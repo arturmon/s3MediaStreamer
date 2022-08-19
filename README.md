@@ -1,0 +1,1 @@
+# skeleton-golange-application
