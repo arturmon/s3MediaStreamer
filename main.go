@@ -9,6 +9,7 @@ import (
 	//https://github.com/swaggo/gin-swagger
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -59,11 +60,11 @@ func main() {
 	// Routes
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/ping", Ping)
-	router.GET("/albums", getAllAlbums)
-	router.GET("/albums/:code", getAlbumByID)
-	router.POST("/albums", postAlbums)
-	router.GET("/albums/deleteAll", getDeleteAll)
-	router.GET("/albums/delete/:code", getDeleteByID)
+	router.GET("/albums", GetAllAlbums)
+	router.GET("/albums/:code", GetAlbumByID)
+	router.POST("/albums", PostAlbums)
+	router.GET("/albums/deleteAll", GetDeleteAll)
+	router.GET("/albums/delete/:code", GetDeleteByID)
 
 	router.GET("/health", HealthGET)
 
@@ -82,4 +83,5 @@ func main() {
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
+
 }

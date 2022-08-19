@@ -46,7 +46,7 @@ func Ping(c *gin.Context) {
 // @Produce		json
 // @Success		200 {object} getAllAlbums_other    "OK"
 // @Router		/albums [get]
-func getAllAlbums(c *gin.Context) {
+func GetAllAlbums(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()
 
@@ -64,7 +64,7 @@ func getAllAlbums(c *gin.Context) {
 // @Produce		json
 // @Success		200 {object} album
 // @Router		/albums/{id} [post]
-func postAlbums(c *gin.Context) {
+func PostAlbums(c *gin.Context) {
 	//prometheuse
 	postAlbumsCounter.Inc()
 
@@ -93,7 +93,7 @@ func postAlbums(c *gin.Context) {
 // @Failure      404         {string}  string  "ok"
 // @Failure      500         {string}  string  "ok"
 // @Router		/albums/{id} [get]
-func getAlbumByID(c *gin.Context) {
+func GetAlbumByID(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()
 
@@ -117,7 +117,7 @@ func getAlbumByID(c *gin.Context) {
 // @Failure      404         {string}  string  "ok"
 // @Failure      500         {string}  string  "ok"
 // @Router		/albums/deleteAll [get]
-func getDeleteAll(c *gin.Context) {
+func GetDeleteAll(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()
 
@@ -141,7 +141,7 @@ func getDeleteAll(c *gin.Context) {
 // @Failure      404         {string}  string  "ok"
 // @Failure      500         {string}  string  "ok"
 // @Router		/albums/delete/:id [get]
-func getDeleteByID(c *gin.Context) {
+func GetDeleteByID(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()
 

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -33,11 +37,19 @@ var clientInstanceError error
 //Used to execute client creation procedure only once.
 var mongoOnce sync.Once
 
-//I have used below constants just to hold required database config's.
-const (
-	CONNECTIONSTRING = "mongodb://localhost:27017"
-	DB               = "db_issue_album"
-	ISSUES           = "col_issues"
-	USERNAME         = "root"
-	PASSWORD         = "1qazxsw2"
+var (
+	CONNECTIONSTRING = goDotEnvVariable("CONNECTIONSTRING")
+	DB               = goDotEnvVariable("DB")
+	ISSUES           = goDotEnvVariable("ISSUES")
+	USERNAME         = goDotEnvVariable("DBUSERNAME")
+	PASSWORD         = goDotEnvVariable("DBPASSWORD")
 )
+
+func goDotEnvVariable(key string) string {
+	// load .env file
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	return os.Getenv(key)
+}
