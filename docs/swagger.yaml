@@ -1,0 +1,186 @@
+definitions:
+  main.Ping_other:
+    properties:
+      message:
+        type: string
+    type: object
+  main.album:
+    properties:
+      _id:
+        type: string
+      artist:
+        type: string
+      code:
+        type: string
+      completed:
+        type: boolean
+      created_at:
+        type: string
+      description:
+        type: string
+      price:
+        type: number
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  main.getAllAlbums_other:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  /albums:
+    get:
+      consumes:
+      - '*/*'
+      description: responds with the list of all albums as JSON.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.getAllAlbums_other'
+      summary: Show the list of all album.
+      tags:
+      - root
+  /albums/{id}:
+    get:
+      consumes:
+      - '*/*'
+      description: locates the album whose ID value matches the id parameter sent
+        by the client, then returns that album as a response.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: answer
+          schema:
+            type: string
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: Album whose ID value matches the id.
+      tags:
+      - root
+    post:
+      consumes:
+      - '*/*'
+      description: adds an album from JSON received in the request body.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.album'
+      summary: Adds an album from JSON.
+      tags:
+      - root
+  /albums/delete/:id:
+    get:
+      consumes:
+      - '*/*'
+      description: locates the album whose ID value matches the id parameter delete.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: answer
+          schema:
+            type: string
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: Album whose ID value matches the code and delete.
+      tags:
+      - root
+  /albums/deleteAll:
+    get:
+      consumes:
+      - '*/*'
+      description: Delete ALL.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: answer
+          schema:
+            type: string
+        "400":
+          description: ok
+          schema:
+            type: string
+        "404":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: ok
+          schema:
+            type: string
+      summary: Complete removal of all albums.
+      tags:
+      - root
+  /ping:
+    get:
+      consumes:
+      - '*/*'
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Ping_other'
+      summary: ping
+      tags:
+      - root
+swagger: "2.0"
