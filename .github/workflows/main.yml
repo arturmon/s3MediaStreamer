@@ -14,13 +14,19 @@ on:
 jobs:
   initial:
     name: Initialing
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      maxtrix:
+        go-version: [1.18.x, 1.19]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
     steps: 
     - uses: actions/checkout@v3
-    - name: Set up Go
+
+    - name: Set up Go ${{ matrix.go-version }}
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: ${{ matrix.go-version }}
+        
     - name: Go modules Cache
       uses: actions/cache@v2
       id: go-cache
@@ -38,7 +44,7 @@ jobs:
     needs: initial
     steps:
     - name: Test
-      run: go test -race ./...
+      run: go test -race .
 
 
   build:
