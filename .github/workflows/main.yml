@@ -1,4 +1,4 @@
-name: Test
+name: CI/CD master
 
 on:
   push:
@@ -12,16 +12,15 @@ on:
     paths-ignore:
       - '**.md'
 jobs:
-  build:
+  initial:
+    name: Initialing
     runs-on: ubuntu-latest
-    steps:
+    steps: 
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
-
     - name: Go modules Cache
       uses: actions/cache@v2
       id: go-cache
@@ -33,7 +32,19 @@ jobs:
     - if: steps.go-cache.outputs.cache-hit != 'true'
       run: go mod download
 
+  unit_tests:
+    name: Unit test App
+    runs-on: ubuntu-latest
+    needs: initial
+    steps:
     - name: Test
       run: go test -race ./...
+
+
+  build:
+    name: Building
+    runs-on: ubuntu-latest
+    needs: [initial, unit_tests]
+    steps:
     - name: Build
       run: go build -v .
