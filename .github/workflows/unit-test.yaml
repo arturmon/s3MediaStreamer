@@ -7,6 +7,9 @@
 
       - uses: actions/checkout@v2
 
+      - name: Verify dependencies
+        run: go mod verify
+
       - name: Go modules Cache
         uses: actions/cache@v2
         id: go-cache
