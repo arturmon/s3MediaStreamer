@@ -13,7 +13,7 @@ on:
 
 jobs:
   golangci:
-    name: lint
+    name: reviewdog
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
