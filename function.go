@@ -12,23 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type DateTime time.Time
-
-type Ping_other struct {
-	Begin DateTime `json:"message,omitempty"`
-}
-type getAllAlbums_other struct {
-	Begin DateTime `json:"message,omitempty"`
-}
-
-// Ping			 godoc
-// @Summary      ping
-// @Description  do ping
-// @Tags         root
-// @Accept       */*
-// @Produce      json
-// @Success      200		{object}  Ping_other   "OK"
-// @Router       /ping [get]
+// Ping			godoc
+// @Summary     Application liveness check function
+// @Description do ping
+// @Tags        album-controller
+// @Accept      */*
+// @Produce     json
+// @Success     200	{object}  web.ResponseRequest   "OK"
+// @Failure		404 {string} string  "Not Found"
+// @Router      /ping [get]
 func Ping(c *gin.Context) {
 	//prometheuse
 	pingCounter.Inc()
@@ -41,10 +33,11 @@ func Ping(c *gin.Context) {
 // getAlbums	godoc
 // @Summary		Show the list of all album.
 // @Description responds with the list of all albums as JSON.
-// @Tags		root
+// @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success		200 {object} getAllAlbums_other    "OK"
+// @Success		200 {object} main.album	"ok"
+// @Failure		404 {string} string  "Not Found"
 // @Router		/albums [get]
 func GetAllAlbums(c *gin.Context) {
 	//prometheuse
@@ -59,11 +52,14 @@ func GetAllAlbums(c *gin.Context) {
 // postAlbums	godoc
 // @Summary		Adds an album from JSON.
 // @Description adds an album from JSON received in the request body.
-// @Tags		root
+// @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success		200 {object} album
-// @Router		/albums/{id} [post]
+// @Param		code 	path string		true "Code"
+// @Param		request body main.album true "query params"
+// @Success     200 {object} main.album  "ok"
+// @Failure     404 {string} string  "Not Found"
+// @Router		/albums/:code [post]
 func PostAlbums(c *gin.Context) {
 	//prometheuse
 	postAlbumsCounter.Inc()
@@ -84,15 +80,14 @@ func PostAlbums(c *gin.Context) {
 // getAlbumByID godoc
 // @Summary		Album whose ID value matches the id.
 // @Description locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.
-// @Tags		root
+// @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		id    path      int     true  "Group ID"
-// @Success      200         {string}  string  "answer"
-// @Failure      400         {string}  string  "ok"
-// @Failure      404         {string}  string  "ok"
-// @Failure      500         {string}  string  "ok"
-// @Router		/albums/{id} [get]
+// @Param		code    path      string     true  "Code album"
+// @Success     200 {object} main.album  "ok"
+// @Failure		400 {object} web.getAllAlbums_other "We need Code!!"
+// @Failure     404 {string} string  "Not Found"
+// @Router		/albums/:code [get]
 func GetAlbumByID(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()
@@ -108,14 +103,11 @@ func GetAlbumByID(c *gin.Context) {
 // getDeleteAll godoc
 // @Summary		Complete removal of all albums.
 // @Description Delete ALL.
-// @Tags		root
+// @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		id    path      int     true  "Group ID"
-// @Success      200         {string}  string  "answer"
-// @Failure      400         {string}  string  "ok"
-// @Failure      404         {string}  string  "ok"
-// @Failure      500         {string}  string  "ok"
+// @Success     200 {object}  web.ResponseRequest   "OK"
+// @Failure     404 {string}  string  "Not Found"
 // @Router		/albums/deleteAll [get]
 func GetDeleteAll(c *gin.Context) {
 	//prometheuse
@@ -132,15 +124,13 @@ func GetDeleteAll(c *gin.Context) {
 // getDeleteByID godoc
 // @Summary		Album whose ID value matches the code and delete.
 // @Description locates the album whose ID value matches the id parameter delete.
-// @Tags		root
+// @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		id    path      int     true  "Group ID"
-// @Success      200         {string}  string  "answer"
-// @Failure      400         {string}  string  "ok"
-// @Failure      404         {string}  string  "ok"
-// @Failure      500         {string}  string  "ok"
-// @Router		/albums/delete/:id [get]
+// @Param		code    path      int     true  "Code album"
+// @Success     200 {object}  web.ResponseRequest   "OK"
+// @Failure     404 {string} string  "Not Found"
+// @Router		/albums/delete/:code [get]
 func GetDeleteByID(c *gin.Context) {
 	//prometheuse
 	getAlbumsCounter.Inc()

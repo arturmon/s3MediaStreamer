@@ -1,9 +1,4 @@
 definitions:
-  main.Ping_other:
-    properties:
-      message:
-        type: string
-    type: object
   main.album:
     properties:
       _id:
@@ -25,7 +20,12 @@ definitions:
       updated_at:
         type: string
     type: object
-  main.getAllAlbums_other:
+  web.ResponseRequest:
+    properties:
+      message:
+        type: string
+    type: object
+  web.getAllAlbums_other:
     properties:
       message:
         type: string
@@ -48,126 +48,120 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: ok
           schema:
-            $ref: '#/definitions/main.getAllAlbums_other'
+            $ref: '#/definitions/main.album'
+        "404":
+          description: Not Found
+          schema:
+            type: string
       summary: Show the list of all album.
       tags:
-      - root
-  /albums/{id}:
+      - album-controller
+  /albums/:code:
     get:
       consumes:
       - '*/*'
       description: locates the album whose ID value matches the id parameter sent
         by the client, then returns that album as a response.
       parameters:
-      - description: Group ID
+      - description: Code album
         in: path
-        name: id
+        name: code
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: answer
+          description: ok
           schema:
-            type: string
+            $ref: '#/definitions/main.album'
         "400":
-          description: ok
+          description: We need Code!!
           schema:
-            type: string
+            $ref: '#/definitions/web.getAllAlbums_other'
         "404":
-          description: ok
-          schema:
-            type: string
-        "500":
-          description: ok
+          description: Not Found
           schema:
             type: string
       summary: Album whose ID value matches the id.
       tags:
-      - root
+      - album-controller
     post:
       consumes:
       - '*/*'
       description: adds an album from JSON received in the request body.
+      parameters:
+      - description: Code
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: query params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.album'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/main.album'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Adds an album from JSON.
+      tags:
+      - album-controller
+  /albums/delete/:code:
+    get:
+      consumes:
+      - '*/*'
+      description: locates the album whose ID value matches the id parameter delete.
+      parameters:
+      - description: Code album
+        in: path
+        name: code
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.album'
-      summary: Adds an album from JSON.
-      tags:
-      - root
-  /albums/delete/:id:
-    get:
-      consumes:
-      - '*/*'
-      description: locates the album whose ID value matches the id parameter delete.
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: answer
-          schema:
-            type: string
-        "400":
-          description: ok
-          schema:
-            type: string
+            $ref: '#/definitions/web.ResponseRequest'
         "404":
-          description: ok
-          schema:
-            type: string
-        "500":
-          description: ok
+          description: Not Found
           schema:
             type: string
       summary: Album whose ID value matches the code and delete.
       tags:
-      - root
+      - album-controller
   /albums/deleteAll:
     get:
       consumes:
       - '*/*'
       description: Delete ALL.
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: answer
+          description: OK
           schema:
-            type: string
-        "400":
-          description: ok
-          schema:
-            type: string
+            $ref: '#/definitions/web.ResponseRequest'
         "404":
-          description: ok
-          schema:
-            type: string
-        "500":
-          description: ok
+          description: Not Found
           schema:
             type: string
       summary: Complete removal of all albums.
       tags:
-      - root
+      - album-controller
   /ping:
     get:
       consumes:
@@ -179,8 +173,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Ping_other'
-      summary: ping
+            $ref: '#/definitions/web.ResponseRequest'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Application liveness check function
       tags:
-      - root
+      - album-controller
 swagger: "2.0"

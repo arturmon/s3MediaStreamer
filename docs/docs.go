@@ -34,20 +34,115 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "album-controller"
                 ],
                 "summary": "Show the list of all album.",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/main.getAllAlbums_other"
+                            "$ref": "#/definitions/main.album"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
             }
         },
-        "/albums/delete/:id": {
+        "/albums/:code": {
+            "get": {
+                "description": "locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-controller"
+                ],
+                "summary": "Album whose ID value matches the id.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Code album",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/main.album"
+                        }
+                    },
+                    "400": {
+                        "description": "We need Code!!",
+                        "schema": {
+                            "$ref": "#/definitions/web.getAllAlbums_other"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "adds an album from JSON received in the request body.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-controller"
+                ],
+                "summary": "Adds an album from JSON.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "query params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.album"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/main.album"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/albums/delete/:code": {
             "get": {
                 "description": "locates the album whose ID value matches the id parameter delete.",
                 "consumes": [
@@ -57,39 +152,27 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "album-controller"
                 ],
                 "summary": "Album whose ID value matches the code and delete.",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Group ID",
-                        "name": "id",
+                        "description": "Code album",
+                        "name": "code",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "answer",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/web.ResponseRequest"
                         }
                     },
                     "404": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "ok",
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -107,112 +190,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "album-controller"
                 ],
                 "summary": "Complete removal of all albums.",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Group ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "answer",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/albums/{id}": {
-            "get": {
-                "description": "locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "root"
-                ],
-                "summary": "Album whose ID value matches the id.",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Group ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "answer",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "adds an album from JSON received in the request body.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "root"
-                ],
-                "summary": "Adds an album from JSON.",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.album"
+                            "$ref": "#/definitions/web.ResponseRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -228,14 +219,20 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "album-controller"
                 ],
-                "summary": "ping",
+                "summary": "Application liveness check function",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Ping_other"
+                            "$ref": "#/definitions/web.ResponseRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -243,14 +240,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.Ping_other": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "main.album": {
             "type": "object",
             "properties": {
@@ -283,7 +272,15 @@ const docTemplate = `{
                 }
             }
         },
-        "main.getAllAlbums_other": {
+        "web.ResponseRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "web.getAllAlbums_other": {
             "type": "object",
             "properties": {
                 "message": {
