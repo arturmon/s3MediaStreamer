@@ -38,9 +38,6 @@ jobs:
     - if: steps.go-cache.outputs.cache-hit != 'true'
       run: go mod download
 
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v3.2.0
-
     - name: Test
       run: go test -race .
 
