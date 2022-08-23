@@ -32,7 +32,7 @@ func main() {
 	docs.SwaggerInfo.Description = "This is a sample server albums server."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Host = "localhost:8080"
-	docs.SwaggerInfo.BasePath = "/v2"
+	docs.SwaggerInfo.BasePath = "/v1"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	// Gin instance

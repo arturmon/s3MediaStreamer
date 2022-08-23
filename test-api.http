@@ -1,0 +1,41 @@
+###
+
+GET http://localhost:8080/ping
+Content-Type: application/json
+###
+
+GET http://localhost:8080/albums
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/albums/I0001
+Content-Type: application/json
+
+###
+
+POST http://localhost:8080/albums
+Content-Type: application/json
+
+{
+  "Title": "Test Title",
+  "Artist": "Test Artist",
+  "Price": 44.10,
+  "Code": "I0001",
+  "Description": "Description Test",
+  "Completed": false
+}
+###
+
+GET http://localhost:8080/albums/delete/I0004
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/albums/deleteAll
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/health
+Content-Type: application/json
