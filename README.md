@@ -16,3 +16,10 @@ go get -u github.com/swaggo/files
 go get -u github.com/swaggo/gin-swagger
 go get -u github.com/sirupsen/logrus
 ```
+## API
+
+| url      | code | status             |
+|----------|------|--------------------|
+| /metrics | 200  | prometheus metrics |
+| /ping | 200 | Pong |
+| | 500 | server error |

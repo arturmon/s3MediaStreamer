@@ -1,4 +1,4 @@
-package main
+package monitoring
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -6,35 +6,35 @@ import (
 )
 
 var (
-	countGetAlbumsConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
+	CountGetAlbumsConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "get_albums_connect_mongodb_total",
 		Help: "The number errors of apps events",
 	})
 )
 
 var (
-	getAlbumsErrorConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
+	GetAlbumsErrorConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "get_albums_error_connect_mongodb_total",
 		Help: "The Bad Request errors of apps events",
 	})
 )
 
 var (
-	pingCounter = promauto.NewCounter(prometheus.CounterOpts{
+	PingCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "ping_request_count",
 		Help: "No of request handled by Ping handler",
 	})
 )
 
 var (
-	getAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
+	GetAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "get_albums_request_count",
 		Help: "No of request handled by get Albums handler",
 	})
 )
 
 var (
-	postAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
+	PostAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "post_albums_request_count",
 		Help: "No of request handled by get Albums handler",
 	})

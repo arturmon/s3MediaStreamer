@@ -1,13 +1,14 @@
-package main
+package monitoring
 
 import (
 	"net/http"
+	"skeleton-golange-application/app/internal/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 func HealthGET(c *gin.Context) {
-	if health == true {
+	if config.AppHealth == true {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "UP",
 		})

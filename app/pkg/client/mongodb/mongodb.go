@@ -1,0 +1,362 @@
+package mongodb
+
+import (
+	"context"
+	"fmt"
+	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	//"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	//"skeleton-golange-application/app/internal/app"
+	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/client/model"
+	"skeleton-golange-application/app/pkg/monitoring"
+	"sync"
+)
+
+// NewMongoConfig creates new pg config instance
+func NewMongoConfig(username, password, host, port, database, collections string) *model.StorageConfig {
+	return &model.StorageConfig{
+		Host:        host,
+		Port:        port,
+		Database:    database,
+		Collections: collections,
+		Username:    username,
+		Password:    password,
+	}
+}
+
+//Used to execute client creation procedure only once.
+var mongoOnce sync.Once
+
+//GetMongoClient - Return mongodb connection to work with
+func GetMongoClient(cfg *config.Config) (clientInstance *mongo.Client, clientInstanceError error) {
+
+	//Perform connection creation operation only once.
+	connectionString := fmt.Sprintf("mongodb://%s:%s", cfg.Storage.MongoDB.Host, cfg.Storage.MongoDB.Port)
+
+	mongoOnce.Do(func() {
+		credential := options.Credential{
+			Username: cfg.Storage.MongoDB.Username,
+			Password: cfg.Storage.MongoDB.Password,
+		}
+		// Set client options
+		clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
+		// Connect to MongoDB
+		client, err := mongo.Connect(context.TODO(), clientOptions)
+		if err != nil {
+			clientInstanceError = err
+		}
+		// Check the connection
+		err = client.Ping(context.TODO(), nil)
+		if err != nil {
+			clientInstanceError = err
+		}
+		clientInstance = client
+	})
+	if clientInstanceError != nil {
+		log.Error(clientInstanceError)
+		// prometheuse
+		monitoring.GetAlbumsErrorConnectMongodbTotal.Inc()
+
+		config.AppHealth = false
+	} else {
+		log.Info("Successfully connected and pinged ", connectionString)
+		// prometheuse
+		monitoring.CountGetAlbumsConnectMongodbTotal.Inc()
+
+		config.AppHealth = true
+	}
+	return clientInstance, clientInstanceError
+}
+
+func findCollections(cfg *config.Config) (collection *mongo.Collection, err error) {
+	client, err := GetMongoClient(cfg)
+	if err != nil {
+		return nil, err
+	}
+	collection = client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	return collection, nil
+}
+func GetMongoClient2(cfg *model.StorageConfig) (clientInstance *mongo.Client, clientInstanceError error) {
+
+	//Perform connection creation operation only once.
+	connectionString := fmt.Sprintf("mongodb://%s:%s", cfg.Host, cfg.Port)
+
+	mongoOnce.Do(func() {
+		credential := options.Credential{
+			Username: cfg.Username,
+			Password: cfg.Password,
+		}
+		// Set client options
+		clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
+		// Connect to MongoDB
+		client, err := mongo.Connect(context.TODO(), clientOptions)
+		if err != nil {
+			clientInstanceError = err
+		}
+		// Check the connection
+		err = client.Ping(context.TODO(), nil)
+		if err != nil {
+			clientInstanceError = err
+		}
+		clientInstance = client
+	})
+	if clientInstanceError != nil {
+		log.Error(clientInstanceError)
+		// prometheuse
+		monitoring.GetAlbumsErrorConnectMongodbTotal.Inc()
+
+		config.AppHealth = false
+	} else {
+		log.Info("Successfully connected and pinged ", connectionString)
+		// prometheuse
+		monitoring.CountGetAlbumsConnectMongodbTotal.Inc()
+
+		config.AppHealth = true
+	}
+	return clientInstance, clientInstanceError
+}
+
+func FindCollections2(cfg *model.StorageConfig, client *mongo.Client) (collection *mongo.Collection, err error) {
+	collection = client.Database(cfg.Database).Collection(cfg.Collections)
+	return collection, nil
+}
+
+/*
+------------------------------------------------------------------------------
+*/
+
+//CreateIssue - Insert a new document in the collection.
+func CreateIssue(cfg *config.Config, task config.Album) error {
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return err
+	}
+	//Perform InsertOne operation & validate against the error.
+	_, err = collection.InsertOne(context.TODO(), task)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+}
+
+//CreateMany - Insert multiple documents at once in the collection.
+func CreateMany(cfg *config.Config, list []config.Album) error {
+	//Map struct slice to interface slice as InsertMany accepts interface slice as parameter
+	insertableList := make([]interface{}, len(list))
+	for i, v := range list {
+		insertableList[i] = v
+	}
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return err
+	}
+	//Perform InsertMany operation & validate against the error.
+	_, err = collection.InsertMany(context.TODO(), insertableList)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+}
+
+//GetIssuesByCode - Get All issues for collection
+func GetIssuesByCode(cfg *config.Config, code string) (config.Album, error) {
+	result := config.Album{}
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{primitive.E{Key: "code", Value: code}}
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return result, err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return result, err
+	}
+	//Perform FindOne operation & validate against the error.
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return result, err
+	}
+	//Return result without any error.
+	return result, nil
+}
+
+/*
+func GetAllIssues(cfg *config.Config) ([]config.Album, error) {
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{{}} //bson.D{{}} specifies 'all documents'
+	var issues []config.Album
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return issues, err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return issues, err
+	}
+	//Perform Find operation & validate against the error.
+	cur, findError := collection.Find(context.TODO(), filter)
+	if findError != nil {
+		return issues, findError
+	}
+	//Map result to slice
+	for cur.Next(context.TODO()) {
+		var t config.Album
+		err := cur.Decode(&t)
+		if err != nil {
+			return issues, err
+		}
+		issues = append(issues, t)
+	}
+	// once exhausted, close the cursor
+	cur.Close(context.TODO())
+	if len(issues) == 0 {
+		return issues, mongo.ErrNoDocuments
+	}
+	return issues, nil
+}
+*/
+
+func GetAllIssues(collection *mongo.Collection) ([]config.Album, error) {
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{{}} //bson.D{{}} specifies 'all documents'
+	var issues []config.Album
+
+	//collection, err := findCollections2(cfg, conn)
+	//if err != nil {
+	//	return issues, err
+	//}
+	//Perform Find operation & validate against the error.
+	cur, findError := collection.Find(context.TODO(), filter)
+	if findError != nil {
+		return issues, findError
+	}
+	//Map result to slice
+	for cur.Next(context.TODO()) {
+		var t config.Album
+		err := cur.Decode(&t)
+		if err != nil {
+			return issues, err
+		}
+		issues = append(issues, t)
+	}
+	// once exhausted, close the cursor
+	cur.Close(context.TODO())
+	if len(issues) == 0 {
+		return issues, mongo.ErrNoDocuments
+	}
+	return issues, nil
+}
+
+//DeleteOne - Delete One document
+func DeleteOne(cfg *config.Config, code string) error {
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{primitive.E{Key: "code", Value: code}}
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return err
+	}
+	//Perform DeleteOne operation & validate against the error.
+	_, err = collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+}
+
+//DeleteAll - Delte All dockument
+func DeleteAll(cfg *config.Config) error {
+	//Define filter query for fetching specific document from collection
+	selector := bson.D{{}} // bson.D{{}} specifies 'all documents'
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return err
+	//}
+	//Create a handle to the respective collection in the database.
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return err
+	}
+	//Perform DeleteMany operation & validate against the error.
+	_, err = collection.DeleteMany(context.TODO(), selector)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+}
+
+//PrintList - Print list of issues on console
+func PrintList(issues []config.Album) {
+	for i, v := range issues {
+		if v.Completed {
+			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+		} else {
+			fmt.Printf("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+		}
+	}
+}
+
+// MarkCompleted - MarkCompleted
+func MarkCompleted(cfg *config.Config, code string) error {
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{primitive.E{Key: "code", Value: code}}
+
+	//Define updater for to specifiy change to be updated.
+	updater := bson.D{primitive.E{Key: "$set", Value: bson.D{
+		primitive.E{Key: "completed", Value: true},
+	}}}
+
+	//Get MongoDB connection using .
+	//client, err := GetMongoClient(cfg)
+	//if err != nil {
+	//	return err
+	//}
+	//collection := client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	collection, err := findCollections(cfg)
+	if err != nil {
+		return err
+	}
+	//Perform UpdateOne operation & validate against the error.
+	_, err = collection.UpdateOne(context.TODO(), filter, updater)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+}
