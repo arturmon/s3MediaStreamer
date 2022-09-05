@@ -1,10 +1,13 @@
 package monitoring
 
 import (
+	"context"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
-
-	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func HealthGET(c *gin.Context) {
@@ -13,8 +16,23 @@ func HealthGET(c *gin.Context) {
 			"status": "UP",
 		})
 	} else {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": "DOWN",
 		})
+	}
+}
+
+func PingStorage(ctx context.Context, client *mongo.Client, cfg *config.Config) {
+	ticker := time.NewTicker(1 * time.Second)
+	var err error
+	for _ = range ticker.C {
+		if cfg.Storage.Type == "mongo" {
+			err = client.Ping(ctx, readpref.Primary())
+		}
+		if err != nil {
+			config.AppHealth = false
+		} else {
+			config.AppHealth = true
+		}
 	}
 }

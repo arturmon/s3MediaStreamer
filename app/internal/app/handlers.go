@@ -50,8 +50,7 @@ func Ping(c *gin.Context) {
 func (a *App) GetAllAlbums(c *gin.Context) {
 	//prometheuse
 	monitoring.GetAlbumsCounter.Inc()
-	//issuesbyCode, err := mongodb.GetAllIssues(a.cfg)
-	issuesbyCode, err := mongodb.GetAllIssues(a.mongoConn)
+	issuesbyCode, err := mongodb.GetAllIssues(a.cfg, a.mongoClient)
 	if err != nil {
 		a.logger.Fatal(err)
 	}
@@ -85,9 +84,9 @@ func (a *App) PostAlbums(c *gin.Context) {
 	if err := c.BindJSON(&newAlbum); err != nil {
 		return
 	}
-	_, err := mongodb.GetIssuesByCode(a.cfg, newAlbum.Code)
+	_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
 	if err == mongo.ErrNoDocuments {
-		mongodb.CreateIssue(a.cfg, newAlbum)
+		mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
 		c.IndentedJSON(http.StatusCreated, newAlbum)
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
@@ -110,7 +109,7 @@ func (a *App) GetAlbumByID(c *gin.Context) {
 	monitoring.GetAlbumsCounter.Inc()
 
 	id := c.Param("code")
-	result, err := mongodb.GetIssuesByCode(a.cfg, id)
+	result, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, id)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 	}
@@ -130,7 +129,7 @@ func (a *App) GetDeleteAll(c *gin.Context) {
 	//prometheuse
 	monitoring.GetAlbumsCounter.Inc()
 
-	err := mongodb.DeleteAll(a.cfg)
+	err := mongodb.DeleteAll(a.cfg, a.mongoClient)
 	if err != nil {
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error Delete all Album"})
@@ -153,7 +152,7 @@ func (a *App) GetDeleteByID(c *gin.Context) {
 	monitoring.GetAlbumsCounter.Inc()
 
 	id := c.Param("code")
-	err := mongodb.DeleteOne(a.cfg, id)
+	err := mongodb.DeleteOne(a.cfg, a.mongoClient, id)
 
 	log.Info(id)
 	log.Info(err)

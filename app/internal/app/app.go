@@ -1,18 +1,18 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
-	"skeleton-golange-application/app/pkg/client/mongodb"
-	"skeleton-golange-application/app/pkg/monitoring"
-
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/client/mongodb"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/app/pkg/monitoring"
 )
 
 type App struct {
@@ -21,7 +21,6 @@ type App struct {
 	router      *gin.Engine
 	httpServer  *http.Server
 	mongoClient *mongo.Client
-	mongoConn   *mongo.Collection
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
@@ -31,40 +30,25 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	/*
-		mongoConfig := mongodb.NewMongoConfig(
-			config.Storage.MongoDB.Username, config.Storage.MongoDB.Password,
-			config.Storage.MongoDB.Host, config.Storage.MongoDB.Port, config.Storage.MongoDB.Database, config.Storage.MongoDB.Collections,
-		)
-		//mongoClient, err := mongodb.GetMongoClient(mongoConfig)
-		mongoClient, err := mongodb.GetMongoClient()
-		if err != nil {
-			logger.Fatal(err)
-		}
 
-
-	*/
 	mongoConfig := mongodb.NewMongoConfig(
 		config.Storage.MongoDB.Username, config.Storage.MongoDB.Password,
 		config.Storage.MongoDB.Host, config.Storage.MongoDB.Port, config.Storage.MongoDB.Database, config.Storage.MongoDB.Collections,
 	)
-	//mongoClient, err := mongodb.GetMongoClient(mongoConfig)
-	mongoClient, err := mongodb.GetMongoClient2(mongoConfig)
+	// mongoClient setup
+	mongoClient, err := mongodb.GetMongoClient(mongoConfig)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	mongoConn, err := mongodb.FindCollections2(mongoConfig, mongoClient)
-	if err != nil {
-		logger.Fatal(err)
-	}
+	ctx := context.Background()
+	go monitoring.PingStorage(ctx, mongoClient, config)
 
 	return App{
 		cfg:         config,
 		logger:      logger,
 		router:      router,
 		mongoClient: mongoClient,
-		mongoConn:   mongoConn,
 	}, nil
 }
 
