@@ -64,6 +64,8 @@ func (a *App) startHTTP() {
 
 	a.logger.Info("start HTTP")
 	// Routes
+	a.logger.Info("setup CORS")
+	a.router.Use(CORSMiddleware())
 	a.logger.Println("heartbeat metric initializing")
 	a.router.GET("/health", monitoring.HealthGET)
 	// Group: v1
@@ -81,8 +83,6 @@ func (a *App) startHTTP() {
 		})
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-	a.logger.Info("setup CORS")
-	a.router.Use(CORSMiddleware())
 	a.logger.Println("application completely initialized and started")
 	a.logger.Info("The service is ready to listen and serve.")
 	// Start server
