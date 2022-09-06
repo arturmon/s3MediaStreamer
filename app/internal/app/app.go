@@ -64,32 +64,24 @@ func (a *App) startHTTP() {
 
 	a.logger.Info("start HTTP")
 	// Routes
-
-	a.router.GET("/ping", Ping)
-	a.router.GET("/albums", a.GetAllAlbums)
-	a.router.GET("/albums/:code", a.GetAlbumByID)
-	a.router.POST("/albums", a.PostAlbums)
-	a.router.GET("/albums/deleteAll", a.GetDeleteAll)
-	a.router.GET("/albums/delete/:code", a.GetDeleteByID)
-
 	a.logger.Println("heartbeat metric initializing")
 	a.router.GET("/health", monitoring.HealthGET)
-
-	a.logger.Println("swagger docs initializing")
-	a.router.GET("/swagger", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-	})
-	a.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	// Group: v1
 	v1 := a.router.Group("/v1")
 	{
 		v1.GET("/ping", Ping)
-		a.logger.Println("heartbeat metric initializing")
-		v1.GET("/health", monitoring.HealthGET)
+		v1.GET("/albums", a.GetAllAlbums)
+		v1.GET("/albums/:code", a.GetAlbumByID)
+		v1.POST("/albums", a.PostAlbums)
+		v1.GET("/albums/deleteAll", a.GetDeleteAll)
+		v1.GET("/albums/delete/:code", a.GetDeleteByID)
+		a.logger.Println("swagger docs initializing")
+		v1.GET("/swagger", func(c *gin.Context) {
+			c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+		})
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-
+	a.logger.Info("setup CORS")
 	a.router.Use(CORSMiddleware())
 	a.logger.Println("application completely initialized and started")
 	a.logger.Info("The service is ready to listen and serve.")
