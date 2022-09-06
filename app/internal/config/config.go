@@ -38,7 +38,7 @@ type Config struct {
 	Storage struct {
 		Type    string `env:"STORAGE_TYPE" env-default:"mongo"`
 		MongoDB struct {
-			Host        string `env:"MONGO_HOST" env-default:"localhost""`
+			Host        string `env:"MONGO_HOST" env-default:"localhost"`
 			Port        string `env:"MONGO_PORT" env-default:"27017"`
 			Database    string `env:"MONGO_DATABASE" env-default:"db_issue_album"`
 			Collections string `env:"MONGO_COL" env-default:"col_issues"`

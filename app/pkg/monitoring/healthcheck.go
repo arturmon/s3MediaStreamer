@@ -11,7 +11,7 @@ import (
 )
 
 func HealthGET(c *gin.Context) {
-	if config.AppHealth == true {
+	if config.AppHealth {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "UP",
 		})
@@ -25,7 +25,7 @@ func HealthGET(c *gin.Context) {
 func PingStorage(ctx context.Context, client *mongo.Client, cfg *config.Config) {
 	ticker := time.NewTicker(1 * time.Second)
 	var err error
-	for _ = range ticker.C {
+	for range ticker.C {
 		if cfg.Storage.Type == "mongo" {
 			err = client.Ping(ctx, readpref.Primary())
 		}

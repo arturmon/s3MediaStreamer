@@ -101,7 +101,6 @@ func (a *App) PostAlbums(c *gin.Context) {
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
 // @Success     200 {object} main.album  "ok"
-// @Failure		400 {object} web.getAllAlbums_other "We need Code!!"
 // @Failure     404 {string} string  "Not Found"
 // @Router		/albums/:code [get]
 func (a *App) GetAlbumByID(c *gin.Context) {

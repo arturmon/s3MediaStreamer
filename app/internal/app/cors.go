@@ -18,14 +18,3 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-/*
-a.router.Use(cors.New(cors.Config{
-AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodOptions, http.MethodDelete},
-AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
-AllowCredentials: true,
-AllowHeaders:     []string{"Location", "Charset", "Access-Control-Allow-Origin", "Content-Type", "content-type", "Origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"},
-ExposeHeaders:    []string{"Location", "Authorization", "Content-Disposition"},
-MaxAge:           12 * time.Hour,
-}))
-*/
