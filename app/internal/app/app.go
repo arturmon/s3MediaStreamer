@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
@@ -30,6 +30,10 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	logger.Println("prometheus initializing")
+	p := ginprometheus.NewPrometheus("gin")
+	p.Use(router)
 
 	mongoConfig := mongodb.NewMongoConfig(
 		config.Storage.MongoDB.Username, config.Storage.MongoDB.Password,
@@ -61,7 +65,6 @@ func (a *App) startHTTP() {
 	a.logger.Info("start HTTP")
 	// Routes
 
-	a.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	a.router.GET("/ping", Ping)
 	a.router.GET("/albums", a.GetAllAlbums)
 	a.router.GET("/albums/:code", a.GetAlbumByID)
