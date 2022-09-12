@@ -1,20 +1,20 @@
 ###
 
-GET http://localhost:8080/ping
+GET http://localhost:10000/v1/ping
 Content-Type: application/json
 ###
 
-GET http://localhost:8080/albums
-Content-Type: application/json
-
-###
-
-GET http://localhost:8080/albums/I0001
+GET http://localhost:10000/v1/albums
 Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/albums
+GET http://localhost:10000/v1/albums/I0001
+Content-Type: application/json
+
+###
+
+POST http://localhost:10000/v1/albums
 Content-Type: application/json
 
 {
@@ -27,15 +27,15 @@ Content-Type: application/json
 }
 ###
 
-GET http://localhost:8080/albums/delete/I0004
+GET http://localhost:10000/v1/albums/delete/I0004
 Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/albums/deleteAll
+GET http://localhost:10000/v1/albums/deleteAll
 Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/health
+GET http://localhost:10000/v1/health
 Content-Type: application/json
