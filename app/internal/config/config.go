@@ -25,6 +25,13 @@ type Album struct {
 	Completed   bool               `json:"completed" bson:"completed"`
 }
 
+type User struct {
+	Id       primitive.ObjectID `json:"_id" bson:"_id"`
+	Name     string             `json:"name" bson:"name"`
+	Email    string             `json:"email" bson:"email"`
+	Password []byte             `json:"-" bson:"password"`
+}
+
 type Config struct {
 	IsDebug       bool `env:"IS_DEBUG" env-default:"false"`
 	IsDevelopment bool `env:"IS_DEV" env-default:"false"`
@@ -38,12 +45,13 @@ type Config struct {
 	Storage struct {
 		Type    string `env:"STORAGE_TYPE" env-default:"mongo"`
 		MongoDB struct {
-			Host        string `env:"MONGO_HOST" env-default:"localhost"`
-			Port        string `env:"MONGO_PORT" env-default:"27017"`
-			Database    string `env:"MONGO_DATABASE" env-default:"db_issue_album"`
-			Collections string `env:"MONGO_COL" env-default:"col_issues"`
-			Username    string `env:"MONGO_USERNAME" env-default:"root"`
-			Password    string `env:"MONGO_PASSWORD" env-default:"1qazxsw2"`
+			Host             string `env:"MONGO_HOST" env-default:"localhost"`
+			Port             string `env:"MONGO_PORT" env-default:"27017"`
+			Database         string `env:"MONGO_DATABASE" env-default:"db_issue_album"`
+			Collections      string `env:"MONGO_COL" env-default:"col_issues"`
+			CollectionsUsers string `env:"MONGO_COL_USERS" env-default:"col_users"`
+			Username         string `env:"MONGO_USERNAME" env-default:"root"`
+			Password         string `env:"MONGO_PASSWORD" env-default:"1qazxsw2"`
 		}
 	}
 }

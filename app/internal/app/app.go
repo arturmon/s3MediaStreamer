@@ -28,6 +28,8 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 
 	// Gin instance
 	router := gin.New()
+	logger.Println("setup CORS")
+	router.Use(CORSMiddleware())
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
@@ -64,19 +66,21 @@ func (a *App) startHTTP() {
 
 	a.logger.Info("start HTTP")
 	// Routes
-	a.logger.Info("setup CORS")
-	a.router.Use(CORSMiddleware())
 	a.logger.Println("heartbeat metric initializing")
 	a.router.GET("/health", monitoring.HealthGET)
 	// Group: v1
 	v1 := a.router.Group("/v1")
 	{
 		v1.GET("/ping", Ping)
+		v1.POST("/register", a.Register)
+		v1.POST("/login", a.Login)
+		v1.GET("/user", a.User)
+		v1.POST("/logout", a.Logout)
 		v1.GET("/albums", a.GetAllAlbums)
 		v1.GET("/albums/:code", a.GetAlbumByID)
-		v1.POST("/albums", a.PostAlbums)
-		v1.GET("/albums/deleteAll", a.GetDeleteAll)
-		v1.GET("/albums/delete/:code", a.GetDeleteByID)
+		v1.POST("/album", a.PostAlbums)
+		v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
+		v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
 		a.logger.Println("swagger docs initializing")
 		v1.GET("/swagger", func(c *gin.Context) {
 			c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")

@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -72,14 +73,19 @@ func GetMongoClient(cfg *model.StorageConfig) (clientInstance *mongo.Client, cli
 	return clientInstance, clientInstanceError
 }
 
-func findCollections(cfg *config.Config, client *mongo.Client) (collection *mongo.Collection, err error) {
+func findCollections(cfg *config.Config, client *mongo.Client, useCollections string) (collection *mongo.Collection, err error) {
 	/*
 		client, err = GetMongoClient(cfg)
 		if err != nil {
 			return nil, err
 		}
 	*/
-	collection = client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	switch useCollections {
+	case "album":
+		collection = client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.Collections)
+	case "user":
+		collection = client.Database(cfg.Storage.MongoDB.Database).Collection(cfg.Storage.MongoDB.CollectionsUsers)
+	}
 	return collection, nil
 }
 
@@ -89,7 +95,7 @@ func findCollections(cfg *config.Config, client *mongo.Client) (collection *mong
 
 //CreateIssue - Insert a new document in the collection.
 func CreateIssue(cfg *config.Config, client *mongo.Client, task config.Album) error {
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return err
 	}
@@ -109,7 +115,7 @@ func CreateMany(cfg *config.Config, client *mongo.Client, list []config.Album) e
 	for i, v := range list {
 		insertableList[i] = v
 	}
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return err
 	}
@@ -127,7 +133,7 @@ func GetIssuesByCode(cfg *config.Config, client *mongo.Client, code string) (con
 	result := config.Album{}
 	//Define filter query for fetching specific document from collection
 	filter := bson.D{primitive.E{Key: "code", Value: code}}
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return result, err
 	}
@@ -145,7 +151,7 @@ func GetAllIssues(cfg *config.Config, client *mongo.Client) ([]config.Album, err
 	filter := bson.D{{}} //bson.D{{}} specifies 'all documents'
 	var issues []config.Album
 
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return issues, err
 	}
@@ -175,7 +181,7 @@ func GetAllIssues(cfg *config.Config, client *mongo.Client) ([]config.Album, err
 func DeleteOne(cfg *config.Config, client *mongo.Client, code string) error {
 	//Define filter query for fetching specific document from collection
 	filter := bson.D{primitive.E{Key: "code", Value: code}}
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return err
 	}
@@ -192,7 +198,7 @@ func DeleteOne(cfg *config.Config, client *mongo.Client, code string) error {
 func DeleteAll(cfg *config.Config, client *mongo.Client) error {
 	//Define filter query for fetching specific document from collection
 	selector := bson.D{{}} // bson.D{{}} specifies 'all documents'
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return err
 	}
@@ -226,7 +232,7 @@ func MarkCompleted(cfg *config.Config, client *mongo.Client, code string) error 
 		primitive.E{Key: "completed", Value: true},
 	}}}
 
-	collection, err := findCollections(cfg, client)
+	collection, err := findCollections(cfg, client, config.COLLECTION_ALBUM)
 	if err != nil {
 		return err
 	}
@@ -236,5 +242,76 @@ func MarkCompleted(cfg *config.Config, client *mongo.Client, code string) error 
 		return err
 	}
 	//Return success without any error.
+	return nil
+}
+
+func CreateUser(cfg *config.Config, client *mongo.Client, user config.User) error {
+
+	collection, err := findCollections(cfg, client, config.COLLECTION_USER)
+	if err != nil {
+		return err
+	}
+	//Perform InsertOne operation & validate against the error.
+	_, err = collection.InsertOne(context.TODO(), user)
+	if err != nil {
+		return err
+	}
+	//Return success without any error.
+	return nil
+
+	// TODO Создать функцию поискать пользователя
+	//_, err := mongodb.GetIssuesByUser(a.cfg, a.mongoClient, user.Code)
+	/*
+			if err == mongo.ErrNoDocuments {
+				// TODO Создать функцию создания пользователя
+				mongodb.CreateUser(a.cfg, a.mongoClient, user)
+				c.IndentedJSON(http.StatusCreated, user)
+			}
+
+
+		//return c.JSON(user)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Not Create User"})
+
+	*/
+	return nil
+}
+func FindUserToEmail(cfg *config.Config, client *mongo.Client, email string) (config.User, error) {
+	result := config.User{}
+	//Define filter query for fetching specific document from collection
+	filter := bson.D{primitive.E{Key: "email", Value: email}}
+	collection, err := findCollections(cfg, client, config.COLLECTION_USER)
+	if err != nil {
+		return result, err
+	}
+
+	//Perform FindOne operation & validate against the error.
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return result, err
+	}
+	//Return result without any error.
+	return result, nil
+}
+
+//database.DB.Where("email = ?", data["email"]).First(&user)
+//database.DB.Where("id = ?", claims.Issuer).First(&user)
+
+func User(cfg *config.Config, client *mongo.Client, claims *jwt.StandardClaims) error {
+
+	//database.DB.Where("id = ?", claims.Issuer).First(&user)
+	// TODO Создать функцию поискать пользователя
+	//_, err := mongodb.GetIssuesByUser(a.cfg, a.mongoClient, user.Code)
+	/*
+			if err == mongo.ErrNoDocuments {
+				// TODO Создать функцию создания пользователя
+				mongodb.CreateUser(a.cfg, a.mongoClient, user)
+				c.IndentedJSON(http.StatusCreated, user)
+			}
+
+
+		//return c.JSON(user)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Not Create User"})
+
+	*/
 	return nil
 }

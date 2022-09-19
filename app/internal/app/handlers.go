@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"skeleton-golange-application/app/internal/config"
+	"strings"
 	"time"
 
 	//"go.mongodb.org/mongo-driver/mongo"
@@ -72,7 +73,7 @@ func (a *App) GetAllAlbums(c *gin.Context) {
 // @Router		/albums/:code [post]
 
 func (a *App) PostAlbums(c *gin.Context) {
-	//prometheuse
+	// prometheuse
 	monitoring.PostAlbumsCounter.Inc()
 
 	var newAlbum config.Album
@@ -84,13 +85,24 @@ func (a *App) PostAlbums(c *gin.Context) {
 	if err := c.BindJSON(&newAlbum); err != nil {
 		return
 	}
-	_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
-	if err == mongo.ErrNoDocuments {
-		mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
-		c.IndentedJSON(http.StatusCreated, newAlbum)
-	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
+	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
+	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
+	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
+	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
 
+	if newAlbum.Code == "" || newAlbum.Artist == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "empty required fields `Code` or `Artist`"})
+		return
+	}
+
+	_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
+	if err != mongo.ErrNoDocuments {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
+		return
+	}
+	mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
+	c.IndentedJSON(http.StatusCreated, newAlbum)
+	return
 }
 
 // GetAlbumByID godoc

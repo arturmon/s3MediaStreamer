@@ -23,3 +23,13 @@ go get -u github.com/sirupsen/logrus
 | /metrics | 200  | prometheus metrics |
 | /ping | 200 | Pong |
 | | 500 | server error |
+
+
+/register  
+```
+{
+    "email":"a@a.com",
+    "name":"a"
+    "password":"1"
+}
+```
