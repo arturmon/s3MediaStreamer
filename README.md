@@ -4,7 +4,12 @@ cd /mnt/c/Users/Arturmon/eclipse-workspace/src/skeleton-golange-application
 /home/arturmon/go/bin/swag init -g main.go --output docs
 ```
 ```
-docker run --name mongo -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=1qazxsw2 -d mongo
+docker run --name mongodb \
+-p 27017:27017 \
+-v /Users/amudrykh/mongodb:/bitnami/mongodb \
+-e MONGODB_ROOT_PASSWORD=1qazxsw2 \
+-e MONGODB_USERNAME=root -e MONGODB_PASSWORD=1qazxsw2 \
+-e MONGODB_DATABASE=db_issue_album bitnami/mongodb:latest
 ```
 
 ```
@@ -18,12 +23,20 @@ go get -u github.com/sirupsen/logrus
 ```
 ## API
 
-| url      | code | status             |
-|----------|------|--------------------|
-| /metrics | 200  | prometheus metrics |
-| /ping | 200 | Pong |
-| | 500 | server error |
-
+| url                  | code | method | status             |
+|----------------------|------|--------|--------------------|
+| /metrics             | 200  | GET    | prometheus metrics |
+| /ping                | 200  | GET    | Pong               |
+| /register            | 200  | POST   | Register           |
+| /login               | 200  | POST   | Login              |
+| /user                | 200  | GET    | User               |
+| /logout              | 200  | POST   | Logout             |
+| /albums              | 200  | GET    | GetAllAlbums       |
+| /albums/:code        | 200  | GET    | GetAlbumByID       |
+| /album               | 200  | POST   | PostAlbums         |
+| /albums/deleteAll    | 200  | DELETE | GetDeleteAll       |
+| /albums/delete/:code | 200  | DELETE | GetDeleteByID      |
+| /swagger             | 200  | GET    |                    |
 
 /register  
 ```
