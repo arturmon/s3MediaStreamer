@@ -39,3 +39,24 @@ var (
 		Help: "No of request handled by get Albums handler",
 	})
 )
+
+var (
+	RegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "register_count",
+		Help: "registration counter",
+	})
+)
+
+var (
+	LoginCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "login_count",
+		Help: "login counter",
+	})
+)
+
+var (
+	ErrPasswordCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "incorrect_password_count",
+		Help: "incorrect password counter",
+	})
+)

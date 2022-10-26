@@ -16,7 +16,7 @@ const SecretKey = "secret"
 
 func (a *App) Register(c *gin.Context) {
 	//prometheuse
-	monitoring.PostAlbumsCounter.Inc()
+	monitoring.RegisterCounter.Inc()
 	var data map[string]string
 
 	if err := c.BindJSON(&data); err != nil {
@@ -43,7 +43,7 @@ func (a *App) Register(c *gin.Context) {
 
 func (a *App) Login(c *gin.Context) {
 	//prometheuse
-	monitoring.PostAlbumsCounter.Inc()
+	monitoring.LoginCounter.Inc()
 	var data map[string]string
 
 	if err := c.BindJSON(&data); err != nil {
@@ -69,6 +69,8 @@ func (a *App) Login(c *gin.Context) {
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
+		//prometheuse
+		monitoring.ErrPasswordCounter.Inc()
 		return
 	}
 
@@ -93,9 +95,6 @@ func (a *App) Login(c *gin.Context) {
 }
 
 func (a *App) User(c *gin.Context) {
-	//var identityKey = "id"
-	//claims := jwt2.ExtractClaims(c)
-	//user2, _ := c.Get(identityKey)
 
 	cookie, err := c.Cookie("jwt")
 	if err != nil {
@@ -115,14 +114,6 @@ func (a *App) User(c *gin.Context) {
 
 	var user config.User
 
-	//database.DB.Where("id = ?", claims.Issuer).First(&user)
-	//mongodb.User(a.cfg, a.mongoClient, claims)
-	//database.DB.Where("email = ?", data["email"]).First(&user)
-	//user, err := mongodb.FindUserToEmail(a.cfg, a.mongoClient, data["email"])
-	//if err != nil {
-	//	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
-	//}
-
 	user, err = mongodb.FindUserToEmail(a.cfg, a.mongoClient, claims.Issuer)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
@@ -131,34 +122,6 @@ func (a *App) User(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 	return
 }
-
-/*
-func (a *App) User(c *gin.Context) {
-	cookie := "jwt"
-	//cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	var user config.User
-
-	//database.DB.Where("id = ?", claims.Issuer).First(&user)
-	mongodb.User(a.cfg, a.mongoClient, claims)
-
-	c.JSON(http.StatusCreated, user)
-	return
-}
-
-
-*/
 
 func (a *App) Logout(c *gin.Context) {
 	Expires := time.Now().Add(-time.Hour)
