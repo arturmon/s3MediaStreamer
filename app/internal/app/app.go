@@ -6,21 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	ginprometheus "github.com/zsais/go-gin-prometheus"
-	"go.mongodb.org/mongo-driver/mongo"
+	ginPrometheus "github.com/zsais/go-gin-prometheus"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/mongodb"
+	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 )
 
 type App struct {
-	cfg         *config.Config
-	logger      *logging.Logger
-	router      *gin.Engine
-	httpServer  *http.Server
-	mongoClient *mongo.Client
+	cfg        *config.Config
+	logger     *logging.Logger
+	router     *gin.Engine
+	httpServer *http.Server
+	storage    *model.DBConfig
+	//userDB     UserDB
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
@@ -34,27 +34,21 @@ func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
 	router.Use(gin.Recovery())
 
 	logger.Println("prometheus initializing")
-	p := ginprometheus.NewPrometheus("gin")
+	p := ginPrometheus.NewPrometheus("gin")
 	p.Use(router)
 
-	mongoConfig := mongodb.NewMongoConfig(
-		config.Storage.MongoDB.Username, config.Storage.MongoDB.Password,
-		config.Storage.MongoDB.Host, config.Storage.MongoDB.Port, config.Storage.MongoDB.Database, config.Storage.MongoDB.Collections,
-	)
-	// mongoClient setup
-	mongoClient, err := mongodb.GetMongoClient(mongoConfig)
+	storage, err := model.NewDBConfig(config)
 	if err != nil {
-		logger.Fatal(err)
+		return App{}, err
 	}
-
 	ctx := context.Background()
-	go monitoring.PingStorage(ctx, mongoClient, config)
+	go monitoring.PingStorage(ctx, storage.Operations)
 
 	return App{
-		cfg:         config,
-		logger:      logger,
-		router:      router,
-		mongoClient: mongoClient,
+		cfg:     config,
+		logger:  logger,
+		router:  router,
+		storage: storage,
 	}, nil
 }
 

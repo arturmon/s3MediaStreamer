@@ -7,7 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/mongodb"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"time"
 )
@@ -33,7 +32,9 @@ func (a *App) Register(c *gin.Context) {
 	}
 
 	//database.DB.Create(&user)
-	err := mongodb.CreateUser(a.cfg, a.mongoClient, user)
+	//!! err := mongodb.CreateUser(a.cfg, a.mongoClient, user)
+	err := a.storage.Operations.CreateUser(user)
+
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "user with this email exists"})
 		return
@@ -53,7 +54,9 @@ func (a *App) Login(c *gin.Context) {
 	var user config.User
 
 	//database.DB.Where("email = ?", data["email"]).First(&user)
-	user, err := mongodb.FindUserToEmail(a.cfg, a.mongoClient, data["email"])
+	//!! user, err := mongodb.FindUserToEmail(a.cfg, a.mongoClient, data["email"])
+	user, err := a.storage.Operations.FindUserToEmail(data["email"])
+
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 	}
@@ -114,7 +117,9 @@ func (a *App) User(c *gin.Context) {
 
 	var user config.User
 
-	user, err = mongodb.FindUserToEmail(a.cfg, a.mongoClient, claims.Issuer)
+	//!! user, err = mongodb.FindUserToEmail(a.cfg, a.mongoClient, claims.Issuer)
+	user, err = a.storage.Operations.FindUserToEmail(claims.Issuer)
+
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 	}

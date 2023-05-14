@@ -2,11 +2,11 @@ package monitoring
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/client/model"
 	"time"
 )
 
@@ -22,15 +22,15 @@ func HealthGET(c *gin.Context) {
 	}
 }
 
-func PingStorage(ctx context.Context, client *mongo.Client, cfg *config.Config) {
+func PingStorage(ctx context.Context, dbOps model.DBOperations) {
 	ticker := time.NewTicker(1 * time.Second)
-	var err error
+	defer ticker.Stop()
+
 	for range ticker.C {
-		if cfg.Storage.Type == "mongo" {
-			err = client.Ping(ctx, readpref.Primary())
-		}
+		err := dbOps.Ping(ctx)
 		if err != nil {
 			config.AppHealth = false
+			fmt.Println("Error pinging database:", err)
 		} else {
 			config.AppHealth = true
 		}
