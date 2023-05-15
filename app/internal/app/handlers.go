@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 	log "github.com/sirupsen/logrus"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
@@ -77,7 +76,6 @@ func (a *App) GetAllAlbums(c *gin.Context) {
 // @Success     200 {object} main.album  "ok"
 // @Failure     404 {string} string  "Not Found"
 // @Router		/albums/:code [post]
-
 func (a *App) PostAlbums(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -110,7 +108,7 @@ func (a *App) PostAlbums(c *gin.Context) {
 	}
 
 	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
-	if err != nil && err != pgx.ErrNoRows {
+	if err == nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error checking if album code exists"})
 		return
 	}
