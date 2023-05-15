@@ -77,43 +77,28 @@ func (a *App) Login(c *gin.Context) {
 }
 
 func (a *App) User(c *gin.Context) {
-	cookie, err := c.Cookie("jwt")
+	email, err := a.checkAuthorization(c)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-	claims := token.Claims.(*jwt.StandardClaims)
 	var user config.User
-	user, err = a.storage.Operations.FindUserToEmail(claims.Issuer)
+	user, err = a.storage.Operations.FindUserToEmail(email)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		return
 	}
 	c.JSON(http.StatusOK, user)
 	return
 }
 
 func (a *App) DeleteUser(c *gin.Context) {
-	cookie, err := c.Cookie("jwt")
+	email, err := a.checkAuthorization(c)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-	claims := token.Claims.(*jwt.StandardClaims)
-	err = a.storage.Operations.DeleteUser(claims.Issuer)
+	err = a.storage.Operations.DeleteUser(email)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
@@ -128,4 +113,19 @@ func (a *App) Logout(c *gin.Context) {
 	c.SetCookie("jwt", "", -1, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
+}
+
+func (a *App) checkAuthorization(c *gin.Context) (string, error) {
+	cookie, err := c.Cookie("jwt")
+	if err != nil {
+		return "", err
+	}
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	return claims.Issuer, nil
 }
