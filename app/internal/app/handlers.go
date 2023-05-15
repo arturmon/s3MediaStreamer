@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
@@ -13,7 +13,6 @@ import (
 
 	//"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
-	"skeleton-golange-application/app/pkg/client/mongodb"
 	"skeleton-golange-application/app/pkg/monitoring"
 )
 
@@ -51,7 +50,8 @@ func Ping(c *gin.Context) {
 func (a *App) GetAllAlbums(c *gin.Context) {
 	//prometheuse
 	monitoring.GetAlbumsCounter.Inc()
-	issuesbyCode, err := mongodb.GetAllIssues(a.cfg, a.mongoClient)
+	//issuesbyCode, err := mongodb.GetAllIssues(a.cfg, a.mongoClient)
+	issuesbyCode, err := a.storage.Operations.GetAllIssues()
 	if err != nil {
 		a.logger.Fatal(err)
 	}
@@ -78,7 +78,8 @@ func (a *App) PostAlbums(c *gin.Context) {
 
 	var newAlbum config.Album
 
-	newAlbum.ID = primitive.NewObjectID()
+	//newAlbum.ID = primitive.NewObjectID()
+	newAlbum.ID = uuid.New()
 	newAlbum.CreatedAt = time.Now()
 	newAlbum.UpdatedAt = time.Now()
 
@@ -95,12 +96,17 @@ func (a *App) PostAlbums(c *gin.Context) {
 		return
 	}
 
-	_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
-	if err != mongo.ErrNoDocuments {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
-		return
+	//_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
+	_, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	// TODO -------mongo use---------- delete
+	if a.cfg.Storage.Type == "mongodb" {
+		if err != mongo.ErrNoDocuments {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
+			return
+		}
 	}
-	mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
+	//mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
+	a.storage.Operations.CreateIssue(newAlbum)
 	c.IndentedJSON(http.StatusCreated, newAlbum)
 	return
 }
@@ -116,13 +122,15 @@ func (a *App) PostAlbums(c *gin.Context) {
 // @Failure     404 {string} string  "Not Found"
 // @Router		/albums/:code [get]
 func (a *App) GetAlbumByID(c *gin.Context) {
-	//prometheuse
+	// prometheuse
 	monitoring.GetAlbumsCounter.Inc()
 
 	id := c.Param("code")
-	result, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, id)
+	//result, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, id)
+	result, err := a.storage.Operations.GetIssuesByCode(id)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, result)
 }
@@ -140,10 +148,12 @@ func (a *App) GetDeleteAll(c *gin.Context) {
 	//prometheuse
 	monitoring.GetAlbumsCounter.Inc()
 
-	err := mongodb.DeleteAll(a.cfg, a.mongoClient)
+	//err := mongodb.DeleteAll(a.cfg, a.mongoClient)
+	err := a.storage.Operations.DeleteAll()
 	if err != nil {
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error Delete all Album"})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
 }
@@ -163,13 +173,14 @@ func (a *App) GetDeleteByID(c *gin.Context) {
 	monitoring.GetAlbumsCounter.Inc()
 
 	id := c.Param("code")
-	err := mongodb.DeleteOne(a.cfg, a.mongoClient, id)
-
+	//err := mongodb.DeleteOne(a.cfg, a.mongoClient, id)
+	err := a.storage.Operations.DeleteOne(id)
 	log.Info(id)
 	log.Info(err)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Delete code not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
 

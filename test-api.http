@@ -18,16 +18,16 @@ POST http://localhost:10000/v1/album
 Content-Type: application/json
 
 {
-  "Title": "Test Title",
-  "Artist": "Test Artist",
-  "Price": 44.10,
-  "Code": "I0004",
-  "Description": "Description Test",
+  "Title": "Test Titl1e",
+  "Artist": "Test Artist1",
+  "Price": 44.102,
+  "Code": "I0001",
+  "Description": "Description Test1",
   "Completed": false
 }
 ###
 
-DELETE http://localhost:10000/v1/albums/delete/I0004
+DELETE http://localhost:10000/v1/albums/delete/I0001
 Content-Type: application/json
 
 ###
@@ -37,5 +37,50 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:10000/v1/health
+GET http://localhost:10000/health
 Content-Type: application/json
+
+
+###
+GET http://localhost:10000/metrics
+Content-Type: application/json
+
+
+###
+POST http://localhost:10000/v1/register
+Content-Type: application/json
+
+{
+  "email":"a@a.com",
+  "name":"a",
+  "password":"1"
+}
+
+###
+POST http://localhost:10000/v1/login
+Content-Type: application/json
+
+{
+  "email":"a@a.com",
+  "password":"1"
+}
+
+###
+POST http://localhost:10000/v1/logout
+Content-Type: application/json
+
+{
+"email":"a@a.com"
+}
+
+###
+GET http://localhost:10000/v1/user
+Content-Type: application/json
+
+###
+POST http://localhost:10000/v1/deleteUser
+Content-Type: application/json
+
+{
+  "email":"a@a.com"
+}
