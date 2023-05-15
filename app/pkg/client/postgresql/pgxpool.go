@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/model"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -16,6 +15,7 @@ import (
 type PostgresCollectionQuery interface {
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
+	DeleteUser(email string) error
 	CreateIssue(task config.Album) error
 	CreateMany(list []config.Album) error
 	GetAllIssues() ([]config.Album, error)
@@ -40,42 +40,6 @@ func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {
 
 func (c *PgClient) FindCollections(name string) (*mongo.Collection, error) {
 	return nil, fmt.Errorf("FindCollections is not supported for PostgreSQL")
-}
-
-// NewClient
-func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg *model.StorageConfig) (pool *pgxpool.Pool, err error) {
-	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s",
-		cfg.Username, cfg.Password,
-		cfg.Host, cfg.Port, cfg.Database,
-	)
-
-	err = DoWithAttempts(func() error {
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		defer cancel()
-
-		pgxCfg, err := pgxpool.ParseConfig(dsn)
-		if err != nil {
-			log.Fatalf("Unable to parse config: %v\n", err)
-		}
-
-		// pgxCfg.ConnConfig.Logger = logrusadapter.NewLogger(logger)
-
-		pool, err = pgxpool.ConnectConfig(ctx, pgxCfg)
-		if err != nil {
-			log.Println("Failed to connect to postgres... Going to do the next attempt")
-
-			return err
-		}
-
-		return nil
-	}, maxAttempts, maxDelay)
-
-	if err != nil {
-		log.Fatal("All attempts are exceeded. Unable to connect to postgres")
-	}
-
-	return pool, nil
 }
 
 func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error {
@@ -140,8 +104,8 @@ func (c *PgClient) Close(ctx context.Context) error {
 }
 
 func (c *PgClient) CreateUser(user config.User) error {
-	query := "INSERT INTO users (id, email, username, password) VALUES ($1, $2, $3, $4)"
-	_, err := c.Pool.Exec(context.TODO(), query, user.Id, user.Email, user.Name, user.Password)
+	query := `INSERT INTO "user" (_id, name, email, password) VALUES ($1, $2, $3, $4)`
+	_, err := c.Pool.Exec(context.TODO(), query, user.Id, user.Name, user.Email, user.Password)
 	if err != nil {
 		return err
 	}
@@ -150,8 +114,8 @@ func (c *PgClient) CreateUser(user config.User) error {
 
 func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	var user config.User
-	query := "SELECT email, username FROM users WHERE email = $1"
-	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.Email, &user.Name)
+	query := `SELECT _id, name, email, password FROM "user" WHERE email = $1`
+	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return user, fmt.Errorf("user with email '%s' not found", email)
@@ -161,9 +125,31 @@ func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	return user, nil
 }
 
-func (c *PgClient) CreateIssue(task config.Album) error {
-	query := "INSERT INTO albums (id, name, description) VALUES ($1, $2, $3)"
-	_, err := c.Pool.Exec(context.TODO(), query, task.ID, task.Artist, task.Description)
+func (c *PgClient) DeleteUser(email string) error {
+	query := `DELETE FROM "user" WHERE email = $1`
+	_, err := c.Pool.Exec(context.TODO(), query, email)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *PgClient) CreateIssue(album config.Album) error {
+	// Check if the "album" table exists
+	tableExists, err := c.TableExists("album")
+	if err != nil {
+		return err
+	}
+
+	if !tableExists {
+		// Return an error if the table does not exist
+		return fmt.Errorf("table 'album' does not exist")
+	}
+
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, completed)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	_, err = c.Pool.Exec(context.TODO(), query, album.ID, album.CreatedAt, album.UpdatedAt, album.Title,
+		album.Artist, album.Price, album.Code, album.Description, album.Completed)
 	if err != nil {
 		return err
 	}
@@ -171,51 +157,77 @@ func (c *PgClient) CreateIssue(task config.Album) error {
 }
 
 func (c *PgClient) CreateMany(list []config.Album) error {
-	insertableList := make([]interface{}, len(list))
-	for i, v := range list {
-		insertableList[i] = []interface{}{v.ID, v.Artist, v.Description}
+	insertableList := make([]interface{}, 0)
+	for _, v := range list {
+		insertableList = append(insertableList, v.ID, v.CreatedAt, v.UpdatedAt, v.Title, v.Artist, v.Price, v.Code, v.Description, v.Completed)
 	}
-	query := "INSERT INTO albums (id, name, description) VALUES "
-	var values []interface{}
-	for i := range insertableList {
-		values = append(values, fmt.Sprintf("($%d, $%d, $%d)", i*3+1, i*3+2, i*3+3))
+
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, completed) VALUES `
+
+	var placeholders []string
+	for i := 0; i < len(list); i++ {
+		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)", i*9+1, i*9+2, i*9+3, i*9+4, i*9+5, i*9+6, i*9+7, i*9+8, i*9+9))
 	}
-	query += fmt.Sprintf("%s", values)
+
+	query += strings.Join(placeholders, ", ")
+
 	_, err := c.Pool.Exec(context.TODO(), query, insertableList...)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (c *PgClient) GetAllIssues() ([]config.Album, error) {
-	query := "SELECT code, title, description FROM albums"
+	tableExists, err := c.TableExists("album")
+	if err != nil {
+		return nil, err
+	}
+
+	if !tableExists {
+		// Return an empty slice if the table does not exist
+		return make([]config.Album, 0), nil
+	}
+
+	query := "SELECT _id, created_at, updated_at, title, artist, price, code, description, completed FROM album"
 	rows, err := c.Pool.Query(context.TODO(), query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var issues []config.Album
+	albums := make([]config.Album, 0) // Initialize an empty slice
 	for rows.Next() {
-		var issue config.Album
-		err := rows.Scan(&issue.Code, &issue.Title, &issue.Description)
+		var album config.Album
+		err := rows.Scan(&album.ID, &album.CreatedAt, &album.UpdatedAt, &album.Title, &album.Artist, &album.Price, &album.Code, &album.Description, &album.Completed)
 		if err != nil {
 			return nil, err
 		}
-		issues = append(issues, issue)
+		albums = append(albums, album)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return issues, nil
+	return albums, nil
 }
 
 func (c *PgClient) DeleteAll() error {
-	query := "DELETE FROM albums"
-	_, err := c.Pool.Exec(context.TODO(), query)
+	// Check if the "album" table exists
+	tableExists, err := c.TableExists("album")
+	if err != nil {
+		return err
+	}
+
+	if !tableExists {
+		// Return nil if the table does not exist
+		return nil
+	}
+
+	query := "DELETE FROM album"
+	_, err = c.Pool.Exec(context.TODO(), query)
 	if err != nil {
 		return err
 	}
@@ -224,16 +236,22 @@ func (c *PgClient) DeleteAll() error {
 }
 
 func (c *PgClient) DeleteOne(code string) error {
-	query := "DELETE FROM albums WHERE code = $1"
-	_, err := c.Pool.Exec(context.TODO(), query, code)
+	query := "DELETE FROM album WHERE code = $1"
+	commandTag, err := c.Pool.Exec(context.TODO(), query, code)
 	if err != nil {
 		return err
 	}
+
+	// Check if any row was deleted
+	if commandTag.RowsAffected() == 0 {
+		return fmt.Errorf("no album found with code: %s", code)
+	}
+
 	return nil
 }
 
 func (c *PgClient) MarkCompleted(code string) error {
-	query := "UPDATE albums SET completed = true WHERE code = $1"
+	query := "UPDATE album SET completed = true WHERE code = $1"
 	_, err := c.Pool.Exec(context.TODO(), query, code)
 	if err != nil {
 		return err
@@ -244,12 +262,28 @@ func (c *PgClient) MarkCompleted(code string) error {
 
 func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 	result := config.Album{}
-	query := "SELECT * FROM albums WHERE code = $1"
+
+	// Check if the "album" table exists
+	tableExists, err := c.TableExists("album")
+	if err != nil {
+		return result, err
+	}
+
+	if !tableExists {
+		// Return an empty result if the table does not exist
+		return result, nil
+	}
+
+	query := "SELECT * FROM album WHERE code = $1"
 	row := c.Pool.QueryRow(context.TODO(), query, code)
-	err := row.Scan(
+	err = row.Scan(
 		&result.ID,
-		&result.Code,
+		&result.CreatedAt,
+		&result.UpdatedAt,
+		&result.Title,
 		&result.Artist,
+		&result.Price,
+		&result.Code,
 		&result.Description,
 		&result.Completed,
 	)

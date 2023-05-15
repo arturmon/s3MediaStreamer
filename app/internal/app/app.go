@@ -20,7 +20,6 @@ type App struct {
 	router     *gin.Engine
 	httpServer *http.Server
 	storage    *model.DBConfig
-	//userDB     UserDB
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
@@ -69,6 +68,7 @@ func (a *App) startHTTP() {
 		v1.POST("/register", a.Register)
 		v1.POST("/login", a.Login)
 		v1.GET("/user", a.User)
+		v1.POST("/deleteUser", a.DeleteUser)
 		v1.POST("/logout", a.Logout)
 		v1.GET("/albums", a.GetAllAlbums)
 		v1.GET("/albums/:code", a.GetAlbumByID)

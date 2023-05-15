@@ -7,10 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/model"
 	"sync"
 )
 
@@ -18,6 +16,7 @@ type MongoCollectionQuery interface {
 	FindCollections(name string) (*mongo.Collection, error)
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
+	DeleteUser(email string) error
 	CreateIssue(task config.Album) error
 	CreateMany(list []config.Album) error
 	GetAllIssues() ([]config.Album, error)
@@ -45,6 +44,9 @@ func (c *MongoClient) Connect() error {
 	}
 	return nil
 }
+func (c *MongoClient) DeleteUser(email string) error {
+	return fmt.Errorf("DeleteUser is not supported for MongoDB")
+}
 
 func (c *MongoClient) Ping(ctx context.Context) error {
 	if c.Client != nil {
@@ -62,24 +64,6 @@ func (c *MongoClient) Close(ctx context.Context) error {
 		c.Client = nil
 	}
 	return nil
-}
-
-func GetMongoClient(cfg *model.StorageConfig) (*mongo.Client, error) {
-	connectionString := fmt.Sprintf("mongodb://%s:%s", cfg.Host, cfg.Port)
-	credential := options.Credential{
-		Username: cfg.Username,
-		Password: cfg.Password,
-	}
-	clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		return nil, err
-	}
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
 }
 
 func (c *MongoClient) FindCollections(useCollections string) (*mongo.Collection, error) {

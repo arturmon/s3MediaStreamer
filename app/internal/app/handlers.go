@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
@@ -78,7 +78,8 @@ func (a *App) PostAlbums(c *gin.Context) {
 
 	var newAlbum config.Album
 
-	newAlbum.ID = primitive.NewObjectID()
+	//newAlbum.ID = primitive.NewObjectID()
+	newAlbum.ID = uuid.New()
 	newAlbum.CreatedAt = time.Now()
 	newAlbum.UpdatedAt = time.Now()
 
@@ -97,9 +98,12 @@ func (a *App) PostAlbums(c *gin.Context) {
 
 	//_, err := mongodb.GetIssuesByCode(a.cfg, a.mongoClient, newAlbum.Code)
 	_, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
-	if err != mongo.ErrNoDocuments {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
-		return
+	// TODO -------mongo use---------- delete
+	if a.cfg.Storage.Type == "mongodb" {
+		if err != mongo.ErrNoDocuments {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "document with this code exists"})
+			return
+		}
 	}
 	//mongodb.CreateIssue(a.cfg, a.mongoClient, newAlbum)
 	a.storage.Operations.CreateIssue(newAlbum)
@@ -126,6 +130,7 @@ func (a *App) GetAlbumByID(c *gin.Context) {
 	result, err := a.storage.Operations.GetIssuesByCode(id)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, result)
 }
@@ -148,6 +153,7 @@ func (a *App) GetDeleteAll(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error Delete all Album"})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
 }
@@ -173,7 +179,8 @@ func (a *App) GetDeleteByID(c *gin.Context) {
 	log.Info(err)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Delete code not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
 
