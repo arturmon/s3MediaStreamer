@@ -5,22 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// ResponseTimeHistogram TO-DO
-//
-//	startTime := time.Now()
-//
-//	// Perform the operation
-//
-//	duration := time.Since(startTime)
-//	ResponseTimeHistogram.Observe(duration.Seconds())
-var (
-	ResponseTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
-		Name:    "response_time_seconds",
-		Help:    "Response time histogram",
-		Buckets: prometheus.DefBuckets,
-	})
-)
-
 // ---------------------Register function
 var (
 	RegisterAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{

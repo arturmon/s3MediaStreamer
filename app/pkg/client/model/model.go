@@ -99,6 +99,7 @@ func NewDBConfig(config *config.Config) (*DBConfig, error) {
 }
 
 func (s *StorageConfig) Connect() error {
+	startTime := time.Now()
 	DatabaseConnectionAttemptCounter.Inc()
 	switch DBType(s.Type) {
 	case MongoDBType:
@@ -120,6 +121,8 @@ func (s *StorageConfig) Connect() error {
 	default:
 		return fmt.Errorf("unsupported database type: %s", s.Type)
 	}
+	duration := time.Since(startTime)
+	ResponseTimeDBConnect.Observe(duration.Seconds())
 	DatabaseConnectionSuccessCounter.Inc()
 	return nil
 }
@@ -197,6 +200,12 @@ var (
 	DatabaseConnectionFailureCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "database_connection_failure_total",
 		Help: "Total number of failed database connections",
+	})
+
+	ResponseTimeDBConnect = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "database_response_time_seconds",
+		Help:    "Database response time histogram",
+		Buckets: prometheus.DefBuckets,
 	})
 
 	// Define additional counters for other database metrics as needed
