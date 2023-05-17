@@ -13,69 +13,167 @@ import (
 
 const SecretKey = "secret"
 
+// Register godoc
+// @Summary		Registers a new user.
+// @Description Register a new user with provided name, email, and password.
+// @Tags		user-controller
+// @Accept		*/*
+// @Produce		json
+// @Param		user body config.User true "Register User"
+// @Success     201 {object} config.User  "Created"
+// @Failure     400 {object} map[string]string "Bad Request - User with this email exists"
+// @Failure     500 {object} map[string]string "Internal Server Error"
+// @Router		/users/register [post]
 func (a *App) Register(c *gin.Context) {
 	//prometheuse
-	monitoring.RegisterCounter.Inc()
+	monitoring.RegisterAttemptCounter.Inc()
+
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
 		return
 	}
+
 	// Check if user already exists
 	_, err := a.storage.Operations.FindUserToEmail(data["email"])
 	if err == nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user with this email exists"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user with this email exists"})
 		return
 	}
+
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
+
 	user := config.User{
 		Id:       uuid.New(),
 		Name:     data["name"],
 		Email:    data["email"],
 		Password: password,
 	}
+
 	err = a.storage.Operations.CreateUser(user)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
+		monitoring.RegisterErrorCounter.Inc()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
 		return
 	}
-	c.IndentedJSON(http.StatusCreated, user)
+	monitoring.RegisterSuccessCounter.Inc()
+	c.JSON(http.StatusCreated, user)
 }
 
+// Login godoc
+// @Summary		Authenticates a user.
+// @Description Authenticates a user with provided email and password.
+// @Tags		user-controller
+// @Accept		*/*
+// @Produce		json
+// @Param		login body config.User true "Login User"
+// @Success     200 {object} map[string]string  "Success"
+// @Failure     400 {object} map[string]string "Bad Request - Incorrect Password"
+// @Failure     404 {object} map[string]string "Not Found - User not found"
+// @Failure     500 {object} map[string]string "Internal Server Error"
+// @Router		/users/login [post]
 func (a *App) Login(c *gin.Context) {
 	//prometheuse
-	monitoring.LoginCounter.Inc()
+	monitoring.LoginAttemptCounter.Inc()
+
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
 		return
 	}
+
 	var user config.User
 	user, err := a.storage.Operations.FindUserToEmail(data["email"])
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
 	}
+
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
-		//prometheuse
+		monitoring.LoginErrorCounter.Inc()
+		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
+		// Prometheus
 		monitoring.ErrPasswordCounter.Inc()
 		return
 	}
+
 	var claims = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    user.Email,
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), //1 day
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 day
 	})
+
 	token, err := claims.SignedString([]byte(SecretKey))
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
 		return
 	}
+
 	maxAge := 60 * 60 * 24
 	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
 	a.logger.Debug("jwt: %s", token)
+	monitoring.LoginSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
 }
 
+// DeleteUser godoc
+// @Summary		Deletes a user.
+// @Description Deletes the authenticated user.
+// @Tags		user-controller
+// @Accept		*/*
+// @Produce		json
+// @Security	ApiKeyAuth
+// @Success     200 {object} map[string]string "Success - User deleted"
+// @Failure     401 {object} map[string]string "Unauthorized - User unauthenticated"
+// @Failure     404 {object} map[string]string "Not Found - User not found"
+// @Router		/users/delete [delete]
+func (a *App) DeleteUser(c *gin.Context) {
+	monitoring.DeleteUserAttemptCounter.Inc()
+	email, err := a.checkAuthorization(c)
+	if err != nil {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
+		return
+	}
+	err = a.storage.Operations.DeleteUser(email)
+	if err != nil {
+		monitoring.DeleteUserErrorCounter.Inc()
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		return
+	}
+	monitoring.DeleteUserSuccessCounter.Inc()
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
+	return
+}
+
+// Logout godoc
+// @Summary		Logs out a user.
+// @Description Clears the authentication cookie, logging out the user.
+// @Tags		user-controller
+// @Accept		*/*
+// @Produce		json
+// @Security	ApiKeyAuth
+// @Success     200 {object} map[string]string  "Success"
+// @Router		/users/logout [post]
+func (a *App) Logout(c *gin.Context) {
+	monitoring.LogoutAttemptCounter.Inc()
+	Expires := time.Now().Add(-time.Hour)
+	a.logger.Println("Expires: %s", Expires)
+	c.SetCookie("jwt", "", -1, "", "", false, true)
+	monitoring.LogoutSuccessCounter.Inc()
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	return
+}
+
+// User godoc
+// @Summary Get user information
+// @Description Retrieves user information based on JWT in the request's cookies
+// @Tags user-controller
+// @Accept  */*
+// @Produce json
+// @Success 200 {object} config.User "Successfully retrieved user information"
+// @Failure 401 {object} gin.H{"message": string} "Unauthenticated"
+// @Failure 404 {object} gin.H{"message": string} "User not found"
+// @Router /user [get]
 func (a *App) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {
@@ -89,29 +187,6 @@ func (a *App) User(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
-	return
-}
-
-func (a *App) DeleteUser(c *gin.Context) {
-	email, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-	err = a.storage.Operations.DeleteUser(email)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
-	return
-}
-
-func (a *App) Logout(c *gin.Context) {
-	Expires := time.Now().Add(-time.Hour)
-	a.logger.Println("Expires: %s", Expires)
-	c.SetCookie("jwt", "", -1, "", "", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
 }
 

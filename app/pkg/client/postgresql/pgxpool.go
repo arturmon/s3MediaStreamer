@@ -31,7 +31,6 @@ type PostgresOperations interface {
 
 type PgClient struct {
 	Pool *pgxpool.Pool
-	// другие поля, если они вам нужны
 }
 
 func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {

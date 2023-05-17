@@ -1,5 +1,6 @@
+basePath: /v1
 definitions:
-  main.album:
+  config.Album:
     properties:
       _id:
         type: string
@@ -20,14 +21,13 @@ definitions:
       updated_at:
         type: string
     type: object
-  web.ResponseRequest:
+  config.User:
     properties:
-      message:
+      _id:
         type: string
-    type: object
-  web.getAllAlbums_other:
-    properties:
-      message:
+      email:
+        type: string
+      name:
         type: string
     type: object
 info:
@@ -35,11 +35,42 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
+  description: This is a sample server Petstore server.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Sceleton Golang Application API
+  version: "1.0"
 paths:
   /albums:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete ALL.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Complete removal of all albums.
+      tags:
+      - album-controller
     get:
       consumes:
       - '*/*'
@@ -48,17 +79,68 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            $ref: '#/definitions/main.album'
-        "404":
-          description: Not Found
+            items:
+              $ref: '#/definitions/config.Album'
+            type: array
+        "401":
+          description: Unauthorized
           schema:
-            type: string
-      summary: Show the list of all album.
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Show the list of all albums.
       tags:
       - album-controller
   /albums/:code:
+    delete:
+      consumes:
+      - '*/*'
+      description: locates the album whose ID value matches the id parameter and deletes
+        it.
+      parameters:
+      - description: Code album
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Deletes album whose ID value matches the code.
+      tags:
+      - album-controller
     get:
       consumes:
       - '*/*'
@@ -74,23 +156,33 @@ paths:
       - application/json
       responses:
         "200":
-          description: ok
+          description: OK
           schema:
-            $ref: '#/definitions/main.album'
-        "400":
-          description: We need Code!!
+            $ref: '#/definitions/config.Album'
+        "401":
+          description: Unauthorized
           schema:
-            $ref: '#/definitions/web.getAllAlbums_other'
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Album whose ID value matches the id.
       tags:
       - album-controller
     post:
       consumes:
-      - '*/*'
+      - application/json
       description: adds an album from JSON received in the request body.
       parameters:
       - description: Code
@@ -98,87 +190,203 @@ paths:
         name: code
         required: true
         type: string
-      - description: query params
+      - description: Album details
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.album'
+          $ref: '#/definitions/config.Album'
       produces:
       - application/json
       responses:
-        "200":
-          description: ok
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/main.album'
-        "404":
-          description: Not Found
+            $ref: '#/definitions/config.Album'
+        "400":
+          description: Bad Request
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Adds an album from JSON.
-      tags:
-      - album-controller
-  /albums/delete/:code:
-    get:
-      consumes:
-      - '*/*'
-      description: locates the album whose ID value matches the id parameter delete.
-      parameters:
-      - description: Code album
-        in: path
-        name: code
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.ResponseRequest'
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: Album whose ID value matches the code and delete.
-      tags:
-      - album-controller
-  /albums/deleteAll:
-    get:
-      consumes:
-      - '*/*'
-      description: Delete ALL.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/web.ResponseRequest'
-        "404":
-          description: Not Found
-          schema:
-            type: string
-      summary: Complete removal of all albums.
       tags:
       - album-controller
   /ping:
     get:
       consumes:
       - '*/*'
-      description: do ping
+      description: Check if the application server is running
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/web.ResponseRequest'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
       summary: Application liveness check function
       tags:
-      - album-controller
+      - health-check
+  /user:
+    get:
+      consumes:
+      - '*/*'
+      description: Retrieves user information based on JWT in the request's cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved user information
+          schema:
+            $ref: '#/definitions/config.User'
+        "401":
+          description: Unauthenticated
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get user information
+      tags:
+      - user-controller
+  /users/delete:
+    delete:
+      consumes:
+      - '*/*'
+      description: Deletes the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success - User deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found - User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes a user.
+      tags:
+      - user-controller
+  /users/login:
+    post:
+      consumes:
+      - '*/*'
+      description: Authenticates a user with provided email and password.
+      parameters:
+      - description: Login User
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/config.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request - Incorrect Password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found - User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Authenticates a user.
+      tags:
+      - user-controller
+  /users/logout:
+    post:
+      consumes:
+      - '*/*'
+      description: Clears the authentication cookie, logging out the user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Logs out a user.
+      tags:
+      - user-controller
+  /users/register:
+    post:
+      consumes:
+      - '*/*'
+      description: Register a new user with provided name, email, and password.
+      parameters:
+      - description: Register User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/config.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/config.User'
+        "400":
+          description: Bad Request - User with this email exists
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Registers a new user.
+      tags:
+      - user-controller
 swagger: "2.0"

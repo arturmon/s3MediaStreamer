@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	log "github.com/sirupsen/logrus"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
@@ -19,49 +20,45 @@ type Handler interface {
 	Register(c *gin.Context)
 }
 
-// Ping			godoc
-// @Summary     Application liveness check function
-// @Description do ping
-// @Tags        album-controller
-// @Accept      */*
-// @Produce     json
-// @Success     200	{object}  web.ResponseRequest   "OK"
-// @Failure		404 {string} string  "Not Found"
-// @Router      /ping [get]
+// Ping godoc
+// @Summary Application liveness check function
+// @Description Check if the application server is running
+// @Tags health-check
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{} "OK"
+// @Failure 404 {object} map[string]string "Not Found"
+// @Router /ping [get]
 func Ping(c *gin.Context) {
-	//prometheuse
-	monitoring.PingCounter.Inc()
-
-	//c.String(http.StatusOK, "pong")
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
-
 }
 
 // GetAllAlbums	godoc
-// @Summary		Show the list of all album.
+// @Summary		Show the list of all albums.
 // @Description responds with the list of all albums as JSON.
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success		200 {object} main.album	"ok"
-// @Failure		404 {string} string  "Not Found"
+// @Success		200 {array} config.Album	"OK"
+// @Failure		401 {object} map[string]string "Unauthorized"
+// @Failure		500 {object} map[string]string "Internal Server Error"
 // @Router		/albums [get]
 func (a *App) GetAllAlbums(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
-
-	// If user is authorized, proceed with getting the albums
-	monitoring.GetAlbumsCounter.Inc()
-	issuesbyCode, err := a.storage.Operations.GetAllIssues()
+	monitoring.GetAllAlbumsCounter.Inc()
+	albums, err := a.storage.Operations.GetAllIssues()
 	if err != nil {
-		a.logger.Fatal(err)
+		a.logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		return
 	}
-	res, _ := json.Marshal(issuesbyCode)
-	c.IndentedJSON(http.StatusOK, issuesbyCode)
+	res, _ := json.Marshal(albums)
+	c.IndentedJSON(http.StatusOK, albums)
 	fmt.Println(string(res))
 }
 
@@ -69,12 +66,13 @@ func (a *App) GetAllAlbums(c *gin.Context) {
 // @Summary		Adds an album from JSON.
 // @Description adds an album from JSON received in the request body.
 // @Tags		album-controller
-// @Accept		*/*
+// @Accept		json
 // @Produce		json
 // @Param		code 	path string		true "Code"
-// @Param		request body main.album true "query params"
-// @Success     200 {object} main.album  "ok"
-// @Failure     404 {string} string  "Not Found"
+// @Param		request body config.Album true "Album details"
+// @Success     201 {object} config.Album  "Created"
+// @Failure     400 {object} map[string]string  "Bad Request"
+// @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums/:code [post]
 func (a *App) PostAlbums(c *gin.Context) {
 	// Check if user is authorized
@@ -83,10 +81,8 @@ func (a *App) PostAlbums(c *gin.Context) {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
-
-	// If user is authorized, proceed with posting the albums
+	// Increment the counter for each request handled by PostAlbums
 	monitoring.PostAlbumsCounter.Inc()
-
 	var newAlbum config.Album
 
 	newAlbum.ID = uuid.New()
@@ -109,7 +105,7 @@ func (a *App) PostAlbums(c *gin.Context) {
 
 	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if err == nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error checking if album code exists"})
+		c.IndentedJSON(http.StatusConflict, gin.H{"message": "album code already exists"})
 		return
 	}
 
@@ -130,8 +126,10 @@ func (a *App) PostAlbums(c *gin.Context) {
 // @Accept		*/*
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
-// @Success     200 {object} main.album  "ok"
-// @Failure     404 {string} string  "Not Found"
+// @Success     200 {object} config.Album  "OK"
+// @Failure     401 {object} map[string]string  "Unauthorized"
+// @Failure     404 {object} map[string]string  "Not Found"
+// @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums/:code [get]
 func (a *App) GetAlbumByID(c *gin.Context) {
 	// Check if user is authorized
@@ -142,12 +140,17 @@ func (a *App) GetAlbumByID(c *gin.Context) {
 	}
 
 	// If user is authorized, proceed with getting the album
-	monitoring.GetAlbumsCounter.Inc()
+	monitoring.GetAlbumByIDCounter.Inc()
 
 	id := c.Param("code")
 	result, err := a.storage.Operations.GetIssuesByCode(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		if err == pgx.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		} else {
+			a.logger.Error(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		}
 		return
 	}
 	c.IndentedJSON(http.StatusOK, result)
@@ -159,9 +162,10 @@ func (a *App) GetAlbumByID(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success     200 {object}  web.ResponseRequest   "OK"
-// @Failure     404 {string}  string  "Not Found"
-// @Router		/albums/deleteAll [get]
+// @Success     204 {object}  map[string]string   "No Content"
+// @Failure     401 {object} map[string]string  "Unauthorized"
+// @Failure     500 {object} map[string]string  "Internal Server Error"
+// @Router		/albums [delete]
 func (a *App) GetDeleteAll(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -170,28 +174,30 @@ func (a *App) GetDeleteAll(c *gin.Context) {
 		return
 	}
 
-	// If user is authorized, proceed with deleting all albums
-	monitoring.GetAlbumsCounter.Inc()
+	// Increment the counter for each request handled by GetDeleteAll
+	monitoring.GetDeleteAllCounter.Inc()
 
 	err = a.storage.Operations.DeleteAll()
 	if err != nil {
 		log.Fatal(err)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Error Delete all Album"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error Delete all Album"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
+	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "OK"})
 }
 
 // GetDeleteByID godoc
-// @Summary		Album whose ID value matches the code and delete.
-// @Description locates the album whose ID value matches the id parameter delete.
+// @Summary		Deletes album whose ID value matches the code.
+// @Description locates the album whose ID value matches the id parameter and deletes it.
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		code    path      int     true  "Code album"
-// @Success     200 {object}  web.ResponseRequest   "OK"
-// @Failure     404 {string} string  "Not Found"
-// @Router		/albums/delete/:code [get]
+// @Param		code    path      string     true  "Code album"
+// @Success     204 {object}  map[string]string   "No Content"
+// @Failure     401 {object} map[string]string  "Unauthorized"
+// @Failure     404 {object} map[string]string  "Not Found"
+// @Failure     500 {object} map[string]string  "Internal Server Error"
+// @Router		/albums/:code [delete]
 func (a *App) GetDeleteByID(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -201,13 +207,26 @@ func (a *App) GetDeleteByID(c *gin.Context) {
 	}
 
 	// If user is authorized, proceed with deleting the album by ID
-	monitoring.GetAlbumsCounter.Inc()
+	monitoring.GetDeleteByIDCounter.Inc()
 
-	id := c.Param("code")
-	err = a.storage.Operations.DeleteOne(id)
+	code := c.Param("code")
+
+	_, err = a.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		if err == pgx.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		} else {
+			a.logger.Error(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		}
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "OK"})
+
+	err = a.storage.Operations.DeleteOne(code)
+	if err != nil {
+		a.logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error deleting album"})
+		return
+	}
+	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "OK"})
 }

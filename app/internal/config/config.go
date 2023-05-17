@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
 	_ "github.com/joho/godotenv/autoload"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -32,14 +32,16 @@ type User struct {
 }
 
 type Config struct {
-	IsDebug       bool `env:"IS_DEBUG" env-default:"false"`
-	IsDevelopment bool `env:"IS_DEV" env-default:"false"`
-	Listen        struct {
+	//IsDebug bool `env:"IS_DEBUG" env-default:"false"`
+	//IsDevelopment bool `env:"IS_DEV" env-default:"false"`
+	Listen struct {
 		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
 		Port   string `env:"PORT" env-default:"10000"`
 	}
 	AppConfig struct {
 		LogLevel string `env:"LOG_LEVEL" env-default:"info"`
+		// debug, release
+		GinMode string `env:"GIN_MODE" env-default:"release"`
 	}
 	// STORAGE_TYPE: mongodb, postgresql
 	// 5432 postgresql, 27017 mongodb

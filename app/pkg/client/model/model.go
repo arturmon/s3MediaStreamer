@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -97,10 +99,12 @@ func NewDBConfig(config *config.Config) (*DBConfig, error) {
 }
 
 func (s *StorageConfig) Connect() error {
+	DatabaseConnectionAttemptCounter.Inc()
 	switch DBType(s.Type) {
 	case MongoDBType:
 		client, err := GetMongoClient(s)
 		if err != nil {
+			DatabaseConnectionFailureCounter.Inc()
 			return err
 		}
 		// Сохраните клиента в структуре s для дальнейшего использования.
@@ -108,6 +112,7 @@ func (s *StorageConfig) Connect() error {
 	case PgSQLType:
 		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, s)
 		if err != nil {
+			DatabaseConnectionFailureCounter.Inc()
 			return err
 		}
 		// Сохраните pool в структуре s для дальнейшего использования.
@@ -115,6 +120,7 @@ func (s *StorageConfig) Connect() error {
 	default:
 		return fmt.Errorf("unsupported database type: %s", s.Type)
 	}
+	DatabaseConnectionSuccessCounter.Inc()
 	return nil
 }
 
@@ -175,3 +181,25 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 
 	return pool, nil
 }
+
+// ---------------------DB prometheus
+var (
+	DatabaseConnectionAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "database_connection_attempt_total",
+		Help: "Total number of database connection attempts",
+	})
+
+	DatabaseConnectionSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "database_connection_success_total",
+		Help: "Total number of successful database connections",
+	})
+
+	DatabaseConnectionFailureCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "database_connection_failure_total",
+		Help: "Total number of failed database connections",
+	})
+
+	// Define additional counters for other database metrics as needed
+	// ...
+
+)

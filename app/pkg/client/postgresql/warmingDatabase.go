@@ -3,7 +3,6 @@ package postgresql
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"reflect"
 	"strings"
 	"time"
@@ -14,22 +13,27 @@ func (c *PgClient) CheckTablePresence(tables []interface{}) error {
 		typeOfTable := reflect.TypeOf(table)
 		isPresent, err := c.IsTablePresent(typeOfTable.Name())
 		if err != nil {
-			return fmt.Errorf("failed to check table: %v", err)
+			fmt.Errorf("failed to check table %v", err)
+			return err
 		}
 		if isPresent {
-			log.Printf("Table %s exists", typeOfTable.Name())
+			//c.Logger.Info(fmt.Sprintf("Table %s exists", typeOfTable.Name()))
+			fmt.Sprintf("Table %s exists", err)
 		} else {
 			err = c.CreateTable(table)
 			if err != nil {
-				return fmt.Errorf("failed to create table %s: %v", typeOfTable.Name(), err)
+				fmt.Errorf("failed to create table %v", err)
+				return err
 			}
-			log.Printf("Table %s created", typeOfTable.Name())
+			//c.Logger.Infof("Table %s created", typeOfTable.Name())
+			fmt.Sprintf("Table %s created", err)
 		}
 	}
 	return nil
 }
 
 func (c *PgClient) IsTablePresent(tableName string) (bool, error) {
+	tableNameToLower := strings.ToLower(tableName)
 	// Query checks if a table with the given name exists
 	query := `
 	SELECT EXISTS (
@@ -40,7 +44,7 @@ func (c *PgClient) IsTablePresent(tableName string) (bool, error) {
 	`
 
 	var exists bool
-	err := c.Pool.QueryRow(context.TODO(), query, tableName).Scan(&exists)
+	err := c.Pool.QueryRow(context.TODO(), query, tableNameToLower).Scan(&exists)
 	if err != nil {
 		return false, err
 	}

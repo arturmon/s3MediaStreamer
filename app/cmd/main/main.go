@@ -1,37 +1,37 @@
 package main
 
 import (
+	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
+	_ "github.com/swaggo/gin-swagger"
+	_ "skeleton-golange-application/app/docs"
+	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
-
-	_ "skeleton-golange-application/app/docs"
-
-	//https://github.com/swaggo/gin-swagger
-
-	_ "github.com/joho/godotenv/autoload"
-	"skeleton-golange-application/app/internal/app"
 )
 
+// @title			Sceleton Golang Application API
+// @version		1.0
+// @description	This is a sample server Petstore server.
 // @contact.name API Support
 // @contact.url http://www.swagger.io/support
 // @contact.email support@swagger.io
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath	/v1
 func main() {
-	log.SetFormatter(&log.JSONFormatter{})
-	log.Info("Starting the service...")
-	log.Print("config initializing")
 	cfg := config.GetConfig()
 	log.Print("logger initializing")
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
-
+	logger.Info("Starting the service...")
+	logger.Info("config initializing")
 	a, err := app.NewApp(cfg, &logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	logger.Println("Running Application")
+	logger.Info("Running Application")
 	a.Run()
 }

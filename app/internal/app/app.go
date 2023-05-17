@@ -23,16 +23,17 @@ type App struct {
 }
 
 func NewApp(config *config.Config, logger *logging.Logger) (App, error) {
-	logger.Println("router initializing")
+	logger.Info("router initializing")
 
 	// Gin instance
+	gin.SetMode(config.AppConfig.GinMode)
 	router := gin.New()
-	logger.Println("setup CORS")
+	logger.Info("setup CORS")
 	router.Use(CORSMiddleware())
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	logger.Println("prometheus initializing")
+	logger.Info("prometheus initializing")
 	p := ginPrometheus.NewPrometheus("gin")
 	p.Use(router)
 
@@ -59,7 +60,7 @@ func (a *App) startHTTP() {
 
 	a.logger.Info("start HTTP")
 	// Routes
-	a.logger.Println("heartbeat metric initializing")
+	a.logger.Info("heartbeat metric initializing")
 	a.router.GET("/health", monitoring.HealthGET)
 	// Group: v1
 	v1 := a.router.Group("/v1")
@@ -75,13 +76,14 @@ func (a *App) startHTTP() {
 		v1.POST("/album", a.PostAlbums)
 		v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
 		v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
-		a.logger.Println("swagger docs initializing")
+		a.logger.Info("swagger docs initializing")
 		v1.GET("/swagger", func(c *gin.Context) {
 			c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 		})
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-	a.logger.Println("application completely initialized and started")
+
+	a.logger.Info("application completely initialized and started")
 	a.logger.Info("The service is ready to listen and serve.")
 	// Start server
 	connectionString := fmt.Sprintf("%s:%s", a.cfg.Listen.BindIP, a.cfg.Listen.Port)

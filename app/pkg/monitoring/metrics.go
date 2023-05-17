@@ -5,58 +5,120 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// ResponseTimeHistogram TO-DO
+//
+//	startTime := time.Now()
+//
+//	// Perform the operation
+//
+//	duration := time.Since(startTime)
+//	ResponseTimeHistogram.Observe(duration.Seconds())
 var (
-	CountGetAlbumsConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "get_albums_connect_mongodb_total",
-		Help: "The number errors of apps events",
+	ResponseTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "response_time_seconds",
+		Help:    "Response time histogram",
+		Buckets: prometheus.DefBuckets,
 	})
 )
 
+// ---------------------Register function
 var (
-	GetAlbumsErrorConnectMongodbTotal = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "get_albums_error_connect_mongodb_total",
-		Help: "The Bad Request errors of apps events",
+	RegisterAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "register_attempt_count",
+		Help: "Total number of registration attempts",
+	})
+
+	RegisterSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "register_success_count",
+		Help: "Total number of successful registrations",
+	})
+
+	RegisterErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "register_error_count",
+		Help: "Total number of registration errors",
 	})
 )
 
+// ---------------------Login function
 var (
-	PingCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "ping_request_count",
-		Help: "No of request handled by Ping handler",
+	LoginAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "login_attempt_count",
+		Help: "Total number of login attempts",
 	})
-)
 
-var (
-	GetAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "get_albums_request_count",
-		Help: "No of request handled by get Albums handler",
-	})
-)
-
-var (
-	PostAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "post_albums_request_count",
-		Help: "No of request handled by get Albums handler",
-	})
-)
-
-var (
-	RegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "register_count",
-		Help: "registration counter",
-	})
-)
-
-var (
-	LoginCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "login_count",
-		Help: "login counter",
-	})
-)
-
-var (
 	ErrPasswordCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "incorrect_password_count",
 		Help: "incorrect password counter",
 	})
+
+	LoginSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "login_success_count",
+		Help: "Total number of successful logins",
+	})
+
+	LoginErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "login_error_count",
+		Help: "Total number of login errors",
+	})
 )
+
+// ---------------------DeleteUser function
+var (
+	DeleteUserAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "delete_user_attempt_count",
+		Help: "Total number of delete user attempts",
+	})
+
+	DeleteUserSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "delete_user_success_count",
+		Help: "Total number of successful user deletions",
+	})
+
+	DeleteUserErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "delete_user_error_count",
+		Help: "Total number of delete user errors",
+	})
+)
+
+// ---------------------Logout function
+var (
+	LogoutAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "logout_attempt_count",
+		Help: "Total number of logout attempts",
+	})
+
+	LogoutSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "logout_success_count",
+		Help: "Total number of successful logouts",
+	})
+)
+
+// GetAllAlbumsCounter Define a counter to track the number of requests handled by GetAllAlbums
+var GetAllAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_get_all_albums_requests_total",
+	Help: "Total number of requests handled by GetAllAlbums",
+})
+
+// PostAlbumsCounter Define a counter to track the number of requests handled by PostAlbums
+var PostAlbumsCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_post_albums_requests_total",
+	Help: "Total number of requests handled by PostAlbums",
+})
+
+// GetAlbumByIDCounter Define a counter to track the number of requests handled by GetAlbumByID
+var GetAlbumByIDCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_get_album_by_id_requests_total",
+	Help: "Total number of requests handled by GetAlbumByID",
+})
+
+// GetDeleteAllCounter Define a counter to track the number of requests handled by GetDeleteAll
+var GetDeleteAllCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_get_delete_all_requests_total",
+	Help: "Total number of requests handled by GetDeleteAll",
+})
+
+// GetDeleteByIDCounter Define a counter to track the number of requests handled by GetDeleteByID
+var GetDeleteByIDCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_get_delete_by_id_requests_total",
+	Help: "Total number of requests handled by GetDeleteByID",
+})
