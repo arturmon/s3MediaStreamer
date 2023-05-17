@@ -5,9 +5,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	_ "github.com/swaggo/gin-swagger"
 	_ "skeleton-golange-application/app/docs"
-	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/app/pkg/web/gin"
 )
 
 // @title			Sceleton Golang Application API
@@ -27,11 +27,12 @@ func main() {
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
 	logger.Info("Starting the service...")
 	logger.Info("config initializing")
-	a, err := app.NewApp(cfg, &logger)
+	appInstanceUseGin, err := gin.NewAppUseGin(cfg, &logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	logger.Info("Running Application")
-	a.Run()
+	appInstanceUseGin.Run() // The app will run
+
 }

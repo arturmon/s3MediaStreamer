@@ -1,4 +1,4 @@
-package app
+package gin
 
 import (
 	"github.com/dgrijalva/jwt-go"
