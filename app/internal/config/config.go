@@ -56,6 +56,16 @@ type Config struct {
 		Collections      string `env:"STORAGE_COLLECTIONS" env-default:"col_issues"`
 		CollectionsUsers string `env:"STORAGE_COLLECTIONS_USERS" env-default:"col_users"`
 	}
+	MessageQueue struct {
+		Enable        bool   `env:"MQ_ENABLE" env-default:"true"`
+		SubExchange   string `env:"MQ_EXCHANGE" env-default:"sub-command"`
+		SubRoutingKey string `env:"MQ_ROUTING_KEY" env-default:"sub-routing-key"`
+		SubQueueName  string `env:"MQ_QUEUE_NAME" env-default:"sub_queue"`
+		PubExchange   string `env:"MQ_EXCHANGE" env-default:"pub-exchange"`
+		PubRoutingKey string `env:"MQ_ROUTING_KEY" env-default:"pub-routing-key"`
+		PubQueueName  string `env:"MQ_QUEUE_NAME" env-default:"pub_queue"`
+		Broker        string `env:"MQ_BROKER" env-default:"amqp://user:password@localhost:5672/"`
+	}
 }
 
 var instance *Config

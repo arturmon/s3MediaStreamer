@@ -24,7 +24,7 @@ const SecretKey = "secret"
 // @Failure     400 {object} map[string]string "Bad Request - User with this email exists"
 // @Failure     500 {object} map[string]string "Internal Server Error"
 // @Router		/users/register [post]
-func (a *App) Register(c *gin.Context) {
+func (a *WebApp) Register(c *gin.Context) {
 	//prometheuse
 	monitoring.RegisterAttemptCounter.Inc()
 
@@ -72,7 +72,7 @@ func (a *App) Register(c *gin.Context) {
 // @Failure     404 {object} map[string]string "Not Found - User not found"
 // @Failure     500 {object} map[string]string "Internal Server Error"
 // @Router		/users/login [post]
-func (a *App) Login(c *gin.Context) {
+func (a *WebApp) Login(c *gin.Context) {
 	//prometheuse
 	monitoring.LoginAttemptCounter.Inc()
 
@@ -127,7 +127,7 @@ func (a *App) Login(c *gin.Context) {
 // @Failure     401 {object} map[string]string "Unauthorized - User unauthenticated"
 // @Failure     404 {object} map[string]string "Not Found - User not found"
 // @Router		/users/delete [delete]
-func (a *App) DeleteUser(c *gin.Context) {
+func (a *WebApp) DeleteUser(c *gin.Context) {
 	monitoring.DeleteUserAttemptCounter.Inc()
 	email, err := a.checkAuthorization(c)
 	if err != nil {
@@ -154,7 +154,7 @@ func (a *App) DeleteUser(c *gin.Context) {
 // @Security	ApiKeyAuth
 // @Success     200 {object} map[string]string  "Success"
 // @Router		/users/logout [post]
-func (a *App) Logout(c *gin.Context) {
+func (a *WebApp) Logout(c *gin.Context) {
 	monitoring.LogoutAttemptCounter.Inc()
 	Expires := time.Now().Add(-time.Hour)
 	a.logger.Println("Expires: %s", Expires)
@@ -174,7 +174,7 @@ func (a *App) Logout(c *gin.Context) {
 // @Failure 401 {object} gin.H{"message": string} "Unauthenticated"
 // @Failure 404 {object} gin.H{"message": string} "User not found"
 // @Router /user [get]
-func (a *App) User(c *gin.Context) {
+func (a *WebApp) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
@@ -190,7 +190,7 @@ func (a *App) User(c *gin.Context) {
 	return
 }
 
-func (a *App) checkAuthorization(c *gin.Context) (string, error) {
+func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	cookie, err := c.Cookie("jwt")
 	if err != nil {
 		return "", err

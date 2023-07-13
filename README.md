@@ -22,14 +22,12 @@ docker run -d --name postgresql-server \
 -e POSTGRESQL_PASSWORD=1qazxsw2 \
 -e POSTGRESQL_DATABASE=db_issue_album bitnami/postgresql:latest
 ```
-Use RabbitMQ
+Use MQ
 ```
-docker run -d --name rabbitmq \
--p 5672:5672 \
--p 15672:15672 \
--v /Users/amudrykh/rabbitmq:/var/lib/rabbitmq \
--e RABBITMQ_DEFAULT_USER=user \
--e RABBITMQ_DEFAULT_PASS=password rabbitmq:3-management
+docker run -d -p 8080:8080 \
+-p 50000:50000 \
+-p 9090:9090 \
+kubemq/kubemq-community:latest
 ```
 
 Downloading dependencies
@@ -41,6 +39,7 @@ go get -u github.com/prometheus/client_golang/prometheus/promhttp
 go get -u github.com/swaggo/files
 go get -u github.com/swaggo/gin-swagger
 go get -u github.com/sirupsen/logrus
+go get github.com/kubemq-io/kubemq-go
 ```
 ## API User
 v1/
@@ -190,3 +189,54 @@ get_albums_connect_mongodb_total 0
 swag init
 ```
 после этого перемести сгенерированную папку `docs` в `app/docs`
+
+## MQ
+
+Exchange: `sub-command`
+Routing key: `sub-routing-key`
+Payload: `{"action":"GetAllAlbums"}`
+
+Example:
+
+| Exchange            | Routing key      | Command      | Payload                                                                      |
+|---------------------|------------------|--------------|------------------------------------------------------------------------------|
+| sub-command         | sub-routing-key  | GetAllAlbums | `{"action":"GetAllAlbums"}`                                                  |
+| sub-command         | sub-routing-key  | GetDeleteAll | `{"action":"GetDeleteAll"}`                                                  |
+| sub-command         | sub-routing-key  | GetAlbumByID | `{"action":"GetAlbumByID","albumID":"f15473e7-98c4-41c2-8256-0b437447de0c"}` |
+| sub-command         | sub-routing-key  | DeleteUser   | `{"action":"DeleteUser","userID":"51809c30-3f9d-459e-9ce1-80a329bacd71"}`    |
+| sub-command         | sub-routing-key  | PostAlbums   | PostAlbums Payload:  --->                                                    |
+
+---> PostAlbums Payload:
+```
+{
+	"action": "PostAlbums",
+	"albums": {
+	  "album": [
+		{
+		  "Title": "Test Titl1e",
+		  "Artist": "Test Artist1",
+		  "Price": 44.102,
+		  "Code": "I0001",
+		  "Description": "Description Test1",
+		  "Completed": false
+		},
+		{
+		  "Title": "Test Titl1e",
+		  "Artist": "Test Artist1",
+		  "Price": 44.102,
+		  "Code": "I0001",
+		  "Description": "Description Test1",
+		  "Completed": false
+		},
+		{
+		  "Title": "Test Titl1e",
+		  "Artist": "Test Artist1",
+		  "Price": 44.102,
+		  "Code": "I0001",
+		  "Description": "Description Test1",
+		  "Completed": false
+		}
+	  ]
+	}
+ }
+```

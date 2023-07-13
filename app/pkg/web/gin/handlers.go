@@ -17,7 +17,17 @@ import (
 )
 
 type Handler interface {
+	GetAllAlbums(c *gin.Context)
+	PostAlbums(c *gin.Context)
+	GetAlbumByID(c *gin.Context)
+	GetDeleteAll(c *gin.Context)
+	GetDeleteByID(c *gin.Context)
 	Register(c *gin.Context)
+	Login(c *gin.Context)
+	DeleteUser(c *gin.Context)
+	Logout(c *gin.Context)
+	User(c *gin.Context)
+	checkAuthorization(c *gin.Context) (string, error)
 }
 
 // Ping godoc
@@ -43,7 +53,7 @@ func Ping(c *gin.Context) {
 // @Failure		401 {object} map[string]string "Unauthorized"
 // @Failure		500 {object} map[string]string "Internal Server Error"
 // @Router		/albums [get]
-func (a *App) GetAllAlbums(c *gin.Context) {
+func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {
@@ -52,11 +62,13 @@ func (a *App) GetAllAlbums(c *gin.Context) {
 	}
 	monitoring.GetAllAlbumsCounter.Inc()
 	albums, err := a.storage.Operations.GetAllIssues()
+
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
 		return
 	}
+
 	res, _ := json.Marshal(albums)
 	c.IndentedJSON(http.StatusOK, albums)
 	fmt.Println(string(res))
@@ -74,7 +86,7 @@ func (a *App) GetAllAlbums(c *gin.Context) {
 // @Failure     400 {object} map[string]string  "Bad Request"
 // @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums/:code [post]
-func (a *App) PostAlbums(c *gin.Context) {
+func (a *WebApp) PostAlbums(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {
@@ -131,7 +143,7 @@ func (a *App) PostAlbums(c *gin.Context) {
 // @Failure     404 {object} map[string]string  "Not Found"
 // @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums/:code [get]
-func (a *App) GetAlbumByID(c *gin.Context) {
+func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {
@@ -166,7 +178,7 @@ func (a *App) GetAlbumByID(c *gin.Context) {
 // @Failure     401 {object} map[string]string  "Unauthorized"
 // @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums [delete]
-func (a *App) GetDeleteAll(c *gin.Context) {
+func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {
@@ -198,7 +210,7 @@ func (a *App) GetDeleteAll(c *gin.Context) {
 // @Failure     404 {object} map[string]string  "Not Found"
 // @Failure     500 {object} map[string]string  "Internal Server Error"
 // @Router		/albums/:code [delete]
-func (a *App) GetDeleteByID(c *gin.Context) {
+func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
 	if err != nil {

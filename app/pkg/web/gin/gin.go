@@ -18,7 +18,7 @@ type AppInterface interface {
 	Run()
 }
 
-type App struct {
+type WebApp struct {
 	cfg        *config.Config
 	logger     *logging.Logger
 	router     *gin.Engine
@@ -26,7 +26,7 @@ type App struct {
 	storage    *model.DBConfig
 }
 
-func NewAppUseGin(config *config.Config, logger *logging.Logger) (AppInterface, error) {
+func NewAppUseGin(config *config.Config, logger *logging.Logger) (*WebApp, error) {
 	logger.Info("router initializing")
 
 	// Gin instance
@@ -48,7 +48,7 @@ func NewAppUseGin(config *config.Config, logger *logging.Logger) (AppInterface, 
 	ctx := context.Background()
 	go monitoring.PingStorage(ctx, storage.Operations)
 
-	return &App{
+	return &WebApp{
 		cfg:     config,
 		logger:  logger,
 		router:  router,
@@ -56,11 +56,11 @@ func NewAppUseGin(config *config.Config, logger *logging.Logger) (AppInterface, 
 	}, nil
 }
 
-func (a *App) Run() {
+func (a *WebApp) Run() {
 	a.startHTTP()
 }
 
-func (a *App) startHTTP() {
+func (a *WebApp) startHTTP() {
 
 	a.logger.Info("start HTTP")
 	// Routes
