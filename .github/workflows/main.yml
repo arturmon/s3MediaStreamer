@@ -39,7 +39,9 @@ jobs:
       run: go mod download
 
     - name: Test
-      run: go test -race app
+      working-directory: app/cmd/main
+      run: go test -race
 
     - name: Build
-      run: go build -v app
+      working-directory: app/cmd/main
+      run: go build -v
