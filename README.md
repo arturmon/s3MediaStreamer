@@ -23,11 +23,13 @@ docker run -d --name postgresql-server \
 -e POSTGRESQL_DATABASE=db_issue_album bitnami/postgresql:latest
 ```
 Use MQ
+GUi port `15672`
+
 ```
-docker run -d -p 8080:8080 \
--p 50000:50000 \
--p 9090:9090 \
-kubemq/kubemq-community:latest
+docker run -d --name some-rabbit \
+-e RABBITMQ_DEFAULT_USER=user \
+-e RABBITMQ_DEFAULT_PASS=password \
+rabbitmq:3-management
 ```
 
 Downloading dependencies
@@ -192,19 +194,19 @@ swag init
 
 ## MQ
 
-Exchange: `sub-command`
-Routing key: `sub-routing-key`
 Payload: `{"action":"GetAllAlbums"}`
 
 Example:
 
-| Exchange            | Routing key      | Command      | Payload                                                                      |
-|---------------------|------------------|--------------|------------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums | `{"action":"GetAllAlbums"}`                                                  |
-| sub-command         | sub-routing-key  | GetDeleteAll | `{"action":"GetDeleteAll"}`                                                  |
-| sub-command         | sub-routing-key  | GetAlbumByID | `{"action":"GetAlbumByID","albumID":"f15473e7-98c4-41c2-8256-0b437447de0c"}` |
-| sub-command         | sub-routing-key  | DeleteUser   | `{"action":"DeleteUser","userID":"51809c30-3f9d-459e-9ce1-80a329bacd71"}`    |
-| sub-command         | sub-routing-key  | PostAlbums   | PostAlbums Payload:  --->                                                    |
+| Exchange            | Routing key      | Command          | Payload                                                                |
+|---------------------|------------------|------------------|------------------------------------------------------------------------|
+| sub-command         | sub-routing-key  | GetAllAlbums     | `{"action":"GetAllAlbums"}`                                            |
+| sub-command         | sub-routing-key  | GetDeleteAll     | `{"action":"GetDeleteAll"}`                                            |
+| sub-command         | sub-routing-key  | GetAlbumByCode   | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                      |
+| sub-command         | sub-routing-key  | AddUser          | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1"}` |
+| sub-command         | sub-routing-key  | DeleteUser       | `{"action":"DeleteUser","userEmail":"a@a.com"}`                        |
+| sub-command         | sub-routing-key  | FindUserToEmail  | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                   |
+| sub-command         | sub-routing-key  | PostAlbums       | PostAlbums Payload:  --->                                              |
 
 ---> PostAlbums Payload:
 ```
@@ -221,22 +223,31 @@ Example:
 		  "Completed": false
 		},
 		{
-		  "Title": "Test Titl1e",
-		  "Artist": "Test Artist1",
-		  "Price": 44.102,
-		  "Code": "I0001",
-		  "Description": "Description Test1",
+		  "Title": "Test Titl2e",
+		  "Artist": "Test Artist2",
+		  "Price": 23423,
+		  "Code": "I0002",
+		  "Description": "Description Test2",
 		  "Completed": false
 		},
 		{
-		  "Title": "Test Titl1e",
-		  "Artist": "Test Artist1",
-		  "Price": 44.102,
-		  "Code": "I0001",
-		  "Description": "Description Test1",
+		  "Title": "Test Titl3e",
+		  "Artist": "Test Artist3",
+		  "Price": 44.3242,
+		  "Code": "I0003",
+		  "Description": "Description Test3",
 		  "Completed": false
 		}
 	  ]
 	}
  }
 ```
+example errors:
+
+types: `logs.error`
+
+| Payload                                                    | Errors                                                  |
+|------------------------------------------------------------|---------------------------------------------------------|
+| `{"action":"GetAlbumByCode","albumCode":"I0001fsdfsd"}`    | `{"error":"no album found with code: I0001fsdfsd"}`     |
+| `{"action":"FindUserToEmail","userEmail":"a@assss.com"}`   | `{"error":"user with email 'a@assss.com' not found"}`   |
+| `{"action":"DeleteUser","userEmail":"a@aasdas.com"}`       | `{"error":"user with email 'a@aasdas.com' not found"}`  |

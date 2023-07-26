@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
@@ -11,10 +12,11 @@ import (
 )
 
 type App struct {
-	cfg     *config.Config
-	logger  *logging.Logger
-	storage *model.DBConfig
-	Gin     *gin.WebApp
+	cfg        *config.Config
+	logger     *logging.Logger
+	storage    *model.DBConfig
+	Gin        *gin.WebApp
+	amqpClient *amqp.AMQPClient
 }
 
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
@@ -38,11 +40,20 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		return nil, err
 	}
 
+	// Create an AMQP client
+	amqpClient, err := amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
+	if err != nil {
+		logger.Error("Failed to initialize MQ:", err)
+		logger.Fatal(err)
+		return nil, err
+	}
+
 	return &App{
-		cfg:     cfg,
-		logger:  logger,
-		storage: storage,
-		Gin:     myGin,
+		cfg:        cfg,
+		logger:     logger,
+		storage:    storage,
+		Gin:        myGin,
+		amqpClient: amqpClient,
 	}, nil
 }
 
@@ -59,6 +70,10 @@ func (a *App) GetCfg() *config.Config {
 
 func (a *App) GetGin() (*gin.WebApp, error) {
 	return a.Gin, nil
+}
+
+func (a *App) GetAMQPClient() *amqp.AMQPClient {
+	return a.amqpClient
 }
 
 var _ interfaces.AppInterface = &App{}

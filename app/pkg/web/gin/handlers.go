@@ -98,6 +98,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	var newAlbum config.Album
 
 	newAlbum.ID = uuid.New()
+
 	newAlbum.CreatedAt = time.Now()
 	newAlbum.UpdatedAt = time.Now()
 
