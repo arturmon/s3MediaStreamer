@@ -41,7 +41,7 @@ jobs:
 
       - name: Test
         working-directory: ./app/cmd/main
-        run: go test -race
+        run: go test -race ./...
 
       - name: Build
         working-directory: ./app/cmd/main
@@ -72,5 +72,5 @@ jobs:
           context: .
           push: true
           tags: user/albums:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=local,src=./.docker-cache
+          cache-to: type=local,dest=./.docker-cache
