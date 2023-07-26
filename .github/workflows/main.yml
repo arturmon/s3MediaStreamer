@@ -65,6 +65,7 @@ jobs:
 
       - shell: bash
         run: |
+          mv app-1.19 albums
           ls -la .
 
       - name: Set up QEMU
@@ -82,5 +83,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
+          context: .
           push: true
           tags: user/albums:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
