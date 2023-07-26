@@ -39,7 +39,7 @@ jobs:
       run: go mod download
 
     - name: Test
-      run: go test -race .
+      run: go test -race app
 
     - name: Build
-      run: go build -v .
+      run: go build -v app
