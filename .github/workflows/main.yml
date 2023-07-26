@@ -40,11 +40,11 @@ jobs:
         run: go mod download
 
       - name: Test
-        working-directory: app/cmd/main
+        working-directory: ./app/cmd/main
         run: go test -race
 
       - name: Build
-        working-directory: app/cmd/main
+        working-directory: ./app/cmd/main
         run: go build -v
 
   docker:
