@@ -7,7 +7,6 @@ LABEL author="Artur Mudrykh"
 WORKDIR /app
 COPY albums .
 
-RUN ls -la .
 USER appuser
 CMD [ "/app/albums" ]
 
