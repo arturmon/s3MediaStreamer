@@ -67,6 +67,12 @@ jobs:
         run: |
           mv app-1.19 albums
 
+      - name: Checkov Dockerfile Scan
+        users: bridgecrewio/checkov-action@v12.1347.0
+        with:
+          directory: container-image-scannig
+          framework: dockerfile
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
