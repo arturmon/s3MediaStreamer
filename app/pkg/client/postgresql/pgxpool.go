@@ -126,9 +126,13 @@ func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 
 func (c *PgClient) DeleteUser(email string) error {
 	query := `DELETE FROM "user" WHERE email = $1`
-	_, err := c.Pool.Exec(context.TODO(), query, email)
+	result, err := c.Pool.Exec(context.TODO(), query, email)
 	if err != nil {
 		return err
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("user with email '%s' not found", email)
 	}
 	return nil
 }
