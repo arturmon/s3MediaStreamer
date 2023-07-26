@@ -136,7 +136,19 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 		Password: []byte(password),
 	}
 
-	err := c.storage.Operations.CreateUser(user)
+	// Check if user already exists
+	_, err := c.storage.Operations.FindUserToEmail(userEmail)
+	if err == nil {
+		// User with this email already exists
+		errMsg := fmt.Errorf("user %s with this email already exists", userEmail)
+		publishErr := c.publishMessage(context.Background(), TypePublisherError, errMsg.Error())
+		if publishErr != nil {
+			c.logger.Printf("Error publishing error message: %v", publishErr)
+		}
+		return errMsg
+	}
+
+	err = c.storage.Operations.CreateUser(user)
 	if err != nil {
 		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
 		if publishErr != nil {
