@@ -72,8 +72,6 @@ jobs:
         with:
           directory: container-image-scannig
           framework: dockerfile
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
