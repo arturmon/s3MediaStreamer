@@ -6,10 +6,10 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.0
 	github.com/google/uuid v1.3.0
-	github.com/ilyakaznacheev/cleanenv v1.3.0
+	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgx/v4 v4.17.2
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/streadway/amqp v1.1.0
@@ -22,7 +22,7 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
