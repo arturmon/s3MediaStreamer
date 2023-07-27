@@ -1,9 +1,0 @@
-version: 2
-updates:
-  - package-ecosystem: "gomod"
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "daily"
-on:
-  schedule:
-    - cron: "0 0 * * *" # Triggers daily at midnight (UTC)
