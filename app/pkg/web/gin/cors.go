@@ -1,14 +1,13 @@
 package gin
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		fmt.Println(c.Request.Header)
+		//fmt.Println(c.Request.Header)
 		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
