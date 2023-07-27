@@ -8,6 +8,11 @@ WORKDIR /app
 COPY albums .
 
 USER appuser
+
+# Add Health Check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -qO- http://localhost:10000/ || exit 1
+
 CMD [ "/app/albums" ]
 
 EXPOSE 10000
