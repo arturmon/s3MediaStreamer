@@ -33,7 +33,8 @@ jobs:
         id: go-cache
         with:
           path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          #key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
       - if: steps.go-cache.outputs.cache-hit != 'true'
@@ -62,7 +63,7 @@ jobs:
       - name: Checkov Dockerfile Scan
         uses: bridgecrewio/checkov-action@v12.2441.0
         with:
-          directory: container-image-scannig
+          directory: container-image-scanning
           framework: dockerfile
 
       - name: Upload SARIF file
