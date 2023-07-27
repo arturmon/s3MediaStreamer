@@ -59,6 +59,8 @@ jobs:
     needs: initial
     steps:
       - uses: actions/checkout@v3
+      - name: Test
+        working-directory: ./app/cmd/main
         run: ls -la .
 
       - name: Checkov Dockerfile Scan
