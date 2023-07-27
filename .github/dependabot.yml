@@ -6,8 +6,12 @@ updates:
       interval: "weekly"
       day: "sunday"
       time: "09:00"
+    reviewers:
+      - "arturmon"
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 99
+    reviewers:
+      - "arturmon"
