@@ -10,7 +10,7 @@ func (c *AMQPClient) GetChannel() *amqp.Channel {
 	return c.channel
 }
 
-func PreInit(amqpClient *AMQPClient, cfg *config.Config) error {
+func PostInit(amqpClient *AMQPClient, cfg *config.Config) error {
 	channel := amqpClient.channel
 	err := DeclareQueue(channel, cfg.MessageQueue.PubQueueName)
 	if err != nil {

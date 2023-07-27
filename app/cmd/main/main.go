@@ -36,7 +36,7 @@ func main() {
 		logger.Fatal("Failed to start consuming messages:", err)
 	}
 	// Call PreInit with the AMQPClient instance and the config
-	err = amqp.PreInit(app.GetAMQPClient(), cfg)
+	err = amqp.PostInit(app.GetAMQPClient(), cfg)
 	if err != nil {
 		logger.Fatal("Failed to pre-initialize AMQP:", err)
 	}
