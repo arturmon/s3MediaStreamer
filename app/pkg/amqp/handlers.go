@@ -81,7 +81,7 @@ func (c *AMQPClient) handleAddUser(data map[string]interface{}) {
 		c.logger.Printf("Error: %v", err)
 		return
 	}
-	c.logger.Printf("userEmail: %s; name: %s; password: %s", userEmail, name, password)
+	c.logger.Printf("userEmail: %s; name: %s", userEmail, name)
 }
 
 func (c *AMQPClient) handleDeleteUser(data map[string]interface{}) {
