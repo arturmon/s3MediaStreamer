@@ -50,26 +50,3 @@ func (c *AMQPClient) publishMessage(ctx context.Context, types string, data inte
 	c.logger.Printf("Published message with action %s: %s", types, body)
 	return nil
 }
-
-// Function to publish an "AddUser" action with the provided user details
-/*
-func (c *AMQPClient) PublishAddUser(ctx context.Context, userEmail, name, password string) error {
-	data := map[string]interface{}{
-		"action":    "AddUser",
-		"userEmail": userEmail,
-		"name":      name,
-		"password":  password,
-	}
-
-	// Use the publishMessage function to send the "AddUser" action
-	return c.publishMessage(ctx, "AddUser", data)
-}
-
-
-*/
-// TODO
-// Publish an "AddUser" action
-//err = amqpClient.PublishAddUser(context.Background(), "a@a.com", "a", "1")
-//if err != nil {
-//logger.Error("Failed to publish AddUser action:", err)
-//}

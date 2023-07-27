@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"skeleton-golange-application/app/internal/config"
 	"time"
 )
@@ -147,6 +148,13 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 		}
 		return errMsg
 	}
+
+	// Hash the user's password
+	hashedPassword, err := bcrypt.GenerateFromPassword(user.Password, 14)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
 
 	err = c.storage.Operations.CreateUser(user)
 	if err != nil {
