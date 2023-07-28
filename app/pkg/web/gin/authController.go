@@ -110,7 +110,7 @@ func (a *WebApp) Login(c *gin.Context) {
 
 	maxAge := 60 * 60 * 24
 	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
-	a.logger.Debug("jwt: %s", token)
+	a.logger.Debugf("jwt: %s", token)
 	monitoring.LoginSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
@@ -157,7 +157,7 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 func (a *WebApp) Logout(c *gin.Context) {
 	monitoring.LogoutAttemptCounter.Inc()
 	Expires := time.Now().Add(-time.Hour)
-	a.logger.Println("Expires: %s", Expires)
+	a.logger.Printf("Expires: %s", Expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
 	monitoring.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
