@@ -83,10 +83,5 @@ func (c *AMQPClient) Close() error {
 	if err := c.channel.Close(); err != nil {
 		return err
 	}
-
-	if err := c.conn.Close(); err != nil {
-		return err
-	}
-
 	return nil
 }
