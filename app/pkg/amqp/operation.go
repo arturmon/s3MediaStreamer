@@ -1,7 +1,6 @@
 package amqp
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
@@ -13,14 +12,14 @@ import (
 func (c *AMQPClient) amqpGetAlbumByCode(Code string) (*config.Album, error) {
 	album, err := c.storage.Operations.GetIssuesByCode(Code)
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
 		return nil, err
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, album)
+	err = c.publishMessage(TypePublisherMessage, album)
 	if err != nil {
 		c.logger.Printf("Error publishing message: %v", err)
 	}
@@ -66,7 +65,7 @@ func (c *AMQPClient) amqpPostAlbums(albumsData string) error {
 
 	err = c.storage.Operations.CreateMany(albumsList)
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
@@ -77,7 +76,7 @@ func (c *AMQPClient) amqpPostAlbums(albumsData string) error {
 		"info": "Albums have been successfully posted",
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, messageData)
+	err = c.publishMessage(TypePublisherMessage, messageData)
 	if err != nil {
 		c.logger.Println("Failed to publish PostAlbumsSuccess message:", err)
 	}
@@ -89,7 +88,7 @@ func (c *AMQPClient) amqpGetAllAlbums() ([]config.Album, error) {
 	albums, err := c.storage.Operations.GetAllIssues()
 	if err != nil {
 		if err != nil {
-			publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+			publishErr := c.publishMessage(TypePublisherError, err.Error())
 			if publishErr != nil {
 				c.logger.Printf("Error publishing error message: %v", publishErr)
 			}
@@ -97,7 +96,7 @@ func (c *AMQPClient) amqpGetAllAlbums() ([]config.Album, error) {
 		}
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, albums)
+	err = c.publishMessage(TypePublisherMessage, albums)
 	if err != nil {
 		c.logger.Printf("Error publishing message: %v", err)
 	}
@@ -108,7 +107,7 @@ func (c *AMQPClient) amqpGetAllAlbums() ([]config.Album, error) {
 func (c *AMQPClient) amqpGetDeleteAll() error {
 	err := c.storage.Operations.DeleteAll()
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
@@ -119,7 +118,7 @@ func (c *AMQPClient) amqpGetDeleteAll() error {
 		"info": "Delete all albums request",
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, messageData)
+	err = c.publishMessage(TypePublisherMessage, messageData)
 	if err != nil {
 		return err
 	}
@@ -142,7 +141,7 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 	if err == nil {
 		// User with this email already exists
 		errMsg := fmt.Errorf("user %s with this email already exists", userEmail)
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, errMsg.Error())
+		publishErr := c.publishMessage(TypePublisherError, errMsg.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
@@ -158,7 +157,7 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 
 	err = c.storage.Operations.CreateUser(user)
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
@@ -169,7 +168,7 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 		"info": "User has been successfully added",
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, messageData)
+	err = c.publishMessage(TypePublisherMessage, messageData)
 	if err != nil {
 		c.logger.Println("Failed to publish AddUserSuccess message:", err)
 	}
@@ -180,7 +179,7 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 func (c *AMQPClient) amqpDeleteUser(userEmail string) error {
 	err := c.storage.Operations.DeleteUser(userEmail)
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
@@ -193,7 +192,7 @@ func (c *AMQPClient) amqpDeleteUser(userEmail string) error {
 		"userEmail": userEmail,
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, messageData)
+	err = c.publishMessage(TypePublisherMessage, messageData)
 	if err != nil {
 		c.logger.Println("Failed to publish DeleteUserSuccess message:", err)
 	}
@@ -204,14 +203,14 @@ func (c *AMQPClient) amqpDeleteUser(userEmail string) error {
 func (c *AMQPClient) amqpFindUserToEmail(userEmail string) error {
 	info, err := c.storage.Operations.FindUserToEmail(userEmail)
 	if err != nil {
-		publishErr := c.publishMessage(context.Background(), TypePublisherError, err.Error())
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
 		return err
 	}
 
-	err = c.publishMessage(context.Background(), TypePublisherMessage, info)
+	err = c.publishMessage(TypePublisherMessage, info)
 	if err != nil {
 		c.logger.Println("Failed to publish AddUserSuccess message:", err)
 	}
