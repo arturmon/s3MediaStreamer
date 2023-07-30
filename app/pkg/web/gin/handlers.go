@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
-	log "github.com/sirupsen/logrus"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
 	"time"
@@ -192,7 +191,7 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 
 	err = a.storage.Operations.DeleteAll()
 	if err != nil {
-		log.Fatal(err)
+		a.logger.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error Delete all Album"})
 		return
 	}
