@@ -17,7 +17,7 @@ func (c *PgClient) CheckTablePresence(tables []interface{}) error {
 			return err
 		}
 		if isPresent {
-			//c.Logger.Info(fmt.Sprintf("Table %s exists", typeOfTable.Name()))
+			// c.Logger.Info(fmt.Sprintf("Table %s exists", typeOfTable.Name()))
 			fmt.Sprintf("Table %s exists", err)
 		} else {
 			err = c.CreateTable(table)
@@ -25,7 +25,7 @@ func (c *PgClient) CheckTablePresence(tables []interface{}) error {
 				fmt.Errorf("failed to create table %v", err)
 				return err
 			}
-			//c.Logger.Infof("Table %s created", typeOfTable.Name())
+			// c.Logger.Infof("Table %s created", typeOfTable.Name())
 			fmt.Sprintf("Table %s created", err)
 		}
 	}
