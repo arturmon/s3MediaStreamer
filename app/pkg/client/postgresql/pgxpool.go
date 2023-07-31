@@ -99,7 +99,7 @@ func (c *PgClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (c *PgClient) Close(ctx context.Context) error {
+func (c *PgClient) Close(_ context.Context) error {
 	if c.Pool != nil {
 		c.Pool.Close()
 		c.Pool = nil
