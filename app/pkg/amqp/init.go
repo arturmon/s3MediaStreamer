@@ -80,8 +80,5 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 }
 
 func (c *MessageClient) Close() error {
-	if err := c.channel.Close(); err != nil {
-		return err
-	}
-	return nil
+	return c.channel.Close()
 }
