@@ -13,5 +13,5 @@ type AppInterface interface {
 	GetLogger() *logging.Logger
 	GetCfg() *config.Config
 	GetGin() (*gin.WebApp, error)
-	GetAMQPClient() *amqp.AMQPClient
+	GetMessageClient() *amqp.MessageClient
 }

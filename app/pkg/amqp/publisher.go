@@ -6,7 +6,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (c *AMQPClient) publishMessage(types string, data interface{}) error {
+func (c *MessageClient) publishMessage(types string, data interface{}) error {
 	// Ensure the channel is open before publishing
 	if c.channel == nil {
 		return fmt.Errorf("AMQP channel is not open")

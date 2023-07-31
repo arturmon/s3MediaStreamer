@@ -9,7 +9,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 )
 
-type AMQPClient struct {
+type MessageClient struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   amqp.Queue
@@ -18,7 +18,7 @@ type AMQPClient struct {
 	storage *model.DBConfig
 }
 
-func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logger) (*AMQPClient, error) {
+func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logger) (*MessageClient, error) {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d/",
 		config.MessageQueue.User,
 		config.MessageQueue.Pass,
@@ -50,7 +50,7 @@ func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logg
 		return nil, err
 	}
 
-	return &AMQPClient{
+	return &MessageClient{
 		conn:    conn,
 		channel: channel,
 		queue:   queue,
@@ -60,7 +60,7 @@ func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logg
 	}, nil
 }
 
-func (c *AMQPClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
+func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
 		"",                // consumer
@@ -79,7 +79,7 @@ func (c *AMQPClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) 
 	return messages, nil
 }
 
-func (c *AMQPClient) Close() error {
+func (c *MessageClient) Close() error {
 	if err := c.channel.Close(); err != nil {
 		return err
 	}

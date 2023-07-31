@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (c *AMQPClient) amqpGetAlbumByCode(Code string) (*config.Album, error) {
+func (c *MessageClient) amqpGetAlbumByCode(Code string) (*config.Album, error) {
 	album, err := c.storage.Operations.GetIssuesByCode(Code)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
@@ -27,7 +27,7 @@ func (c *AMQPClient) amqpGetAlbumByCode(Code string) (*config.Album, error) {
 	return &album, nil
 }
 
-func (c *AMQPClient) amqpPostAlbums(albumsData string) error {
+func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(albumsData), &data)
 	if err != nil {
@@ -84,7 +84,7 @@ func (c *AMQPClient) amqpPostAlbums(albumsData string) error {
 	return nil
 }
 
-func (c *AMQPClient) amqpGetAllAlbums() ([]config.Album, error) {
+func (c *MessageClient) amqpGetAllAlbums() ([]config.Album, error) {
 	albums, err := c.storage.Operations.GetAllIssues()
 	if err != nil {
 		if err != nil {
@@ -104,7 +104,7 @@ func (c *AMQPClient) amqpGetAllAlbums() ([]config.Album, error) {
 	return albums, nil
 }
 
-func (c *AMQPClient) amqpGetDeleteAll() error {
+func (c *MessageClient) amqpGetDeleteAll() error {
 	err := c.storage.Operations.DeleteAll()
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
@@ -128,7 +128,7 @@ func (c *AMQPClient) amqpGetDeleteAll() error {
 	return nil
 }
 
-func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
+func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
 	user := config.User{
 		Id:       uuid.New(),
 		Name:     name,
@@ -176,7 +176,7 @@ func (c *AMQPClient) amqpAddUser(userEmail, name, password string) error {
 	return nil
 }
 
-func (c *AMQPClient) amqpDeleteUser(userEmail string) error {
+func (c *MessageClient) amqpDeleteUser(userEmail string) error {
 	err := c.storage.Operations.DeleteUser(userEmail)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
@@ -200,7 +200,7 @@ func (c *AMQPClient) amqpDeleteUser(userEmail string) error {
 	return nil
 }
 
-func (c *AMQPClient) amqpFindUserToEmail(userEmail string) error {
+func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 	info, err := c.storage.Operations.FindUserToEmail(userEmail)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())

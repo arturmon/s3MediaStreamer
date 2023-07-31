@@ -6,11 +6,11 @@ import (
 )
 
 // Getter method for the channel
-func (c *AMQPClient) GetChannel() *amqp.Channel {
+func (c *MessageClient) GetChannel() *amqp.Channel {
 	return c.channel
 }
 
-func PostInit(amqpClient *AMQPClient, cfg *config.Config) error {
+func PostInit(amqpClient *MessageClient, cfg *config.Config) error {
 	channel := amqpClient.channel
 	err := DeclareQueue(channel, cfg.MessageQueue.PubQueueName)
 	if err != nil {
