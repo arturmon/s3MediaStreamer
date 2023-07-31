@@ -30,7 +30,12 @@ type PostgresOperations interface {
 }
 
 type PgClient struct {
-	Pool *pgxpool.Pool
+	Pool             *pgxpool.Pool
+	ConnectionString string
+}
+
+func (c *PgClient) GetConnectionString() string {
+	return c.ConnectionString
 }
 
 func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {

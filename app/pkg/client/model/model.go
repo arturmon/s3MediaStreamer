@@ -147,11 +147,10 @@ func GetMongoClient(cfg *StorageConfig) (*mongo.Client, error) {
 
 func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg *StorageConfig) (pool *pgxpool.Pool, err error) {
 	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s",
+		"postgresql://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.Username, cfg.Password,
 		cfg.Host, cfg.Port, cfg.Database,
 	)
-
 	err = postgresql.DoWithAttempts(func() error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -167,12 +166,11 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 			return err
 		}
 
-		client := &postgresql.PgClient{Pool: pool}
-
-		tables := []interface{}{config.User{}, config.Album{}}
-		err = client.CheckTablePresence(tables)
+		// Run database migrations
+		log.Info("migration initializing")
+		err = postgresql.RunMigrations(dsn)
 		if err != nil {
-			return fmt.Errorf("failed to check table presence: %v", err)
+			return fmt.Errorf("failed to run migrations: %v", err)
 		}
 
 		return nil

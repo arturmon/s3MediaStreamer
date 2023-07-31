@@ -1,3 +1,7 @@
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/arturmon/skeleton-golange-application/main.yaml?branch=master)](https://github.com/arturmon/skeleton-golange-application/actions/workflows/main.yaml?query=branch%3Amain)
+![Supported Go Versions](https://img.shields.io/badge/Go-1.19%2C%201.20-lightgrey.svg)
+[![Coverage Status](https://img.shields.io/coveralls/github/arturmon/skeleton-golange-application/main.svg)](https://coveralls.io/github/golang-migrate/migrate?branch=main)
+
 ## Generate specification Swager
 ```
 cd /mnt/c/Users/Arturmon/eclipse-workspace/src/skeleton-golange-application
