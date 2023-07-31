@@ -167,7 +167,6 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 		}
 
 		// Run database migrations
-		log.Info("migration initializing")
 		err = postgresql.RunMigrations(dsn)
 		if err != nil {
 			return fmt.Errorf("failed to run migrations: %v", err)

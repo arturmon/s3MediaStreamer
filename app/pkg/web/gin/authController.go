@@ -201,6 +201,9 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	claims := token.Claims.(*jwt.StandardClaims)
+	claims, ok := token.Claims.(*jwt.StandardClaims)
+	if !ok {
+		return "", err
+	}
 	return claims.Issuer, nil
 }

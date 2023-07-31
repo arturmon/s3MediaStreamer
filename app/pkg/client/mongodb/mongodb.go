@@ -3,13 +3,11 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"skeleton-golange-application/app/internal/config"
-	"sync"
 )
 
 type MongoCollectionQuery interface {
@@ -35,7 +33,7 @@ type MongoClient struct {
 	Cfg    *config.Config
 }
 
-var mongoOnce sync.Once
+//var mongoOnce sync.Once
 
 func (c *MongoClient) Connect() error {
 	err := c.Client.Connect(context.TODO())
@@ -45,7 +43,7 @@ func (c *MongoClient) Connect() error {
 	return nil
 }
 func (c *MongoClient) DeleteUser(email string) error {
-	return fmt.Errorf("DeleteUser is not supported for MongoDB")
+	return fmt.Errorf("DeleteUser is not supported for MongoDB, '%s' not deleted", email)
 }
 
 func (c *MongoClient) Ping(ctx context.Context) error {
@@ -78,7 +76,7 @@ func (c *MongoClient) FindCollections(useCollections string) (*mongo.Collection,
 }
 
 func (c *MongoClient) CreateIssue(task config.Album) error {
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
@@ -94,7 +92,7 @@ func (c *MongoClient) CreateMany(list []config.Album) error {
 	for i, v := range list {
 		insertableList[i] = v
 	}
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
@@ -108,7 +106,7 @@ func (c *MongoClient) CreateMany(list []config.Album) error {
 func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
 	result := config.Album{}
 	filter := bson.D{primitive.E{Key: "code", Value: code}}
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return result, err
 	}
@@ -123,7 +121,7 @@ func (c *MongoClient) GetAllIssues() ([]config.Album, error) {
 	filter := bson.D{{}}
 	var issues []config.Album
 
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return issues, err
 	}
@@ -148,7 +146,7 @@ func (c *MongoClient) GetAllIssues() ([]config.Album, error) {
 
 func (c *MongoClient) DeleteOne(code string) error {
 	filter := bson.D{primitive.E{Key: "code", Value: code}}
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
@@ -161,7 +159,7 @@ func (c *MongoClient) DeleteOne(code string) error {
 
 func (c *MongoClient) DeleteAll() error {
 	selector := bson.D{{}}
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
@@ -184,7 +182,7 @@ func PrintList(issues []config.Album) {
 }
 
 func (c *MongoClient) CreateUser(user config.User) error {
-	collection, err := c.FindCollections(config.COLLECTION_USER)
+	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return err
 	}
@@ -213,7 +211,7 @@ func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 	result := config.User{}
 	// Define filter query for fetching a specific document from the collection
 	filter := bson.D{primitive.E{Key: "email", Value: email}}
-	collection, err := c.FindCollections(config.COLLECTION_USER)
+	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return result, err
 	}
@@ -230,7 +228,7 @@ func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 
 func (c *MongoClient) MarkCompleted(code string) error {
 	// Получение коллекции "album" из базы данных
-	collection, err := c.FindCollections(config.COLLECTION_ALBUM)
+	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
@@ -256,25 +254,5 @@ func (c *MongoClient) MarkCompleted(code string) error {
 		return mongo.ErrNoDocuments
 	}
 
-	return nil
-}
-
-func User(cfg *config.Config, client *mongo.Client, claims *jwt.StandardClaims) error {
-
-	//database.DB.Where("id = ?", claims.Issuer).First(&user)
-	// TODO Создать функцию поискать пользователя
-	//_, err := mongodb.GetIssuesByUser(a.cfg, a.mongoClient, user.Code)
-	/*
-			if err == mongo.ErrNoDocuments {
-				// TODO Создать функцию создания пользователя
-				mongodb.CreateUser(a.cfg, a.mongoClient, user)
-				c.IndentedJSON(http.StatusCreated, user)
-			}
-
-
-		//return c.JSON(user)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Not Create User"})
-
-	*/
 	return nil
 }
