@@ -41,7 +41,7 @@ jobs:
         run: go mod download
 
       - name: Test
-        run: go test -race ./...
+        run: go test -v -coverprofile=profile.cov -race ./...
 
       - name: Send goveralls coverage
         uses: shogo82148/actions-goveralls@v1
