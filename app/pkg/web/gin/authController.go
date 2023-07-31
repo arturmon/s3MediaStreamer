@@ -25,7 +25,7 @@ const SecretKey = "secret"
 // @Failure     500 {object} map[string]string "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
-	//prometheuse
+	// prometheuse
 	monitoring.RegisterAttemptCounter.Inc()
 
 	var data map[string]string
@@ -73,7 +73,7 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Failure     500 {object} map[string]string "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
-	//prometheuse
+	// prometheuse
 	monitoring.LoginAttemptCounter.Inc()
 
 	var data map[string]string
@@ -201,6 +201,9 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	claims := token.Claims.(*jwt.StandardClaims)
+	claims, ok := token.Claims.(*jwt.StandardClaims)
+	if !ok {
+		return "", err
+	}
 	return claims.Issuer, nil
 }

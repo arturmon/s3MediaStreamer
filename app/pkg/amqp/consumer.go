@@ -6,7 +6,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func (c *AMQPClient) consumeMessages(ctx context.Context, messages <-chan amqp.Delivery) {
+func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amqp.Delivery) {
 	for {
 		select {
 		case <-ctx.Done():

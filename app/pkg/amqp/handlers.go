@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func (c *AMQPClient) handlePostAlbums(data map[string]interface{}) {
+func (c *MessageClient) handlePostAlbums(data map[string]interface{}) {
 	albumsData, ok := data["albums"].(map[string]interface{})
 	if !ok {
 		c.logger.Println("Invalid albums data")
@@ -26,7 +26,7 @@ func (c *AMQPClient) handlePostAlbums(data map[string]interface{}) {
 	c.logger.Println("Successfully handled PostAlbums")
 }
 
-func (c *AMQPClient) handleGetAllAlbums() {
+func (c *MessageClient) handleGetAllAlbums() {
 	albums, err := c.amqpGetAllAlbums()
 	if err != nil {
 		c.logger.Printf("Error: %v", err)
@@ -35,7 +35,7 @@ func (c *AMQPClient) handleGetAllAlbums() {
 	c.logger.Printf("Albums: %s", albums)
 }
 
-func (c *AMQPClient) handleGetDeleteAll() {
+func (c *MessageClient) handleGetDeleteAll() {
 	err := c.amqpGetDeleteAll()
 	if err != nil {
 		c.logger.Printf("Error: %v", err)
@@ -43,7 +43,7 @@ func (c *AMQPClient) handleGetDeleteAll() {
 	}
 }
 
-func (c *AMQPClient) handleGetAlbumByCode(data map[string]interface{}) {
+func (c *MessageClient) handleGetAlbumByCode(data map[string]interface{}) {
 	albumCode, ok := data["albumCode"].(string)
 	if !ok {
 		c.logger.Println("Invalid albumCode")
@@ -59,7 +59,7 @@ func (c *AMQPClient) handleGetAlbumByCode(data map[string]interface{}) {
 	c.logger.Printf("Album: %+v", album)
 }
 
-func (c *AMQPClient) handleAddUser(data map[string]interface{}) {
+func (c *MessageClient) handleAddUser(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
 		c.logger.Println("Invalid userEmail")
@@ -84,7 +84,7 @@ func (c *AMQPClient) handleAddUser(data map[string]interface{}) {
 	c.logger.Printf("userEmail: %s; name: %s", userEmail, name)
 }
 
-func (c *AMQPClient) handleDeleteUser(data map[string]interface{}) {
+func (c *MessageClient) handleDeleteUser(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
 		c.logger.Println("Invalid userEmail")
@@ -99,7 +99,7 @@ func (c *AMQPClient) handleDeleteUser(data map[string]interface{}) {
 	c.logger.Printf("userEmail: %s", userEmail)
 }
 
-func (c *AMQPClient) handleFindUserToEmail(data map[string]interface{}) {
+func (c *MessageClient) handleFindUserToEmail(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
 		c.logger.Println("Invalid userEmail")

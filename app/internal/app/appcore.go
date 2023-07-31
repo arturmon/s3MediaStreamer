@@ -16,7 +16,7 @@ type App struct {
 	logger     *logging.Logger
 	storage    *model.DBConfig
 	Gin        *gin.WebApp
-	amqpClient *amqp.AMQPClient
+	amqpClient *amqp.MessageClient
 }
 
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
@@ -72,7 +72,7 @@ func (a *App) GetGin() (*gin.WebApp, error) {
 	return a.Gin, nil
 }
 
-func (a *App) GetAMQPClient() *amqp.AMQPClient {
+func (a *App) GetMessageClient() *amqp.MessageClient {
 	return a.amqpClient
 }
 

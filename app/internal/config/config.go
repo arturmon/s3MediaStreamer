@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
-	_ "github.com/joho/godotenv/autoload"
 	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -32,8 +31,6 @@ type User struct {
 }
 
 type Config struct {
-	//IsDebug bool `env:"IS_DEBUG" env-default:"false"`
-	//IsDevelopment bool `env:"IS_DEV" env-default:"false"`
 	Listen struct {
 		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
 		Port   string `env:"PORT" env-default:"10000"`

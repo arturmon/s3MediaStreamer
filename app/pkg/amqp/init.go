@@ -9,7 +9,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 )
 
-type AMQPClient struct {
+type MessageClient struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   amqp.Queue
@@ -18,12 +18,12 @@ type AMQPClient struct {
 	storage *model.DBConfig
 }
 
-func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logger) (*AMQPClient, error) {
+func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger) (*MessageClient, error) {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d/",
-		config.MessageQueue.User,
-		config.MessageQueue.Pass,
-		config.MessageQueue.Broker,
-		config.MessageQueue.BrokerPort))
+		cfg.MessageQueue.User,
+		cfg.MessageQueue.Pass,
+		cfg.MessageQueue.Broker,
+		cfg.MessageQueue.BrokerPort))
 	if err != nil {
 		return nil, err
 	}
@@ -45,22 +45,22 @@ func NewAMQPClient(queueName string, config *config.Config, logger *logging.Logg
 		return nil, err
 	}
 
-	storage, err := model.NewDBConfig(config)
+	storage, err := model.NewDBConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return &AMQPClient{
+	return &MessageClient{
 		conn:    conn,
 		channel: channel,
 		queue:   queue,
-		cfg:     config,
+		cfg:     cfg,
 		logger:  logger,
 		storage: storage,
 	}, nil
 }
 
-func (c *AMQPClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
+func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
 		"",                // consumer
@@ -79,9 +79,6 @@ func (c *AMQPClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) 
 	return messages, nil
 }
 
-func (c *AMQPClient) Close() error {
-	if err := c.channel.Close(); err != nil {
-		return err
-	}
-	return nil
+func (c *MessageClient) Close() error {
+	return c.channel.Close()
 }

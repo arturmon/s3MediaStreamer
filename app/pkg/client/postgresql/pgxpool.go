@@ -30,7 +30,12 @@ type PostgresOperations interface {
 }
 
 type PgClient struct {
-	Pool *pgxpool.Pool
+	Pool             *pgxpool.Pool
+	ConnectionString string
+}
+
+func (c *PgClient) GetConnectionString() string {
+	return c.ConnectionString
 }
 
 func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {
@@ -38,7 +43,7 @@ func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {
 }
 
 func (c *PgClient) FindCollections(name string) (*mongo.Collection, error) {
-	return nil, fmt.Errorf("FindCollections is not supported for PostgreSQL")
+	return nil, fmt.Errorf("FindCollections is not supported for PostgreSQL, %s not finded", name)
 }
 
 func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error {
@@ -94,7 +99,7 @@ func (c *PgClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (c *PgClient) Close(ctx context.Context) error {
+func (c *PgClient) Close(_ context.Context) error {
 	if c.Pool != nil {
 		c.Pool.Close()
 		c.Pool = nil
