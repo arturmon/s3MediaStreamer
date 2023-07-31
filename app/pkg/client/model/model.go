@@ -54,18 +54,18 @@ type DBOperations interface {
 	postgresql.PostgresOperations
 }
 
-func NewDBConfig(config *config.Config) (*DBConfig, error) {
-	switch DBType(config.Storage.Type) {
+func NewDBConfig(cfg *config.Config) (*DBConfig, error) {
+	switch DBType(cfg.Storage.Type) {
 	case MongoDBType:
 		client, err := GetMongoClient(&StorageConfig{
-			Type:             config.Storage.Type,
-			Host:             config.Storage.Host,
-			Port:             config.Storage.Port,
-			Username:         config.Storage.Username,
-			Password:         config.Storage.Password,
-			Database:         config.Storage.Database,
-			Collections:      config.Storage.Collections,
-			CollectionsUsers: config.Storage.CollectionsUsers,
+			Type:             cfg.Storage.Type,
+			Host:             cfg.Storage.Host,
+			Port:             cfg.Storage.Port,
+			Username:         cfg.Storage.Username,
+			Password:         cfg.Storage.Password,
+			Database:         cfg.Storage.Database,
+			Collections:      cfg.Storage.Collections,
+			CollectionsUsers: cfg.Storage.CollectionsUsers,
 		})
 		if err != nil {
 			return nil, err
@@ -73,17 +73,17 @@ func NewDBConfig(config *config.Config) (*DBConfig, error) {
 		return &DBConfig{
 			&mongodb.MongoClient{
 				Client: client,
-				Cfg:    config,
+				Cfg:    cfg,
 			},
 		}, nil
 	case PgSQLType:
 		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, &StorageConfig{
-			Type:     config.Storage.Type,
-			Host:     config.Storage.Host,
-			Port:     config.Storage.Port,
-			Username: config.Storage.Username,
-			Password: config.Storage.Password,
-			Database: config.Storage.Database,
+			Type:     cfg.Storage.Type,
+			Host:     cfg.Storage.Host,
+			Port:     cfg.Storage.Port,
+			Username: cfg.Storage.Username,
+			Password: cfg.Storage.Password,
+			Database: cfg.Storage.Database,
 		})
 		if err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func NewDBConfig(config *config.Config) (*DBConfig, error) {
 			},
 		}, nil
 	default:
-		return nil, fmt.Errorf("unsupported database type: %s", config.Storage.Type)
+		return nil, fmt.Errorf("unsupported database type: %s", cfg.Storage.Type)
 	}
 }
 
