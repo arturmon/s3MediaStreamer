@@ -20,7 +20,7 @@ Content-Type: application/json
   "Completed": false
 }
 ###
-DELETE http://localhost:10000/v1/albums/delete/222
+DELETE http://localhost:10000/v1/albums/delete/I0001
 Content-Type: application/json
 ###
 DELETE http://localhost:10000/v1/albums/deleteAll
