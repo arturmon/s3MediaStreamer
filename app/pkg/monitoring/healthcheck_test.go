@@ -23,7 +23,7 @@ func TestHealthGET(t *testing.T) {
 	r.GET("/health", mockHealthGET)
 
 	// Create a request to the "/health" endpoint
-	req, _ := http.NewRequest("GET", "/health", nil)
+	req, _ := http.NewRequest("GET", "/health", http.NoBody) // Use http.NoBody instead of nil
 
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
