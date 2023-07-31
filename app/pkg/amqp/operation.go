@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func (c *MessageClient) amqpGetAlbumByCode(Code string) (*config.Album, error) {
-	album, err := c.storage.Operations.GetIssuesByCode(Code)
+func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
+	album, err := c.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
