@@ -33,7 +33,7 @@ type MongoClient struct {
 	Cfg    *config.Config
 }
 
-//var mongoOnce sync.Once
+// var mongoOnce sync.Once
 
 func (c *MongoClient) Connect() error {
 	err := c.Client.Connect(context.TODO())
