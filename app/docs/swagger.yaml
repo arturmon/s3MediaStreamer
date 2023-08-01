@@ -61,6 +61,58 @@ info:
   title: Sceleton Golang Application API
   version: "1.0"
 paths:
+  /album/update:
+    post:
+      consumes:
+      - application/json
+      description: updates an existing album with new data based on the ID parameter
+        sent by the client.
+      parameters:
+      - description: Code
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Updated album details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/config.Album'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/config.Album'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Updates an existing album with new data.
+      tags:
+      - album-controller
   /albums:
     delete:
       consumes:
@@ -202,15 +254,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: updates an existing album with new data based on the ID parameter
-        sent by the client.
+      description: adds an album from JSON received in the request body.
       parameters:
       - description: Code
         in: path
         name: code
         required: true
         type: string
-      - description: Updated album details
+      - description: Album details
         in: body
         name: request
         required: true
@@ -219,24 +270,12 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/config.Album'
         "400":
           description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -247,7 +286,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Updates an existing album with new data.
+      summary: Adds an album from JSON.
       tags:
       - album-controller
   /health:
