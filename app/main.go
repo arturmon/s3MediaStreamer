@@ -11,7 +11,7 @@ import (
 )
 
 // @title			Sceleton Golang Application API
-// @version		1.0
+// @version		0.0.1
 // @description	This is a sample server Petstore server.
 // @contact.name API Support
 // @contact.url http://www.swagger.io/support
@@ -20,7 +20,13 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @schemes http
+// @host      localhost:10000
 // @BasePath	/v1
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
+// @securityDefinitions.basic	BasicAuth
+
 func main() {
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)

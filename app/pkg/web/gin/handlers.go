@@ -33,7 +33,7 @@ type Handler interface {
 // Ping godoc
 // @Summary Application liveness check function
 // @Description Check if the application server is running
-// @Tags health-check
+// @Tags health-controller
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{} "OK"
@@ -50,8 +50,9 @@ func Ping(c *gin.Context) {
 // @Accept		*/*
 // @Produce		json
 // @Success		200 {array} config.Album	"OK"
-// @Failure		401 {object} map[string]string "Unauthorized"
-// @Failure		500 {object} map[string]string "Internal Server Error"
+// @Failure		401 {object} ErrorResponse "Unauthorized"
+// @Failure		500 {object} ErrorResponse "Internal Server Error"
+// @Security    ApiKeyAuth
 // @Router		/albums [get]
 func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	// Check if user is authorized
@@ -80,12 +81,12 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		json
 // @Produce		json
-// @Param		code 	path string		true "Code"
 // @Param		request body config.Album true "Album details"
 // @Success     201 {object} config.Album  "Created"
-// @Failure     400 {object} map[string]string  "Bad Request"
-// @Failure     500 {object} map[string]string  "Internal Server Error"
-// @Router		/albums/:code [post]
+// @Failure     400 {object} ErrorResponse  "Bad Request"
+// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Security    ApiKeyAuth
+// @Router		/album [post]
 func (a *WebApp) PostAlbums(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -140,10 +141,11 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
 // @Success     200 {object} config.Album  "OK"
-// @Failure     401 {object} map[string]string  "Unauthorized"
-// @Failure     404 {object} map[string]string  "Not Found"
-// @Failure     500 {object} map[string]string  "Internal Server Error"
-// @Router		/albums/:code [get]
+// @Failure     401 {object} ErrorResponse  "Unauthorized"
+// @Failure     404 {object} ErrorResponse  "Not Found"
+// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Security    ApiKeyAuth
+// @Router		/albums/{code} [get]
 func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -175,10 +177,11 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success     204 {object}  map[string]string   "No Content"
-// @Failure     401 {object} map[string]string  "Unauthorized"
-// @Failure     500 {object} map[string]string  "Internal Server Error"
-// @Router		/albums [delete]
+// @Success     204 {object}  ErrorResponse   "No Content"
+// @Failure     401 {object} ErrorResponse  "Unauthorized"
+// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Security    ApiKeyAuth
+// @Router		/albums/deleteAll [delete]
 func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -206,11 +209,12 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 // @Accept		*/*
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
-// @Success     204 {object}  map[string]string   "No Content"
-// @Failure     401 {object} map[string]string  "Unauthorized"
-// @Failure     404 {object} map[string]string  "Not Found"
-// @Failure     500 {object} map[string]string  "Internal Server Error"
-// @Router		/albums/:code [delete]
+// @Success     204 {object}  ErrorResponse   "No Content"
+// @Failure     401 {object} ErrorResponse  "Unauthorized"
+// @Failure     404 {object} ErrorResponse  "Not Found"
+// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Security    ApiKeyAuth
+// @Router		/albums/delete/{code} [delete]
 func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
@@ -250,13 +254,13 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Tags                album-controller
 // @Accept                json
 // @Produce                json
-// @Param                code         path string                true "Code"
 // @Param                request body config.Album true "Updated album details"
 // @Success     200 {object} config.Album  "OK"
-// @Failure     400 {object} map[string]string  "Bad Request"
-// @Failure     401 {object} map[string]string  "Unauthorized"
-// @Failure     404 {object} map[string]string  "Not Found"
-// @Failure     500 {object} map[string]string  "Internal Server Error"
+// @Failure     400 {object} ErrorResponse  "Bad Request"
+// @Failure     401 {object} ErrorResponse  "Unauthorized"
+// @Failure     404 {object} ErrorResponse  "Not Found"
+// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Security    ApiKeyAuth
 // @Router                /album/update [post]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Check if user is authorized

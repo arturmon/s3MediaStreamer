@@ -12,22 +12,25 @@ var AppHealth = false
 
 // Album album represents data about a record album.
 type Album struct {
-	ID          uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid"`
-	CreatedAt   time.Time `json:"created_at" bson:"created_at" pg:"default:now()"`
-	UpdatedAt   time.Time `json:"updated_at" bson:"updated_at" pg:"default:now()"`
-	Title       string    `json:"title" bson:"title"`
-	Artist      string    `json:"artist" bson:"artist"`
-	Price       float64   `json:"price" bson:"price"`
-	Code        string    `json:"code" bson:"code"`
-	Description string    `json:"description" bson:"description"`
-	Completed   bool      `json:"completed" bson:"completed"`
+	ID          uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
+	CreatedAt   time.Time `json:"created_at" bson:"created_at" pg:"default:now()" swaggerignore:"true"`
+	UpdatedAt   time.Time `json:"updated_at" bson:"updated_at" pg:"default:now()" swaggerignore:"true"`
+	Title       string    `json:"title" bson:"title" example:"Title name"`
+	Artist      string    `json:"artist" bson:"artist" example:"Artist name"`
+	Price       float64   `json:"price" bson:"price" example:"111.111"`
+	Code        string    `json:"code" bson:"code" example:"I001"`
+	Description string    `json:"description" bson:"description" example:"A short description of the application"`
+	Completed   bool      `json:"completed" bson:"completed" example:"false"`
 }
 
+// User model info
+// @Description User account information
+// @Description with: user _id, name, email, password
 type User struct {
-	Id       uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid"`
-	Name     string    `json:"name" bson:"name"`
-	Email    string    `json:"email" bson:"email"`
-	Password []byte    `json:"-" bson:"password"`
+	Id       uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
+	Name     string    `json:"name" bson:"name" example:"Artur"`
+	Email    string    `json:"email" bson:"email" example:"aaaa@aaaa.com"`
+	Password []byte    `json:"-" bson:"password"  example:"1111"`
 }
 
 type Config struct {

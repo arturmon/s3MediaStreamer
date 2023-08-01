@@ -24,8 +24,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/album": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "adds an album from JSON received in the request body.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-controller"
+                ],
+                "summary": "Adds an album from JSON.",
+                "parameters": [
+                    {
+                        "description": "Album details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/config.Album"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/config.Album"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/album/update": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "updates an existing album with new data based on the ID parameter sent by the client.",
                 "consumes": [
                     "application/json"
@@ -38,13 +94,6 @@ const docTemplate = `{
                 ],
                 "summary": "Updates an existing album with new data.",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "Updated album details",
                         "name": "request",
@@ -65,37 +114,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
@@ -103,6 +140,11 @@ const docTemplate = `{
         },
         "/albums": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "responds with the list of all albums as JSON.",
                 "consumes": [
                     "*/*"
@@ -127,24 +169,80 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/albums/delete/{code}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "locates the album whose ID value matches the id parameter and deletes it.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "album-controller"
+                ],
+                "summary": "Deletes album whose ID value matches the code.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Code album",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/albums/deleteAll": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete ALL.",
                 "consumes": [
                     "*/*"
@@ -160,35 +258,31 @@ const docTemplate = `{
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/albums/:code": {
+        "/albums/{code}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.",
                 "consumes": [
                     "*/*"
@@ -219,145 +313,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "adds an album from JSON received in the request body.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "album-controller"
-                ],
-                "summary": "Adds an album from JSON.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Album details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/config.Album"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/config.Album"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "locates the album whose ID value matches the id parameter and deletes it.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "album-controller"
-                ],
-                "summary": "Deletes album whose ID value matches the code.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Code album",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
@@ -402,7 +370,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health-check"
+                    "health-controller"
                 ],
                 "summary": "Application liveness check function",
                 "responses": {
@@ -474,7 +442,7 @@ const docTemplate = `{
                 ],
                 "description": "Deletes the authenticated user.",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -487,28 +455,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Success - User deleted",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
@@ -518,7 +477,7 @@ const docTemplate = `{
             "post": {
                 "description": "Authenticates a user with provided email and password.",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -542,37 +501,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Incorrect Password",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
@@ -587,7 +534,7 @@ const docTemplate = `{
                 ],
                 "description": "Clears the authentication cookie, logging out the user.",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -600,10 +547,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "type": "string"
                         }
                     }
                 }
@@ -613,7 +557,7 @@ const docTemplate = `{
             "post": {
                 "description": "Register a new user with provided name, email, and password.",
                 "consumes": [
-                    "*/*"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -643,19 +587,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request - User with this email exists",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
@@ -666,46 +604,43 @@ const docTemplate = `{
         "config.Album": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "artist": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Artist name"
                 },
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "I001"
                 },
                 "completed": {
-                    "type": "boolean"
-                },
-                "created_at": {
-                    "type": "string"
+                    "type": "boolean",
+                    "example": false
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "A short description of the application"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 111.111
                 },
                 "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Title name"
                 }
             }
         },
         "config.User": {
+            "description": "User account information with: user _id, name, email, password",
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "aaaa@aaaa.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Artur"
                 }
             }
         },
@@ -739,15 +674,24 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    },
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "",
+	Version:          "0.0.1",
+	Host:             "localhost:10000",
 	BasePath:         "/v1",
-	Schemes:          []string{},
+	Schemes:          []string{"http"},
 	Title:            "Sceleton Golang Application API",
 	Description:      "This is a sample server Petstore server.",
 	InfoInstanceName: "swagger",

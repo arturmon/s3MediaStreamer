@@ -50,13 +50,13 @@ go get github.com/kubemq-io/kubemq-go
 ## API User
 v1/
 
-| url                  | code            | method | status             |
-|----------------------|-----------------|--------|--------------------|
-| /register            | 201/400/500     | POST   | Register           |
-| /login               | 200/400/404/500 | POST   | Login              |
-| /user                | 200/401/404     | GET    | User               |
-| /deleteUser          | 200/401/404     | POST   | DeleteUser         |
-| /logout              | 200             | POST   | Logout             |
+| url               | code            | method | status             |
+|-------------------|-----------------|--------|--------------------|
+| /users/register   | 201/400/500     | POST   | Register           |
+| /users/login      | 200/400/404/500 | POST   | Login              |
+| /user             | 200/401/404     | GET    | User               |
+| /users/deleteUser | 200/401/404     | POST   | DeleteUser         |
+| /users/logout     | 200             | POST   | Logout             |
 
 /register
 ```

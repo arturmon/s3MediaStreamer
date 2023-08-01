@@ -69,11 +69,11 @@ func (a *WebApp) startHTTP() {
 	// Group: v1
 	v1 := a.router.Group("/v1")
 	{
-		v1.POST("/register", a.Register)
-		v1.POST("/login", a.Login)
+		v1.POST("/users/register", a.Register)
+		v1.POST("/users/login", a.Login)
 		v1.GET("/user", a.User)
-		v1.POST("/deleteUser", a.DeleteUser)
-		v1.POST("/logout", a.Logout)
+		v1.POST("/users/delete", a.DeleteUser)
+		v1.POST("users/logout", a.Logout)
 		v1.GET("/albums", a.GetAllAlbums)
 		v1.GET("/albums/:code", a.GetAlbumByID)
 		v1.POST("/album", a.PostAlbums)

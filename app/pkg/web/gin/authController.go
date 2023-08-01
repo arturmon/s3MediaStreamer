@@ -17,12 +17,12 @@ const SecretKey = "secret"
 // @Summary		Registers a new user.
 // @Description Register a new user with provided name, email, and password.
 // @Tags		user-controller
-// @Accept		*/*
+// @Accept		json
 // @Produce		json
 // @Param		user body config.User true "Register User"
 // @Success     201 {object} config.User  "Created"
-// @Failure     400 {object} map[string]string "Bad Request - User with this email exists"
-// @Failure     500 {object} map[string]string "Internal Server Error"
+// @Failure     400 {object} ErrorResponse "Bad Request - User with this email exists"
+// @Failure     500 {object} ErrorResponse "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
 	// prometheuse
@@ -64,13 +64,13 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Summary		Authenticates a user.
 // @Description Authenticates a user with provided email and password.
 // @Tags		user-controller
-// @Accept		*/*
+// @Accept		json
 // @Produce		json
 // @Param		login body config.User true "Login User"
-// @Success     200 {object} map[string]string  "Success"
-// @Failure     400 {object} map[string]string "Bad Request - Incorrect Password"
-// @Failure     404 {object} map[string]string "Not Found - User not found"
-// @Failure     500 {object} map[string]string "Internal Server Error"
+// @Success     200 {object} ErrorResponse  "Success"
+// @Failure     400 {object} ErrorResponse "Bad Request - Incorrect Password"
+// @Failure     404 {object} ErrorResponse "Not Found - User not found"
+// @Failure     500 {object} ErrorResponse "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
 	// prometheuse
@@ -120,12 +120,12 @@ func (a *WebApp) Login(c *gin.Context) {
 // @Summary		Deletes a user.
 // @Description Deletes the authenticated user.
 // @Tags		user-controller
-// @Accept		*/*
+// @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
-// @Success     200 {object} map[string]string "Success - User deleted"
-// @Failure     401 {object} map[string]string "Unauthorized - User unauthenticated"
-// @Failure     404 {object} map[string]string "Not Found - User not found"
+// @Success     200 {object} string "Success - User deleted"
+// @Failure     401 {object} ErrorResponse "Unauthorized - User unauthenticated"
+// @Failure     404 {object} ErrorResponse "Not Found - User not found"
 // @Router		/users/delete [delete]
 func (a *WebApp) DeleteUser(c *gin.Context) {
 	monitoring.DeleteUserAttemptCounter.Inc()
@@ -149,10 +149,10 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Summary		Logs out a user.
 // @Description Clears the authentication cookie, logging out the user.
 // @Tags		user-controller
-// @Accept		*/*
+// @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
-// @Success     200 {object} map[string]string  "Success"
+// @Success     200 {object} ErrorResponse  "Success"
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
 	monitoring.LogoutAttemptCounter.Inc()

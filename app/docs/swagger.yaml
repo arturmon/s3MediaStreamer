@@ -2,32 +2,33 @@ basePath: /v1
 definitions:
   config.Album:
     properties:
-      _id:
-        type: string
       artist:
+        example: Artist name
         type: string
       code:
+        example: I001
         type: string
       completed:
+        example: false
         type: boolean
-      created_at:
-        type: string
       description:
+        example: A short description of the application
         type: string
       price:
+        example: 111.111
         type: number
       title:
-        type: string
-      updated_at:
+        example: Title name
         type: string
     type: object
   config.User:
+    description: 'User account information with: user _id, name, email, password'
     properties:
-      _id:
-        type: string
       email:
+        example: aaaa@aaaa.com
         type: string
       name:
+        example: Artur
         type: string
     type: object
   gin.ErrorResponse:
@@ -49,6 +50,10 @@ definitions:
       status:
         type: string
     type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:10000
 info:
   contact:
     email: support@swagger.io
@@ -59,8 +64,40 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Sceleton Golang Application API
-  version: "1.0"
+  version: 0.0.1
 paths:
+  /album:
+    post:
+      consumes:
+      - application/json
+      description: adds an album from JSON received in the request body.
+      parameters:
+      - description: Album details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/config.Album'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/config.Album'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Adds an album from JSON.
+      tags:
+      - album-controller
   /album/update:
     post:
       consumes:
@@ -68,11 +105,6 @@ paths:
       description: updates an existing album with new data based on the ID parameter
         sent by the client.
       parameters:
-      - description: Code
-        in: path
-        name: code
-        required: true
-        type: string
       - description: Updated album details
         in: body
         name: request
@@ -89,59 +121,25 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Updates an existing album with new data.
       tags:
       - album-controller
   /albums:
-    delete:
-      consumes:
-      - '*/*'
-      description: Delete ALL.
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Complete removal of all albums.
-      tags:
-      - album-controller
     get:
       consumes:
       - '*/*'
@@ -158,60 +156,17 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Show the list of all albums.
       tags:
       - album-controller
-  /albums/:code:
-    delete:
-      consumes:
-      - '*/*'
-      description: locates the album whose ID value matches the id parameter and deletes
-        it.
-      parameters:
-      - description: Code album
-        in: path
-        name: code
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Deletes album whose ID value matches the code.
-      tags:
-      - album-controller
+  /albums/{code}:
     get:
       consumes:
       - '*/*'
@@ -233,60 +188,79 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Album whose ID value matches the id.
       tags:
       - album-controller
-    post:
+  /albums/delete/{code}:
+    delete:
       consumes:
-      - application/json
-      description: adds an album from JSON received in the request body.
+      - '*/*'
+      description: locates the album whose ID value matches the id parameter and deletes
+        it.
       parameters:
-      - description: Code
+      - description: Code album
         in: path
         name: code
         required: true
         type: string
-      - description: Album details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/config.Album'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "204":
+          description: No Content
           schema:
-            $ref: '#/definitions/config.Album'
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/gin.ErrorResponse'
+        "401":
+          description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Adds an album from JSON.
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes album whose ID value matches the code.
+      tags:
+      - album-controller
+  /albums/deleteAll:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete ALL.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Complete removal of all albums.
       tags:
       - album-controller
   /health:
@@ -329,7 +303,7 @@ paths:
             type: object
       summary: Application liveness check function
       tags:
-      - health-check
+      - health-controller
   /user:
     get:
       consumes:
@@ -358,7 +332,7 @@ paths:
   /users/delete:
     delete:
       consumes:
-      - '*/*'
+      - application/json
       description: Deletes the authenticated user.
       produces:
       - application/json
@@ -366,21 +340,15 @@ paths:
         "200":
           description: Success - User deleted
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
         "401":
           description: Unauthorized - User unauthenticated
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Deletes a user.
@@ -389,7 +357,7 @@ paths:
   /users/login:
     post:
       consumes:
-      - '*/*'
+      - application/json
       description: Authenticates a user with provided email and password.
       parameters:
       - description: Login User
@@ -404,34 +372,26 @@ paths:
         "200":
           description: Success
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
         "400":
           description: Bad Request - Incorrect Password
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
       summary: Authenticates a user.
       tags:
       - user-controller
   /users/logout:
     post:
       consumes:
-      - '*/*'
+      - application/json
       description: Clears the authentication cookie, logging out the user.
       produces:
       - application/json
@@ -439,9 +399,7 @@ paths:
         "200":
           description: Success
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
       security:
       - ApiKeyAuth: []
       summary: Logs out a user.
@@ -450,7 +408,7 @@ paths:
   /users/register:
     post:
       consumes:
-      - '*/*'
+      - application/json
       description: Register a new user with provided name, email, and password.
       parameters:
       - description: Register User
@@ -469,16 +427,17 @@ paths:
         "400":
           description: Bad Request - User with this email exists
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/gin.ErrorResponse'
       summary: Registers a new user.
       tags:
       - user-controller
+schemes:
+- http
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"
