@@ -69,7 +69,6 @@ func (a *WebApp) startHTTP() {
 	// Group: v1
 	v1 := a.router.Group("/v1")
 	{
-		v1.GET("/ping", Ping)
 		v1.POST("/register", a.Register)
 		v1.POST("/login", a.Login)
 		v1.GET("/user", a.User)
@@ -87,6 +86,7 @@ func (a *WebApp) startHTTP() {
 		})
 		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
+	a.router.GET("/ping", Ping)
 
 	a.logger.Info("application completely initialized and started")
 	a.logger.Info("The service is ready to listen and serve.")
