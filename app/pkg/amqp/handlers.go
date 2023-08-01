@@ -113,3 +113,25 @@ func (c *MessageClient) handleFindUserToEmail(data map[string]interface{}) {
 	}
 	c.logger.Printf("userEmail: %s", userEmail)
 }
+
+func (c *MessageClient) HandlerUpdateAlbum(data map[string]interface{}) {
+	newAlbumsData, ok := data["album"].(map[string]interface{})
+	if !ok {
+		c.logger.Println("Invalid albums data")
+		return
+	}
+
+	albumsJSON, err := json.Marshal(newAlbumsData)
+	if err != nil {
+		c.logger.Printf("Error converting albums data to JSON: %v", err)
+		return
+	}
+
+	err = c.amqpUpdateAlbum(string(albumsJSON))
+	if err != nil {
+		c.logger.Printf("Error handling UpdateAlbum: %v", err)
+		return
+	}
+
+	c.logger.Println("Successfully handled UpdateAlbum")
+}

@@ -22,6 +22,7 @@ type MongoCollectionQuery interface {
 	DeleteOne(code string) error
 	DeleteAll() error
 	MarkCompleted(code string) error
+	UpdateIssue(album config.Album) error
 }
 
 type MongoOperations interface {
@@ -252,6 +253,38 @@ func (c *MongoClient) MarkCompleted(code string) error {
 	// Проверка, была ли обновлена хотя бы одна запись
 	if result.ModifiedCount == 0 {
 		return mongo.ErrNoDocuments
+	}
+
+	return nil
+}
+
+func (c *MongoClient) UpdateIssue(album config.Album) error {
+	collection, err := c.FindCollections(config.CollectionAlbum)
+	if err != nil {
+		return err
+	}
+
+	// Define the filter to find the album by its code
+	filter := bson.D{{"code", album.Code}}
+
+	// Define the update fields using the $set operator to update only the specified fields
+	update := bson.D{
+		{"$set", bson.D{
+			{"title", album.Title},
+			{"artist", album.Artist},
+			{"price", album.Price},
+			{"description", album.Description},
+			{"completed", album.Completed},
+		}},
+		{"$currentDate", bson.D{
+			{"updatedat", true}, // Set the "updatedat" field to the current date
+		}},
+	}
+
+	// Perform the update operation
+	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -23,6 +23,7 @@ type PostgresCollectionQuery interface {
 	DeleteOne(code string) error
 	DeleteAll() error
 	MarkCompleted(code string) error
+	UpdateIssue(album config.Album) error
 }
 
 type PostgresOperations interface {
@@ -302,4 +303,37 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+func (c *PgClient) UpdateIssue(album config.Album) error {
+	// Check if the "album" table exists
+	tableExists, err := c.TableExists("album")
+	if err != nil {
+		return err
+	}
+
+	if !tableExists {
+		// Return an error if the table does not exist
+		return fmt.Errorf("table 'album' does not exist")
+	}
+
+	query := `
+        UPDATE album
+        SET
+            created_at = $1,
+            updated_at = $2,
+            title = $3,
+            artist = $4,
+            price = $5,
+            description = $6,
+            completed = $7
+        WHERE
+            code = $8
+    `
+	_, err = c.Pool.Exec(context.TODO(), query,
+		album.CreatedAt, time.Now(), album.Title, album.Artist, album.Price, album.Description, album.Completed, album.Code)
+	if err != nil {
+		return err
+	}
+	return nil
 }
