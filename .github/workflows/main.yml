@@ -107,7 +107,7 @@ jobs:
 
       - shell: bash
         run: |
-          mv app-1.19 albums
+          mv app-1.19.x albums
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
