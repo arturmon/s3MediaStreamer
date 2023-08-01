@@ -40,6 +40,13 @@ jobs:
       - if: steps.go-cache.outputs.cache-hit != 'true'
         run: go mod download
 
+      - name: Install SWAGGER
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Update SWAGGER
+        working-directory: ./app
+        run: swag init
+
       - name: Test
         run: go test -v -coverprofile=profile.cov -race ./...
 
@@ -51,14 +58,14 @@ jobs:
           parallel: true
 
       - name: Build
-        working-directory: ./app/cmd/main
+        working-directory: ./app
         run: go build -v -o app-${{ matrix.go-version }}
 
       - name: Upload Build results
         uses: actions/upload-artifact@v3
         with:
           name: Go-results-${{ matrix.go-version }}
-          path: ./app/cmd/main/app-${{ matrix.go-version }}
+          path: ./app/app-${{ matrix.go-version }}
 
   check-coverage:
     name: Check coverage

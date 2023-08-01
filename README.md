@@ -5,7 +5,7 @@
 ## Generate specification Swager
 ```
 cd /mnt/c/Users/Arturmon/eclipse-workspace/src/skeleton-golange-application
-/home/arturmon/go/bin/swag init -g main.go --output docs
+/home/arturmon/go/bin/swag init
 ```
 Use MongoDB docker container 
 ```
