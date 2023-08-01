@@ -1,8 +1,9 @@
 package gin
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -73,7 +74,7 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Failure     500 {object} ErrorResponse "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
-	// prometheuse
+	// prometheus
 	monitoring.LoginAttemptCounter.Inc()
 
 	var data map[string]string
@@ -97,12 +98,13 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	var claims = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    user.Email,
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 day
+	var key = []byte(SecretKey)
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss": user.Email,
+		"exp": time.Now().Add(time.Hour * 24).Unix(), // 1 day
 	})
 
-	token, err := claims.SignedString([]byte(SecretKey))
+	token, err := claims.SignedString(key)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
 		return
@@ -211,15 +213,23 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
+
+	key := []byte(SecretKey)
+	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return key, nil
 	})
+
 	if err != nil {
 		return "", err
 	}
-	claims, ok := token.Claims.(*jwt.StandardClaims)
-	if !ok {
-		return "", err
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", fmt.Errorf("invalid JWT token")
 	}
-	return claims.Issuer, nil
+
+	return claims["iss"].(string), nil
 }

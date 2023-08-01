@@ -44,16 +44,16 @@ Content-Type: application/json
 GET http://localhost:10000/metrics
 Content-Type: application/json
 ###
-POST http://localhost:10000/v1/register
+POST http://localhost:10000/v1/users/register
 Content-Type: application/json
 
 {
-  "email":"a@a.com",
+  "email":"aa@a.com",
   "name":"a",
   "password":"1"
 }
 ###
-POST http://localhost:10000/v1/login
+POST http://localhost:10000/v1/users/login
 Content-Type: application/json
 
 {
@@ -61,7 +61,7 @@ Content-Type: application/json
   "password":"1"
 }
 ###
-POST http://localhost:10000/v1/logout
+POST http://localhost:10000/v1/users/logout
 Content-Type: application/json
 
 {
@@ -71,7 +71,7 @@ Content-Type: application/json
 GET http://localhost:10000/v1/user
 Content-Type: application/json
 ###
-POST http://localhost:10000/v1/deleteUser
+POST http://localhost:10000/v1/users/deleteUser
 Content-Type: application/json
 
 {
