@@ -160,7 +160,7 @@
                     }
                 }
             },
-            "put": {
+            "post": {
                 "description": "updates an existing album with new data based on the ID parameter sent by the client.",
                 "consumes": [
                     "application/json"
@@ -217,63 +217,6 @@
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "adds an album from JSON received in the request body.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "album-controller"
-                ],
-                "summary": "Adds an album from JSON.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Album details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/config.Album"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/config.Album"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

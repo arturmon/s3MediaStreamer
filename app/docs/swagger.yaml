@@ -202,44 +202,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: adds an album from JSON received in the request body.
-      parameters:
-      - description: Code
-        in: path
-        name: code
-        required: true
-        type: string
-      - description: Album details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/config.Album'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/config.Album'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Adds an album from JSON.
-      tags:
-      - album-controller
-    put:
-      consumes:
-      - application/json
       description: updates an existing album with new data based on the ID parameter
         sent by the client.
       parameters:
