@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	_ "github.com/joho/godotenv/autoload"
-	_ "github.com/swaggo/gin-swagger"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
@@ -25,24 +24,24 @@ import (
 func main() {
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
-	app, err := app.NewAppInit(cfg, &logger)
+	myApp, err := app.NewAppInit(cfg, &logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	// Start consuming messages
-	messages, err := app.GetMessageClient().Consume(context.Background())
+	messages, err := myApp.GetMessageClient().Consume(context.Background())
 	if err != nil {
 		logger.Fatal("Failed to start consuming messages:", err)
 	}
 	// Call PreInit with the AMQPClient instance and the config
-	err = amqp.PostInit(app.GetMessageClient(), cfg)
+	err = amqp.PostInit(myApp.GetMessageClient(), cfg)
 	if err != nil {
 		logger.Fatal("Failed to pre-initialize AMQP:", err)
 	}
 
 	logger.Info("Running Application")
-	app.Gin.Run() // The app will run
+	myApp.Gin.Run() // The app will run
 	// Wait for the background goroutine to finish
 	<-messages
 	logger.Info("Background goroutine finished.")

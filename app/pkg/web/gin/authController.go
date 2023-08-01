@@ -170,24 +170,40 @@ func (a *WebApp) Logout(c *gin.Context) {
 // @Tags user-controller
 // @Accept  */*
 // @Produce json
-// @Success 200 {object} config.User "Successfully retrieved user information"
-// @Failure 401 {object} gin.H{"message": string} "Unauthenticated"
-// @Failure 404 {object} gin.H{"message": string} "User not found"
+// @Security ApiKeyAuth
+// @Success 200 {object} UserResponse "Successfully retrieved user information"
+// @Failure 401 {object} ErrorResponse "Unauthenticated"
+// @Failure 404 {object} ErrorResponse "User not found"
 // @Router /user [get]
 func (a *WebApp) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
+		c.IndentedJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
 		return
 	}
+
 	var user config.User
 	user, err = a.storage.Operations.FindUserToEmail(email)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, ErrorResponse{Message: "user not found"})
 		return
 	}
+
 	c.JSON(http.StatusOK, user)
 	return
+}
+
+// UserResponse represents the response object for the user information endpoint.
+type UserResponse struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	// Add other fields from the config.User struct that you want to expose in the response.
+}
+
+// ErrorResponse represents the response object for error responses.
+type ErrorResponse struct {
+	Message string `json:"message"`
 }
 
 func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
