@@ -96,7 +96,7 @@ jobs:
       - name: Download a single artifact
         uses: actions/download-artifact@v3
         with:
-          name: Go-results-1.19
+          name: Go-results-1.19.x
 
       - shell: bash
         run: |
