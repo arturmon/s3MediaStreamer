@@ -96,13 +96,14 @@ v1/
 ## API Album
 v1/
 
-| url                  | code             | method | status             |
-|----------------------|------------------|--------|--------------------|
-| /albums              | 200/401/500      | GET    | GetAllAlbums       |
-| /albums/:code        | 200/401/404/500  | GET    | GetAlbumByID       |
-| /album               | 201/400/500      | POST   | PostAlbums         |
-| /albums/deleteAll    | 204/401/500      | DELETE | GetDeleteAll       |
-| /albums/delete/:code | 204/401/404/500  | DELETE | GetDeleteByID      |
+| url                  | code                | method | status        |
+|----------------------|---------------------|--------|---------------|
+| /albums              | 200/401/500         | GET    | GetAllAlbums  |
+| /albums/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
+| /album               | 201/400/500         | POST   | PostAlbums    |
+| /album/update        | 200/400/401/404/500 | POST   | UpdateAlbum   |
+| /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
+| /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
 /albums
 ```
@@ -142,6 +143,17 @@ v1/
   "Price": 44.102,
   "Code": "I0001",
   "Description": "Description Test1",
+  "Completed": false
+}
+```
+/album/update
+```
+{
+  "Title": "Marco Polo",
+  "Artist": "Test Update",
+  "Price": 123.99,
+  "Code": "I0001",
+  "Description": "Description Update",
   "Completed": false
 }
 ```
@@ -202,15 +214,16 @@ Payload: `{"action":"GetAllAlbums"}`
 
 Example:
 
-| Exchange            | Routing key      | Command          | Payload                                                                |
-|---------------------|------------------|------------------|------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums     | `{"action":"GetAllAlbums"}`                                            |
-| sub-command         | sub-routing-key  | GetDeleteAll     | `{"action":"GetDeleteAll"}`                                            |
-| sub-command         | sub-routing-key  | GetAlbumByCode   | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                      |
-| sub-command         | sub-routing-key  | AddUser          | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1"}` |
-| sub-command         | sub-routing-key  | DeleteUser       | `{"action":"DeleteUser","userEmail":"a@a.com"}`                        |
-| sub-command         | sub-routing-key  | FindUserToEmail  | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                   |
-| sub-command         | sub-routing-key  | PostAlbums       | PostAlbums Payload:  --->                                              |
+| Exchange            | Routing key      | Command         | Payload                                                                |
+|---------------------|------------------|-----------------|------------------------------------------------------------------------|
+| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums"}`                                            |
+| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                            |
+| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                      |
+| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1"}` |
+| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                        |
+| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                   |
+| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                              |
+| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                             |
 
 ---> PostAlbums Payload:
 ```
@@ -246,6 +259,21 @@ Example:
 	}
  }
 ```
+---> UpdateAlbum Payload:
+```
+{
+    "action": "UpdateAlbum",
+    "album": {
+      "Title": "Test Rabbitmq",
+      "Artist": "Test Update RAbbit",
+      "Price": 1.99,
+      "Code": "I0001",
+      "Description": "Description Update Rabbitmq",
+      "Completed": false
+    }
+}
+```
+
 example errors:
 
 types: `logs.error`

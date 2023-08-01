@@ -20,7 +20,19 @@ Content-Type: application/json
   "Completed": false
 }
 ###
-DELETE http://localhost:10000/v1/albums/delete/222
+POST http://localhost:10000/v1/album/update
+Content-Type: application/json
+
+{
+  "Title": "Marco Polo",
+  "Artist": "Test Update",
+  "Price": 123.99,
+  "Code": "I0001",
+  "Description": "Description Update",
+  "Completed": false
+}
+###
+DELETE http://localhost:10000/v1/albums/delete/I0001
 Content-Type: application/json
 ###
 DELETE http://localhost:10000/v1/albums/deleteAll

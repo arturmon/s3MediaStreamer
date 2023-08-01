@@ -78,6 +78,7 @@ func (a *WebApp) startHTTP() {
 		v1.GET("/albums", a.GetAllAlbums)
 		v1.GET("/albums/:code", a.GetAlbumByID)
 		v1.POST("/album", a.PostAlbums)
+		v1.POST("/album/update", a.UpdateAlbum)
 		v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
 		v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
 		a.logger.Info("swagger docs initializing")

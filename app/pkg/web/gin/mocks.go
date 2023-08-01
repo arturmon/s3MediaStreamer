@@ -2,6 +2,7 @@ package gin
 
 import (
 	"context"
+	"fmt"
 	"skeleton-golange-application/app/internal/config"
 )
 
@@ -59,18 +60,47 @@ func (m *MockDBOperations) GetAllIssues() ([]config.Album, error) {
 
 func (m *MockDBOperations) GetIssuesByCode(code string) (config.Album, error) {
 	// Implement mock behavior for GetIssuesByCode
-	// You can return a mock album based on the provided code
-	return config.Album{}, nil
+
+	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
+	// We will iterate through the list and find the album with the given code.
+	for _, album := range m.mockAlbums {
+		if album.Code == code {
+			// If we find the album with the given code, we return it as the result.
+			return album, nil
+		}
+	}
+
+	// If the album with the given code was not found, we can return an error.
+	// You can customize the error message based on your requirements.
+	return config.Album{}, fmt.Errorf("album with code %s not found", code)
 }
 
 func (m *MockDBOperations) DeleteOne(code string) error {
 	// Implement mock behavior for DeleteOne
-	return nil
+
+	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
+	// We will iterate through the list and find the album with the given code.
+	for i, album := range m.mockAlbums {
+		if album.Code == code {
+			// If we find the album with the given code, we will "delete" it from the list.
+			// In this example, "deleting" means removing the album from the list.
+			m.mockAlbums = append(m.mockAlbums[:i], m.mockAlbums[i+1:]...)
+			return nil // Return nil to indicate successful "deletion."
+		}
+	}
+
+	// If the album with the given code was not found, we can return an error.
+	// You can customize the error message based on your requirements.
+	return fmt.Errorf("album with code %s not found", code)
 }
 
 func (m *MockDBOperations) DeleteAll() error {
 	// Implement mock behavior for DeleteAll
-	return nil
+
+	// Clear the list of mock albums to simulate deleting all records.
+	m.mockAlbums = []config.Album{}
+
+	return nil // Return nil to indicate successful "deletion."
 }
 
 func (m *MockDBOperations) MarkCompleted(code string) error {

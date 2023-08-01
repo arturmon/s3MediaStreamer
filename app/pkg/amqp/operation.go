@@ -217,3 +217,52 @@ func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 
 	return nil
 }
+
+func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
+	// Check if the required fields are present in the data
+	var data map[string]interface{}
+	err := json.Unmarshal([]byte(albumsData), &data)
+	if err != nil {
+		return err
+	}
+
+	// Fetch the album from the database based on the provided code
+	code, ok := data["Code"].(string)
+	if !ok {
+		c.logger.Println("Invalid code field")
+		return fmt.Errorf("invalid code field")
+	}
+
+	existingAlbum, err := c.storage.Operations.GetIssuesByCode(code)
+	if err != nil {
+		c.logger.Printf("Error fetching album with code %s: %v", code, err)
+		return err
+	}
+
+	// Update the album fields based on the data received
+	if title, ok := data["Title"].(string); ok {
+		existingAlbum.Title = title
+	}
+	if artist, ok := data["Artist"].(string); ok {
+		existingAlbum.Artist = artist
+	}
+	if price, ok := data["Price"].(float64); ok {
+		existingAlbum.Price = price
+	}
+	if description, ok := data["Description"].(string); ok {
+		existingAlbum.Description = description
+	}
+	if completed, ok := data["Completed"].(bool); ok {
+		existingAlbum.Completed = completed
+	}
+
+	// Update the album in the database
+	err = c.storage.Operations.UpdateIssue(existingAlbum)
+	if err != nil {
+		c.logger.Printf("Error updating album with code %s: %v", code, err)
+		return err
+	}
+
+	c.logger.Printf("Album with code %s updated successfully", code)
+	return nil
+}
