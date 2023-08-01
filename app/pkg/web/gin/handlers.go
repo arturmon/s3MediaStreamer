@@ -27,6 +27,7 @@ type Handler interface {
 	Logout(c *gin.Context)
 	User(c *gin.Context)
 	checkAuthorization(c *gin.Context) (string, error)
+	UpdateAlbum(c *gin.Context)
 }
 
 // Ping godoc
@@ -241,4 +242,86 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "OK"})
+}
+
+// UpdateAlbum godoc
+// @Summary                Updates an existing album with new data.
+// @Description updates an existing album with new data based on the ID parameter sent by the client.
+// @Tags                album-controller
+// @Accept                json
+// @Produce                json
+// @Param                code         path string                true "Code"
+// @Param                request body config.Album true "Updated album details"
+// @Success     200 {object} config.Album  "OK"
+// @Failure     400 {object} map[string]string  "Bad Request"
+// @Failure     401 {object} map[string]string  "Unauthorized"
+// @Failure     404 {object} map[string]string  "Not Found"
+// @Failure     500 {object} map[string]string  "Internal Server Error"
+// @Router                /albums/:code [put]
+func (a *WebApp) UpdateAlbum(c *gin.Context) {
+	// Check if user is authorized
+	_, err := a.checkAuthorization(c)
+	if err != nil {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
+		return
+	}
+
+	// Increment the counter for each request handled by UpdateAlbum
+	monitoring.UpdateAlbumCounter.Inc()
+
+	var newAlbum config.Album
+
+	newAlbum.UpdatedAt = time.Now()
+
+	if err := c.BindJSON(&newAlbum); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		return
+	}
+	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
+	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
+	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
+	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
+
+	if newAlbum.Code == "" || newAlbum.Artist == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "empty required fields `Code` or `Artist`"})
+		return
+	}
+
+	existingAlbum, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		} else {
+			a.logger.Error(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		}
+		return
+	}
+
+	// Update only the fields that have new data
+	if newAlbum.Title != "" {
+		existingAlbum.Title = newAlbum.Title
+	}
+	if newAlbum.Artist != "" {
+		existingAlbum.Artist = newAlbum.Artist
+	}
+	if newAlbum.Price != 0 {
+		existingAlbum.Price = newAlbum.Price
+	}
+	if newAlbum.Description != "" {
+		existingAlbum.Description = newAlbum.Description
+	}
+	if newAlbum.Completed != existingAlbum.Completed {
+		existingAlbum.Completed = newAlbum.Completed
+	}
+
+	existingAlbum.UpdatedAt = time.Now()
+	// Perform the update operation
+	err = a.storage.Operations.UpdateIssue(existingAlbum)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error updating album"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, existingAlbum)
 }

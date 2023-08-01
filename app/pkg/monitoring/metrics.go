@@ -106,3 +106,9 @@ var GetDeleteByIDCounter = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "app_get_delete_by_id_requests_total",
 	Help: "Total number of requests handled by GetDeleteByID",
 })
+
+// UpdateAlbumCounter Define a counter to track the number of requests handled by UpdateAlbum
+var UpdateAlbumCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "app_update_album_requests_total",
+	Help: "Total number of requests handled by UpdateAlbum",
+})

@@ -52,6 +52,9 @@ func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amq
 			case "FindUserToEmail":
 				c.handleFindUserToEmail(data)
 
+			case "UpdateAlbum":
+				c.HandlerUpdateAlbum(data)
+
 			default:
 				c.logger.Printf("Unknown action: %s", action)
 				continue
