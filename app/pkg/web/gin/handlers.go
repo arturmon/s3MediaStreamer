@@ -257,7 +257,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Failure     401 {object} map[string]string  "Unauthorized"
 // @Failure     404 {object} map[string]string  "Not Found"
 // @Failure     500 {object} map[string]string  "Internal Server Error"
-// @Router                /albums/:code [post]
+// @Router                /album/update [post]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Check if user is authorized
 	_, err := a.checkAuthorization(c)
