@@ -129,3 +129,16 @@ jobs:
           tags: arturmon/albums:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to Staging server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ env.REMOTE_HOST }}
+          port: 22
+          username: ${{ env.REMOTE_USER }}
+          script: |
+            podman run -d -p 5432:5432 --name postgresql-server \
+              -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
+              bitnami/postgresql:latest
+            podman run -d arturmon/albums:latest
