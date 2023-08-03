@@ -497,7 +497,7 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "400": {
@@ -543,7 +543,7 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }

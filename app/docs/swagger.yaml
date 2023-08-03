@@ -372,7 +372,7 @@ paths:
         "200":
           description: Success
           schema:
-            type: string
+            $ref: '#/definitions/gin.ErrorResponse'
         "400":
           description: Bad Request - Incorrect Password
           schema:
@@ -399,7 +399,7 @@ paths:
         "200":
           description: Success
           schema:
-            type: string
+            $ref: '#/definitions/gin.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Logs out a user.

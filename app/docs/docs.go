@@ -501,7 +501,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     },
                     "400": {
@@ -547,7 +547,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/gin.ErrorResponse"
                         }
                     }
                 }
