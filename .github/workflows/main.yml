@@ -133,6 +133,7 @@ jobs:
   Deploy:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
     needs: Docker
     steps:
       - name: Deploy to Staging server
@@ -143,7 +144,7 @@ jobs:
           port: 22
           username: ${{ secrets.REMOTE_USER }}
           script: |
-            podman run -d -p 5432:5432 --name postgresql-server \
+            podman run -d -p 5432:5432 --privileged --name postgresql-server \
               -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
               docker.io/bitnami/postgresql:latest
-            podman run -d docker.io/arturmon/albums:latest
+            podman run -d --privileged --name albums docker.io/arturmon/albums:latest
