@@ -145,5 +145,5 @@ jobs:
           script: |
             podman run -d -p 5432:5432 --name postgresql-server \
               -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
-              bitnami/postgresql:latest
-            podman run -d arturmon/albums:latest
+              docker.io/bitnami/postgresql:latest
+            podman run -d docker.io/arturmon/albums:latest
