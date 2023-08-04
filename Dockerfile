@@ -3,7 +3,7 @@ FROM golang:1.20-alpine
 RUN adduser -D -g '' appuser
 RUN mkdir -p /app
 LABEL author="Artur Mudrykh"
-
+MAINTAINER Arturmon <arturmon82@gmail.com>
 WORKDIR /app
 COPY albums .
 
@@ -13,6 +13,6 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD wget -qO- http://localhost:10000/ || exit 1
 
-CMD [ "/app/albums" ]
+ENTRYPOINT [ "/app/albums" ]
 
 EXPOSE 10000
