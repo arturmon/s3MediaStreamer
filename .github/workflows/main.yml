@@ -162,4 +162,4 @@ jobs:
             podman stop albums
             podman rm albums
             echo "Deploying albums container..."
-            podman run -d --privileged --name albums docker.io/arturmon/albums:latest
+            podman run -d --privileged --network=host --name albums docker.io/arturmon/albums:latest
