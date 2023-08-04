@@ -144,7 +144,11 @@ jobs:
           port: 22
           username: ${{ secrets.REMOTE_USER }}
           script: |
+            echo "======VERSION======"
             podman version
+            echo "======INFO========="
+            podman info
+            echo "======DEPLOY======="
             # Check if the PostgreSQL server container is already running
             if podman ps -a --filter "name=postgresql-server" --format "{{.Names}}" | grep -q "postgresql-server"; then
               echo "PostgreSQL server container is already running. Perform nothing operation."

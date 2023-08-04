@@ -5,7 +5,8 @@ RUN mkdir -p /app
 LABEL author="Artur Mudrykh"
 WORKDIR /app
 COPY albums .
-
+RUN chown -R appuser:appuser /app
+RUN chmod +x /app/albums
 USER appuser
 
 # Add Health Check
