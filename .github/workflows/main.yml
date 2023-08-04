@@ -59,7 +59,7 @@ jobs:
 
       - name: Build
         working-directory: ./app
-        run: go build -v -o app-${{ matrix.go-version }}
+        run: CGO_ENABLED=0 GOOS=linux go build -v -o app-${{ matrix.go-version }}
 
       - name: Upload Build results
         uses: actions/upload-artifact@v3
