@@ -156,6 +156,7 @@ jobs:
               echo "Deploying PostgreSQL server container..."
               podman run -d -p 5432:5432 --privileged --name postgresql-server \
               -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
+              -e POSTGRESQL_DATABASE="db_issue_album" \
               docker.io/bitnami/postgresql:latest
             fi
             echo "Delete old albums container..."
