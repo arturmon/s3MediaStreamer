@@ -161,5 +161,6 @@ jobs:
             echo "Delete old albums container..."
             podman stop albums
             podman rm albums
+            podman image rm docker.io/arturmon/albums:latest
             echo "Deploying albums container..."
             podman run -d --privileged --network=host --name albums docker.io/arturmon/albums:latest
