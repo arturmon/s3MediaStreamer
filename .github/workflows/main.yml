@@ -145,7 +145,17 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           script: |
             podman version
+          # Check if the PostgreSQL server container is already running
+            if podman ps -a --filter "name=postgresql-server" --format "{{.Names}}" | grep -q "postgresql-server"; then
+            echo "PostgreSQL server container is already running. Perform nothing operation."
+            else
+            echo "Deploying PostgreSQL server container..."
             podman run -d -p 5432:5432 --privileged --name postgresql-server \
-              -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
-              docker.io/bitnami/postgresql:latest
+            -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
+            docker.io/bitnami/postgresql:latest
+            fi
+            echo "Delete old albums container..."
+            podman stop albums
+            podman rm albums
+            echo "Deploying albums container..."
             podman run -d --privileged --name albums docker.io/arturmon/albums:latest
