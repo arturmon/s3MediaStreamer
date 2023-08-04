@@ -3,7 +3,6 @@ FROM golang:1.20-alpine
 RUN adduser -D -g '' appuser
 RUN mkdir -p /app
 LABEL author="Artur Mudrykh"
-MAINTAINER Arturmon <arturmon82@gmail.com>
 WORKDIR /app
 COPY albums .
 
