@@ -20,10 +20,7 @@ type App struct {
 }
 
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
-	logger.Info("logger initializing")
-	logger.Info("Starting the service...")
-	logger.Info("config initializing")
-
+	logger.Info("Starting initialize the storage...")
 	storage, err := model.NewDBConfig(cfg)
 	if err != nil {
 		logger.Error("Failed to initialize the storage:", err)

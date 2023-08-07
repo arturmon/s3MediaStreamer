@@ -30,14 +30,16 @@ import (
 func main() {
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
+	logger.Info("config initialize")
+	logger.Info("logger initialize")
+	if cfg.AppConfig.LogLevel == "debug" {
+		config.PrintAllDefaultEnvs(&logger)
+	}
 	myApp, err := app.NewAppInit(cfg, &logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	if cfg.AppConfig.LogLevel == "debug" {
-		config.PrintAllDefaultEnvs(&logger)
-	}
 	// Start consuming messages
 	messages, err := myApp.GetMessageClient().Consume(context.Background())
 	if err != nil {

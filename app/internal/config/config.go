@@ -40,7 +40,7 @@ type Config struct {
 		Port   string `env:"PORT" env-default:"10000"`
 	}
 	AppConfig struct {
-		LogLevel string `env:"LOG_LEVEL" env-default:"info"`
+		LogLevel string `env:"LOG_LEVEL" env-default:"debug"`
 		// debug, release
 		GinMode string `env:"GIN_MODE" env-default:"release"`
 	}
