@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
+	"skeleton-golange-application/app/pkg/logging"
 	"sync"
 	"time"
 )
@@ -76,16 +77,24 @@ var once sync.Once
 
 func GetConfig() *Config {
 	once.Do(func() {
-		log.Print("gather config")
+		log.Info("gather config")
 
 		instance = &Config{}
 
 		if err := cleanenv.ReadEnv(instance); err != nil {
 			helpText := "The Art of Development - Monolith Notes System"
 			help, _ := cleanenv.GetDescription(instance, &helpText)
-			log.Print(help)
+			log.Debug(help)
 			log.Fatal(err)
 		}
 	})
 	return instance
+}
+
+func PrintAllDefaultEnvs(logger *logging.Logger) {
+	cfg := &Config{}
+	helpText := "The Art of Development - Monolith Notes System"
+	help, _ := cleanenv.GetDescription(cfg, &helpText)
+	// Print the help text containing all the default environment variables
+	logger.Debug(help)
 }

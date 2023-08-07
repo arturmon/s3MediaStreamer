@@ -35,6 +35,9 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	if cfg.AppConfig.LogLevel == "debug" {
+		config.PrintAllDefaultEnvs(&logger)
+	}
 	// Start consuming messages
 	messages, err := myApp.GetMessageClient().Consume(context.Background())
 	if err != nil {
