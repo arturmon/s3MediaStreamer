@@ -136,6 +136,18 @@ jobs:
     environment: ${{ vars.ENVIRONMENT_STAGE }}
     needs: Docker
     steps:
+      - name: Stop and Remove Old Containers
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
+          port: 22
+          username: ${{ secrets.REMOTE_USER }}
+          script: |
+            # Stop and remove the old containers
+            podman stop albums-app || true
+            podman rm albums-app || true
+
       - name: Deploy to Staging server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -149,19 +161,22 @@ jobs:
             echo "======INFO========="
             podman info
             echo "======DEPLOY======="
-            # Check if the PostgreSQL server container is already running
-            if podman ps -a --filter "name=postgresql-server" --format "{{.Names}}" | grep -q "postgresql-server"; then
-              echo "PostgreSQL server container is already running. Perform nothing operation."
-            else
-              echo "Deploying PostgreSQL server container..."
-              podman run -d -p 5432:5432 --privileged --name postgresql-server \
-              -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
-              -e POSTGRESQL_DATABASE="db_issue_album" \
-              docker.io/bitnami/postgresql:latest
-            fi
-            echo "Delete old albums container..."
-            podman stop albums
-            podman rm albums
-            podman image rm docker.io/arturmon/albums:latest
-            echo "Deploying albums container..."
-            podman run -d --privileged --network=host --name albums docker.io/arturmon/albums:latest
+            podman pod create --name albums -p 3000:3000
+            
+            podman run --pod albums --name postgresql-server \
+            -e POSTGRESQL_USERNAME="root" \
+            -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
+            -e POSTGRESQL_DATABASE="db_issue_album" \
+            -d docker.io/bitnami/postgresql:latest
+
+            echo "Up rabbitmq...."
+            podman run --name rabbitmq \
+            -e RABBITMQ_DEFAULT_USER=user \
+            -e RABBITMQ_DEFAULT_PASS=password \
+            -d rabbitmq:3
+            
+            podman run --pod albums --name albums-app \
+            -e STORAGE_HOST="postgresql-server" \
+            -e MQ_BROKER="rabbitmq" \
+            -e LOG_LEVEL="info" \
+            -d docker.io/arturmon/albums:latest
