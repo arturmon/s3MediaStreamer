@@ -109,12 +109,6 @@ jobs:
         run: |
           mv app-1.19.x albums
 
-      - shell: bash
-        run: |
-          ls -al
-          cp -r migrations/psql migrations/psql
-          ls -la
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
