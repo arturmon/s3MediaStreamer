@@ -147,6 +147,8 @@ jobs:
             # Stop and remove the old containers
             podman stop albums-app || true
             podman rm albums-app || true
+            # Remove the old image
+            podman rmi docker.io/arturmon/albums:latest || true
 
       - name: Deploy to Staging server
         uses: appleboy/ssh-action@v1.0.0
