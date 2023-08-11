@@ -182,3 +182,14 @@ jobs:
             -e MQ_BROKER="rabbitmq" \
             -e LOG_LEVEL="info" \
             -d docker.io/arturmon/albums:latest
+
+      - name: Wait for Albums App to Start
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.REMOTE_HOST }}
+          port: 22
+          username: ${{ secrets.REMOTE_USER }}
+          script: |
+            # Wait for the albums-app container to be up and running
+            while ! podman inspect -f '{{.State.Running}}' albums-app; do sleep 5; done
