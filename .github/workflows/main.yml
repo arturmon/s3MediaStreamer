@@ -109,7 +109,7 @@ jobs:
         run: |
           mv app-1.19.x albums
 
-      - shell: copy migration card
+      - shell: bash
         run: |
           ls -al
           cp -r migrations/psql migrations/psql
