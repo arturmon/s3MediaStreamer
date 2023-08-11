@@ -4,7 +4,7 @@ RUN adduser -D -g '' appuser
 RUN mkdir -p /app
 LABEL author="Artur Mudrykh"
 WORKDIR /app
-COPY /migrations/psql/ .
+COPY /migrations/psql/ ./migrations/psql/
 COPY albums .
 RUN chown -R appuser:appuser /app
 RUN chmod +x /app/albums
