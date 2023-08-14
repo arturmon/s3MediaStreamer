@@ -130,7 +130,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  Clean old Deploy:
+  Clean-old-Deploy:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment: ${{ vars.ENVIRONMENT_STAGE }}
@@ -154,7 +154,7 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment: ${{ vars.ENVIRONMENT_STAGE }}
-    needs: Clean old Deploy
+    needs: Clean-old-Deploy
     steps:
       - name: Deploy to Staging server
         uses: appleboy/ssh-action@v1.0.0
