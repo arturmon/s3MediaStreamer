@@ -130,7 +130,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  Deploy:
+  Clean old Deploy:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     environment: ${{ vars.ENVIRONMENT_STAGE }}
@@ -150,6 +150,12 @@ jobs:
             # Remove the old image
             podman rmi docker.io/arturmon/albums:latest || true
 
+  Deploy:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    needs: Clean old Deploy
+    steps:
       - name: Deploy to Staging server
         uses: appleboy/ssh-action@v1.0.0
         with:
