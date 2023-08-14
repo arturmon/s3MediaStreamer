@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// handlePostAlbums handles the "PostAlbums" action by processing the incoming album data.
 func (c *MessageClient) handlePostAlbums(data map[string]interface{}) {
 	albumsData, ok := data["albums"].(map[string]interface{})
 	if !ok {
@@ -26,6 +27,7 @@ func (c *MessageClient) handlePostAlbums(data map[string]interface{}) {
 	c.logger.Println("Successfully handled PostAlbums")
 }
 
+// handleGetAllAlbums handles the "GetAllAlbums" action by fetching and logging all albums.
 func (c *MessageClient) handleGetAllAlbums() {
 	albums, err := c.amqpGetAllAlbums()
 	if err != nil {
@@ -35,6 +37,7 @@ func (c *MessageClient) handleGetAllAlbums() {
 	c.logger.Printf("Albums: %s", albums)
 }
 
+// handleGetDeleteAll handles the "GetDeleteAll" action by deleting all albums.
 func (c *MessageClient) handleGetDeleteAll() {
 	err := c.amqpGetDeleteAll()
 	if err != nil {
@@ -43,6 +46,7 @@ func (c *MessageClient) handleGetDeleteAll() {
 	}
 }
 
+// handleGetAlbumByCode handles the "GetAlbumByCode" action by fetching and logging an album by its code.
 func (c *MessageClient) handleGetAlbumByCode(data map[string]interface{}) {
 	albumCode, ok := data["albumCode"].(string)
 	if !ok {
@@ -59,6 +63,7 @@ func (c *MessageClient) handleGetAlbumByCode(data map[string]interface{}) {
 	c.logger.Printf("Album: %+v", album)
 }
 
+// handleAddUser handles the "AddUser" action by adding a new user.
 func (c *MessageClient) handleAddUser(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
@@ -84,6 +89,7 @@ func (c *MessageClient) handleAddUser(data map[string]interface{}) {
 	c.logger.Printf("userEmail: %s; name: %s", userEmail, name)
 }
 
+// handleDeleteUser handles the "DeleteUser" action by deleting a user.
 func (c *MessageClient) handleDeleteUser(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
@@ -99,6 +105,7 @@ func (c *MessageClient) handleDeleteUser(data map[string]interface{}) {
 	c.logger.Printf("userEmail: %s", userEmail)
 }
 
+// handleFindUserToEmail handles the "FindUserToEmail" action by finding a user by their email.
 func (c *MessageClient) handleFindUserToEmail(data map[string]interface{}) {
 	userEmail, ok := data["userEmail"].(string)
 	if !ok {
@@ -114,6 +121,7 @@ func (c *MessageClient) handleFindUserToEmail(data map[string]interface{}) {
 	c.logger.Printf("userEmail: %s", userEmail)
 }
 
+// HandlerUpdateAlbum handles the "UpdateAlbum" action by updating an album's data.
 func (c *MessageClient) HandlerUpdateAlbum(data map[string]interface{}) {
 	newAlbumsData, ok := data["album"].(map[string]interface{})
 	if !ok {

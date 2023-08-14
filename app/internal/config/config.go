@@ -9,9 +9,10 @@ import (
 	"time"
 )
 
+// AppHealth stores the status of the application's health.
 var AppHealth = false
 
-// Album album represents data about a record album.
+// Album represents data about a record album.
 type Album struct {
 	ID          uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
 	CreatedAt   time.Time `json:"created_at" bson:"created_at" pg:"default:now()" swaggerignore:"true"`
@@ -24,7 +25,7 @@ type Album struct {
 	Completed   bool      `json:"completed" bson:"completed" example:"false"`
 }
 
-// User model info
+// User represents user account information.
 // @Description User account information
 // @Description with: user _id, name, email, password
 type User struct {
@@ -34,6 +35,7 @@ type User struct {
 	Password []byte    `json:"-" bson:"password"  example:"1111"`
 }
 
+// Config represents the application's configuration.
 type Config struct {
 	Listen struct {
 		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
@@ -75,6 +77,7 @@ type Config struct {
 var instance *Config
 var once sync.Once
 
+// GetConfig returns the singleton instance of the configuration.
 func GetConfig() *Config {
 	once.Do(func() {
 		log.Info("gather config")
@@ -91,6 +94,7 @@ func GetConfig() *Config {
 	return instance
 }
 
+// PrintAllDefaultEnvs prints the help text containing all the default environment variables.
 func PrintAllDefaultEnvs(logger *logging.Logger) {
 	cfg := &Config{}
 	helpText := "The Art of Development - Monolith Notes System"

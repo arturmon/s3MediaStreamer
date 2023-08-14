@@ -9,6 +9,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 )
 
+// MessageClient represents an AMQP message client.
 type MessageClient struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
@@ -18,6 +19,7 @@ type MessageClient struct {
 	storage *model.DBConfig
 }
 
+// NewAMQPClient creates a new instance of the MessageClient.
 func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger) (*MessageClient, error) {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%d/",
 		cfg.MessageQueue.User,
@@ -60,6 +62,7 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 	}, nil
 }
 
+// Consume starts consuming messages from the queue.
 func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
@@ -79,6 +82,7 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 	return messages, nil
 }
 
+// Close closes the AMQP channel.
 func (c *MessageClient) Close() error {
 	return c.channel.Close()
 }

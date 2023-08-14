@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// amqpGetAlbumByCode retrieves an album by its code using AMQP.
 func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
 	album, err := c.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
@@ -27,6 +28,7 @@ func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
 	return &album, nil
 }
 
+// amqpPostAlbums posts albums data using AMQP.
 func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(albumsData), &data)
@@ -84,6 +86,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 	return nil
 }
 
+// amqpGetAllAlbums retrieves all albums using AMQP.
 func (c *MessageClient) amqpGetAllAlbums() ([]config.Album, error) {
 	albums, err := c.storage.Operations.GetAllIssues()
 	if err != nil {
@@ -104,6 +107,7 @@ func (c *MessageClient) amqpGetAllAlbums() ([]config.Album, error) {
 	return albums, nil
 }
 
+// amqpGetDeleteAll deletes all albums using AMQP.
 func (c *MessageClient) amqpGetDeleteAll() error {
 	err := c.storage.Operations.DeleteAll()
 	if err != nil {
@@ -128,6 +132,7 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 	return nil
 }
 
+// amqpAddUser adds a user using AMQP.
 func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
 	user := config.User{
 		Id:       uuid.New(),
@@ -176,6 +181,7 @@ func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
 	return nil
 }
 
+// amqpDeleteUser deletes a user using AMQP.
 func (c *MessageClient) amqpDeleteUser(userEmail string) error {
 	err := c.storage.Operations.DeleteUser(userEmail)
 	if err != nil {
@@ -200,6 +206,7 @@ func (c *MessageClient) amqpDeleteUser(userEmail string) error {
 	return nil
 }
 
+// amqpFindUserToEmail finds a user by email using AMQP.
 func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 	info, err := c.storage.Operations.FindUserToEmail(userEmail)
 	if err != nil {
@@ -218,6 +225,7 @@ func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 	return nil
 }
 
+// amqpUpdateAlbum updates an album using AMQP.
 func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	// Check if the required fields are present in the data
 	var data map[string]interface{}

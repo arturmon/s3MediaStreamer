@@ -10,26 +10,31 @@ func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amq
 	for {
 		select {
 		case <-ctx.Done():
+			// If the context is canceled, return and stop processing messages.
 			return
 
 		case message, ok := <-messages:
+			// Check if the channel is closed (no more messages).
 			if !ok {
 				return
 			}
 
+			// Decode the incoming JSON message body.
 			var data map[string]interface{}
 			err := json.Unmarshal(message.Body, &data)
 			if err != nil {
 				c.logger.Printf("Error decoding message: %v", err)
-				continue
+				continue // Continue processing other messages.
 			}
 
+			// Extract the action field from the message data.
 			action, ok := data["action"].(string)
 			if !ok {
 				c.logger.Println("Invalid action field")
-				continue
+				continue // Continue processing other messages.
 			}
 
+			// Based on the action, handle different types of messages.
 			switch action {
 			case "PostAlbums":
 				c.handlePostAlbums(data)
@@ -57,7 +62,7 @@ func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amq
 
 			default:
 				c.logger.Printf("Unknown action: %s", action)
-				continue
+				continue // Continue processing other messages with unknown actions.
 			}
 		}
 	}
