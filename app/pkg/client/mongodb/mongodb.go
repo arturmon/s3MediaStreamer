@@ -92,12 +92,14 @@ func (c *MongoClient) CreateMany(issues []config.Album) error {
 	insertableList := make([]interface{}, len(issues))
 	for i := range issues {
 		v := &issues[i] // Use a pointer to the current issue
+		insertableList[i] = v
 		if v.Completed {
 			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
 		} else {
 			fmt.Printf("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
 		}
 	}
+
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
