@@ -178,14 +178,12 @@ jobs:
             -d docker.io/bitnami/postgresql:latest
 
             echo "Up rabbitmq...."
-            podman run --name rabbitmq \
+            podman run --pod albums --name rabbitmq \
             -e RABBITMQ_DEFAULT_USER=user \
             -e RABBITMQ_DEFAULT_PASS=password \
-            -d rabbitmq:3
+            -d docker.io/rabbitmq:3.12.2
             
             podman run --pod albums --name albums-app \
-            -e STORAGE_HOST="postgresql-server" \
-            -e MQ_BROKER="rabbitmq" \
             -e LOG_LEVEL="info" \
             -d docker.io/arturmon/albums:latest
 
