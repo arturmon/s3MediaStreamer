@@ -167,8 +167,17 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 
 func (c *PgClient) CreateMany(list []config.Album) error {
 	insertableList := make([]interface{}, 0)
-	for _, v := range list {
-		insertableList = append(insertableList, v.ID, v.CreatedAt, v.UpdatedAt, v.Title, v.Artist, v.Price, v.Code, v.Description, v.Completed)
+	for i, v := range list {
+		baseIndex := i * 9
+		insertableList[baseIndex] = &v.ID
+		insertableList[baseIndex+1] = &v.CreatedAt
+		insertableList[baseIndex+2] = &v.UpdatedAt
+		insertableList[baseIndex+3] = &v.Title
+		insertableList[baseIndex+4] = &v.Artist
+		insertableList[baseIndex+5] = &v.Price
+		insertableList[baseIndex+6] = &v.Code
+		insertableList[baseIndex+7] = &v.Description
+		insertableList[baseIndex+8] = &v.Completed
 	}
 
 	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, completed) VALUES `
