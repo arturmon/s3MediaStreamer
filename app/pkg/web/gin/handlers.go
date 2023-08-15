@@ -123,7 +123,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		return
 	}
 
-	err = a.storage.Operations.CreateIssue(newAlbum)
+	err = a.storage.Operations.CreateIssue(&newAlbum)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error creating album"})
 		return
@@ -321,7 +321,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 
 	existingAlbum.UpdatedAt = time.Now()
 	// Perform the update operation
-	err = a.storage.Operations.UpdateIssue(existingAlbum)
+	err = a.storage.Operations.UpdateIssue(&existingAlbum)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error updating album"})
 		return

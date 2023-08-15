@@ -265,7 +265,7 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	}
 
 	// Update the album in the database
-	err = c.storage.Operations.UpdateIssue(existingAlbum)
+	err = c.storage.Operations.UpdateIssue(&existingAlbum)
 	if err != nil {
 		c.logger.Printf("Error updating album with code %s: %v", code, err)
 		return err
