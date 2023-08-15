@@ -15,14 +15,14 @@ type MongoCollectionQuery interface {
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
 	DeleteUser(email string) error
-	CreateIssue(task config.Album) error
+	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
 	GetAllIssues() ([]config.Album, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
 	MarkCompleted(code string) error
-	UpdateIssue(album config.Album) error
+	UpdateIssue(album *config.Album) error
 }
 
 type MongoOperations interface {
@@ -76,22 +76,27 @@ func (c *MongoClient) FindCollections(useCollections string) (*mongo.Collection,
 	}
 }
 
-func (c *MongoClient) CreateIssue(task config.Album) error {
+func (c *MongoClient) CreateIssue(album *config.Album) error {
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
 	}
-	_, err = collection.InsertOne(context.TODO(), task)
+	_, err = collection.InsertOne(context.TODO(), album)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *MongoClient) CreateMany(list []config.Album) error {
-	insertableList := make([]interface{}, len(list))
-	for i, v := range list {
-		insertableList[i] = v
+func (c *MongoClient) CreateMany(issues []config.Album) error {
+	insertableList := make([]interface{}, len(issues))
+	for i := range issues {
+		v := &issues[i] // Use a pointer to the current issue
+		if v.Completed {
+			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+		} else {
+			fmt.Printf("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+		}
 	}
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
@@ -258,7 +263,7 @@ func (c *MongoClient) MarkCompleted(code string) error {
 	return nil
 }
 
-func (c *MongoClient) UpdateIssue(album config.Album) error {
+func (c *MongoClient) UpdateIssue(album *config.Album) error {
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err

@@ -16,14 +16,14 @@ type PostgresCollectionQuery interface {
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
 	DeleteUser(email string) error
-	CreateIssue(task config.Album) error
+	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
 	GetAllIssues() ([]config.Album, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
 	MarkCompleted(code string) error
-	UpdateIssue(album config.Album) error
+	UpdateIssue(album *config.Album) error
 }
 
 type PostgresOperations interface {
@@ -143,7 +143,7 @@ func (c *PgClient) DeleteUser(email string) error {
 	return nil
 }
 
-func (c *PgClient) CreateIssue(album config.Album) error {
+func (c *PgClient) CreateIssue(album *config.Album) error {
 	// Check if the "album" table exists
 	tableExists, err := c.TableExists("album")
 	if err != nil {
@@ -305,7 +305,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 	return result, nil
 }
 
-func (c *PgClient) UpdateIssue(album config.Album) error {
+func (c *PgClient) UpdateIssue(album *config.Album) error {
 	// Check if the "album" table exists
 	tableExists, err := c.TableExists("album")
 	if err != nil {
