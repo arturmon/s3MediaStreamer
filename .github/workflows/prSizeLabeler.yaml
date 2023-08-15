@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: BedrockStreaming/pr-size-labeler@v2.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: $
           xs_label: 'size/xs'
           xs_max_size: '10'
           s_label: 'size/s'
