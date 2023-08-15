@@ -26,11 +26,11 @@ type WebApp struct {
 	storage    *model.DBConfig
 }
 
-func NewAppUseGin(config *config.Config, logger *logging.Logger) (*WebApp, error) {
+func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	logger.Info("router initializing")
 
 	// Gin instance
-	gin.SetMode(config.AppConfig.GinMode)
+	gin.SetMode(cfg.AppConfig.GinMode)
 	router := gin.New()
 	logger.Info("setup CORS")
 	router.Use(CORSMiddleware())
@@ -42,7 +42,7 @@ func NewAppUseGin(config *config.Config, logger *logging.Logger) (*WebApp, error
 	p.Use(router)
 
 	logger.Info("storage initializing")
-	storage, err := model.NewDBConfig(config)
+	storage, err := model.NewDBConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func NewAppUseGin(config *config.Config, logger *logging.Logger) (*WebApp, error
 	go monitoring.PingStorage(ctx, storage.Operations)
 
 	return &WebApp{
-		cfg:     config,
+		cfg:     cfg,
 		logger:  logger,
 		router:  router,
 		storage: storage,
