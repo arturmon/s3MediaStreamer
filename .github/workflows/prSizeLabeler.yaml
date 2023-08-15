@@ -1,14 +1,10 @@
 name: 🏷 PR size labeler
 
-on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-  pull_request_target:
-    types:
-      - opened
-      - synchronize
+on: [pull_request]
+
+permissions:
+  pull-requests: write
+  issues: write
 
 jobs:
   labeler:
@@ -17,7 +13,7 @@ jobs:
     steps:
       - uses: BedrockStreaming/pr-size-labeler@v2.0.0
         with:
-          token: $
+          token: ${{ secrets.GITHUB_TOKEN }}
           xs_label: 'size/xs'
           xs_max_size: '10'
           s_label: 'size/s'
