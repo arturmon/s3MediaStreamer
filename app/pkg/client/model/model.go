@@ -3,16 +3,17 @@ package model
 import (
 	"context"
 	"fmt"
+	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/client/mongodb"
+	"skeleton-golange-application/app/pkg/client/postgresql"
+	"time"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/mongodb"
-	"skeleton-golange-application/app/pkg/client/postgresql"
-	"time"
 )
 
 type StorageConfig struct {

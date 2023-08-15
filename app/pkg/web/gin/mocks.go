@@ -7,8 +7,7 @@ import (
 )
 
 type MockDBOperations struct {
-	mockStorage []config.User
-	mockAlbums  []config.Album
+	mockAlbums []config.Album
 }
 
 func (m *MockDBOperations) Connect() error {
@@ -63,10 +62,10 @@ func (m *MockDBOperations) GetIssuesByCode(code string) (*config.Album, error) {
 
 	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
 	// We will iterate through the list and find the album with the given code.
-	for _, album := range m.mockAlbums {
-		if album.Code == code {
+	for i := range m.mockAlbums {
+		if m.mockAlbums[i].Code == code {
 			// If we find the album with the given code, we return a pointer to it as the result.
-			return &album, nil
+			return &m.mockAlbums[i], nil
 		}
 	}
 

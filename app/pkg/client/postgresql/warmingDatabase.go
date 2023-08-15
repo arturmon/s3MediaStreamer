@@ -3,6 +3,7 @@ package postgresql
 import (
 	"context"
 	"fmt"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" //lint:ignore blank-imports
 	_ "github.com/golang-migrate/migrate/v4/source/file"       //lint:ignore blank-imports

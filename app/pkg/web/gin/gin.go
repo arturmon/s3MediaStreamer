@@ -19,11 +19,10 @@ type AppInterface interface {
 }
 
 type WebApp struct {
-	cfg        *config.Config
-	logger     *logging.Logger
-	router     *gin.Engine
-	httpServer *http.Server
-	storage    *model.DBConfig
+	cfg     *config.Config
+	logger  *logging.Logger
+	router  *gin.Engine
+	storage *model.DBConfig
 }
 
 func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {

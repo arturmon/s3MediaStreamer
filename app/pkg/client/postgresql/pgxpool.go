@@ -167,9 +167,10 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 }
 
 func (c *PgClient) CreateMany(list []config.Album) error {
-	insertableList := make([]interface{}, 0)
-	for i, v := range list {
+	insertableList := make([]interface{}, len(list)*9)
+	for i := range list {
 		baseIndex := i * 9
+		v := &list[i] // Use a pointer to the current album
 		insertableList[baseIndex] = &v.ID
 		insertableList[baseIndex+1] = &v.CreatedAt
 		insertableList[baseIndex+2] = &v.UpdatedAt

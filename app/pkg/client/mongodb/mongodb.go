@@ -3,11 +3,12 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"skeleton-golange-application/app/internal/config"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"skeleton-golange-application/app/internal/config"
 )
 
 type MongoCollectionQuery interface {

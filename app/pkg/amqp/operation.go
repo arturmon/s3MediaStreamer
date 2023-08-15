@@ -42,7 +42,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 		return fmt.Errorf("invalid albums data")
 	}
 
-	var albumsList []config.Album
+	albumsList := make([]config.Album, 0, len(albumArray)) // Pre-allocate with the expected length
 	for _, albumObj := range albumArray {
 		albumData, ok := albumObj.(map[string]interface{})
 		if !ok {
