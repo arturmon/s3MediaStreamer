@@ -3,11 +3,12 @@ package postgresql
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-	"go.mongodb.org/mongo-driver/mongo"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v4"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )

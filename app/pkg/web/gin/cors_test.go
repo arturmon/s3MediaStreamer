@@ -18,7 +18,7 @@ func TestCORSMiddleware(t *testing.T) {
 	})
 
 	// Create a mock request to the "/test" endpoint
-	req, _ := http.NewRequest("GET", "/test", nil)
+	req, _ := http.NewRequest("GET", "/test", http.NoBody)
 	req.Header.Set("Origin", "http://localhost:3000")
 
 	// Create a response recorder to record the response

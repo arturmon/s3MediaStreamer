@@ -1,12 +1,13 @@
 package config
 
 import (
-	"github.com/google/uuid"
-	"github.com/ilyakaznacheev/cleanenv"
-	log "github.com/sirupsen/logrus"
 	"skeleton-golange-application/app/pkg/logging"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/ilyakaznacheev/cleanenv"
+	log "github.com/sirupsen/logrus"
 )
 
 // AppHealth stores the status of the application's health.

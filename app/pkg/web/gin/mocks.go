@@ -42,12 +42,12 @@ func (m *MockDBOperations) DeleteUser(email string) error {
 	return nil
 }
 
-func (m *MockDBOperations) CreateIssue(task config.Album) error {
+func (m *MockDBOperations) CreateIssue(task *config.Album) error {
 	// Implement mock behavior for CreateIssue
 	return nil
 }
 
-func (m *MockDBOperations) CreateMany(list []config.Album) error {
+func (m *MockDBOperations) CreateMany(list []*config.Album) error {
 	// Implement mock behavior for CreateMany
 	return nil
 }
@@ -58,21 +58,21 @@ func (m *MockDBOperations) GetAllIssues() ([]config.Album, error) {
 	return m.mockAlbums, nil
 }
 
-func (m *MockDBOperations) GetIssuesByCode(code string) (config.Album, error) {
+func (m *MockDBOperations) GetIssuesByCode(code string) (*config.Album, error) {
 	// Implement mock behavior for GetIssuesByCode
 
 	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
 	// We will iterate through the list and find the album with the given code.
 	for _, album := range m.mockAlbums {
 		if album.Code == code {
-			// If we find the album with the given code, we return it as the result.
-			return album, nil
+			// If we find the album with the given code, we return a pointer to it as the result.
+			return &album, nil
 		}
 	}
 
 	// If the album with the given code was not found, we can return an error.
 	// You can customize the error message based on your requirements.
-	return config.Album{}, fmt.Errorf("album with code %s not found", code)
+	return nil, fmt.Errorf("album with code %s not found", code)
 }
 
 func (m *MockDBOperations) DeleteOne(code string) error {

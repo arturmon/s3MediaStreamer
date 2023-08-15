@@ -2,12 +2,13 @@ package logging
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"log"
 	"os"
 	"path"
 	"runtime"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Logger struct {
