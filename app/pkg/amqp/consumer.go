@@ -3,6 +3,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/streadway/amqp"
 )
 

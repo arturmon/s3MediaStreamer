@@ -62,7 +62,6 @@ func (a *WebApp) Run() {
 }
 
 func (a *WebApp) startHTTP() {
-
 	a.logger.Info("start HTTP")
 	// Routes
 	a.logger.Info("heartbeat metric initializing")

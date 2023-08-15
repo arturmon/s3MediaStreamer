@@ -79,8 +79,8 @@ func (m *MockDBOperations) DeleteOne(code string) error {
 
 	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
 	// We will iterate through the list and find the album with the given code.
-	for i, album := range m.mockAlbums {
-		if album.Code == code {
+	for i := 0; i < len(m.mockAlbums); i++ {
+		if m.mockAlbums[i].Code == code {
 			// If we find the album with the given code, we will "delete" it from the list.
 			// In this example, "deleting" means removing the album from the list.
 			m.mockAlbums = append(m.mockAlbums[:i], m.mockAlbums[i+1:]...)

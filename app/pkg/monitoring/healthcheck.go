@@ -3,11 +3,12 @@ package monitoring
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type HealthResponse struct {

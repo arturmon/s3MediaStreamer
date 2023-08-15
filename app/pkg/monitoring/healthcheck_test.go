@@ -1,12 +1,13 @@
 package monitoring
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"skeleton-golange-application/app/internal/config"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 // Mocking the config.AppHealth variable to return true
