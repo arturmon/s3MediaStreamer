@@ -171,19 +171,19 @@ jobs:
             echo "======DEPLOY======="
             podman pod create --name albums -p 3000:3000
             
-            podman run --pod albums --name postgresql-server \
+            podman run --pod albums --privileged --name postgresql-server \
             -e POSTGRESQL_USERNAME="root" \
             -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
             -e POSTGRESQL_DATABASE="db_issue_album" \
             -d docker.io/bitnami/postgresql:latest
 
             echo "Up rabbitmq...."
-            podman run --pod albums --name rabbitmq \
+            podman run --pod albums --privileged --name rabbitmq \
             -e RABBITMQ_DEFAULT_USER=user \
             -e RABBITMQ_DEFAULT_PASS=password \
             -d docker.io/rabbitmq:3.12.2
             
-            podman run --pod albums --name albums-app \
+            podman run --pod albums --privileged --name albums-app \
             -e LOG_LEVEL="info" \
             -d docker.io/arturmon/albums:latest
 
