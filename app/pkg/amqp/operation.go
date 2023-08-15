@@ -3,10 +3,11 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"skeleton-golange-application/app/internal/config"
 	"time"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // amqpGetAlbumByCode retrieves an album by its code using AMQP.

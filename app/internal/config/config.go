@@ -92,6 +92,7 @@ func GetConfig() *Config {
 			log.Fatal(err)
 		}
 	})
+
 	return instance
 }
 

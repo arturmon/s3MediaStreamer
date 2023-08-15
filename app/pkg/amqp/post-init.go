@@ -2,8 +2,9 @@ package amqp
 
 import (
 	"errors"
-	"github.com/streadway/amqp"
 	"skeleton-golange-application/app/internal/config"
+
+	"github.com/streadway/amqp"
 )
 
 // Getter method for retrieving the channel.

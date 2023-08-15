@@ -3,10 +3,11 @@ package amqp
 import (
 	"context"
 	"fmt"
-	"github.com/streadway/amqp"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
+
+	"github.com/streadway/amqp"
 )
 
 // MessageClient represents an AMQP message client.
