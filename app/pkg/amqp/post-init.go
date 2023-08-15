@@ -1,6 +1,7 @@
 package amqp
 
 import (
+	"errors"
 	"github.com/streadway/amqp"
 	"skeleton-golange-application/app/internal/config"
 )
@@ -12,6 +13,10 @@ func (c *MessageClient) GetChannel() *amqp.Channel {
 
 // PostInit performs post-initialization setup for AMQP configuration.
 func PostInit(amqpClient *MessageClient, cfg *config.Config) error {
+	if amqpClient == nil {
+		return errors.New("AMQP client is nil")
+	}
+
 	channel := amqpClient.channel
 
 	// Declare the publisher queue

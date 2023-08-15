@@ -9,6 +9,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/web/gin"
+	"time"
 )
 
 // App represents the main application struct.
@@ -42,12 +43,23 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		return nil, err
 	}
 
-	// Create an AMQP client
-	amqpClient, err := amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
-	if err != nil {
-		logger.Error("Failed to initialize MQ:", err)
-		logger.Fatal(err)
-		return nil, err
+	// Create an AMQP client if it's enabled in the configuration
+	var amqpClient *amqp.MessageClient
+	if cfg.MessageQueue.Enable {
+		maxRetries := 5
+		for retry := 1; retry <= maxRetries; retry++ {
+			amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
+			if err == nil {
+				break // Break out of the loop if the connection is successful
+			}
+			logger.Error("Failed to initialize MQ:", err)
+			if retry < maxRetries {
+				logger.Info("Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+			} else {
+				logger.Fatal("Failed to initialize MQ after", maxRetries, "attempts")
+			}
+		}
 	}
 
 	// Return a new App instance with all initialized components

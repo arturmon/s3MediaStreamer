@@ -41,11 +41,13 @@ func NewAppUseGin(config *config.Config, logger *logging.Logger) (*WebApp, error
 	p := ginPrometheus.NewPrometheus("gin")
 	p.Use(router)
 
+	logger.Info("storage initializing")
 	storage, err := model.NewDBConfig(config)
 	if err != nil {
 		return nil, err
 	}
 	ctx := context.Background()
+	logger.Info("init ping storage")
 	go monitoring.PingStorage(ctx, storage.Operations)
 
 	return &WebApp{
