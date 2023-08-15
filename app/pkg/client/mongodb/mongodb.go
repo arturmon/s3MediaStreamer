@@ -180,7 +180,8 @@ func (c *MongoClient) DeleteAll() error {
 
 // PrintList - Print list of issues on console
 func PrintList(issues []config.Album) {
-	for i, v := range issues {
+	for i := range issues {
+		v := &issues[i] // Use a pointer to the current issue
 		if v.Completed {
 			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
 		} else {
