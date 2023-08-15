@@ -70,24 +70,24 @@ func (a *WebApp) startHTTP() {
 	a.router.GET("/health", monitoring.HealthGET)
 	// Group: v1
 	v1 := a.router.Group("/v1")
-	{
-		v1.POST("/users/register", a.Register)
-		v1.POST("/users/login", a.Login)
-		v1.GET("/user", a.User)
-		v1.POST("/users/delete", a.DeleteUser)
-		v1.POST("users/logout", a.Logout)
-		v1.GET("/albums", a.GetAllAlbums)
-		v1.GET("/albums/:code", a.GetAlbumByID)
-		v1.POST("/album", a.PostAlbums)
-		v1.POST("/album/update", a.UpdateAlbum)
-		v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
-		v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
-		a.logger.Info("swagger docs initializing")
-		v1.GET("/swagger", func(c *gin.Context) {
-			c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-		})
-		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	}
+
+	v1.POST("/users/register", a.Register)
+	v1.POST("/users/login", a.Login)
+	v1.GET("/user", a.User)
+	v1.POST("/users/delete", a.DeleteUser)
+	v1.POST("users/logout", a.Logout)
+	v1.GET("/albums", a.GetAllAlbums)
+	v1.GET("/albums/:code", a.GetAlbumByID)
+	v1.POST("/album", a.PostAlbums)
+	v1.POST("/album/update", a.UpdateAlbum)
+	v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
+	v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
+	a.logger.Info("swagger docs initializing")
+	v1.GET("/swagger", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+	v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	a.router.GET("/ping", Ping)
 
 	a.logger.Info("application completely initialized and started")
