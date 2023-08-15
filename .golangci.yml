@@ -304,6 +304,8 @@ issues:
   max-same-issues: 50
 
   exclude-rules:
+    - source: "// \\* godoc"
+      linters: [ godot ]
     - source: "(noinspection|TODO)"
       linters: [ godot ]
     - source: "//noinspection"
