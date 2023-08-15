@@ -2,14 +2,15 @@ package gin
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const SecretKey = "secret"
@@ -158,8 +159,8 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
 	monitoring.LogoutAttemptCounter.Inc()
-	Expires := time.Now().Add(-time.Hour)
-	a.logger.Printf("Expires: %s", Expires)
+	expires := time.Now().Add(-time.Hour)
+	a.logger.Debugf("Expires: %s", expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
 	monitoring.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})

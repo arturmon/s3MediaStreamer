@@ -183,7 +183,7 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 	return pool, nil
 }
 
-// ---------------------DB prometheus
+// ---------------------DB prometheus.
 var (
 	DatabaseConnectionAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "database_connection_attempt_total",

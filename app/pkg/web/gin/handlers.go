@@ -2,16 +2,16 @@ package gin
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
+	"net/http"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/monitoring"
 	"strings"
 	"time"
 
-	"net/http"
-	"skeleton-golange-application/app/pkg/monitoring"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 type Handler interface {
@@ -71,7 +71,7 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 
 	res, _ := json.Marshal(albums)
 	c.IndentedJSON(http.StatusOK, albums)
-	fmt.Println(string(res))
+	log.Debugf("Albums response: %s", res)
 }
 
 // PostAlbums	godoc

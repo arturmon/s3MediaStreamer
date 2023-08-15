@@ -2,11 +2,12 @@ package monitoring
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,7 @@ func PingStorage(ctx context.Context, dbOps model.DBOperations) {
 		err := dbOps.Ping(ctx)
 		if err != nil {
 			config.AppHealth = false
-			fmt.Println("Error pinging database:", err)
+			log.Infof("Error pinging database: %v", err)
 		} else {
 			config.AppHealth = true
 		}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
 
+	log "github.com/sirupsen/logrus"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -95,9 +97,9 @@ func (c *MongoClient) CreateMany(issues []config.Album) error {
 		v := &issues[i] // Use a pointer to the current issue
 		insertableList[i] = v
 		if v.Completed {
-			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			log.Infof("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
 		} else {
-			fmt.Printf("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			log.Infof("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
 		}
 	}
 
@@ -179,14 +181,14 @@ func (c *MongoClient) DeleteAll() error {
 	return nil
 }
 
-// PrintList - Print list of issues on console
+// PrintList - Print list of issues on console.
 func PrintList(issues []config.Album) {
 	for i := range issues {
 		v := &issues[i] // Use a pointer to the current issue
 		if v.Completed {
-			fmt.Printf("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
 		} else {
-			fmt.Printf("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			log.Infof("No Completed %d: %f    %s", i+1, v.Price, v.Title)
 		}
 	}
 }
