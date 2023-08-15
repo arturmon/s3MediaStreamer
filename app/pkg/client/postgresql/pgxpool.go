@@ -67,14 +67,14 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 
 func (c *PgClient) Connect() error {
 	if c.Pool != nil {
-		// Acquire a connection from the pool
+		// Acquire a connection from the pool.
 		conn, err := c.Pool.Acquire(context.Background())
 		if err != nil {
 			return err
 		}
-		// Release the connection back to the pool
+		// Release the connection back to the pool.
 		defer conn.Release()
-		// Ping the database to check the connection
+		// Ping the database to check the connection.
 		if err := conn.Conn().Ping(context.Background()); err != nil {
 			return err
 		}
@@ -170,7 +170,7 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 	insertableList := make([]interface{}, len(list)*9)
 	for i := range list {
 		baseIndex := i * 9
-		v := &list[i] // Use a pointer to the current album
+		v := &list[i] // Use a pointer to the current album.
 		insertableList[baseIndex] = &v.ID
 		insertableList[baseIndex+1] = &v.CreatedAt
 		insertableList[baseIndex+2] = &v.UpdatedAt
@@ -186,7 +186,8 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 
 	var placeholders []string
 	for i := 0; i < len(list); i++ {
-		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)", i*9+1, i*9+2, i*9+3, i*9+4, i*9+5, i*9+6, i*9+7, i*9+8, i*9+9))
+		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+			i*9+1, i*9+2, i*9+3, i*9+4, i*9+5, i*9+6, i*9+7, i*9+8, i*9+9))
 	}
 
 	query += strings.Join(placeholders, ", ")
@@ -210,17 +211,24 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 		return make([]config.Album, 0), nil
 	}
 
-	query := "SELECT _id, created_at, updated_at, title, artist, price, code, description, completed FROM album"
+	query := `
+		SELECT _id, created_at, updated_at, title, artist,
+		price, code, description, completed
+		FROM album`
 	rows, err := c.Pool.Query(context.TODO(), query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	albums := make([]config.Album, 0) // Initialize an empty slice
+	albums := make([]config.Album, 0) // Initialize an empty slice.
 	for rows.Next() {
 		var album config.Album
-		err := rows.Scan(&album.ID, &album.CreatedAt, &album.UpdatedAt, &album.Title, &album.Artist, &album.Price, &album.Code, &album.Description, &album.Completed)
+		err := rows.Scan(
+			&album.ID, &album.CreatedAt, &album.UpdatedAt,
+			&album.Title, &album.Artist, &album.Price,
+			&album.Code, &album.Description, &album.Completed,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -235,7 +243,7 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 }
 
 func (c *PgClient) DeleteAll() error {
-	// Check if the "album" table exists
+	// Check if the "album" table exists.
 	tableExists, err := c.TableExists("album")
 	if err != nil {
 		return err
@@ -262,7 +270,7 @@ func (c *PgClient) DeleteOne(code string) error {
 		return err
 	}
 
-	// Check if any row was deleted
+	// Check if any row was deleted.
 	if commandTag.RowsAffected() == 0 {
 		return fmt.Errorf("no album found with code: %s", code)
 	}
@@ -283,7 +291,7 @@ func (c *PgClient) MarkCompleted(code string) error {
 func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 	result := config.Album{}
 
-	// Check if the "album" table exists
+	// Check if the "album" table exists.
 	tableExists, err := c.TableExists("album")
 	if err != nil {
 		return result, err
@@ -317,7 +325,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 }
 
 func (c *PgClient) UpdateIssue(album *config.Album) error {
-	// Check if the "album" table exists
+	// Check if the "album" table exists.
 	tableExists, err := c.TableExists("album")
 	if err != nil {
 		return err

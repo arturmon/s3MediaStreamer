@@ -3,15 +3,16 @@ package gin
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	ginPrometheus "github.com/zsais/go-gin-prometheus"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	ginPrometheus "github.com/zsais/go-gin-prometheus"
 )
 
 type AppInterface interface {

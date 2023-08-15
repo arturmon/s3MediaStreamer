@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "github.com/joho/godotenv/autoload"
 	"os"
 	"os/signal"
 	_ "skeleton-golange-application/app/docs"
@@ -11,6 +10,8 @@ import (
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	"syscall"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title			Sceleton Golang Application API

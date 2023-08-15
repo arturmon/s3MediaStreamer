@@ -25,7 +25,11 @@ func RunMigrations(connectionString string) error {
 }
 
 func (c *PgClient) TableExists(tableName string) (bool, error) {
-	query := "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = $1)"
+	query := `
+		SELECT EXISTS (
+			SELECT FROM information_schema.tables
+			WHERE table_schema = current_schema() AND table_name = $1
+		)`
 	var exists bool
 	err := c.Pool.QueryRow(context.TODO(), query, tableName).Scan(&exists)
 	if err != nil {
