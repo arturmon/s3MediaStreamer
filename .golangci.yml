@@ -304,6 +304,24 @@ issues:
   max-same-issues: 50
 
   exclude-rules:
+    - source: "// @Router"
+      linters: [ godot ]
+    - source: "// @Summary"
+      linters: [ godot ]
+    - source: "// @Description"
+      linters: [ godot ]
+    - source: "// @Tags"
+      linters: [ godot ]
+    - source: "// @Accept"
+      linters: [ godot ]
+    - source: "// @Produce"
+      linters: [ godot ]
+    - source: "// @Success"
+      linters: [ godot ]
+    - source: "// @Failure"
+      linters: [ godot ]
+    - source: "// @Security"
+      linters: [ godot ]
     - source: "// \\* godoc"
       linters: [ godot ]
     - source: "(noinspection|TODO)"
