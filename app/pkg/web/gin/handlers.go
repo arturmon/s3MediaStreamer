@@ -2,6 +2,7 @@ package gin
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/monitoring"
@@ -293,7 +294,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 
 	existingAlbum, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
 		} else {
 			a.logger.Error(err)

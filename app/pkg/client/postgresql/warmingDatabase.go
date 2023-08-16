@@ -12,13 +12,13 @@ import (
 func RunMigrations(connectionString string) error {
 	m, err := migrate.New("file://migrations/psql", connectionString)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to initialize migrations: %w", err)
 	}
 	defer m.Close()
 
 	// Apply pending migrations
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("failed to apply migrations: %v", err)
+		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
 
 	return nil
@@ -33,7 +33,7 @@ func (c *PgClient) TableExists(tableName string) (bool, error) {
 	var exists bool
 	err := c.Pool.QueryRow(context.TODO(), query, tableName).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to check table existence: %w", err)
 	}
 	return exists, nil
 }

@@ -107,17 +107,17 @@ func (s *StorageConfig) Connect() error {
 		client, err := GetMongoClient(s)
 		if err != nil {
 			DatabaseConnectionFailureCounter.Inc()
-			return err
+			return fmt.Errorf("failed to connect to MongoDB: %w", err)
 		}
-		// Сохраните клиента в структуре s для дальнейшего использования.
+		// Save the client in the s structure for future use.
 		s.client = client
 	case PgSQLType:
 		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, s)
 		if err != nil {
 			DatabaseConnectionFailureCounter.Inc()
-			return err
+			return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
 		}
-		// Сохраните pool в структуре s для дальнейшего использования.
+		// Save the pool in the s structure for future use.
 		s.pool = pool
 	default:
 		return fmt.Errorf("unsupported database type: %s", s.Type)
@@ -206,7 +206,7 @@ var (
 		Buckets: prometheus.DefBuckets,
 	})
 
-	// Define additional counters for other database metrics as needed
+	// Define additional counters for other database metrics as needed.
 	// ...
 
 )

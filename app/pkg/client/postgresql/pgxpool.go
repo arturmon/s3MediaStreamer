@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
@@ -67,14 +68,11 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 
 func (c *PgClient) Connect() error {
 	if c.Pool != nil {
-		// Acquire a connection from the pool.
 		conn, err := c.Pool.Acquire(context.Background())
 		if err != nil {
 			return err
 		}
-		// Release the connection back to the pool.
 		defer conn.Release()
-		// Ping the database to check the connection.
 		if err := conn.Conn().Ping(context.Background()); err != nil {
 			return err
 		}
@@ -123,7 +121,7 @@ func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	query := `SELECT _id, name, email, password FROM "user" WHERE email = $1`
 	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return user, fmt.Errorf("user with email '%s' not found", email)
 		}
 		return user, err
@@ -316,7 +314,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 		&result.Completed,
 	)
 	if err != nil {
-		if pgx.ErrNoRows == err {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return result, fmt.Errorf("no album found with code: %s", code)
 		}
 		return result, err
