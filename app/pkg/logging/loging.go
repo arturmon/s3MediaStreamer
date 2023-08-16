@@ -52,6 +52,8 @@ func newLogger(level string) Logger {
 }
 
 func GetLogger(level string) Logger {
+	var loggerInit loggerInitializer
+
 	loggerInit.once.Do(func() {
 		loggerInit.instance = newLogger(level)
 	})
