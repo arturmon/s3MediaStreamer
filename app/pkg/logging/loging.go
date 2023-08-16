@@ -19,8 +19,10 @@ func (s *Logger) ExtraFields(fields map[string]interface{}) *Logger {
 	return &Logger{s.WithFields(fields)}
 }
 
-var instance Logger
-var once sync.Once
+var (
+	instance Logger
+	once     sync.Once
+)
 
 func GetLogger(level string) Logger {
 	once.Do(func() {

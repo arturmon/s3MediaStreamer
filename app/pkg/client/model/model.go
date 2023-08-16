@@ -158,7 +158,7 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 
 		pgxCfg, err := pgxpool.ParseConfig(dsn)
 		if err != nil {
-			log.Fatalf("Unable to parse config: %v\n", err)
+			log.Fatalf("Unable to parse config: %w\n", err) // <-- Use %w here.
 		}
 
 		pool, err = pgxpool.ConnectConfig(ctx, pgxCfg)
@@ -170,7 +170,7 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 		// Run database migrations
 		err = postgresql.RunMigrations(dsn)
 		if err != nil {
-			return fmt.Errorf("failed to run migrations: %v", err)
+			return fmt.Errorf("failed to run migrations: %w", err) // <-- Use %w here
 		}
 
 		return nil

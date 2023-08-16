@@ -161,7 +161,7 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	id := c.Param("code")
 	result, err := a.storage.Operations.GetIssuesByCode(id)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
 		} else {
 			a.logger.Error(err)
@@ -231,7 +231,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 
 	_, err = a.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
 		} else {
 			a.logger.Error(err)

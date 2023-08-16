@@ -75,8 +75,10 @@ type Config struct {
 	}
 }
 
-var instance *Config
-var once sync.Once
+var (
+	instance *Config
+	once     sync.Once
+)
 
 // GetConfig returns the singleton instance of the configuration.
 func GetConfig() *Config {
