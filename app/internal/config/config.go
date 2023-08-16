@@ -10,6 +10,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// getConfigManager returns a singleton instance of the configuration manager.
+func getConfigManager() *configManager {
+	return &configManager{}
+}
+
 // ConfigManager is responsible for managing the application's configuration.
 type configManager struct {
 	instance *Config
@@ -17,7 +22,7 @@ type configManager struct {
 }
 
 var (
-	cfgManager configManager
+	cfgManager = getConfigManager()
 )
 
 // Album represents data about a record album.
@@ -86,6 +91,8 @@ type Config struct {
 
 // GetConfig returns the singleton instance of the configuration.
 func GetConfig() *Config {
+	cfgManager := getConfigManager()
+
 	cfgManager.once.Do(func() {
 		log.Info("gather config")
 

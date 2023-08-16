@@ -31,6 +31,13 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		return nil, err
 	}
 
+	// Initialize DBOperations interface within the storage.
+	err = storage.Operations.Connect() // Initialize the storage's Operations field
+	if err != nil {
+		logger.Error("Failed to connect to the database:", err)
+		return nil, err
+	}
+
 	ctx := context.Background()
 	// Start monitoring the database storage.
 	go monitoring.PingStorage(ctx, storage.Operations)
