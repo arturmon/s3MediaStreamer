@@ -9,14 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Mocking the mockAppHealth variable to return true.
-var mockAppHealth = true
-
-func mockHealthGET(c *gin.Context, metrics *HealthMetrics) {
-	// Set the mockAppHealth before the test.
-	mockAppHealth = true // or false based on your test scenario.
-
-	// Call HealthGET with both required arguments.
+func mockHealthGET(c *gin.Context, metrics *HealthMetrics, mockAppHealth bool) {
+	c.Set("appHealth", mockAppHealth)
 	HealthGET(c, metrics)
 }
 
@@ -27,7 +21,8 @@ func TestHealthGET(t *testing.T) {
 	// Initialize a new Gin engine with the mockHandler.
 	r := gin.New()
 	r.GET("/health", func(c *gin.Context) {
-		mockHealthGET(c, metrics)
+		mockAppHealth := true // or false based on your test scenario.
+		mockHealthGET(c, metrics, mockAppHealth)
 	})
 
 	// Create a request to the "/health" endpoint.

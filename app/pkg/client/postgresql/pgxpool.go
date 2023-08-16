@@ -165,9 +165,9 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 }
 
 func (c *PgClient) CreateMany(list []config.Album) error {
-	insertableList := make([]interface{}, len(list)*9)
+	insertableList := make([]interface{}, len(list)*albumFieldCount)
 	for i := range list {
-		baseIndex := i * 9
+		baseIndex := i * albumFieldCount
 		v := &list[i] // Use a pointer to the current album.
 		insertableList[baseIndex] = &v.ID
 		insertableList[baseIndex+1] = &v.CreatedAt
@@ -184,8 +184,11 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 
 	var placeholders []string
 	for i := 0; i < len(list); i++ {
-		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-			i*9+1, i*9+2, i*9+3, i*9+4, i*9+5, i*9+6, i*9+7, i*9+8, i*9+9))
+		placeholderValues := make([]string, albumFieldCount)
+		for j := 0; j < albumFieldCount; j++ {
+			placeholderValues[j] = fmt.Sprintf("$%d", i*albumFieldCount+j+1)
+		}
+		placeholders = append(placeholders, "("+strings.Join(placeholderValues, ", ")+")")
 	}
 
 	query += strings.Join(placeholders, ", ")

@@ -101,12 +101,13 @@ func NewDBConfig(cfg *config.Config) (*DBConfig, error) {
 
 func (s *StorageConfig) Connect() error {
 	startTime := time.Now()
-	DatabaseConnectionAttemptCounter.Inc()
+	metrics := NewDBPrometheusMetrics()
+	metrics.DatabaseConnectionAttemptCounter.Inc()
 	switch DBType(s.Type) {
 	case MongoDBType:
 		client, err := GetMongoClient(s)
 		if err != nil {
-			DatabaseConnectionFailureCounter.Inc()
+			metrics.DatabaseConnectionFailureCounter.Inc()
 			return fmt.Errorf("failed to connect to MongoDB: %w", err)
 		}
 		// Save the client in the s structure for future use.
@@ -114,7 +115,7 @@ func (s *StorageConfig) Connect() error {
 	case PgSQLType:
 		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, s)
 		if err != nil {
-			DatabaseConnectionFailureCounter.Inc()
+			metrics.DatabaseConnectionFailureCounter.Inc()
 			return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
 		}
 		// Save the pool in the s structure for future use.
@@ -123,8 +124,8 @@ func (s *StorageConfig) Connect() error {
 		return fmt.Errorf("unsupported database type: %s", s.Type)
 	}
 	duration := time.Since(startTime)
-	ResponseTimeDBConnect.Observe(duration.Seconds())
-	DatabaseConnectionSuccessCounter.Inc()
+	metrics.ResponseTimeDBConnect.Observe(duration.Seconds())
+	metrics.DatabaseConnectionSuccessCounter.Inc()
 	return nil
 }
 
@@ -183,30 +184,33 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 	return pool, nil
 }
 
-// ---------------------DB prometheus.
-var (
-	DatabaseConnectionAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "database_connection_attempt_total",
-		Help: "Total number of database connection attempts",
-	})
+type DBPrometheusMetrics struct {
+	DatabaseConnectionAttemptCounter prometheus.Counter
+	DatabaseConnectionSuccessCounter prometheus.Counter
+	DatabaseConnectionFailureCounter prometheus.Counter
+	ResponseTimeDBConnect            prometheus.Histogram
+}
 
-	DatabaseConnectionSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "database_connection_success_total",
-		Help: "Total number of successful database connections",
-	})
-
-	DatabaseConnectionFailureCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "database_connection_failure_total",
-		Help: "Total number of failed database connections",
-	})
-
-	ResponseTimeDBConnect = promauto.NewHistogram(prometheus.HistogramOpts{
-		Name:    "database_response_time_seconds",
-		Help:    "Database response time histogram",
-		Buckets: prometheus.DefBuckets,
-	})
-
-	// Define additional counters for other database metrics as needed.
-	// ...
-
-)
+func NewDBPrometheusMetrics() *DBPrometheusMetrics {
+	return &DBPrometheusMetrics{
+		DatabaseConnectionAttemptCounter: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "database_connection_attempt_total",
+			Help: "Total number of database connection attempts",
+		}),
+		DatabaseConnectionSuccessCounter: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "database_connection_success_total",
+			Help: "Total number of successful database connections",
+		}),
+		DatabaseConnectionFailureCounter: promauto.NewCounter(prometheus.CounterOpts{
+			Name: "database_connection_failure_total",
+			Help: "Total number of failed database connections",
+		}),
+		ResponseTimeDBConnect: promauto.NewHistogram(prometheus.HistogramOpts{
+			Name:    "database_response_time_seconds",
+			Help:    "Database response time histogram",
+			Buckets: prometheus.DefBuckets,
+		}),
+		// Define additional counters for other database metrics as needed.
+		// ...
+	}
+}
