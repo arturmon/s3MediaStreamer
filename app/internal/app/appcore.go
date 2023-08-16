@@ -21,6 +21,9 @@ type App struct {
 	amqpClient *amqp.MessageClient
 }
 
+const retryDelaySeconds = 5
+const maxRetries = 5
+
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	healthMetrics := monitoring.NewHealthMetrics()
@@ -57,7 +60,6 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
 	if cfg.MessageQueue.Enable {
-		maxRetries := 5
 		for retry := 1; retry <= maxRetries; retry++ {
 			amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
 			if err == nil {
@@ -65,8 +67,8 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 			}
 			logger.Error("Failed to initialize MQ:", err)
 			if retry < maxRetries {
-				logger.Info("Retrying in 5 seconds...")
-				time.Sleep(5 * time.Second)
+				logger.Info("Retrying in", retryDelaySeconds, "seconds...")
+				time.Sleep(retryDelaySeconds * time.Second)
 			} else {
 				logger.Fatal("Failed to initialize MQ after", maxRetries, "attempts")
 			}

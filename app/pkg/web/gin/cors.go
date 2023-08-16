@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const httpNoContent = 204
+
 // noinspection
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -13,7 +15,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			c.AbortWithStatus(httpNoContent)
 			return
 		}
 

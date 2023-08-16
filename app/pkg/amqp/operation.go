@@ -10,6 +10,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const bcryptCost = 14
+
 // amqpGetAlbumByCode retrieves an album by its code using AMQP.
 func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
 	album, err := c.storage.Operations.GetIssuesByCode(code)
@@ -155,7 +157,7 @@ func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
 	}
 
 	// Hash the user's password
-	hashedPassword, err := bcrypt.GenerateFromPassword(user.Password, 14)
+	hashedPassword, err := bcrypt.GenerateFromPassword(user.Password, bcryptCost)
 	if err != nil {
 		return err
 	}

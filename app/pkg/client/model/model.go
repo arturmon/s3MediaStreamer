@@ -30,6 +30,7 @@ type StorageConfig struct {
 }
 
 const (
+	maxConnectionAttempts = 5
 	// maxAttempts is the maximum number of attempts to connect to the database.
 	maxAttempts = 10
 	// maxDelay is the maximum delay between connection attempts.
@@ -154,7 +155,7 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 		cfg.Host, cfg.Port, cfg.Database,
 	)
 	err = postgresql.DoWithAttempts(func() error {
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, maxConnectionAttempts*time.Second)
 		defer cancel()
 
 		pgxCfg, err := pgxpool.ParseConfig(dsn)

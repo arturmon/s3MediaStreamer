@@ -13,6 +13,8 @@ import (
 )
 
 const SecretKey = "secret"
+const bcryptCost = 14
+const jwtExpirationHours = 24
 
 // Register godoc
 // @Summary		Registers a new user.
@@ -42,7 +44,7 @@ func (a *WebApp) Register(c *gin.Context) {
 		return
 	}
 
-	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
+	password, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcryptCost)
 
 	user := config.User{
 		Id:       uuid.New(),
@@ -101,7 +103,7 @@ func (a *WebApp) Login(c *gin.Context) {
 	var key = []byte(SecretKey)
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": user.Email,
-		"exp": time.Now().Add(time.Hour * 24).Unix(), // 1 day
+		"exp": time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
 	})
 
 	token, err := claims.SignedString(key)
