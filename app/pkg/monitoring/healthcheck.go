@@ -37,17 +37,17 @@ func HealthGET(c *gin.Context) {
 	}
 }
 
-func PingStorage(ctx context.Context, dbOps model.DBOperations) {
+func PingStorage(ctx context.Context, dbOps model.DBOperations, cfg *config.Config) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		err := dbOps.Ping(ctx)
 		if err != nil {
-			config.SetAppHealth(false)
+			config.SetAppHealth(cfg, false)
 			log.Infof("Error pinging database: %v", err)
 		} else {
-			config.SetAppHealth(true)
+			config.SetAppHealth(cfg, true)
 		}
 	}
 }

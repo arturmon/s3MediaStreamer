@@ -23,6 +23,7 @@ type App struct {
 
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
+
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
 	storage, err := model.NewDBConfig(cfg)
@@ -40,7 +41,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 
 	ctx := context.Background()
 	// Start monitoring the database storage.
-	go monitoring.PingStorage(ctx, storage.Operations)
+	go monitoring.PingStorage(ctx, storage.Operations, cfg)
 
 	// Initialize the Gin web framework.
 	myGin, err := gin.NewAppUseGin(cfg, logger)

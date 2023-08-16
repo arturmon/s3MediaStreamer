@@ -48,7 +48,7 @@ func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	}
 	ctx := context.Background()
 	logger.Info("init ping storage")
-	go monitoring.PingStorage(ctx, storage.Operations)
+	go monitoring.PingStorage(ctx, storage.Operations, cfg)
 
 	return &WebApp{
 		cfg:     cfg,

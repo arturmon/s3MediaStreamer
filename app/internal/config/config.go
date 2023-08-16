@@ -11,12 +11,12 @@ import (
 )
 
 // getConfigManager returns a singleton instance of the configuration manager.
-func getConfigManager() *configManager {
-	return &configManager{}
+func getConfigManager() *ConfigManager {
+	return &ConfigManager{}
 }
 
 // ConfigManager is responsible for managing the application's configuration.
-type configManager struct {
+type ConfigManager struct {
 	instance *Config
 	once     sync.Once
 }
@@ -94,17 +94,17 @@ func GetConfig() *Config {
 	cfgManager := getConfigManager()
 
 	cfgManager.once.Do(func() {
-		log.Info("gather config")
+		log.Info("gathering config")
 
 		cfgManager.instance = &Config{}
-
-		if err := cleanenv.ReadEnv(cfgManager.instance); err != nil {
-			helpText := "The Art of Development - Monolith Notes System"
-			help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
-			log.Debug(help)
-			log.Fatal(err)
-		}
 	})
+
+	if err := cleanenv.ReadEnv(cfgManager.instance); err != nil {
+		helpText := "The Art of Development - Monolith Notes System"
+		help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
+		log.Debug(help)
+		log.Errorf("Error reading environment variables: %v", err)
+	}
 
 	return cfgManager.instance
 }
@@ -124,6 +124,6 @@ func GetAppHealth() bool {
 }
 
 // SetAppHealth sets the value of AppHealth.
-func SetAppHealth(health bool) {
-	cfgManager.instance.AppHealth = health
+func SetAppHealth(config *Config, health bool) {
+	config.AppHealth = health
 }
