@@ -15,6 +15,9 @@ import (
 const SecretKey = "secret"
 const bcryptCost = 14
 const jwtExpirationHours = 24
+const secondsInOneMinute = 60
+const minutesInOneHour = 60
+const hoursInOneDay = 24
 
 // Register godoc
 // @Summary		Registers a new user.
@@ -112,7 +115,7 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	maxAge := 60 * 60 * 24
+	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
 	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
 	a.logger.Debugf("jwt: %s", token)
 	a.metrics.LoginSuccessCounter.Inc()
