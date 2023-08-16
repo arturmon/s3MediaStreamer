@@ -275,16 +275,16 @@ func (c *MongoClient) UpdateIssue(album *config.Album) error {
 	}
 
 	// Define the filter to find the album by its code.
-	filter := bson.D{{"code", album.Code}}
+	filter := bson.D{{Key: "code", Value: album.Code}}
 
 	// Define the update fields using the $set operator to update only the specified fields.
 	update := bson.D{
 		{"$set", bson.D{
-			{"title", album.Title},
-			{"artist", album.Artist},
-			{"price", album.Price},
-			{"description", album.Description},
-			{"completed", album.Completed},
+			{Key: "title", Value: album.Title},
+			{Key: "artist", Value: album.Artist},
+			{Key: "price", Value: album.Price},
+			{Key: "description", Value: album.Description},
+			{Key: "completed", Value: album.Completed},
 		}},
 		{"$currentDate", bson.D{
 			{"updatedat", true}, // Set the "updatedat" field to the current date.

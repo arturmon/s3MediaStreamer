@@ -148,7 +148,6 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 	}
 	a.metrics.DeleteUserSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
-	return
 }
 
 // Logout godoc
