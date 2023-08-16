@@ -28,28 +28,32 @@ var (
 	loggerInit loggerInitializer
 )
 
+func newLogger(level string) Logger {
+	logrusLevel, err := logrus.ParseLevel(level)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	l := logrus.New()
+	l.SetReportCaller(true)
+	l.Formatter = &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := path.Base(f.File)
+			return fmt.Sprintf("%s:%d", filename, f.Line), fmt.Sprintf("%s()", f.Function)
+		},
+		DisableColors: false,
+		FullTimestamp: true,
+	}
+
+	l.SetOutput(os.Stdout)
+	l.SetLevel(logrusLevel)
+
+	return Logger{logrus.NewEntry(l)}
+}
+
 func GetLogger(level string) Logger {
 	loggerInit.once.Do(func() {
-		logrusLevel, err := logrus.ParseLevel(level)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		l := logrus.New()
-		l.SetReportCaller(true)
-		l.Formatter = &logrus.TextFormatter{
-			CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-				filename := path.Base(f.File)
-				return fmt.Sprintf("%s:%d", filename, f.Line), fmt.Sprintf("%s()", f.Function)
-			},
-			DisableColors: false,
-			FullTimestamp: true,
-		}
-
-		l.SetOutput(os.Stdout)
-		l.SetLevel(logrusLevel)
-
-		loggerInit.instance = Logger{logrus.NewEntry(l)}
+		loggerInit.instance = newLogger(level)
 	})
 
 	return loggerInit.instance

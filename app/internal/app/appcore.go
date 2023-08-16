@@ -23,7 +23,7 @@ type App struct {
 
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
-	// Initialize the database storage
+	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
 	storage, err := model.NewDBConfig(cfg)
 	if err != nil {
@@ -32,10 +32,10 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 
 	ctx := context.Background()
-	// Start monitoring the database storage
+	// Start monitoring the database storage.
 	go monitoring.PingStorage(ctx, storage.Operations)
 
-	// Initialize the Gin web framework
+	// Initialize the Gin web framework.
 	myGin, err := gin.NewAppUseGin(cfg, logger)
 	if err != nil {
 		logger.Error("Failed to initialize Gin:", err)
@@ -43,14 +43,14 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		return nil, err
 	}
 
-	// Create an AMQP client if it's enabled in the configuration
+	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
 	if cfg.MessageQueue.Enable {
 		maxRetries := 5
 		for retry := 1; retry <= maxRetries; retry++ {
 			amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
 			if err == nil {
-				break // Break out of the loop if the connection is successful
+				break // Break out of the loop if the connection is successful.
 			}
 			logger.Error("Failed to initialize MQ:", err)
 			if retry < maxRetries {
@@ -62,7 +62,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		}
 	}
 
-	// Return a new App instance with all initialized components
+	// Return a new App instance with all initialized components.
 	return &App{
 		cfg:        cfg,
 		logger:     logger,

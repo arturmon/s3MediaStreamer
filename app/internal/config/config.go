@@ -10,9 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
+// ConfigManager is responsible for managing the application's configuration.
+type configManager struct {
 	instance *Config
 	once     sync.Once
+}
+
+var (
+	cfgManager configManager
 )
 
 // Album represents data about a record album.
@@ -81,20 +86,20 @@ type Config struct {
 
 // GetConfig returns the singleton instance of the configuration.
 func GetConfig() *Config {
-	once.Do(func() {
+	cfgManager.once.Do(func() {
 		log.Info("gather config")
 
-		instance = &Config{}
+		cfgManager.instance = &Config{}
 
-		if err := cleanenv.ReadEnv(instance); err != nil {
+		if err := cleanenv.ReadEnv(cfgManager.instance); err != nil {
 			helpText := "The Art of Development - Monolith Notes System"
-			help, _ := cleanenv.GetDescription(instance, &helpText)
+			help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
 			log.Debug(help)
 			log.Fatal(err)
 		}
 	})
 
-	return instance
+	return cfgManager.instance
 }
 
 // PrintAllDefaultEnvs prints the help text containing all the default environment variables.
@@ -108,10 +113,10 @@ func PrintAllDefaultEnvs(logger *logging.Logger) {
 
 // GetAppHealth returns the value of AppHealth.
 func GetAppHealth() bool {
-	return instance.AppHealth
+	return cfgManager.instance.AppHealth
 }
 
 // SetAppHealth sets the value of AppHealth.
 func SetAppHealth(health bool) {
-	instance.AppHealth = health
+	cfgManager.instance.AppHealth = health
 }
