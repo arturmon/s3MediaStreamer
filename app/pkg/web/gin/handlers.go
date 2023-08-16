@@ -134,6 +134,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 
 // GetAlbumByID godoc
 // @Summary		Album whose ID value matches the id.
+// noinspection
 // @Description locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.
 // @Tags		album-controller
 // @Accept		*/*

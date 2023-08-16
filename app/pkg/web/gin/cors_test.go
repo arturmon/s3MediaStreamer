@@ -32,7 +32,7 @@ func TestCORSMiddleware(t *testing.T) {
 	if w.Code != 200 {
 		t.Errorf("Expected status code 200, but got %d", w.Code)
 	}
-
+	// noinspection
 	expectedHeaders := map[string]string{
 		"Access-Control-Allow-Origin":      "http://localhost:3000",
 		"Access-Control-Allow-Credentials": "true",

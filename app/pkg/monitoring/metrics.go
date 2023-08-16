@@ -8,17 +8,17 @@ import (
 // ---------------------Register function.
 var (
 	RegisterAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "register_attempt_count",
+		Name: "register_attempt_count_total",
 		Help: "Total number of registration attempts",
 	})
 
 	RegisterSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "register_success_count",
+		Name: "register_success_count_total",
 		Help: "Total number of successful registrations",
 	})
 
 	RegisterErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "register_error_count",
+		Name: "register_error_count_total",
 		Help: "Total number of registration errors",
 	})
 )
@@ -26,22 +26,22 @@ var (
 // ---------------------Login function.
 var (
 	LoginAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "login_attempt_count",
+		Name: "login_attempt_count_total",
 		Help: "Total number of login attempts",
 	})
 
 	ErrPasswordCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "incorrect_password_count",
+		Name: "incorrect_password_count_total",
 		Help: "incorrect password counter",
 	})
 
 	LoginSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "login_success_count",
+		Name: "login_success_count_total",
 		Help: "Total number of successful logins",
 	})
 
 	LoginErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "login_error_count",
+		Name: "login_error_count_total",
 		Help: "Total number of login errors",
 	})
 )
