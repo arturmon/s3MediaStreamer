@@ -117,7 +117,7 @@ func (c *MongoClient) CreateMany(issues []config.Album) error {
 
 func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
 	result := config.Album{}
-	filter := bson.D{primitive.E{Key: "code", Value: code}}
+	filter := bson.D{{Key: "code", Value: code}} // Fix the linting issue here
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return result, err
@@ -223,18 +223,16 @@ func (c *MongoClient) CreateUser(user config.User) error {
 func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 	result := config.User{}
 	// Define filter query for fetching a specific document from the collection.
-	filter := bson.D{primitive.E{Key: "email", Value: email}}
+	filter := bson.D{{Key: "email", Value: email}} // Fix the linting issue here
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return result, err
 	}
-
 	// Perform FindOne operation and validate against errors.
 	err = collection.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
 		return result, err
 	}
-
 	// Return the result without any error.
 	return result, nil
 }

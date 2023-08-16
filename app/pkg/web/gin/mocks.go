@@ -64,8 +64,3 @@ func (m *MockDBOperations) DeleteAll() error {
 
 	return nil // Return nil to indicate successful "deletion."
 }
-
-func (m *MockDBOperations) MarkCompleted(code string) error {
-	// Implement mock behavior for MarkCompleted
-	return nil
-}
