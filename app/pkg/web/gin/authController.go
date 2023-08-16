@@ -120,7 +120,6 @@ func (a *WebApp) Login(c *gin.Context) {
 	a.logger.Debugf("jwt: %s", token)
 	a.metrics.LoginSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
-	return
 }
 
 // DeleteUser godoc
@@ -168,7 +167,6 @@ func (a *WebApp) Logout(c *gin.Context) {
 	c.SetCookie("jwt", "", -1, "", "", false, true)
 	a.metrics.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
-	return
 }
 
 // User godoc
@@ -197,7 +195,6 @@ func (a *WebApp) User(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
-	return
 }
 
 // UserResponse represents the response object for the user information endpoint.

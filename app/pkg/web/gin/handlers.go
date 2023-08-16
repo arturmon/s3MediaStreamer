@@ -129,7 +129,6 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, newAlbum)
-	return
 }
 
 // GetAlbumByID godoc
