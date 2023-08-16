@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
 
@@ -94,7 +95,7 @@ func (c *MongoClient) CreateIssue(album *config.Album) error {
 func (c *MongoClient) CreateMany(issues []config.Album) error {
 	insertableList := make([]interface{}, len(issues))
 	for i := range issues {
-		v := &issues[i] // Use a pointer to the current issue
+		v := &issues[i] // Use a pointer to the current issue.
 		insertableList[i] = v
 		if v.Completed {
 			log.Infof("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
@@ -184,7 +185,7 @@ func (c *MongoClient) DeleteAll() error {
 // PrintList - Print list of issues on console.
 func PrintList(issues []config.Album) {
 	for i := range issues {
-		v := &issues[i] // Use a pointer to the current issue
+		v := &issues[i] // Use a pointer to the current issue.
 		if v.Completed {
 			log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
 		} else {
@@ -199,10 +200,10 @@ func (c *MongoClient) CreateUser(user config.User) error {
 		return err
 	}
 
-	// Поиск пользователя с помощью email
+	// Поиск пользователя с помощью email.
 	existingUser, err := c.FindUserToEmail(user.Email)
 	if err != nil {
-		if err != mongo.ErrNoDocuments {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
 			return err
 		}
 
@@ -215,26 +216,26 @@ func (c *MongoClient) CreateUser(user config.User) error {
 		return nil
 	}
 
-	// Пользователь с таким email уже существует
+	// Пользователь с таким email уже существует.
 	return fmt.Errorf("user with email '%s' already exists", existingUser.Email)
 }
 
 func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 	result := config.User{}
-	// Define filter query for fetching a specific document from the collection
+	// Define filter query for fetching a specific document from the collection.
 	filter := bson.D{primitive.E{Key: "email", Value: email}}
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return result, err
 	}
 
-	// Perform FindOne operation and validate against errors
+	// Perform FindOne operation and validate against errors.
 	err = collection.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
 		return result, err
 	}
 
-	// Return the result without any error
+	// Return the result without any error.
 	return result, nil
 }
 
@@ -245,23 +246,23 @@ func (c *MongoClient) MarkCompleted(code string) error {
 		return err
 	}
 
-	// Определение фильтра для поиска записи по коду
+	// Определение фильтра для поиска записи по коду.
 	filter := bson.D{primitive.E{Key: "code", Value: code}}
 
-	// Определение обновления для установки флага "completed" в true
+	// Определение обновления для установки флага "completed" в true.
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "completed", Value: true},
 		}},
 	}
 
-	// Выполнение операции обновления
+	// Выполнение операции обновления.
 	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
 
-	// Проверка, была ли обновлена хотя бы одна запись
+	// Проверка, была ли обновлена хотя бы одна запись.
 	if result.ModifiedCount == 0 {
 		return mongo.ErrNoDocuments
 	}
@@ -275,10 +276,10 @@ func (c *MongoClient) UpdateIssue(album *config.Album) error {
 		return err
 	}
 
-	// Define the filter to find the album by its code
+	// Define the filter to find the album by its code.
 	filter := bson.D{{"code", album.Code}}
 
-	// Define the update fields using the $set operator to update only the specified fields
+	// Define the update fields using the $set operator to update only the specified fields.
 	update := bson.D{
 		{"$set", bson.D{
 			{"title", album.Title},
@@ -288,11 +289,11 @@ func (c *MongoClient) UpdateIssue(album *config.Album) error {
 			{"completed", album.Completed},
 		}},
 		{"$currentDate", bson.D{
-			{"updatedat", true}, // Set the "updatedat" field to the current date
+			{"updatedat", true}, // Set the "updatedat" field to the current date.
 		}},
 	}
 
-	// Perform the update operation
+	// Perform the update operation.
 	_, err = collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err

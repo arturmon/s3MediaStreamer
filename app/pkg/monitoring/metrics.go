@@ -49,17 +49,17 @@ var (
 // ---------------------DeleteUser function.
 var (
 	DeleteUserAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "delete_user_attempt_count",
+		Name: "delete_user_attempt_count_total",
 		Help: "Total number of delete user attempts",
 	})
 
 	DeleteUserSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "delete_user_success_count",
+		Name: "delete_user_success_count_total",
 		Help: "Total number of successful user deletions",
 	})
 
 	DeleteUserErrorCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "delete_user_error_count",
+		Name: "delete_user_error_count_total",
 		Help: "Total number of delete user errors",
 	})
 )
@@ -67,12 +67,12 @@ var (
 // ---------------------Logout function.
 var (
 	LogoutAttemptCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "logout_attempt_count",
+		Name: "logout_attempt_count_total",
 		Help: "Total number of logout attempts",
 	})
 
 	LogoutSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "logout_success_count",
+		Name: "logout_success_count_total",
 		Help: "Total number of successful logouts",
 	})
 )
