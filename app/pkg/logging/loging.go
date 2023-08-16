@@ -24,10 +24,6 @@ func (s *Logger) ExtraFields(fields map[string]interface{}) *Logger {
 	return &Logger{s.WithFields(fields)}
 }
 
-var (
-	loggerInit loggerInitializer
-)
-
 func newLogger(level string) Logger {
 	logrusLevel, err := logrus.ParseLevel(level)
 	if err != nil {

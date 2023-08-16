@@ -21,10 +21,6 @@ type ConfigManager struct {
 	once     sync.Once
 }
 
-var (
-	cfgManager = getConfigManager()
-)
-
 // Album represents data about a record album.
 type Album struct {
 	ID          uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`

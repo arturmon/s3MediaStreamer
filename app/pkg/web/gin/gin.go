@@ -31,7 +31,6 @@ type WebApp struct {
 }
 
 func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
-
 	logger.Info("router initializing")
 
 	// Gin instance
