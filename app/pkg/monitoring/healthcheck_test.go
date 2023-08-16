@@ -14,7 +14,7 @@ import (
 var mockAppHealth = true
 
 func mockHealthGET(c *gin.Context) {
-	config.AppHealth = mockAppHealth
+	config.SetAppHealth(mockAppHealth)
 	HealthGET(c)
 }
 
@@ -24,7 +24,7 @@ func TestHealthGET(t *testing.T) {
 	r.GET("/health", mockHealthGET)
 
 	// Create a request to the "/health" endpoint.
-	req, _ := http.NewRequest("GET", "/health", http.NoBody) // Use http.NoBody instead of nil
+	req, _ := http.NewRequest("GET", "/health", http.NoBody)
 
 	// Create a response recorder to record the response.
 	w := httptest.NewRecorder()
@@ -36,6 +36,6 @@ func TestHealthGET(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// You can also check the response body or headers as needed.
-	// For example, you can assert that the response contains {"status": "UP"} in the JSON body:.
+	// For example, you can assert that the response contains {"status": "UP"} in the JSON body:
 	assert.JSONEq(t, `{"status": "UP"}`, w.Body.String())
 }
