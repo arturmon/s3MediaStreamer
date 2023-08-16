@@ -3,7 +3,6 @@ package monitoring
 import (
 	"context"
 	"net/http"
-	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"time"
 
@@ -11,6 +10,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type HealthMetrics struct {
+	HealthStatus bool
+	// Add other metric fields here as needed
+}
+
+func NewHealthMetrics() *HealthMetrics {
+	return &HealthMetrics{
+		HealthStatus: false,
+		// Initialize other metric fields here
+	}
+}
 
 type HealthResponse struct {
 	Status string `json:"status"`
@@ -25,8 +36,8 @@ type HealthResponse struct {
 // @Success 200 {object} HealthResponse
 // @Failure 500 {object} HealthResponse
 // @Router /health [get]
-func HealthGET(c *gin.Context) {
-	if config.GetAppHealth() { // Use GetAppHealth function here.
+func HealthGET(c *gin.Context, metrics *HealthMetrics) {
+	if metrics.HealthStatus {
 		c.JSON(http.StatusOK, HealthResponse{
 			Status: "UP",
 		})
@@ -37,17 +48,17 @@ func HealthGET(c *gin.Context) {
 	}
 }
 
-func PingStorage(ctx context.Context, dbOps model.DBOperations, cfg *config.Config) {
+func PingStorage(ctx context.Context, dbOps model.DBOperations, metrics *HealthMetrics) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		err := dbOps.Ping(ctx)
 		if err != nil {
-			config.SetAppHealth(cfg, false)
+			metrics.HealthStatus = false
 			log.Infof("Error pinging database: %v", err)
 		} else {
-			config.SetAppHealth(cfg, true)
+			metrics.HealthStatus = true
 		}
 	}
 }

@@ -3,6 +3,7 @@ package gin
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
@@ -20,13 +21,16 @@ type AppInterface interface {
 }
 
 type WebApp struct {
-	cfg     *config.Config
-	logger  *logging.Logger
-	router  *gin.Engine
-	storage *model.DBConfig
+	cfg           *config.Config
+	logger        *logging.Logger
+	router        *gin.Engine
+	storage       *model.DBConfig
+	healthMetrics *monitoring.HealthMetrics
+	metrics       *monitoring.Metrics
 }
 
 func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
+
 	logger.Info("router initializing")
 
 	// Gin instance
@@ -46,15 +50,20 @@ func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx := context.Background()
-	logger.Info("init ping storage")
-	go monitoring.PingStorage(ctx, storage.Operations, cfg)
+
+	reg := prometheus.NewRegistry()
+	m := monitoring.NewMetrics(reg)
+
+	healthMetrics := monitoring.NewHealthMetrics()
+	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)
 
 	return &WebApp{
-		cfg:     cfg,
-		logger:  logger,
-		router:  router,
-		storage: storage,
+		cfg:           cfg,
+		logger:        logger,
+		router:        router,
+		storage:       storage,
+		healthMetrics: healthMetrics,
+		metrics:       m,
 	}, nil
 }
 
@@ -66,7 +75,9 @@ func (a *WebApp) startHTTP() {
 	a.logger.Info("start HTTP")
 	// Routes
 	a.logger.Info("heartbeat metric initializing")
-	a.router.GET("/health", monitoring.HealthGET)
+	a.router.GET("/health", func(c *gin.Context) {
+		monitoring.HealthGET(c, a.healthMetrics) // Pass the healthMetrics to HealthGET.
+	})
 	// Group: v1
 	v1 := a.router.Group("/v1")
 

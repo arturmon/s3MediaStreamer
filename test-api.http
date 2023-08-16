@@ -1,5 +1,5 @@
 ###
-GET http://localhost:10000/v1/ping
+GET http://localhost:10000/ping
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/albums
@@ -48,7 +48,7 @@ POST http://localhost:10000/v1/users/register
 Content-Type: application/json
 
 {
-  "email":"aa@a.com",
+  "email":"a@a.com",
   "name":"a",
   "password":"1"
 }

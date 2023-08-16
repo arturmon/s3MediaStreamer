@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/monitoring"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,7 @@ const SecretKey = "secret"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
 	// prometheuse
-	monitoring.RegisterAttemptCounter.Inc()
+	a.metrics.RegisterAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
@@ -54,11 +53,11 @@ func (a *WebApp) Register(c *gin.Context) {
 
 	err = a.storage.Operations.CreateUser(user)
 	if err != nil {
-		monitoring.RegisterErrorCounter.Inc()
+		a.metrics.RegisterErrorCounter.Inc()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
 		return
 	}
-	monitoring.RegisterSuccessCounter.Inc()
+	a.metrics.RegisterSuccessCounter.Inc()
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -76,7 +75,7 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
 	// prometheus
-	monitoring.LoginAttemptCounter.Inc()
+	a.metrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
@@ -92,10 +91,10 @@ func (a *WebApp) Login(c *gin.Context) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		monitoring.LoginErrorCounter.Inc()
+		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
 		// Prometheus
-		monitoring.ErrPasswordCounter.Inc()
+		a.metrics.ErrPasswordCounter.Inc()
 		return
 	}
 
@@ -114,7 +113,7 @@ func (a *WebApp) Login(c *gin.Context) {
 	maxAge := 60 * 60 * 24
 	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
 	a.logger.Debugf("jwt: %s", token)
-	monitoring.LoginSuccessCounter.Inc()
+	a.metrics.LoginSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
 }
@@ -131,7 +130,7 @@ func (a *WebApp) Login(c *gin.Context) {
 // @Failure     404 {object} ErrorResponse "Not Found - User not found"
 // @Router		/users/delete [delete]
 func (a *WebApp) DeleteUser(c *gin.Context) {
-	monitoring.DeleteUserAttemptCounter.Inc()
+	a.metrics.DeleteUserAttemptCounter.Inc()
 	email, err := a.checkAuthorization(c)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
@@ -139,11 +138,11 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 	}
 	err = a.storage.Operations.DeleteUser(email)
 	if err != nil {
-		monitoring.DeleteUserErrorCounter.Inc()
+		a.metrics.DeleteUserErrorCounter.Inc()
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
 	}
-	monitoring.DeleteUserSuccessCounter.Inc()
+	a.metrics.DeleteUserSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 	return
 }
@@ -158,11 +157,11 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Success     200 {object} ErrorResponse  "Success"
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
-	monitoring.LogoutAttemptCounter.Inc()
+	a.metrics.LogoutAttemptCounter.Inc()
 	expires := time.Now().Add(-time.Hour)
 	a.logger.Debugf("Expires: %s", expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
-	monitoring.LogoutSuccessCounter.Inc()
+	a.metrics.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 	return
 }

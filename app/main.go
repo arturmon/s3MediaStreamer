@@ -36,7 +36,6 @@ func main() {
 	defer cancel()
 
 	cfg := config.GetConfig()
-	config.SetAppHealth(cfg, false)
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")

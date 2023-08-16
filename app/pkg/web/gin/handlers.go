@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/monitoring"
 	"strings"
 	"time"
 
@@ -61,7 +60,7 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
-	monitoring.GetAllAlbumsCounter.Inc()
+	a.metrics.GetAllAlbumsCounter.Inc()
 	albums, err := a.storage.Operations.GetAllIssues()
 
 	if err != nil {
@@ -95,7 +94,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		return
 	}
 	// Increment the counter for each request handled by PostAlbums
-	monitoring.PostAlbumsCounter.Inc()
+	a.metrics.PostAlbumsCounter.Inc()
 	var newAlbum config.Album
 
 	newAlbum.ID = uuid.New()
@@ -156,7 +155,7 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	}
 
 	// If user is authorized, proceed with getting the album
-	monitoring.GetAlbumByIDCounter.Inc()
+	a.metrics.GetAlbumByIDCounter.Inc()
 
 	id := c.Param("code")
 	result, err := a.storage.Operations.GetIssuesByCode(id)
@@ -192,7 +191,7 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	}
 
 	// Increment the counter for each request handled by GetDeleteAll
-	monitoring.GetDeleteAllCounter.Inc()
+	a.metrics.GetDeleteAllCounter.Inc()
 
 	err = a.storage.Operations.DeleteAll()
 	if err != nil {
@@ -225,7 +224,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	}
 
 	// If user is authorized, proceed with deleting the album by ID
-	monitoring.GetDeleteByIDCounter.Inc()
+	a.metrics.GetDeleteByIDCounter.Inc()
 
 	code := c.Param("code")
 
@@ -272,7 +271,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	}
 
 	// Increment the counter for each request handled by UpdateAlbum
-	monitoring.UpdateAlbumCounter.Inc()
+	a.metrics.UpdateAlbumCounter.Inc()
 
 	var newAlbum config.Album
 

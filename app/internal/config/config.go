@@ -117,13 +117,3 @@ func PrintAllDefaultEnvs(logger *logging.Logger) {
 	// Print the help text containing all the default environment variables
 	logger.Debug(help)
 }
-
-// GetAppHealth returns the value of AppHealth.
-func GetAppHealth() bool {
-	return cfgManager.instance.AppHealth
-}
-
-// SetAppHealth sets the value of AppHealth.
-func SetAppHealth(config *Config, health bool) {
-	config.AppHealth = health
-}
