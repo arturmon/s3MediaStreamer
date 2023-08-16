@@ -26,7 +26,7 @@ type HealthResponse struct {
 // @Failure 500 {object} HealthResponse
 // @Router /health [get]
 func HealthGET(c *gin.Context) {
-	if config.AppHealth {
+	if config.GetAppHealth() { // Use GetAppHealth function here.
 		c.JSON(http.StatusOK, HealthResponse{
 			Status: "UP",
 		})
@@ -44,10 +44,10 @@ func PingStorage(ctx context.Context, dbOps model.DBOperations) {
 	for range ticker.C {
 		err := dbOps.Ping(ctx)
 		if err != nil {
-			config.AppHealth = false
+			config.SetAppHealth(false)
 			log.Infof("Error pinging database: %v", err)
 		} else {
-			config.AppHealth = true
+			config.SetAppHealth(true)
 		}
 	}
 }

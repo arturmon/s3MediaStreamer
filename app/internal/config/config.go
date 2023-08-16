@@ -10,8 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// AppHealth stores the status of the application's health.
-var AppHealth = false
+var (
+	instance *Config
+	once     sync.Once
+)
 
 // Album represents data about a record album.
 type Album struct {
@@ -38,7 +40,9 @@ type User struct {
 
 // Config represents the application's configuration.
 type Config struct {
-	Listen struct {
+	// AppHealth stores the status of the application's health.
+	AppHealth bool
+	Listen    struct {
 		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
 		Port   string `env:"PORT" env-default:"10000"`
 	}
@@ -75,11 +79,6 @@ type Config struct {
 	}
 }
 
-var (
-	instance *Config
-	once     sync.Once
-)
-
 // GetConfig returns the singleton instance of the configuration.
 func GetConfig() *Config {
 	once.Do(func() {
@@ -105,4 +104,14 @@ func PrintAllDefaultEnvs(logger *logging.Logger) {
 	help, _ := cleanenv.GetDescription(cfg, &helpText)
 	// Print the help text containing all the default environment variables
 	logger.Debug(help)
+}
+
+// GetAppHealth returns the value of AppHealth.
+func GetAppHealth() bool {
+	return instance.AppHealth
+}
+
+// SetAppHealth sets the value of AppHealth.
+func SetAppHealth(health bool) {
+	instance.AppHealth = health
 }

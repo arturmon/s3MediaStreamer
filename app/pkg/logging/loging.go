@@ -11,6 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type loggerInitializer struct {
+	instance Logger
+	once     sync.Once
+}
+
 type Logger struct {
 	*logrus.Entry
 }
@@ -20,12 +25,11 @@ func (s *Logger) ExtraFields(fields map[string]interface{}) *Logger {
 }
 
 var (
-	instance Logger
-	once     sync.Once
+	loggerInit loggerInitializer
 )
 
 func GetLogger(level string) Logger {
-	once.Do(func() {
+	loggerInit.once.Do(func() {
 		logrusLevel, err := logrus.ParseLevel(level)
 		if err != nil {
 			log.Fatalln(err)
@@ -45,8 +49,8 @@ func GetLogger(level string) Logger {
 		l.SetOutput(os.Stdout)
 		l.SetLevel(logrusLevel)
 
-		instance = Logger{logrus.NewEntry(l)}
+		loggerInit.instance = Logger{logrus.NewEntry(l)}
 	})
 
-	return instance
+	return loggerInit.instance
 }
