@@ -11,12 +11,12 @@ import (
 )
 
 // getConfigManager returns a singleton instance of the configuration manager.
-func getConfigManager() *ConfigManager {
-	return &ConfigManager{}
+func getConfigManager() *Manager {
+	return &Manager{}
 }
 
-// ConfigManager is responsible for managing the application's configuration.
-type ConfigManager struct {
+// Manager is responsible for managing the application's configuration.
+type Manager struct {
 	instance *Config
 	once     sync.Once
 }
@@ -38,7 +38,7 @@ type Album struct {
 // @Description User account information
 // @Description with: user _id, name, email, password
 type User struct {
-	Id       uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
+	ID       uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
 	Name     string    `json:"name" bson:"name" example:"Artur"`
 	Email    string    `json:"email" bson:"email" example:"aaaa@aaaa.com"`
 	Password []byte    `json:"-" bson:"password"  example:"1111"`

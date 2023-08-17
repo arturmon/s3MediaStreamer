@@ -1,4 +1,4 @@
-package monitoring
+package monitoring_test
 
 import (
 	"net/http"
@@ -7,16 +7,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+
+	// Import the package where HealthMetrics and HealthGET are defined.
+	"skeleton-golange-application/app/pkg/monitoring"
 )
 
-func mockHealthGET(c *gin.Context, metrics *HealthMetrics, mockAppHealth bool) {
+func mockHealthGET(c *gin.Context, metrics *monitoring.HealthMetrics, mockAppHealth bool) {
 	c.Set("appHealth", mockAppHealth)
-	HealthGET(c, metrics)
+	monitoring.HealthGET(c, metrics)
 }
 
 func TestHealthGET(t *testing.T) {
 	// Create a new HealthMetrics instance.
-	metrics := NewHealthMetrics()
+	metrics := monitoring.NewHealthMetrics()
 
 	// Initialize a new Gin engine with the mockHandler.
 	r := gin.New()
@@ -26,7 +29,7 @@ func TestHealthGET(t *testing.T) {
 	})
 
 	// Create a request to the "/health" endpoint.
-	req, _ := http.NewRequest("GET", "/health", http.NoBody)
+	req, _ := http.NewRequest(http.MethodGet, "/health", http.NoBody)
 
 	// Create a response recorder to record the response.
 	w := httptest.NewRecorder()

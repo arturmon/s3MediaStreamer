@@ -102,7 +102,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	newAlbum.CreatedAt = time.Now()
 	newAlbum.UpdatedAt = time.Now()
 
-	if err := c.BindJSON(&newAlbum); err != nil {
+	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
 		return
 	}
@@ -134,7 +134,8 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 // GetAlbumByID godoc
 // @Summary		Album whose ID value matches the id.
 // noinspection
-// @Description locates the album whose ID value matches the id parameter sent by the client, then returns that album as a response.
+// @Description locates the album whose ID value matches the id parameter sent by the client,
+// @Description	then returns that album as a response.
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
@@ -276,7 +277,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 
 	newAlbum.UpdatedAt = time.Now()
 
-	if err := c.BindJSON(&newAlbum); err != nil {
+	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
 		return
 	}
@@ -290,12 +291,12 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 		return
 	}
 
-	existingAlbum, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	existingAlbum, getErr := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	if getErr != nil {
+		if errors.Is(getErr, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
 		} else {
-			a.logger.Error(err)
+			a.logger.Error(getErr)
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
 		}
 		return

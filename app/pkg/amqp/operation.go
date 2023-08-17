@@ -14,16 +14,16 @@ const bcryptCost = 14
 
 // amqpGetAlbumByCode retrieves an album by its code using AMQP.
 func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
-	album, err := c.storage.Operations.GetIssuesByCode(code)
-	if err != nil {
-		publishErr := c.publishMessage(TypePublisherError, err.Error())
+	album, getErr := c.storage.Operations.GetIssuesByCode(code)
+	if getErr != nil {
+		publishErr := c.publishMessage(TypePublisherError, getErr.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
-		return nil, err
+		return nil, getErr
 	}
 
-	err = c.publishMessage(TypePublisherMessage, album)
+	err := c.publishMessage(TypePublisherMessage, album)
 	if err != nil {
 		c.logger.Printf("Error publishing message: %v", err)
 	}
@@ -47,8 +47,8 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 
 	albumsList := make([]config.Album, 0, len(albumArray)) // Pre-allocate with the expected length
 	for _, albumObj := range albumArray {
-		albumData, ok := albumObj.(map[string]interface{})
-		if !ok {
+		albumData, castOk := albumObj.(map[string]interface{})
+		if !castOk {
 			c.logger.Println("Invalid album data")
 			continue
 		}
@@ -93,13 +93,11 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 func (c *MessageClient) amqpGetAllAlbums() ([]config.Album, error) {
 	albums, err := c.storage.Operations.GetAllIssues()
 	if err != nil {
-		if err != nil {
-			publishErr := c.publishMessage(TypePublisherError, err.Error())
-			if publishErr != nil {
-				c.logger.Printf("Error publishing error message: %v", publishErr)
-			}
-			return nil, err
+		publishErr := c.publishMessage(TypePublisherError, err.Error())
+		if publishErr != nil {
+			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
+		return nil, err
 	}
 
 	err = c.publishMessage(TypePublisherMessage, albums)
@@ -138,7 +136,7 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 // amqpAddUser adds a user using AMQP.
 func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
 	user := config.User{
-		Id:       uuid.New(),
+		ID:       uuid.New(),
 		Name:     name,
 		Email:    userEmail,
 		Password: []byte(password),
@@ -238,32 +236,32 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	}
 
 	// Fetch the album from the database based on the provided code
-	code, ok := data["Code"].(string)
-	if !ok {
+	code, codeOk := data["Code"].(string)
+	if !codeOk {
 		c.logger.Println("Invalid code field")
 		return fmt.Errorf("invalid code field")
 	}
 
-	existingAlbum, err := c.storage.Operations.GetIssuesByCode(code)
-	if err != nil {
-		c.logger.Printf("Error fetching album with code %s: %v", code, err)
-		return err
+	existingAlbum, getErr := c.storage.Operations.GetIssuesByCode(code)
+	if getErr != nil {
+		c.logger.Printf("Error fetching album with code %s: %v", code, getErr)
+		return getErr
 	}
 
 	// Update the album fields based on the data received
-	if title, ok := data["Title"].(string); ok {
+	if title, titleOk := data["Title"].(string); titleOk {
 		existingAlbum.Title = title
 	}
-	if artist, ok := data["Artist"].(string); ok {
+	if artist, artistOk := data["Artist"].(string); artistOk {
 		existingAlbum.Artist = artist
 	}
-	if price, ok := data["Price"].(float64); ok {
+	if price, priceOk := data["Price"].(float64); priceOk {
 		existingAlbum.Price = price
 	}
-	if description, ok := data["Description"].(string); ok {
+	if description, descOk := data["Description"].(string); descOk {
 		existingAlbum.Description = description
 	}
-	if completed, ok := data["Completed"].(bool); ok {
+	if completed, complOk := data["Completed"].(bool); complOk {
 		existingAlbum.Completed = completed
 	}
 

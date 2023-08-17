@@ -15,7 +15,7 @@ func (m *MockDBOperations) Connect() error {
 	return nil
 }
 
-func (m *MockDBOperations) Ping(ctx context.Context) error {
+func (m *MockDBOperations) Ping(_ context.Context) error {
 	// Implement mock behavior for Ping
 	return nil
 }

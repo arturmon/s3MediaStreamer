@@ -31,7 +31,7 @@ const hoursInOneDay = 24
 // @Failure     500 {object} ErrorResponse "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
-	// prometheuse
+	// prometheus
 	a.metrics.RegisterAttemptCounter.Inc()
 
 	var data map[string]string
@@ -43,17 +43,23 @@ func (a *WebApp) Register(c *gin.Context) {
 	// Check if user already exists
 	_, err := a.storage.Operations.FindUserToEmail(data["email"])
 	if err == nil {
+		a.metrics.RegisterErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, gin.H{"message": "user with this email exists"})
 		return
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcryptCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcryptCost)
+	if err != nil {
+		a.metrics.RegisterErrorCounter.Inc()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
+		return
+	}
 
 	user := config.User{
-		Id:       uuid.New(),
+		ID:       uuid.New(),
 		Name:     data["name"],
 		Email:    data["email"],
-		Password: password,
+		Password: passwordHash,
 	}
 
 	err = a.storage.Operations.CreateUser(user)
@@ -79,7 +85,6 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Failure     500 {object} ErrorResponse "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
-	// prometheus
 	a.metrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
@@ -88,18 +93,18 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	var user config.User
 	user, err := a.storage.Operations.FindUserToEmail(data["email"])
 	if err != nil {
+		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+	bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
+	if bcryptErr != nil {
 		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
-		// Prometheus
-		a.metrics.ErrPasswordCounter.Inc()
+		a.metrics.ErrPasswordCounter.Inc() // Prometheus
 		return
 	}
 

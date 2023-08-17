@@ -68,13 +68,13 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 
 func (c *PgClient) Connect() error {
 	if c.Pool != nil {
-		conn, err := c.Pool.Acquire(context.Background())
-		if err != nil {
-			return err
+		conn, connErr := c.Pool.Acquire(context.Background())
+		if connErr != nil {
+			return connErr
 		}
 		defer conn.Release()
-		if err := conn.Conn().Ping(context.Background()); err != nil {
-			return err
+		if pingErr := conn.Conn().Ping(context.Background()); pingErr != nil {
+			return pingErr
 		}
 	} else {
 		return fmt.Errorf("pgx pool is not initialized")
@@ -84,14 +84,14 @@ func (c *PgClient) Connect() error {
 
 func (c *PgClient) Ping(ctx context.Context) error {
 	if c.Pool != nil {
-		conn, err := c.Pool.Acquire(ctx)
-		if err != nil {
-			return err
+		conn, connErr := c.Pool.Acquire(ctx)
+		if connErr != nil {
+			return connErr
 		}
 		defer conn.Release()
-		err = conn.Conn().Ping(ctx)
-		if err != nil {
-			return err
+		pingErr := conn.Conn().Ping(ctx)
+		if pingErr != nil {
+			return pingErr
 		}
 	} else {
 		return fmt.Errorf("pgx pool is not initialized")
@@ -109,7 +109,7 @@ func (c *PgClient) Close(_ context.Context) error {
 
 func (c *PgClient) CreateUser(user config.User) error {
 	query := `INSERT INTO "user" (_id, name, email, password) VALUES ($1, $2, $3, $4)`
-	_, err := c.Pool.Exec(context.TODO(), query, user.Id, user.Name, user.Email, user.Password)
+	_, err := c.Pool.Exec(context.TODO(), query, user.ID, user.Name, user.Email, user.Password)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (c *PgClient) CreateUser(user config.User) error {
 func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	var user config.User
 	query := `SELECT _id, name, email, password FROM "user" WHERE email = $1`
-	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return user, fmt.Errorf("user with email '%s' not found", email)
@@ -202,9 +202,9 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 }
 
 func (c *PgClient) GetAllIssues() ([]config.Album, error) {
-	tableExists, err := c.TableExists("album")
-	if err != nil {
-		return nil, err
+	tableExists, tableErr := c.TableExists("album")
+	if tableErr != nil {
+		return nil, tableErr
 	}
 
 	if !tableExists {
@@ -216,28 +216,28 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 		SELECT _id, created_at, updated_at, title, artist,
 		price, code, description, completed
 		FROM album`
-	rows, err := c.Pool.Query(context.TODO(), query)
-	if err != nil {
-		return nil, err
+	rows, queryErr := c.Pool.Query(context.TODO(), query)
+	if queryErr != nil {
+		return nil, queryErr
 	}
 	defer rows.Close()
 
 	albums := make([]config.Album, 0) // Initialize an empty slice.
 	for rows.Next() {
 		var album config.Album
-		err := rows.Scan(
+		scanErr := rows.Scan(
 			&album.ID, &album.CreatedAt, &album.UpdatedAt,
 			&album.Title, &album.Artist, &album.Price,
 			&album.Code, &album.Description, &album.Completed,
 		)
-		if err != nil {
-			return nil, err
+		if scanErr != nil {
+			return nil, scanErr
 		}
 		albums = append(albums, album)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
 	}
 
 	return albums, nil

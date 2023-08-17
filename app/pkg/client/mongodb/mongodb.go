@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	log "github.com/sirupsen/logrus"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,15 +40,19 @@ type MongoClient struct {
 	Cfg    *config.Config
 }
 
-// var mongoOnce sync.Once
-
 func (c *MongoClient) Connect() error {
-	err := c.Client.Connect(context.TODO())
+	uri := "mongodb://" + c.Cfg.Storage.Host + ":" + c.Cfg.Storage.Port
+	clientOptions := options.Client().ApplyURI(uri)
+
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return err
 	}
+
+	c.Client = client
 	return nil
 }
+
 func (c *MongoClient) DeleteUser(email string) error {
 	return fmt.Errorf("DeleteUser is not supported for MongoDB, '%s' not deleted", email)
 }
@@ -143,9 +149,9 @@ func (c *MongoClient) GetAllIssues() ([]config.Album, error) {
 	}
 	for cur.Next(context.TODO()) {
 		var t config.Album
-		err := cur.Decode(&t)
-		if err != nil {
-			return issues, err
+		decodeErr := cur.Decode(&t)
+		if decodeErr != nil {
+			return issues, decodeErr
 		}
 		issues = append(issues, t)
 	}
@@ -279,15 +285,15 @@ func (c *MongoClient) UpdateIssue(album *config.Album) error {
 
 	// Define the update fields using the $set operator to update only the specified fields.
 	update := bson.D{
-		{"$set", bson.D{
+		{Key: "$set", Value: bson.D{
 			{Key: "title", Value: album.Title},
 			{Key: "artist", Value: album.Artist},
 			{Key: "price", Value: album.Price},
 			{Key: "description", Value: album.Description},
 			{Key: "completed", Value: album.Completed},
 		}},
-		{"$currentDate", bson.D{
-			{"updatedat", true}, // Set the "updatedat" field to the current date.
+		{Key: "$currentDate", Value: bson.D{
+			{Key: "updatedat", Value: true}, // Set the "updatedat" field to the current date.
 		}},
 	}
 

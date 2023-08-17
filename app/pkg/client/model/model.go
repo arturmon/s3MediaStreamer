@@ -3,6 +3,8 @@ package model
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/mongodb"
 	"skeleton-golange-application/app/pkg/client/postgresql"
@@ -131,7 +133,7 @@ func (s *StorageConfig) Connect() error {
 }
 
 func GetMongoClient(cfg *StorageConfig) (*mongo.Client, error) {
-	connectionString := fmt.Sprintf("mongodb://%s:%s", cfg.Host, cfg.Port)
+	connectionString := net.JoinHostPort(cfg.Host, cfg.Port)
 	credential := options.Credential{
 		Username: cfg.Username,
 		Password: cfg.Password,
@@ -148,31 +150,37 @@ func GetMongoClient(cfg *StorageConfig) (*mongo.Client, error) {
 	return client, nil
 }
 
-func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg *StorageConfig) (pool *pgxpool.Pool, err error) {
-	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.Username, cfg.Password,
-		cfg.Host, cfg.Port, cfg.Database,
-	)
-	err = postgresql.DoWithAttempts(func() error {
-		ctx, cancel := context.WithTimeout(ctx, maxConnectionAttempts*time.Second)
+func NewClient(ctx context.Context, maxAttempts int,
+	maxDelay time.Duration, cfg *StorageConfig) (*pgxpool.Pool, error) {
+	dsn := url.URL{
+		Scheme:   "postgresql",
+		User:     url.UserPassword(cfg.Username, cfg.Password),
+		Host:     net.JoinHostPort(cfg.Host, cfg.Port),
+		Path:     cfg.Database,
+		RawQuery: "sslmode=disable", // This enables SSL/TLS
+	}
+
+	var pool *pgxpool.Pool
+
+	err := postgresql.DoWithAttempts(func() error {
+		ctxWithTimeout, cancel := context.WithTimeout(ctx, maxConnectionAttempts*time.Second)
 		defer cancel()
 
-		pgxCfg, err := pgxpool.ParseConfig(dsn)
+		pgxCfg, err := pgxpool.ParseConfig(dsn.String())
 		if err != nil {
-			log.Fatalf("Unable to parse config: %w\n", err) // <-- Use %w here.
+			log.Fatalf("Unable to parse config: %v\n", err)
 		}
 
-		pool, err = pgxpool.ConnectConfig(ctx, pgxCfg)
+		pool, err = pgxpool.ConnectConfig(ctxWithTimeout, pgxCfg)
 		if err != nil {
 			log.Println("Failed to connect to postgres... Going to do the next attempt")
 			return err
 		}
 
 		// Run database migrations
-		err = postgresql.RunMigrations(dsn)
+		err = postgresql.RunMigrations(ctx, dsn.String())
 		if err != nil {
-			return fmt.Errorf("failed to run migrations: %w", err) // <-- Use %w here
+			return fmt.Errorf("failed to run migrations: %w", err)
 		}
 
 		return nil
@@ -180,6 +188,7 @@ func NewClient(ctx context.Context, maxAttempts int, maxDelay time.Duration, cfg
 
 	if err != nil {
 		log.Fatal("All attempts are exceeded. Unable to connect to postgres")
+		return nil, err
 	}
 
 	return pool, nil

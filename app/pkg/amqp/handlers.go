@@ -34,7 +34,13 @@ func (c *MessageClient) handleGetAllAlbums() {
 		c.logger.Printf("Error: %v", err)
 		return
 	}
-	c.logger.Printf("Albums: %s", albums)
+	albumsJSON, err := json.Marshal(albums)
+	if err != nil {
+		c.logger.Printf("Error marshaling albums: %v", err)
+		return
+	}
+
+	c.logger.Printf("Albums: %s", albumsJSON)
 }
 
 // handleGetDeleteAll handles the "GetDeleteAll" action by deleting all albums.

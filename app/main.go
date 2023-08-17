@@ -63,9 +63,9 @@ func main() {
 	// Start consuming messages
 	if myApp.GetMessageClient() != nil {
 		go func() {
-			messages, err := myApp.GetMessageClient().Consume(ctx)
-			if err != nil {
-				logger.Fatal("Failed to start consuming messages:", err)
+			messages, consumeErr := myApp.GetMessageClient().Consume(ctx) // Use a different variable name (consumeErr)
+			if consumeErr != nil {
+				logger.Fatal("Failed to start consuming messages:", consumeErr)
 			}
 			// Wait for the background goroutine to finish
 			logger.Info("Waiting for the background goroutine to finish...")
@@ -77,7 +77,7 @@ func main() {
 
 	// Call PreInit with the AMQPClient instance and the config
 	if myApp.GetMessageClient() != nil {
-		err = amqp.PostInit(myApp.GetMessageClient(), cfg)
+		err = amqp.PostInit(myApp.GetMessageClient(), cfg) // Use the existing variable name "err"
 		if err != nil {
 			logger.Fatal("Failed to pre-initialize AMQP:", err)
 		}
