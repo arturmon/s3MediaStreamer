@@ -1,12 +1,13 @@
 package gin
 
 import (
+	"skeleton-golange-application/app/internal/config"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"skeleton-golange-application/app/internal/config"
 )
 
 const sessionMaxAge = 60 * 60 * 24
@@ -34,8 +35,13 @@ func countSession(c *gin.Context) {
 	if v == nil {
 		count = 0
 	} else {
-		count = v.(int)
-		count++
+		if val, ok := v.(int); ok {
+			count = val
+			count++
+		} else {
+			logrus.Errorf("Error converting session value to int")
+			return
+		}
 	}
 	session.Set("count", count)
 
