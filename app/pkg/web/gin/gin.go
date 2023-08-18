@@ -11,6 +11,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -37,7 +38,7 @@ func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	gin.SetMode(cfg.AppConfig.GinMode)
 	router := gin.New()
 	logger.Info("setup CORS")
-	router.Use(CORSMiddleware())
+	router.Use(cors.New(ConfigCORS()))
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
