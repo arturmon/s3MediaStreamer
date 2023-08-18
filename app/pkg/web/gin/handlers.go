@@ -60,6 +60,10 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
+
+	// Increment the session-based counter
+	countSession(c)
+
 	a.metrics.GetAllAlbumsCounter.Inc()
 	albums, err := a.storage.Operations.GetAllIssues()
 
@@ -93,6 +97,10 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
+
+	// Increment the session-based counter
+	countSession(c)
+
 	// Increment the counter for each request handled by PostAlbums
 	a.metrics.PostAlbumsCounter.Inc()
 	var newAlbum config.Album
@@ -154,6 +162,9 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 		return
 	}
 
+	// Increment the session-based counter
+	countSession(c)
+
 	// If user is authorized, proceed with getting the album
 	a.metrics.GetAlbumByIDCounter.Inc()
 
@@ -190,6 +201,9 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 		return
 	}
 
+	// Increment the session-based counter
+	countSession(c)
+
 	// Increment the counter for each request handled by GetDeleteAll
 	a.metrics.GetDeleteAllCounter.Inc()
 
@@ -222,6 +236,9 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
+
+	// Increment the session-based counter
+	countSession(c)
 
 	// If user is authorized, proceed with deleting the album by ID
 	a.metrics.GetDeleteByIDCounter.Inc()
@@ -269,6 +286,9 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
 		return
 	}
+
+	// Increment the session-based counter
+	countSession(c)
 
 	// Increment the counter for each request handled by UpdateAlbum
 	a.metrics.UpdateAlbumCounter.Inc()

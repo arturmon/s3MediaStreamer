@@ -79,6 +79,9 @@ func (a *WebApp) startHTTP() {
 	a.router.GET("/health", func(c *gin.Context) {
 		monitoring.HealthGET(c, a.healthMetrics) // Pass the healthMetrics to HealthGET.
 	})
+	// Initialize session
+	initSession(a.router, a.cfg)
+
 	// Group: v1
 	v1 := a.router.Group("/v1")
 
