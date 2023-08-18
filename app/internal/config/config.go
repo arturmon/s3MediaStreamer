@@ -83,6 +83,13 @@ type Config struct {
 		Broker        string `env:"MQ_BROKER" env-default:"localhost"`
 		BrokerPort    int    `env:"MQ_BROKER_PORT" env-default:"5672"`
 	}
+	Session struct {
+		SessionStorageType string `env:"SESSION_STORAGE_TYPE" env-default:"cookie"` // cookie, memstore
+		SessionName        string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
+		Cookies            struct {
+			SessionSecretKey string `env:"SESSION_COOKIES_SESSION_SECRET_KEY" env-default:"sdfgerfsd3543g"`
+		}
+	}
 }
 
 // GetConfig returns the singleton instance of the configuration.
