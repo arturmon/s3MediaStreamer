@@ -108,8 +108,8 @@ func (c *PgClient) Close(_ context.Context) error {
 }
 
 func (c *PgClient) CreateUser(user config.User) error {
-	query := `INSERT INTO "user" (_id, name, email, password) VALUES ($1, $2, $3, $4)`
-	_, err := c.Pool.Exec(context.TODO(), query, user.ID, user.Name, user.Email, user.Password)
+	query := `INSERT INTO "user" (_id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)`
+	_, err := c.Pool.Exec(context.TODO(), query, user.ID, user.Name, user.Email, user.Password, user.Role)
 	if err != nil {
 		return err
 	}
@@ -118,8 +118,9 @@ func (c *PgClient) CreateUser(user config.User) error {
 
 func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	var user config.User
-	query := `SELECT _id, name, email, password FROM "user" WHERE email = $1`
-	err := c.Pool.QueryRow(context.TODO(), query, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	query := `SELECT _id, name, email, password, role FROM "user" WHERE email = $1`
+	err := c.Pool.QueryRow(context.TODO(), query, email).
+		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return user, fmt.Errorf("user with email '%s' not found", email)

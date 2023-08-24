@@ -38,9 +38,6 @@ Content-Type: application/json
 DELETE http://localhost:10000/v1/albums/deleteAll
 Content-Type: application/json
 ###
-GET http://localhost:10000/health
-Content-Type: application/json
-###
 GET http://localhost:10000/metrics
 Content-Type: application/json
 ###
@@ -50,7 +47,8 @@ Content-Type: application/json
 {
   "email":"a@a.com",
   "name":"a",
-  "password":"1"
+  "password":"1",
+  "role":"member"
 }
 ###
 POST http://localhost:10000/v1/users/login
@@ -61,19 +59,23 @@ Content-Type: application/json
   "password":"1"
 }
 ###
+POST http://localhost:10000/v1/users/login
+Content-Type: application/json
+
+{
+  "email":"admin@admin.com",
+  "password":"admin"
+}
+###
 POST http://localhost:10000/v1/users/logout
 Content-Type: application/json
-
-{
-"email":"a@a.com"
-}
 ###
-GET http://localhost:10000/v1/user
+GET http://localhost:10000/v1/users/me
 Content-Type: application/json
 ###
-POST http://localhost:10000/v1/users/deleteUser
+POST http://localhost:10000/v1/users/delete
 Content-Type: application/json
 
-{
-  "email":"a@a.com"
-}
+###
+GET http://localhost:10000/health
+Content-Type: application/json
