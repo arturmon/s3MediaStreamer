@@ -76,6 +76,16 @@ Content-Type: application/json
 POST http://localhost:10000/v1/users/delete
 Content-Type: application/json
 
+{
+  "email":"a@a.com"
+}
+###
+POST http://localhost:10000/v1/users/delete
+Content-Type: application/json
+
+{
+  "email":"admin@admin.com"
+}
 ###
 GET http://localhost:10000/health
 Content-Type: application/json

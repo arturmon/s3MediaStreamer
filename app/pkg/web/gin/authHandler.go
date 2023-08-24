@@ -18,6 +18,19 @@ const secondsInOneMinute = 60
 const minutesInOneHour = 60
 const hoursInOneDay = 24
 
+// UserResponse represents the response object for the user information endpoint.
+type UserResponse struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	// Add other fields from the config.User struct that you want to expose in the response.
+}
+
+// ErrorResponse represents the response object for error responses.
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
 // Register godoc
 // @Summary		Registers a new user.
 // @Description Register a new user with provided name, email, and password.
@@ -143,12 +156,32 @@ func (a *WebApp) Login(c *gin.Context) {
 // @Router		/users/delete [delete]
 func (a *WebApp) DeleteUser(c *gin.Context) {
 	a.metrics.DeleteUserAttemptCounter.Inc()
-	email, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
+
+	var data map[string]string
+	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
 		return
 	}
-	err = a.storage.Operations.DeleteUser(email)
+	email, ok := data["email"]
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "email not provided"})
+		return
+	}
+
+	// directive
+	if email == "admin@admin.com" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user cannot be deleted: admin@admin.com"})
+		return
+	}
+
+	user, err := a.storage.Operations.FindUserToEmail(email)
+	if err != nil {
+		a.metrics.DeleteUserErrorCounter.Inc()
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		return
+	}
+
+	err = a.storage.Operations.DeleteUser(user.Email)
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
@@ -202,17 +235,4 @@ func (a *WebApp) User(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
-}
-
-// UserResponse represents the response object for the user information endpoint.
-type UserResponse struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	// Add other fields from the config.User struct that you want to expose in the response.
-}
-
-// ErrorResponse represents the response object for error responses.
-type ErrorResponse struct {
-	Message string `json:"message"`
 }
