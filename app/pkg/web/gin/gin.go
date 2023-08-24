@@ -3,6 +3,7 @@ package gin
 import (
 	"context"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -124,8 +124,8 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	}))
 
 	v1.POST("/users/register", a.Register)
+	v1.OPTIONS("/users/login", handleOptions)
 	v1.POST("/users/login", a.Login)
-
 	v1.GET("/users/me", a.User)
 	v1.POST("/users/delete", a.DeleteUser)
 	v1.POST("/users/logout", a.Logout)

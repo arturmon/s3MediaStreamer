@@ -172,10 +172,10 @@ func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
 		// Log the extracted role, path, and method
 		path := c.Request.URL.Path
 		method := c.Request.Method
-		logger.Printf("Role: %s, Path: %s, Method: %s\n", role, path, method)
 
 		// Use the extracted role to enforce authorization using Casbin
 		allowed, err := e.Enforce(role, path, method)
+		logger.Printf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
 		if err != nil {
 			// Handle error
 			logger.Println("Authorization Error:", err)
