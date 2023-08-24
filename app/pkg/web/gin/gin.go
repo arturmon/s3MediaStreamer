@@ -3,13 +3,14 @@ package gin
 import (
 	"context"
 	"fmt"
-	"github.com/gin-contrib/cors"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"time"
+
+	"github.com/gin-contrib/cors"
 
 	"github.com/casbin/casbin/v2"
 

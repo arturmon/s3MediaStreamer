@@ -1,13 +1,17 @@
 package gin
 
 import (
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/gin-contrib/cors"
 )
 
-const maxAgeDuration = 12 * time.Hour
+const (
+	maxAgeDuration  = 12 * time.Hour
+	noContentStatus = 204 // Define a constant for HTTP status code 204.
+)
 
 func ConfigCORS() cors.Config {
 	return cors.Config{
@@ -25,6 +29,5 @@ func ConfigCORS() cors.Config {
 }
 
 func handleOptions(c *gin.Context) {
-	c.AbortWithStatus(204)
-	return
+	c.AbortWithStatus(noContentStatus)
 }
