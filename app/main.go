@@ -84,8 +84,10 @@ func main() {
 	}
 
 	logger.Info("Running Application")
-	myApp.Gin.Run() // The app will run
-
+	myApp.Gin.Run(ctx) // The app will run
+	if err != nil {
+		logger.Fatal(err)
+	}
 	// Wait for the context to be cancelled before exiting
 	<-ctx.Done()
 	logger.Info("Application stopped")

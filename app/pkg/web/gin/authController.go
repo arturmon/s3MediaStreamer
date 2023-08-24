@@ -1,222 +1,93 @@
 package gin
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/client/model"
+	"skeleton-golange-application/app/pkg/logging"
 	"time"
 
+	"github.com/go-pg/pg/v10"
+
+	pgadapter "github.com/casbin/casbin-pg-adapter"
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
-const SecretKey = "secret"
-const bcryptCost = 14
-const jwtExpirationHours = 24
-const secondsInOneMinute = 60
-const minutesInOneHour = 60
-const hoursInOneDay = 24
+const timeoutDuration = 30 * time.Second
 
-// Register godoc
-// @Summary		Registers a new user.
-// @Description Register a new user with provided name, email, and password.
-// @Tags		user-controller
-// @Accept		json
-// @Produce		json
-// @Param		user body config.User true "Register User"
-// @Success     201 {object} config.User  "Created"
-// @Failure     400 {object} ErrorResponse "Bad Request - User with this email exists"
-// @Failure     500 {object} ErrorResponse "Internal Server Error"
-// @Router		/users/register [post]
-func (a *WebApp) Register(c *gin.Context) {
-	// prometheus
-	a.metrics.RegisterAttemptCounter.Inc()
-
-	var data map[string]string
-	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
-		return
+func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error) {
+	uri := url.URL{
+		User: url.UserPassword(cfg.Storage.Username, cfg.Storage.Password),
+		Host: net.JoinHostPort(cfg.Storage.Host, cfg.Storage.Port),
+		Path: "/casbin",
 	}
-
-	// Check if user already exists
-	_, err := a.storage.Operations.FindUserToEmail(data["email"])
-	if err == nil {
-		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user with this email exists"})
-		return
+	options := &pg.Options{
+		Addr:            uri.Host,
+		User:            uri.User.Username(),
+		Password:        cfg.Storage.Password, // Use the password from the config
+		Database:        uri.Path[1:],         // Remove the leading slash from the path
+		DialTimeout:     timeoutDuration,
+		ReadTimeout:     timeoutDuration,
+		WriteTimeout:    timeoutDuration,
+		ApplicationName: "casbin",
 	}
-
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcryptCost)
+	// uri := fmt.Sprintf("postgresql://%s:%s/%s?sslmode=disable",
+	//	net.JoinHostPort(cfg.Storage.Host, cfg.Storage.Port), cfg.Storage.Username, "casbin")
+	adapter, err := pgadapter.NewAdapter(options)
 	if err != nil {
-		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
-		return
+		return nil, err
 	}
 
-	user := config.User{
-		ID:       uuid.New(),
-		Name:     data["name"],
-		Email:    data["email"],
-		Password: passwordHash,
-	}
-
-	err = a.storage.Operations.CreateUser(user)
+	enforcer, err := casbin.NewEnforcer("acl/rbac_model.conf", adapter)
 	if err != nil {
-		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
-		return
+		return nil, err
 	}
-	a.metrics.RegisterSuccessCounter.Inc()
-	c.JSON(http.StatusCreated, user)
+
+	return enforcer, nil
 }
 
-// Login godoc
-// @Summary		Authenticates a user.
-// @Description Authenticates a user with provided email and password.
-// @Tags		user-controller
-// @Accept		json
-// @Produce		json
-// @Param		login body config.User true "Login User"
-// @Success     200 {object} ErrorResponse  "Success"
-// @Failure     400 {object} ErrorResponse "Bad Request - Incorrect Password"
-// @Failure     404 {object} ErrorResponse "Not Found - User not found"
-// @Failure     500 {object} ErrorResponse "Internal Server Error"
-// @Router		/users/login [post]
-func (a *WebApp) Login(c *gin.Context) {
-	a.metrics.LoginAttemptCounter.Inc()
+func initRoles(enf *casbin.Enforcer) error {
+	enf.ClearPolicy()
 
-	var data map[string]string
-	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
-		return
+	policies := []struct {
+		role   string
+		path   string
+		method string
+	}{
+		{"admin", "/*", "*"},
+		{"anonymous", "/v1/users/login", "*"},
+		{"anonymous", "/v1/users/register", "*"},
+		{"anonymous", "/v1/swagger/*", "*"},
+		{"anonymous", "/ping", "*"},
+		{"anonymous", "/healts", "*"},
+		{"member", "/v1/users/me", "*"},
+		{"member", "/v1/users/logout", "*"},
+		{"admin", "/v1/users/delete", "*"},
+		{"member", "/v1/albums", "*"},
+		{"member", "/v1/albums/*", "*"},
+		{"member", "/v1/album", "*"},
+		{"member", "/v1/album/*", "*"},
 	}
 
-	user, err := a.storage.Operations.FindUserToEmail(data["email"])
-	if err != nil {
-		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
-		return
+	for _, p := range policies {
+		if ok, err := enf.AddPolicy(p.role, p.path, p.method); err != nil || !ok {
+			return fmt.Errorf("failed to add policy: %s %s %s", p.role, p.path, p.method)
+		}
 	}
 
-	bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
-	if bcryptErr != nil {
-		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
-		a.metrics.ErrPasswordCounter.Inc() // Prometheus
-		return
-	}
-
-	var key = []byte(SecretKey)
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss": user.Email,
-		"exp": time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
-	})
-
-	token, err := claims.SignedString(key)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
-		return
-	}
-
-	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
-	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
-	a.logger.Debugf("jwt: %s", token)
-	a.metrics.LoginSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
-}
-
-// DeleteUser godoc
-// @Summary		Deletes a user.
-// @Description Deletes the authenticated user.
-// @Tags		user-controller
-// @Accept		json
-// @Produce		json
-// @Security	ApiKeyAuth
-// @Success     200 {object} string "Success - User deleted"
-// @Failure     401 {object} ErrorResponse "Unauthorized - User unauthenticated"
-// @Failure     404 {object} ErrorResponse "Not Found - User not found"
-// @Router		/users/delete [delete]
-func (a *WebApp) DeleteUser(c *gin.Context) {
-	a.metrics.DeleteUserAttemptCounter.Inc()
-	email, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-	err = a.storage.Operations.DeleteUser(email)
-	if err != nil {
-		a.metrics.DeleteUserErrorCounter.Inc()
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
-		return
-	}
-	a.metrics.DeleteUserSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
-}
-
-// Logout godoc
-// @Summary		Logs out a user.
-// @Description Clears the authentication cookie, logging out the user.
-// @Tags		user-controller
-// @Accept		json
-// @Produce		json
-// @Security	ApiKeyAuth
-// @Success     200 {object} ErrorResponse  "Success"
-// @Router		/users/logout [post]
-func (a *WebApp) Logout(c *gin.Context) {
-	a.metrics.LogoutAttemptCounter.Inc()
-	expires := time.Now().Add(-time.Hour)
-	a.logger.Debugf("Expires: %s", expires)
-	c.SetCookie("jwt", "", -1, "", "", false, true)
-	a.metrics.LogoutSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
-}
-
-// User godoc
-// @Summary Get user information
-// @Description Retrieves user information based on JWT in the request's cookies
-// @Tags user-controller
-// @Accept  */*
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} UserResponse "Successfully retrieved user information"
-// @Failure 401 {object} ErrorResponse "Unauthenticated"
-// @Failure 404 {object} ErrorResponse "User not found"
-// @Router /user [get]
-func (a *WebApp) User(c *gin.Context) {
-	email, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-		return
-	}
-
-	var user config.User
-	user, err = a.storage.Operations.FindUserToEmail(email)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, ErrorResponse{Message: "user not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
-
-// UserResponse represents the response object for the user information endpoint.
-type UserResponse struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	// Add other fields from the config.User struct that you want to expose in the response.
-}
-
-// ErrorResponse represents the response object for error responses.
-type ErrorResponse struct {
-	Message string `json:"message"`
+	return enf.SavePolicy()
 }
 
 func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	cookie, err := c.Cookie("jwt")
 	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
 		return "", err
 	}
 
@@ -229,13 +100,93 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	})
 
 	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
 		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
 		return "", fmt.Errorf("invalid JWT token")
 	}
-
 	return claims["iss"].(string), nil
+}
+
+func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		jwtToken, err := c.Cookie("jwt") // Extract the JWT token from the cookie
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) { // Use errors.Is to check for a specific error
+				// Handle the case when the JWT cookie is missing
+				// For example, this might mean that the user is not authenticated yet.
+				// You can proceed with authentication or respond with an appropriate error.
+				return
+			}
+			// Handle other errors
+			logger.Println("JWT Cookie Error:", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
+			return
+		}
+
+		// Your JWT validation and key retrieval logic here
+		key := []byte(SecretKey) // Replace SecretKey with your actual secret key
+		token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return key, nil
+		})
+		if err != nil || !token.Valid {
+			// Handle invalid or expired token
+			logger.Println("JWT Parse Error:", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			// Handle invalid claims format
+			logger.Println("JWT Claims Error:", err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
+			return
+		}
+
+		logger.Println("Extracted Role:", claims["role"])
+		if role, exists := claims["role"].(string); exists {
+			c.Set("userRole", role) // Store the role in the context
+		} else {
+			// Handle missing role claim
+			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
+			return
+		}
+
+		c.Next() // Indicate that the middleware execution is completed
+	}
+}
+
+func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
+	roleExtractor func(*gin.Context) string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := roleExtractor(c) // Extract user's role using the provided function
+
+		// Log the extracted role, path, and method
+		path := c.Request.URL.Path
+		method := c.Request.Method
+		logger.Printf("Role: %s, Path: %s, Method: %s\n", role, path, method)
+
+		// Use the extracted role to enforce authorization using Casbin
+		allowed, err := e.Enforce(role, path, method)
+		if err != nil {
+			// Handle error
+			logger.Println("Authorization Error:", err)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorResponse{Message: "internal server error"})
+			return
+		}
+
+		if allowed {
+			c.Next()
+		} else {
+			c.AbortWithStatusJSON(http.StatusForbidden, ErrorResponse{Message: "forbidden"})
+		}
+	}
 }

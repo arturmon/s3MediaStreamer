@@ -42,6 +42,7 @@ type User struct {
 	Name     string    `json:"name" bson:"name" example:"Artur"`
 	Email    string    `json:"email" bson:"email" example:"aaaa@aaaa.com"`
 	Password []byte    `json:"-" bson:"password"  example:"1111"`
+	Role     string    `json:"role" bson:"role"  example:"-"`
 }
 
 // Config represents the application's configuration.
@@ -53,18 +54,15 @@ type Config struct {
 		Port   string `env:"PORT" env-default:"10000"`
 	}
 	AppConfig struct {
-		LogLevel string `env:"LOG_LEVEL" env-default:"info"`
-		// debug, release
-		GinMode string `env:"GIN_MODE" env-default:"release"`
+		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // debug, release
+		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 	}
-	// STORAGE_TYPE: mongodb, postgresql
-	// 5432 postgresql, 27017 mongodb
 	Storage struct {
-		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"`
+		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"` // mongodb, postgresql
 		Username string `env:"STORAGE_USERNAME" env-default:"root"`
 		Password string `env:"STORAGE_PASSWORD" env-default:"1qazxsw2"`
 		Host     string `env:"STORAGE_HOST" env-default:"localhost"`
-		Port     string `env:"STORAGE_PORT" env-default:"5432"`
+		Port     string `env:"STORAGE_PORT" env-default:"5432"` // 5432 postgresql, 27017 mongodb
 		Database string `env:"STORAGE_DATABASE" env-default:"db_issue_album"`
 		// Mongo use
 		Collections      string `env:"STORAGE_COLLECTIONS" env-default:"col_issues"`
