@@ -8,7 +8,7 @@ Content-Type: application/json
 GET http://localhost:10000/v1/albums/I0001
 Content-Type: application/json
 ###
-POST http://localhost:10000/v1/album
+POST http://localhost:10000/v1/albums/add
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
   "Completed": false
 }
 ###
-POST http://localhost:10000/v1/album/update
+POST http://localhost:10000/v1/albums/update
 Content-Type: application/json
 
 {
