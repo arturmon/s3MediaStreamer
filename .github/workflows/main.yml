@@ -184,6 +184,8 @@ jobs:
             -d docker.io/rabbitmq:3.12.2
             
             podman run --pod albums --privileged --name albums-app \
+            -e STORAGE_HOST="postgresql-server" \
+            -e MQ_BROKER="rabbitmq" \
             -e LOG_LEVEL="info" \
             -d docker.io/arturmon/albums:latest
 
