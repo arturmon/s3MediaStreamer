@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "user" (
                                       name     TEXT,
                                       email    TEXT UNIQUE,
                                       password BYTEA,
-                                      role     TEXT
+                                      role     TEXT CHECK (role IN ('admin', 'member'))
 );
 
 CREATE INDEX idx_user_email ON "user" (email);

@@ -134,12 +134,13 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 }
 
 // amqpAddUser adds a user using AMQP.
-func (c *MessageClient) amqpAddUser(userEmail, name, password string) error {
+func (c *MessageClient) amqpAddUser(userEmail, name, password, role string) error {
 	user := config.User{
 		ID:       uuid.New(),
 		Name:     name,
 		Email:    userEmail,
 		Password: []byte(password),
+		Role:     role,
 	}
 
 	// Check if user already exists

@@ -86,8 +86,13 @@ func (c *MessageClient) handleAddUser(data map[string]interface{}) {
 		c.logger.Println("Invalid password")
 		return
 	}
+	role, ok := data["role"].(string)
+	if !ok {
+		c.logger.Println("Invalid role")
+		return
+	}
 
-	err := c.amqpAddUser(userEmail, name, password)
+	err := c.amqpAddUser(userEmail, name, password, role)
 	if err != nil {
 		c.logger.Printf("Error: %v", err)
 		return
