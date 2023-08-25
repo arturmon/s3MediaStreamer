@@ -212,16 +212,16 @@ Payload: `{"action":"GetAllAlbums"}`
 
 Example:
 
-| Exchange            | Routing key      | Command         | Payload                                                                |
-|---------------------|------------------|-----------------|------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums"}`                                            |
-| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                            |
-| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                      |
-| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1"}` |
-| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                        |
-| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                   |
-| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                              |
-| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                             |
+| Exchange            | Routing key      | Command         | Payload                                                                                |
+|---------------------|------------------|-----------------|----------------------------------------------------------------------------------------|
+| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums"}`                                                            |
+| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                                            |
+| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                                      |
+| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1","role":"member"}` |
+| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                                        |
+| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                                   |
+| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                              |
+| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                             |
 
 ---> PostAlbums Payload:
 ```
