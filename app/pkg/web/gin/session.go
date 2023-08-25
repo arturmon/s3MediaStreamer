@@ -17,6 +17,8 @@ func initSession(router *gin.Engine, cfg *config.Config) {
 
 	// Initialize session
 	switch cfg.Session.SessionStorageType {
+	case "cookie":
+		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	case "memstore":
 		store = memstore.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	default:

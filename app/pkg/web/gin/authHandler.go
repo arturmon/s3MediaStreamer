@@ -219,7 +219,7 @@ func (a *WebApp) Logout(c *gin.Context) {
 // @Success 200 {object} UserResponse "Successfully retrieved user information"
 // @Failure 401 {object} ErrorResponse "Unauthenticated"
 // @Failure 404 {object} ErrorResponse "User not found"
-// @Router /user [get]
+// @Router /users/me [get]
 func (a *WebApp) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {

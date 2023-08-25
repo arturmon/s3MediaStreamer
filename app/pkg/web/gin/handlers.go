@@ -54,13 +54,6 @@ func Ping(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/albums [get]
 func (a *WebApp) GetAllAlbums(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
@@ -89,15 +82,8 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Failure     400 {object} ErrorResponse  "Bad Request"
 // @Failure     500 {object} ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/album [post]
+// @Router		/albums/add [post]
 func (a *WebApp) PostAlbums(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
@@ -124,7 +110,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		return
 	}
 
-	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	_, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if err == nil {
 		c.IndentedJSON(http.StatusConflict, gin.H{"message": "album code already exists"})
 		return
@@ -155,13 +141,6 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/albums/{code} [get]
 func (a *WebApp) GetAlbumByID(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
@@ -194,20 +173,13 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/albums/deleteAll [delete]
 func (a *WebApp) GetDeleteAll(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
 	// Increment the counter for each request handled by GetDeleteAll
 	a.metrics.GetDeleteAllCounter.Inc()
 
-	err = a.storage.Operations.DeleteAll()
+	err := a.storage.Operations.DeleteAll()
 	if err != nil {
 		a.logger.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error Delete all Album"})
@@ -230,13 +202,6 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/albums/delete/{code} [delete]
 func (a *WebApp) GetDeleteByID(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
@@ -245,7 +210,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 
 	code := c.Param("code")
 
-	_, err = a.storage.Operations.GetIssuesByCode(code)
+	_, err := a.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
@@ -278,15 +243,8 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Failure     404 {object} ErrorResponse  "Not Found"
 // @Failure     500 {object} ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router                /album/update [post]
+// @Router                /albums/update [post]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {
-	// Check if user is authorized
-	_, err := a.checkAuthorization(c)
-	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "unauthenticated"})
-		return
-	}
-
 	// Increment the session-based counter
 	countSession(c)
 
@@ -341,7 +299,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 
 	existingAlbum.UpdatedAt = time.Now()
 	// Perform the update operation
-	err = a.storage.Operations.UpdateIssue(&existingAlbum)
+	err := a.storage.Operations.UpdateIssue(&existingAlbum)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error updating album"})
 		return

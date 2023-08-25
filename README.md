@@ -4,8 +4,8 @@
 [![Docker](https://img.shields.io/docker/pulls/arturmon/albums)](https://hub.docker.com/r/arturmon/albums)
 ## Generate specification Swager
 ```
-cd /mnt/c/Users/Arturmon/eclipse-workspace/src/skeleton-golange-application
-/home/arturmon/go/bin/swag init
+cd skeleton-golange-application
+swag init
 ```
 Use MongoDB docker container 
 ```
@@ -50,13 +50,13 @@ go get github.com/kubemq-io/kubemq-go
 ## API User
 v1/
 
-| url               | code            | method | status             |
-|-------------------|-----------------|--------|--------------------|
-| /users/register   | 201/400/500     | POST   | Register           |
-| /users/login      | 200/400/404/500 | POST   | Login              |
-| /user             | 200/401/404     | GET    | User               |
-| /users/deleteUser | 200/401/404     | POST   | DeleteUser         |
-| /users/logout     | 200             | POST   | Logout             |
+| url             | code            | method | status             |
+|-----------------|-----------------|--------|--------------------|
+| /users/register | 201/400/500     | POST   | Register           |
+| /users/login    | 200/400/404/500 | POST   | Login              |
+| /users/me       | 200/401/404     | GET    | User               |
+| /users/delete   | 200/401/404     | POST   | DeleteUser         |
+| /users/logout   | 200             | POST   | Logout             |
 
 /register
 ```
@@ -73,7 +73,7 @@ v1/
   "password":"1"
 }
 ```
-/user
+/users/me
 ```
 {
   "_id": "84e6fc11-10b3-48dd-abbf-dc8c83d05be8",
@@ -81,7 +81,7 @@ v1/
   "email": "a@a.com"
 }
 ```
-/deleteUser
+/delete
 ```
 {
   "email":"a@a.com"
@@ -100,7 +100,7 @@ v1/
 |----------------------|---------------------|--------|---------------|
 | /albums              | 200/401/500         | GET    | GetAllAlbums  |
 | /albums/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
-| /album               | 201/400/500         | POST   | PostAlbums    |
+| /albums/add          | 201/400/500         | POST   | PostAlbums    |
 | /album/update        | 200/400/401/404/500 | POST   | UpdateAlbum   |
 | /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
 | /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
@@ -135,7 +135,7 @@ v1/
   "completed": false
 }
 ```
-/album
+/albums
 ```
 {
   "Title": "Test Titl1e",
@@ -146,7 +146,7 @@ v1/
   "Completed": false
 }
 ```
-/album/update
+/albums/update
 ```
 {
   "Title": "Marco Polo",
@@ -201,12 +201,10 @@ get_albums_connect_mongodb_total 0
 ```
 
 ## Generate SWAGER
-в cmd создать папку `config` в нем файл `main.go` зобавить в `main` структуры `Album` и `User`, а также все функции с коментариями из которых будет все генерироваться.
-затем выполнить:
 ```
 swag init
 ```
-после этого перемести сгенерированную папку `docs` в `app/docs`
+
 
 ## MQ
 

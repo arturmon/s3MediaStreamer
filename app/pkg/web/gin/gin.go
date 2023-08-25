@@ -114,35 +114,44 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	})
 	a.router.GET("/ping", Ping)
 
-	// Group: v1
-	v1 := a.router.Group("/v1")
-	v1.Use(ExtractUserRole(a.logger))
-	v1.Use(NewAuthorizerWithRoleExtractor(a.enforcer, a.logger, func(c *gin.Context) string {
+	a.router.Use(ExtractUserRole(a.logger))
+	a.router.Use(NewAuthorizerWithRoleExtractor(a.enforcer, a.logger, func(c *gin.Context) string {
 		if role, ok := c.Get("userRole"); ok {
 			return role.(string)
 		}
 		return "anonymous" // Default role
 	}))
 
-	v1.POST("/users/register", a.Register)
-	v1.OPTIONS("/users/login", handleOptions)
-	v1.POST("/users/login", a.Login)
-	v1.GET("/users/me", a.User)
-	v1.POST("/users/delete", a.DeleteUser)
-	v1.POST("/users/logout", a.Logout)
-	v1.GET("/albums", a.GetAllAlbums)
-	v1.GET("/albums/:code", a.GetAlbumByID)
-	v1.POST("/album", a.PostAlbums)
-	v1.POST("/album/update", a.UpdateAlbum)
-	v1.DELETE("/albums/deleteAll", a.GetDeleteAll)
-	v1.DELETE("/albums/delete/:code", a.GetDeleteByID)
-
-	a.logger.Info("swagger docs initializing")
-	v1.GET("/swagger", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-	})
-	v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	// Group: v1
+	v1 := a.router.Group("/v1")
+	{
+		users := v1.Group("/users")
+		{
+			users.POST("/register", a.Register)
+			users.OPTIONS("/login", handleOptions)
+			users.POST("/login", a.Login)
+			users.GET("/me", a.User)
+			users.POST("/delete", a.DeleteUser)
+			users.POST("/logout", a.Logout)
+		}
+		albums := v1.Group("/albums")
+		{
+			albums.GET("", a.GetAllAlbums)
+			albums.GET("/:code", a.GetAlbumByID)
+			albums.DELETE("/deleteAll", a.GetDeleteAll)
+			albums.DELETE("/delete/:code", a.GetDeleteByID)
+			albums.POST("/add", a.PostAlbums)
+			albums.POST("/update", a.UpdateAlbum)
+		}
+		a.logger.Info("swagger docs initializing")
+		swagger := v1.Group("/swagger")
+		{
+			swagger.GET("", func(c *gin.Context) {
+				c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+			})
+			swagger.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		}
+	}
 	a.logger.Info("view Casbin Policies:")
 	policies := a.enforcer.GetPolicy()
 	for _, p := range policies {

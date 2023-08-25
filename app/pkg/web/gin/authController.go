@@ -60,19 +60,16 @@ func initRoles(enf *casbin.Enforcer) error {
 		path   string
 		method string
 	}{
+		{"*", "/favicon.ico", "GET"},
+		{"*", "/v1/swagger/*", "GET"},
 		{"admin", "/*", "*"},
-		{"anonymous", "/v1/users/login", "*"},
-		{"anonymous", "/v1/users/register", "*"},
-		{"anonymous", "/v1/swagger/*", "*"},
-		{"anonymous", "/ping", "*"},
-		{"anonymous", "/healts", "*"},
-		{"member", "/v1/users/me", "*"},
-		{"member", "/v1/users/logout", "*"},
-		{"admin", "/v1/users/delete", "*"},
+		{"*", "/ping", "GET"},
+		{"*", "/healts", "GET"},
+		{"anonymous", "/v1/users/login", "POST"},
+		{"member", "/v1/users/me", "GET"},
+		{"member", "/v1/users/logout", "POST"},
 		{"member", "/v1/albums", "*"},
 		{"member", "/v1/albums/*", "*"},
-		{"member", "/v1/album", "*"},
-		{"member", "/v1/album/*", "*"},
 	}
 
 	for _, p := range policies {
