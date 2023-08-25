@@ -16,3 +16,7 @@
 
 # idea confDB
 .idea
+
+# http
+*.cookies
+*.html
