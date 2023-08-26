@@ -3,7 +3,8 @@ package gin
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"net"
+	"net/url"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 
@@ -49,14 +50,14 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 			store = mongodriver.NewStore(c, mongodriverMaxIdle, true, []byte(cfg.Session.Cookies.SessionSecretKey))
 		}
 	case "postgres":
-		var postgresURL string
-		postgresURL = fmt.Sprintf("%s:%s", cfg.Session.Postgresql.PostgresqlHost, cfg.Session.Postgresql.PostgresqlPort)
-		postgresURL = fmt.Sprintf("postgresql://%s:%s@%s",
-			cfg.Session.Postgresql.PostgresqlUser, cfg.Session.Postgresql.PostgresqlPass, postgresURL)
-		postgresSSL := "?sslmode=disable"
-		postgresURL = fmt.Sprintf("%s/%s%s", postgresURL, cfg.Session.Postgresql.PostgresqlDatabase, postgresSSL)
-		logger.Infof("postgresURL: %s", postgresURL)
-		db, err := sql.Open("postgres", postgresURL)
+		dsn := url.URL{
+			Scheme:   "postgresql",
+			User:     url.UserPassword(cfg.Session.Postgresql.PostgresqlUser, cfg.Session.Postgresql.PostgresqlPass),
+			Host:     net.JoinHostPort(cfg.Session.Postgresql.PostgresqlHost, cfg.Session.Postgresql.PostgresqlPort),
+			Path:     cfg.Session.Postgresql.PostgresqlDatabase,
+			RawQuery: "sslmode=disable", // This enables SSL/TLS
+		}
+		db, err := sql.Open("postgres", dsn.String())
 		if err != nil {
 			logger.Errorf("Error creating Postgres store: %v", err)
 		}
