@@ -259,7 +259,7 @@ func (c *PgClient) DeleteAll() error {
 		return nil
 	}
 
-	query := "DELETE FROM album"
+	query := "TRUNCATE album"
 	_, err = c.Pool.Exec(context.TODO(), query)
 	if err != nil {
 		return err
