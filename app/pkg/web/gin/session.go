@@ -20,7 +20,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const sessionMaxAge = 60 * 60 * 24
+const (
+	sessionMaxAge      = 60 * 60 * 24
+	mongodriverMaxIdle = 3600 // Define a named constant for better readability
+)
 
 func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, logger *logging.Logger) {
 	var store sessions.Store
@@ -38,24 +41,20 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 		mongoURL := "mongodb://" + cfg.Session.Mongodb.MongoUser + ":" + cfg.Session.Mongodb.MongoPass +
 			"@" + cfg.Session.Mongodb.MongoHost + ":" + cfg.Session.Mongodb.MongoPort
 		mongoOptions := options.Client().ApplyURI(mongoURL)
-		client, err := mongo.NewClient(mongoOptions)
+		client, err := mongo.Connect(ctx, mongoOptions) // Use Connect instead of NewClient
 		if err != nil {
 			logger.Errorf("Error creating Mongo store: %v", err)
 		} else {
-			connectErr := client.Connect(ctx)
-			if connectErr != nil {
-				logger.Errorf("Error creating Mongo store: %v", connectErr)
-			} else {
-				c := client.Database(cfg.Session.Mongodb.MongoDatabase).Collection("sessions")
-				store = mongodriver.NewStore(c, 3600, true, []byte(cfg.Session.Cookies.SessionSecretKey))
-			}
+			c := client.Database(cfg.Session.Mongodb.MongoDatabase).Collection("sessions")
+			store = mongodriver.NewStore(c, mongodriverMaxIdle, true, []byte(cfg.Session.Cookies.SessionSecretKey))
 		}
 	case "postgres":
 		var postgresURL string
 		postgresURL = fmt.Sprintf("%s:%s", cfg.Session.Postgresql.PostgresqlHost, cfg.Session.Postgresql.PostgresqlPort)
-		postgresURL = fmt.Sprintf("postgresql://%s:%s@%s", cfg.Session.Postgresql.PostgresqlUser, cfg.Session.Postgresql.PostgresqlPass, postgresURL)
+		postgresURL = fmt.Sprintf("postgresql://%s:%s@%s",
+			cfg.Session.Postgresql.PostgresqlUser, cfg.Session.Postgresql.PostgresqlPass, postgresURL)
+		postgresURL += "?sslmode=disable" // Use += instead of = to append
 		postgresURL = fmt.Sprintf("%s/%s", postgresURL, cfg.Session.Postgresql.PostgresqlDatabase)
-		postgresURL = postgresURL + "?sslmode=disable"
 		db, err := sql.Open("postgres", postgresURL)
 		if err != nil {
 			logger.Errorf("Error creating Postgres store: %v", err)
