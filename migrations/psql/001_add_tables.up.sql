@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS album (
                                      price       REAL,
                                      code        TEXT UNIQUE,
                                      description TEXT,
-                                     completed   BOOLEAN
+                                     sender      TEXT CHECK (sender IN ('amqp', 'rest'))
 );
 
 CREATE INDEX idx_album_code ON "album" (code);

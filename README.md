@@ -117,7 +117,7 @@ v1/
     "price": 44.10200119018555,
     "code": "I0001",
     "description": "Description Test1",
-    "completed": false
+    "sender": "rest"
   }
 ]
 ```
@@ -132,7 +132,7 @@ v1/
   "price": 44.10200119018555,
   "code": "I0001",
   "description": "Description Test1",
-  "completed": false
+  "sender": "amqp"
 }
 ```
 /albums
@@ -143,7 +143,6 @@ v1/
   "Price": 44.102,
   "Code": "I0001",
   "Description": "Description Test1",
-  "Completed": false
 }
 ```
 /albums/update
@@ -154,7 +153,6 @@ v1/
   "Price": 123.99,
   "Code": "I0001",
   "Description": "Description Update",
-  "Completed": false
 }
 ```
 /albums/deleteAll
@@ -226,36 +224,34 @@ Example:
 ---> PostAlbums Payload:
 ```
 {
-	"action": "PostAlbums",
-	"albums": {
-	  "album": [
-		{
-		  "Title": "Test Titl1e",
-		  "Artist": "Test Artist1",
-		  "Price": 44.102,
-		  "Code": "I0001",
-		  "Description": "Description Test1",
-		  "Completed": false
-		},
-		{
-		  "Title": "Test Titl2e",
-		  "Artist": "Test Artist2",
-		  "Price": 23423,
-		  "Code": "I0002",
-		  "Description": "Description Test2",
-		  "Completed": false
-		},
-		{
-		  "Title": "Test Titl3e",
-		  "Artist": "Test Artist3",
-		  "Price": 44.3242,
-		  "Code": "I0003",
-		  "Description": "Description Test3",
-		  "Completed": false
-		}
-	  ]
-	}
- }
+    "action": "PostAlbums",
+    "albums": {
+        "album": [
+            {
+                "Title": "Test Title1",
+                "Artist": "Test Artist1",
+                "Price": 44.102,
+                "Code": "I0001",
+                "Description": "Description Test1"
+            },
+            {
+                "Title": "Test Title2",
+                "Artist": "Test Artist2",
+                "Price": 23423,
+                "Code": "I0002",
+                "Description": "Description Test2"
+            },
+            {
+                "Title": "Test Title3",
+                "Artist": "Test Artist3",
+                "Price": 44.3242,
+                "Code": "I0003",
+                "Description": "Description Test3"
+            }
+        ]
+    }
+}
+
 ```
 ---> UpdateAlbum Payload:
 ```
@@ -266,8 +262,7 @@ Example:
       "Artist": "Test Update RAbbit",
       "Price": 1.99,
       "Code": "I0001",
-      "Description": "Description Update Rabbitmq",
-      "Completed": false
+      "Description": "Description Update Rabbitmq"
     }
 }
 ```

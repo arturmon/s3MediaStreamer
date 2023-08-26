@@ -27,7 +27,6 @@ type MongoCollectionQuery interface {
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
-	MarkCompleted(code string) error
 	UpdateIssue(album *config.Album) error
 }
 
@@ -103,11 +102,14 @@ func (c *MongoClient) CreateMany(issues []config.Album) error {
 	for i := range issues {
 		v := &issues[i] // Use a pointer to the current issue.
 		insertableList[i] = v
-		if v.Completed {
-			log.Infof("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
-		} else {
-			log.Infof("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
-		}
+		/*
+			if v.Completed {
+				log.Infof("INFO: Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			} else {
+				log.Infof("INFO: No Completed %d: %f    %s\n", i+1, v.Price, v.Title)
+			}
+
+		*/
 	}
 
 	collection, err := c.FindCollections(config.CollectionAlbum)
@@ -192,11 +194,15 @@ func (c *MongoClient) DeleteAll() error {
 func PrintList(issues []config.Album) {
 	for i := range issues {
 		v := &issues[i] // Use a pointer to the current issue.
-		if v.Completed {
-			log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
-		} else {
-			log.Infof("No Completed %d: %f    %s", i+1, v.Price, v.Title)
-		}
+		log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
+		/*
+			if v.Completed {
+				log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
+			} else {
+				log.Infof("No Completed %d: %f    %s", i+1, v.Price, v.Title)
+			}
+
+		*/
 	}
 }
 
@@ -243,37 +249,6 @@ func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 	return result, nil
 }
 
-func (c *MongoClient) MarkCompleted(code string) error {
-	// Получение коллекции "album" из базы данных
-	collection, err := c.FindCollections(config.CollectionAlbum)
-	if err != nil {
-		return err
-	}
-
-	// Определение фильтра для поиска записи по коду.
-	filter := bson.D{primitive.E{Key: "code", Value: code}}
-
-	// Определение обновления для установки флага "completed" в true.
-	update := bson.D{
-		{Key: "$set", Value: bson.D{
-			{Key: "completed", Value: true},
-		}},
-	}
-
-	// Выполнение операции обновления.
-	result, err := collection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		return err
-	}
-
-	// Проверка, была ли обновлена хотя бы одна запись.
-	if result.ModifiedCount == 0 {
-		return mongo.ErrNoDocuments
-	}
-
-	return nil
-}
-
 func (c *MongoClient) UpdateIssue(album *config.Album) error {
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
@@ -290,7 +265,7 @@ func (c *MongoClient) UpdateIssue(album *config.Album) error {
 			{Key: "artist", Value: album.Artist},
 			{Key: "price", Value: album.Price},
 			{Key: "description", Value: album.Description},
-			{Key: "completed", Value: album.Completed},
+			{Key: "sender", Value: album.Sender},
 		}},
 		{Key: "$currentDate", Value: bson.D{
 			{Key: "updatedat", Value: true}, // Set the "updatedat" field to the current date.

@@ -95,6 +95,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 
 	newAlbum.CreatedAt = time.Now()
 	newAlbum.UpdatedAt = time.Now()
+	newAlbum.Sender = "rest"
 
 	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
@@ -293,8 +294,9 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	if newAlbum.Description != "" {
 		existingAlbum.Description = newAlbum.Description
 	}
-	if newAlbum.Completed != existingAlbum.Completed {
-		existingAlbum.Completed = newAlbum.Completed
+	// TODO
+	if newAlbum.Sender != existingAlbum.Sender {
+		existingAlbum.Sender = newAlbum.Sender
 	}
 
 	existingAlbum.UpdatedAt = time.Now()

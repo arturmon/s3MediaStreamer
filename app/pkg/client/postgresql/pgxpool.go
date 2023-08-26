@@ -24,7 +24,6 @@ type PostgresCollectionQuery interface {
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
-	MarkCompleted(code string) error
 	UpdateIssue(album *config.Album) error
 }
 
@@ -155,10 +154,10 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 		return fmt.Errorf("table 'album' does not exist")
 	}
 
-	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, completed)
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender)
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err = c.Pool.Exec(context.TODO(), query, album.ID, album.CreatedAt, album.UpdatedAt, album.Title,
-		album.Artist, album.Price, album.Code, album.Description, album.Completed)
+		album.Artist, album.Price, album.Code, album.Description, album.Sender)
 	if err != nil {
 		return err
 	}
@@ -178,10 +177,10 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 		insertableList[baseIndex+5] = &v.Price
 		insertableList[baseIndex+6] = &v.Code
 		insertableList[baseIndex+7] = &v.Description
-		insertableList[baseIndex+8] = &v.Completed
+		insertableList[baseIndex+8] = &v.Sender
 	}
 
-	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, completed) VALUES `
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender) VALUES `
 
 	var placeholders []string
 	for i := 0; i < len(list); i++ {
@@ -215,7 +214,7 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 
 	query := `
 		SELECT _id, created_at, updated_at, title, artist,
-		price, code, description, completed
+		price, code, description, sender
 		FROM album`
 	rows, queryErr := c.Pool.Query(context.TODO(), query)
 	if queryErr != nil {
@@ -229,7 +228,7 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 		scanErr := rows.Scan(
 			&album.ID, &album.CreatedAt, &album.UpdatedAt,
 			&album.Title, &album.Artist, &album.Price,
-			&album.Code, &album.Description, &album.Completed,
+			&album.Code, &album.Description, &album.Sender,
 		)
 		if scanErr != nil {
 			return nil, scanErr
@@ -280,16 +279,6 @@ func (c *PgClient) DeleteOne(code string) error {
 	return nil
 }
 
-func (c *PgClient) MarkCompleted(code string) error {
-	query := "UPDATE album SET completed = true WHERE code = $1"
-	_, err := c.Pool.Exec(context.TODO(), query, code)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 	result := config.Album{}
 
@@ -315,7 +304,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 		&result.Price,
 		&result.Code,
 		&result.Description,
-		&result.Completed,
+		&result.Sender,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -347,12 +336,12 @@ func (c *PgClient) UpdateIssue(album *config.Album) error {
             artist = $4,
             price = $5,
             description = $6,
-            completed = $7
+            sender = $7
         WHERE
             code = $8
     `
 	_, err = c.Pool.Exec(context.TODO(), query,
-		album.CreatedAt, time.Now(), album.Title, album.Artist, album.Price, album.Description, album.Completed, album.Code)
+		album.CreatedAt, time.Now(), album.Title, album.Artist, album.Price, album.Description, album.Sender, album.Code)
 	if err != nil {
 		return err
 	}

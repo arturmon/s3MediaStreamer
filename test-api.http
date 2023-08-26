@@ -16,8 +16,7 @@ Content-Type: application/json
   "Artist": "Test Artis22t1",
   "Price": 44.10,
   "Code": "I0001",
-  "Description": "Description Test1",
-  "Completed": false
+  "Description": "Description Test1"
 }
 ###
 POST http://localhost:10000/v1/albums/update

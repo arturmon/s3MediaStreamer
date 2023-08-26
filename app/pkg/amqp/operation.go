@@ -62,7 +62,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			Price:       albumData["Price"].(float64),
 			Code:        albumData["Code"].(string),
 			Description: albumData["Description"].(string),
-			Completed:   albumData["Completed"].(bool),
+			Sender:      "amqp",
 		}
 
 		albumsList = append(albumsList, album)
@@ -262,8 +262,8 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	if description, descOk := data["Description"].(string); descOk {
 		existingAlbum.Description = description
 	}
-	if completed, complOk := data["Completed"].(bool); complOk {
-		existingAlbum.Completed = completed
+	if sender, complOk := data["Sender"].(string); complOk {
+		existingAlbum.Sender = sender
 	}
 
 	// Update the album in the database

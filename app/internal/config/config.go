@@ -31,7 +31,7 @@ type Album struct {
 	Price       float64   `json:"price" bson:"price" example:"111.111"`
 	Code        string    `json:"code" bson:"code" example:"I001"`
 	Description string    `json:"description" bson:"description" example:"A short description of the application"`
-	Completed   bool      `json:"completed" bson:"completed" example:"false"`
+	Sender      string    `json:"sender" bson:"sender" example:"amqp or rest"`
 }
 
 // User represents user account information.
@@ -70,7 +70,7 @@ type Config struct {
 	}
 	// MessageQueue
 	MessageQueue struct {
-		Enable        bool   `env:"MQ_ENABLE" env-default:"false"`
+		Enable        bool   `env:"MQ_ENABLE" env-default:"true"`
 		SubRoutingKey string `env:"MQ_ROUTING_KEY" env-default:"sub-routing-key"`
 		SubQueueName  string `env:"MQ_QUEUE_NAME" env-default:"sub_queue"`
 		PubExchange   string `env:"MQ_EXCHANGE" env-default:"pub-exchange"`

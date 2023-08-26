@@ -89,7 +89,7 @@ func TestCreateIssue(t *testing.T) {
 		Price:       111.111,
 		Code:        "ALBUM123",
 		Description: "A short description of the application",
-		Completed:   false,
+		Sender:      "amqp",
 	}
 	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedAlbum)).Return(nil)
 
@@ -116,7 +116,7 @@ func TestCreateMany(t *testing.T) {
 			Price:       111.111,
 			Code:        "ALBUM123",
 			Description: "Description 1",
-			Completed:   false,
+			Sender:      "amqp",
 		},
 		{
 			ID:          uuid.New(),
@@ -127,7 +127,7 @@ func TestCreateMany(t *testing.T) {
 			Price:       222.222,
 			Code:        "ALBUM456",
 			Description: "Description 2",
-			Completed:   true,
+			Sender:      "amqp",
 		},
 	}
 	mockCollectionQuery.EXPECT().CreateMany(gomock.AssignableToTypeOf(expectedAlbums)).Return(nil)
@@ -155,7 +155,7 @@ func TestGetAllIssues(t *testing.T) {
 			Price:       111.111,
 			Code:        "ALBUM123",
 			Description: "Description 1",
-			Completed:   false,
+			Sender:      "amqp",
 		},
 		{
 			ID:          uuid.New(),
@@ -166,7 +166,7 @@ func TestGetAllIssues(t *testing.T) {
 			Price:       222.222,
 			Code:        "ALBUM456",
 			Description: "Description 2",
-			Completed:   true,
+			Sender:      "amqp",
 		},
 	}
 	mockCollectionQuery.EXPECT().GetAllIssues().Return(expectedAlbums, nil)
@@ -194,7 +194,7 @@ func TestGetIssuesByCode(t *testing.T) {
 		Price:       123.45,
 		Code:        "ALBUM123",
 		Description: "Description",
-		Completed:   true,
+		Sender:      "amqp",
 	}
 	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedAlbum, nil)
 
@@ -235,6 +235,7 @@ func TestDeleteAll(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+/*
 func TestMarkCompleted(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -249,6 +250,8 @@ func TestMarkCompleted(t *testing.T) {
 	// Verify the result
 	assert.NoError(t, err)
 }
+
+*/
 
 func TestUpdateIssue(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -268,7 +271,7 @@ func TestUpdateIssue(t *testing.T) {
 		Price:       99.99,
 		Code:        "ALBUM789",
 		Description: "Updated Description",
-		Completed:   false,
+		Sender:      "amqp",
 	}
 
 	err := mockCollectionQuery.UpdateIssue(&albumToUpdate)
