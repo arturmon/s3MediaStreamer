@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/logging"
 	"strings"
 	"time"
 
@@ -65,7 +66,7 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 	return err
 }
 
-func (c *PgClient) Connect() error {
+func (c *PgClient) Connect(logger *logging.Logger) error {
 	if c.Pool != nil {
 		conn, connErr := c.Pool.Acquire(context.Background())
 		if connErr != nil {

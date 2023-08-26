@@ -63,7 +63,7 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	p.Use(router)
 
 	logger.Info("storage initializing")
-	storage, err := model.NewDBConfig(cfg)
+	storage, err := model.NewDBConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}

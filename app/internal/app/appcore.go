@@ -29,14 +29,14 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	healthMetrics := monitoring.NewHealthMetrics()
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
-	storage, err := model.NewDBConfig(cfg)
+	storage, err := model.NewDBConfig(cfg, logger)
 	if err != nil {
 		logger.Error("Failed to initialize the storage:", err)
 		return nil, err
 	}
 
 	// Initialize DBOperations interface within the storage.
-	err = storage.Operations.Connect() // Initialize the storage's Operations field
+	err = storage.Operations.Connect(logger) // Initialize the storage's Operations field
 	if err != nil {
 		logger.Error("Failed to connect to the database:", err)
 		return nil, err

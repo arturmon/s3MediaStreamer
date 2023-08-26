@@ -54,7 +54,7 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 		return nil, err
 	}
 
-	storage, err := model.NewDBConfig(cfg)
+	storage, err := model.NewDBConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}

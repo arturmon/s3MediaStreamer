@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/logging"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -39,7 +40,7 @@ type MongoClient struct {
 	Cfg    *config.Config
 }
 
-func (c *MongoClient) Connect() error {
+func (c *MongoClient) Connect(logger *logging.Logger) error {
 	uri := "mongodb://" + c.Cfg.Storage.Host + ":" + c.Cfg.Storage.Port
 	clientOptions := options.Client().ApplyURI(uri)
 
