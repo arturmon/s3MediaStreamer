@@ -39,7 +39,7 @@ type WebApp struct {
 	enforcer      *casbin.Enforcer
 }
 
-func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
+func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	logger.Info("router initializing")
 	// Gin instance
 	switch cfg.AppConfig.GinMode {
@@ -85,7 +85,8 @@ func NewAppUseGin(cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
 	}
 
 	// Initialize session
-	initSession(router, cfg)
+	logger.Info("session initializing")
+	initSession(ctx, router, cfg, logger)
 
 	healthMetrics := monitoring.NewHealthMetrics()
 	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)

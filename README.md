@@ -26,6 +26,15 @@ docker run -d --name postgresql-server \
 -e POSTGRESQL_PASSWORD=1qazxsw2 \
 -e POSTGRESQL_DATABASE=db_issue_album bitnami/postgresql:latest
 ```
+create add db
+```sql
+create database casbin
+    with owner root;
+create database session
+    with owner root;
+
+```
+
 Use MQ
 GUi port `15672`
 
@@ -35,6 +44,21 @@ docker run -d --name some-rabbit \
 -e RABBITMQ_DEFAULT_PASS=password \
 rabbitmq:3-management
 ```
+Use Session
+Redis
+```
+docker run --name redis -d redis
+docker run --name redis -d \
+-e ALLOW_EMPTY_PASSWORD=yes \
+bitnami/redis:latest
+```
+memcached
+```
+docker run --name memcache -d \
+bitnami/memcached:latest
+```
+
+
 
 Downloading dependencies
 ```

@@ -82,10 +82,29 @@ type Config struct {
 		BrokerPort    int    `env:"MQ_BROKER_PORT" env-default:"5672"`
 	}
 	Session struct {
-		SessionStorageType string `env:"SESSION_STORAGE_TYPE" env-default:"cookie"` // cookie, memstore
-		SessionName        string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
-		Cookies            struct {
+		SessionStorageType string `env:"SESSION_STORAGE_TYPE" env-default:"postgres"` // cookie, memory, memcached,
+		// mongo, postgres
+		SessionName string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
+		Cookies     struct {
 			SessionSecretKey string `env:"SESSION_COOKIES_SESSION_SECRET_KEY" env-default:"sdfgerfsd3543g"`
+		}
+		Memcached struct {
+			MemcachedHost string `env:"SESSION_MEMCACHED_HOST" env-default:"localhost"`
+			MemcachedPort string `env:"SESSION_MEMCACHED_PORT" env-default:"11211"`
+		}
+		Mongodb struct {
+			MongoHost     string `env:"SESSION_MONGO_HOST" env-default:"localhost"`
+			MongoPort     string `env:"SESSION_MONGO_PORT" env-default:"27017"`
+			MongoDatabase string `env:"SESSION_MONGO_DATABASE" env-default:"session"`
+			MongoUser     string `env:"SESSION_MONGO_USERNAME" env-default:"root"`
+			MongoPass     string `env:"SESSION_MONGO_PASSWORD" env-default:"1qazxsw2"`
+		}
+		Postgresql struct {
+			PostgresqlHost     string `env:"SESSION_POSTGRESQL_HOST" env-default:"localhost"`
+			PostgresqlPort     string `env:"SESSION_POSTGRESQL_PORT" env-default:"5432"`
+			PostgresqlDatabase string `env:"SESSION_POSTGRESQL_DATABASE" env-default:"session"`
+			PostgresqlUser     string `env:"SESSION_POSTGRESQL_USER" env-default:"root"`
+			PostgresqlPass     string `env:"SESSION_POSTGRESQL_PASS" env-default:"1qazxsw2"`
 		}
 	}
 }
