@@ -3,6 +3,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/streadway/amqp"
 )
@@ -20,51 +21,117 @@ func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amq
 				return
 			}
 
-			// Decode the incoming JSON message body.
-			var data map[string]interface{}
-			err := json.Unmarshal(message.Body, &data)
-			if err != nil {
-				c.logger.Printf("Error decoding message: %v", err)
-				continue // Continue processing other messages.
-			}
-
-			// Extract the action field from the message data.
-			action, ok := data["action"].(string)
-			if !ok {
-				c.logger.Println("Invalid action field")
-				continue // Continue processing other messages.
-			}
-
-			// Based on the action, handle different types of messages.
-			switch action {
-			case "PostAlbums":
-				c.handlePostAlbums(data)
-
-			case "GetAllAlbums":
-				c.handleGetAllAlbums()
-
-			case "GetDeleteAll":
-				c.handleGetDeleteAll()
-
-			case "GetAlbumByCode":
-				c.handleGetAlbumByCode(data)
-
-			case "AddUser":
-				c.handleAddUser(data)
-
-			case "DeleteUser":
-				c.handleDeleteUser(data)
-
-			case "FindUserToEmail":
-				c.handleFindUserToEmail(data)
-
-			case "UpdateAlbum":
-				c.HandlerUpdateAlbum(data)
-
-			default:
-				c.logger.Printf("Unknown action: %s", action)
-				continue // Continue processing other messages with unknown actions.
-			}
+			// Handle the message based on its action
+			c.handleMessage(message)
 		}
+	}
+}
+
+func (c *MessageClient) handleMessage(message amqp.Delivery) {
+	// Decode the incoming JSON message body.
+	var data map[string]interface{}
+	err := json.Unmarshal(message.Body, &data)
+	if err != nil {
+		c.logger.Printf("Error decoding message: %v", err)
+		return
+	}
+
+	// Extract the action field from the message data.
+	action, ok := data["action"].(string)
+	if !ok {
+		c.logger.Println("Invalid action field")
+		return
+	}
+
+	// Based on the action, handle different types of messages.
+	switch action {
+	case "PostAlbums":
+		c.handleActionPostAlbums(data)
+
+	case "GetAllAlbums":
+		c.handleActionGetAllAlbums()
+
+	case "GetDeleteAll":
+		c.handleActionGetDeleteAll()
+
+	case "GetAlbumByCode":
+		c.handleActionGetAlbumByCode(data)
+
+	case "AddUser":
+		c.handleActionAddUser(data)
+
+	case "DeleteUser":
+		c.handleActionDeleteUser(data)
+
+	case "FindUserToEmail":
+		c.handleActionFindUserToEmail(data)
+
+	case "UpdateAlbum":
+		c.handleActionUpdateAlbum(data)
+
+	default:
+		c.logger.Printf("Unknown action: %s", action)
+		return
+	}
+}
+
+func (c *MessageClient) handleActionPostAlbums(data map[string]interface{}) {
+	resultErr := c.handlePostAlbums(data)
+	c.handleResult(resultErr, "PostAlbums")
+}
+
+func (c *MessageClient) handleActionGetAllAlbums() {
+	resultErr := c.handleGetAllAlbums()
+	c.handleResult(resultErr, "GetAllAlbums")
+}
+
+func (c *MessageClient) handleActionGetDeleteAll() {
+	resultErr := c.handleGetDeleteAll()
+	c.handleResult(resultErr, "GetDeleteAll")
+}
+
+func (c *MessageClient) handleActionGetAlbumByCode(data map[string]interface{}) {
+	resultErr := c.handleGetAlbumByCode(data)
+	c.handleResult(resultErr, "GetAlbumByCode")
+}
+
+func (c *MessageClient) handleActionAddUser(data map[string]interface{}) {
+	resultErr := c.handleAddUser(data)
+	c.handleResult(resultErr, "AddUser")
+}
+
+func (c *MessageClient) handleActionDeleteUser(data map[string]interface{}) {
+	resultErr := c.handleDeleteUser(data)
+	c.handleResult(resultErr, "DeleteUser")
+}
+
+func (c *MessageClient) handleActionFindUserToEmail(data map[string]interface{}) {
+	resultErr := c.handleFindUserToEmail(data)
+	c.handleResult(resultErr, "FindUserToEmail")
+}
+
+func (c *MessageClient) handleActionUpdateAlbum(data map[string]interface{}) {
+	resultErr := c.handleUpdateAlbum(data)
+	c.handleResult(resultErr, "UpdateAlbum")
+}
+
+func (c *MessageClient) handleResult(resultErr error, action string) {
+	if resultErr != nil {
+		errorData := map[string]interface{}{
+			"error": resultErr.Error(),
+		}
+		c.publishAndLogResult(TypePublisherError, errorData)
+	} else {
+		successData := map[string]interface{}{
+			"info": fmt.Sprintf("Successfully handled %s", action),
+		}
+		c.publishAndLogResult(TypePublisherMessage, successData)
+	}
+}
+
+func (c *MessageClient) publishAndLogResult(resultType string, data map[string]interface{}) {
+	publishErr := c.publishMessage(resultType, data)
+	if publishErr != nil {
+		c.logger.Printf("Error publishing %s message: %v", resultType, publishErr)
 	}
 }

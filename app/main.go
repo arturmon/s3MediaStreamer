@@ -71,7 +71,6 @@ func main() {
 			logger.Info("Waiting for the background goroutine to finish...")
 			<-messages
 			logger.Info("Finished consuming messages")
-			cancel() // Cancel the context to stop other goroutines
 		}()
 	}
 

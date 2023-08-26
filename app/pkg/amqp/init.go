@@ -3,7 +3,6 @@ package amqp
 import (
 	"context"
 	"fmt"
-	"net"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
@@ -23,18 +22,26 @@ type MessageClient struct {
 
 // NewAMQPClient creates a new instance of the MessageClient.
 func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger) (*MessageClient, error) {
-	amqpURL := net.JoinHostPort(cfg.MessageQueue.User, cfg.MessageQueue.Pass)
+	/*
+		amqpURL := fmt.Sprintf("amqp://%s:%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass)
+
+		if cfg.MessageQueue.BrokerPort != 0 {
+			amqpURL += fmt.Sprintf("@%s:%d/", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
+		} else {
+			amqpURL += fmt.Sprintf("@%s/", cfg.MessageQueue.Broker)
+		}
+
+	*/
+
+	var amqpURL string
 
 	if cfg.MessageQueue.BrokerPort != 0 {
-		amqpURL = net.JoinHostPort(amqpURL, fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort))
+		amqpURL = fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
 	} else {
-		amqpURL = net.JoinHostPort(amqpURL, cfg.MessageQueue.Broker)
+		amqpURL = cfg.MessageQueue.Broker
 	}
-	if cfg.MessageQueue.BrokerPort != 0 {
-		amqpURL = net.JoinHostPort(amqpURL, fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort))
-	} else {
-		amqpURL = net.JoinHostPort(amqpURL, cfg.MessageQueue.Broker)
-	}
+
+	amqpURL = fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 
 	conn, err := amqp.Dial(amqpURL)
 	if err != nil {
