@@ -53,8 +53,9 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 		postgresURL = fmt.Sprintf("%s:%s", cfg.Session.Postgresql.PostgresqlHost, cfg.Session.Postgresql.PostgresqlPort)
 		postgresURL = fmt.Sprintf("postgresql://%s:%s@%s",
 			cfg.Session.Postgresql.PostgresqlUser, cfg.Session.Postgresql.PostgresqlPass, postgresURL)
-		postgresURL += "?sslmode=disable" // Use += instead of = to append
-		postgresURL = fmt.Sprintf("%s/%s", postgresURL, cfg.Session.Postgresql.PostgresqlDatabase)
+		postgresSSL := "?sslmode=disable"
+		postgresURL = fmt.Sprintf("%s/%s%s", postgresURL, cfg.Session.Postgresql.PostgresqlDatabase, postgresSSL)
+		logger.Infof("postgresURL: %s", postgresURL)
 		db, err := sql.Open("postgres", postgresURL)
 		if err != nil {
 			logger.Errorf("Error creating Postgres store: %v", err)
@@ -66,11 +67,10 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 	default:
 		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	}
-
-	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
 	store.Options(sessions.Options{MaxAge: sessionMaxAge}) // expire in a day
 	sessionName := cfg.Session.SessionName
 	router.Use(sessions.Sessions(sessionName, store))
+	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
 }
 
 func countSession(c *gin.Context) {
