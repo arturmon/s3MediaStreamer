@@ -37,8 +37,6 @@ func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error
 		WriteTimeout:    timeoutDuration,
 		ApplicationName: "casbin",
 	}
-	// uri := fmt.Sprintf("postgresql://%s:%s/%s?sslmode=disable",
-	//	net.JoinHostPort(cfg.Storage.Host, cfg.Storage.Port), cfg.Storage.Username, "casbin")
 	adapter, err := pgadapter.NewAdapter(options)
 	if err != nil {
 		return nil, err
