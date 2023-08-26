@@ -70,7 +70,7 @@ type Config struct {
 	}
 	// MessageQueue
 	MessageQueue struct {
-		Enable        bool   `env:"MQ_ENABLE" env-default:"true"`
+		Enable        bool   `env:"MQ_ENABLE" env-default:"false"`
 		SubRoutingKey string `env:"MQ_ROUTING_KEY" env-default:"sub-routing-key"`
 		SubQueueName  string `env:"MQ_QUEUE_NAME" env-default:"sub_queue"`
 		PubExchange   string `env:"MQ_EXCHANGE" env-default:"pub-exchange"`
