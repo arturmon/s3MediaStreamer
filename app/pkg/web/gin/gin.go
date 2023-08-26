@@ -158,8 +158,8 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	for _, p := range policies {
 		a.logger.Infof("Policy: %v", p)
 	}
-	a.logger.Info("application completely initialized and started")
-	a.logger.Info("The service is ready to listen and serve.")
+	a.logger.Info("application completely initialized, ...started")
+	a.logger.Infof("The service is ready to listen and serve on %s:%s.", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
 	// Start server
 	connectionString := fmt.Sprintf("%s:%s", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
 	server := &http.Server{
