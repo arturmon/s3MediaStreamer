@@ -1,3 +1,3 @@
 package postgresql
 
-const albumFieldCount = 9
+const albumFieldCount = 10
