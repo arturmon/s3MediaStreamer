@@ -154,10 +154,11 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 		return fmt.Errorf("table 'album' does not exist")
 	}
 
-	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender)
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, 
+                   description, sender, _creator_user)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 	_, err = c.Pool.Exec(context.TODO(), query, album.ID, album.CreatedAt, album.UpdatedAt, album.Title,
-		album.Artist, album.Price, album.Code, album.Description, album.Sender)
+		album.Artist, album.Price, album.Code, album.Description, album.Sender, album.CreatorUser)
 	if err != nil {
 		return err
 	}
@@ -178,9 +179,11 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 		insertableList[baseIndex+6] = &v.Code
 		insertableList[baseIndex+7] = &v.Description
 		insertableList[baseIndex+8] = &v.Sender
+		insertableList[baseIndex+9] = &v.CreatorUser
 	}
 
-	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender) VALUES `
+	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, 
+                   description, sender, _creator_user) VALUES `
 
 	var placeholders []string
 	for i := 0; i < len(list); i++ {
@@ -214,7 +217,7 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 
 	query := `
 		SELECT _id, created_at, updated_at, title, artist,
-		price, code, description, sender
+		price, code, description, sender, _creator_user
 		FROM album`
 	rows, queryErr := c.Pool.Query(context.TODO(), query)
 	if queryErr != nil {
@@ -229,6 +232,7 @@ func (c *PgClient) GetAllIssues() ([]config.Album, error) {
 			&album.ID, &album.CreatedAt, &album.UpdatedAt,
 			&album.Title, &album.Artist, &album.Price,
 			&album.Code, &album.Description, &album.Sender,
+			&album.CreatorUser,
 		)
 		if scanErr != nil {
 			return nil, scanErr
@@ -305,6 +309,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 		&result.Code,
 		&result.Description,
 		&result.Sender,
+		&result.CreatorUser,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

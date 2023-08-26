@@ -63,6 +63,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			Code:        albumData["Code"].(string),
 			Description: albumData["Description"].(string),
 			Sender:      "amqp",
+			CreatorUser: uuid.Nil,
 		}
 
 		albumsList = append(albumsList, album)

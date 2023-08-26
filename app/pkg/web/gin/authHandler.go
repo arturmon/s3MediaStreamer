@@ -131,12 +131,12 @@ func (a *WebApp) Login(c *gin.Context) {
 		a.metrics.ErrPasswordCounter.Inc() // Prometheus
 		return
 	}
-	// Save the user's email in the session
-	session := sessions.Default(c)
-	session.Set("user_email", user.Email)
-	if saveErr := session.Save(); saveErr != nil {
+
+	// set vars session
+	err = setSessionKey(c, "user_id", user.ID.String())
+	if err != nil {
 		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not set values session"})
 		return
 	}
 

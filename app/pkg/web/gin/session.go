@@ -3,10 +3,15 @@ package gin
 import (
 	"context"
 	"database/sql"
+	"encoding/gob"
+	"errors"
 	"net"
+	"net/http"
 	"net/url"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+
+	"github.com/google/uuid"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-contrib/sessions"
@@ -27,6 +32,7 @@ const (
 )
 
 func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, logger *logging.Logger) {
+	gob.Register(uuid.UUID{})
 	var store sessions.Store
 
 	// Initialize session
@@ -74,26 +80,32 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
 }
 
-func countSession(c *gin.Context) {
+func setSessionKey(c *gin.Context, key string, value string) error {
 	session := sessions.Default(c)
-	var count int
-	v := session.Get("count")
-	if v == nil {
-		count = 0
-	} else {
-		if val, ok := v.(int); ok {
-			count = val
-			count++
-		} else {
-			logrus.Errorf("Error converting session value to int")
-			return
-		}
-	}
-	session.Set("count", count)
+	session.Set(key, value)
+
+	// Set the cookie path to "/"
+	session.Options(sessions.Options{
+		MaxAge:   sessionMaxAge,
+		Path:     "/", // Set the cookie path to "/"
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 
 	// Save the session
 	if err := session.Save(); err != nil {
 		// Handle the error here, e.g., log it
 		logrus.Errorf("Error saving session: %v", err)
+		return err
 	}
+	return nil
+}
+
+func getSessionKey(c *gin.Context, key string) (interface{}, error) {
+	session := sessions.Default(c)
+	value := session.Get(key)
+	if value == nil {
+		return nil, errors.New("session value is nil")
+	}
+	return value, nil
 }

@@ -55,7 +55,6 @@ func Ping(c *gin.Context) {
 // @Router		/albums [get]
 func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	a.metrics.GetAllAlbumsCounter.Inc()
 	albums, err := a.storage.Operations.GetAllIssues()
@@ -85,7 +84,6 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Router		/albums/add [post]
 func (a *WebApp) PostAlbums(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	// Increment the counter for each request handled by PostAlbums
 	a.metrics.PostAlbumsCounter.Inc()
@@ -105,13 +103,31 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
 	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
 	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
+	newAlbum.CreatorUser = uuid.New()
+
+	// Read the user_id from the session
+	value, err := getSessionKey(c, "user_id")
+	if err != nil {
+		a.logger.Errorf("Error getting session value: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not get session value"})
+		return
+	}
+
+	valueUUID, err := uuid.Parse(value.(string))
+	if err != nil {
+		a.logger.Errorf("Error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error converting value"})
+		return
+	}
+
+	newAlbum.CreatorUser = valueUUID
 
 	if newAlbum.Code == "" || newAlbum.Artist == "" {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "empty required fields `Code` or `Artist`"})
 		return
 	}
 
-	_, err := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if err == nil {
 		c.IndentedJSON(http.StatusConflict, gin.H{"message": "album code already exists"})
 		return
@@ -143,7 +159,6 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 // @Router		/albums/{code} [get]
 func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	// If user is authorized, proceed with getting the album
 	a.metrics.GetAlbumByIDCounter.Inc()
@@ -175,7 +190,6 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 // @Router		/albums/deleteAll [delete]
 func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	// Increment the counter for each request handled by GetDeleteAll
 	a.metrics.GetDeleteAllCounter.Inc()
@@ -204,7 +218,6 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 // @Router		/albums/delete/{code} [delete]
 func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	// If user is authorized, proceed with deleting the album by ID
 	a.metrics.GetDeleteByIDCounter.Inc()
@@ -247,7 +260,6 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Router                /albums/update [post]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Increment the session-based counter
-	countSession(c)
 
 	// Increment the counter for each request handled by UpdateAlbum
 	a.metrics.UpdateAlbumCounter.Inc()

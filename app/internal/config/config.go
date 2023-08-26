@@ -32,6 +32,7 @@ type Album struct {
 	Code        string    `json:"code" bson:"code" example:"I001"`
 	Description string    `json:"description" bson:"description" example:"A short description of the application"`
 	Sender      string    `json:"sender" bson:"sender" example:"amqp or rest"`
+	CreatorUser uuid.UUID `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 }
 
 // User represents user account information.
