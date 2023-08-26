@@ -107,7 +107,7 @@ func (c *PgClient) Close(_ context.Context) error {
 }
 
 func (c *PgClient) CreateUser(user config.User) error {
-	query := `INSERT INTO "user" (_id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO "users" (_id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)`
 	_, err := c.Pool.Exec(context.TODO(), query, user.ID, user.Name, user.Email, user.Password, user.Role)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func (c *PgClient) CreateUser(user config.User) error {
 
 func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	var user config.User
-	query := `SELECT _id, name, email, password, role FROM "user" WHERE email = $1`
+	query := `SELECT _id, name, email, password, role FROM "users" WHERE email = $1`
 	err := c.Pool.QueryRow(context.TODO(), query, email).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role)
 	if err != nil {
@@ -130,7 +130,7 @@ func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 }
 
 func (c *PgClient) DeleteUser(email string) error {
-	query := `DELETE FROM "user" WHERE email = $1`
+	query := `DELETE FROM "users" WHERE email = $1`
 	result, err := c.Pool.Exec(context.TODO(), query, email)
 	if err != nil {
 		return err

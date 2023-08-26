@@ -5,6 +5,8 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -81,9 +83,16 @@ func (a *WebApp) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
 		return
 	}
+	// Save the user's email in the session
+	session := sessions.Default(c)
+	session.Set("user_email", user.Email)
+	if saveErr := session.Save(); saveErr != nil {
+		a.metrics.RegisterErrorCounter.Inc()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
+		return
+	}
+
 	a.metrics.RegisterSuccessCounter.Inc()
-	// AddPolicy(sec string, ptype string, rule []string) error
-	// "alice", "data1", "read"
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -120,6 +129,14 @@ func (a *WebApp) Login(c *gin.Context) {
 		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
 		a.metrics.ErrPasswordCounter.Inc() // Prometheus
+		return
+	}
+	// Save the user's email in the session
+	session := sessions.Default(c)
+	session.Set("user_email", user.Email)
+	if saveErr := session.Save(); saveErr != nil {
+		a.metrics.LoginErrorCounter.Inc()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
 		return
 	}
 

@@ -50,7 +50,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}()
 
 	// Initialize the Gin web framework.
-	myGin, err := gin.NewAppUseGin(cfg, logger)
+	myGin, err := gin.NewAppUseGin(ctx, cfg, logger)
 	if err != nil {
 		logger.Error("Failed to initialize Gin:", err)
 		logger.Fatal(err)

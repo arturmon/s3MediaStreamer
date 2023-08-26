@@ -22,17 +22,6 @@ type MessageClient struct {
 
 // NewAMQPClient creates a new instance of the MessageClient.
 func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger) (*MessageClient, error) {
-	/*
-		amqpURL := fmt.Sprintf("amqp://%s:%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass)
-
-		if cfg.MessageQueue.BrokerPort != 0 {
-			amqpURL += fmt.Sprintf("@%s:%d/", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
-		} else {
-			amqpURL += fmt.Sprintf("@%s/", cfg.MessageQueue.Broker)
-		}
-
-	*/
-
 	var amqpURL string
 
 	if cfg.MessageQueue.BrokerPort != 0 {
