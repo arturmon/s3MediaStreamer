@@ -23,16 +23,16 @@ type MessageClient struct {
 // NewAMQPClient creates a new instance of the MessageClient.
 func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger) (*MessageClient, error) {
 	var amqpURL string
-
+	logger.Info("Starting AMQP Client...")
 	if cfg.MessageQueue.BrokerPort != 0 {
 		amqpURL = fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
 	} else {
 		amqpURL = cfg.MessageQueue.Broker
 	}
 
-	amqpURL = fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
+	amqpURLpriv := fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 
-	conn, err := amqp.Dial(amqpURL)
+	conn, err := amqp.Dial(amqpURLpriv)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +58,8 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Infof("Connect AMQP Client: amqp://%s:***@%s", cfg.MessageQueue.User, amqpURL)
 
 	return &MessageClient{
 		conn:    conn,
@@ -85,7 +87,7 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 	}
 
 	go c.consumeMessages(ctx, messages) // Start processing the messages in a separate goroutine
-
+	c.logger.Infof("AMQP Comsume: %s", c.queue.Name)
 	return messages, nil
 }
 
