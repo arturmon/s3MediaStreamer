@@ -6,6 +6,8 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"time"
 
+	"github.com/bojanz/currency"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,12 +46,31 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 		c.logger.Println("Invalid albums data")
 		return fmt.Errorf("invalid albums data")
 	}
-
+	var newPrice currency.Amount
 	albumsList := make([]config.Album, 0, len(albumArray)) // Pre-allocate with the expected length
 	for _, albumObj := range albumArray {
 		albumData, castOk := albumObj.(map[string]interface{})
 		if !castOk {
 			c.logger.Println("Invalid album data")
+			continue
+		}
+		priceData, castOk := albumData["Price"].(map[string]interface{})
+		if !castOk {
+			c.logger.Println("Invalid price data")
+			continue
+		}
+
+		numberStr, numberOk := priceData["Number"].(string)
+		currencyCode, currencyOk := priceData["Currency"].(string)
+
+		if !numberOk || !currencyOk {
+			c.logger.Println("Invalid price components")
+			continue
+		}
+
+		newPrice, err = currency.NewAmount(numberStr, currencyCode)
+		if err != nil {
+			c.logger.Println("Error creating currency.Amount")
 			continue
 		}
 
@@ -59,7 +80,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			UpdatedAt:   time.Now(),
 			Title:       albumData["Title"].(string),
 			Artist:      albumData["Artist"].(string),
-			Price:       albumData["Price"].(float64),
+			Price:       newPrice,
 			Code:        albumData["Code"].(string),
 			Description: albumData["Description"].(string),
 			Sender:      "amqp",
@@ -230,20 +251,19 @@ func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 
 // amqpUpdateAlbum updates an album using AMQP.
 func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
-	// Check if the required fields are present in the data
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(albumsData), &data)
 	if err != nil {
 		return err
 	}
 
-	// Fetch the album from the database based on the provided code
+	// Fetch the album code from the data
 	code, codeOk := data["Code"].(string)
 	if !codeOk {
-		c.logger.Println("Invalid code field")
 		return fmt.Errorf("invalid code field")
 	}
 
+	// Fetch the album from the database based on the provided code
 	existingAlbum, getErr := c.storage.Operations.GetIssuesByCode(code)
 	if getErr != nil {
 		c.logger.Printf("Error fetching album with code %s: %v", code, getErr)
@@ -257,13 +277,28 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	if artist, artistOk := data["Artist"].(string); artistOk {
 		existingAlbum.Artist = artist
 	}
-	if price, priceOk := data["Price"].(float64); priceOk {
-		existingAlbum.Price = price
+	var newPrice currency.Amount
+	// Handle price data
+	if priceData, priceOk := data["Price"].(map[string]interface{}); priceOk {
+		numberStr, numberOk := priceData["Number"].(string)
+		currencyCode, currencyOk := priceData["Currency"].(string)
+
+		if !numberOk || !currencyOk {
+			return fmt.Errorf("invalid price components")
+		}
+
+		newPrice, err = currency.NewAmount(numberStr, currencyCode)
+		if err != nil {
+			return err
+		}
+
+		existingAlbum.Price = newPrice
 	}
+
 	if description, descOk := data["Description"].(string); descOk {
 		existingAlbum.Description = description
 	}
-	if sender, complOk := data["Sender"].(string); complOk {
+	if sender, senderOk := data["Sender"].(string); senderOk {
 		existingAlbum.Sender = sender
 	}
 

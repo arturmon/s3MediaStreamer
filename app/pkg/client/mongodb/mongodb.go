@@ -9,8 +9,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	log "github.com/sirupsen/logrus"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,7 +38,7 @@ type MongoClient struct {
 	Cfg    *config.Config
 }
 
-func (c *MongoClient) Connect(logger *logging.Logger) error {
+func (c *MongoClient) Connect(_ *logging.Logger) error {
 	uri := "mongodb://" + c.Cfg.Storage.Host + ":" + c.Cfg.Storage.Port
 	clientOptions := options.Client().ApplyURI(uri)
 
@@ -189,22 +187,6 @@ func (c *MongoClient) DeleteAll() error {
 		return err
 	}
 	return nil
-}
-
-// PrintList - Print list of issues on console.
-func PrintList(issues []config.Album) {
-	for i := range issues {
-		v := &issues[i] // Use a pointer to the current issue.
-		log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
-		/*
-			if v.Completed {
-				log.Infof("Completed %d: %f    %s", i+1, v.Price, v.Title)
-			} else {
-				log.Infof("No Completed %d: %f    %s", i+1, v.Price, v.Title)
-			}
-
-		*/
-	}
 }
 
 func (c *MongoClient) CreateUser(user config.User) error {

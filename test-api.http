@@ -14,8 +14,11 @@ Content-Type: application/json
 {
   "Title": "Test Titl1e",
   "Artist": "Test Artis22t1",
-  "Price": 44.10,
-  "Code": "I0001",
+  "Price": {
+    "Number": "44.10",
+    "Currency": "EUR"
+  },
+  "Code": "I0005",
   "Description": "Description Test1"
 }
 ###
@@ -25,8 +28,11 @@ Content-Type: application/json
 {
   "Title": "Marco Polo",
   "Artist": "Test Update",
-  "Price": 123.99,
-  "Code": "I0001",
+  "Price": {
+    "Number": "1.10",
+    "Currency": "USD"
+  },
+  "Code": "I00010",
   "Description": "Description Update",
   "Completed": false
 }

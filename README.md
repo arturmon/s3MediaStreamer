@@ -3,12 +3,12 @@
 [![Coverage Status](https://coveralls.io/repos/github/arturmon/skeleton-golange-application/badge.svg?branch=main)](https://coveralls.io/github/arturmon/skeleton-golange-application?branch=main)
 [![Docker](https://img.shields.io/docker/pulls/arturmon/albums)](https://hub.docker.com/r/arturmon/albums)
 ## Generate specification Swager
-```
+```shell
 cd skeleton-golange-application
 swag init
 ```
 Use MongoDB docker container 
-```
+```shell
 docker run -d --name mongodb \
 -p 27017:27017 \
 -v /Users/amudrykh/mongodb:/bitnami/mongodb \
@@ -18,7 +18,7 @@ docker run -d --name mongodb \
 bitnami/mongodb:latest
 ```
 Use Postgresql docker container
-```
+```shell
 docker run -d --name postgresql-server \
 -p 5432:5432 \
 -v /Users/amudrykh/postgresql:/bitnami/postgresql \
@@ -38,7 +38,7 @@ create database session
 Use MQ
 GUi port `15672`
 
-```
+```shell
 docker run -d --name some-rabbit \
 -e RABBITMQ_DEFAULT_USER=user \
 -e RABBITMQ_DEFAULT_PASS=password \
@@ -46,14 +46,14 @@ rabbitmq:3-management
 ```
 Use Session
 Redis
-```
+```shell
 docker run --name redis -d redis
 docker run --name redis -d \
 -e ALLOW_EMPTY_PASSWORD=yes \
 bitnami/redis:latest
 ```
 memcached
-```
+```shell
 docker run --name memcache -d \
 bitnami/memcached:latest
 ```
@@ -61,7 +61,7 @@ bitnami/memcached:latest
 
 
 Downloading dependencies
-```
+```shell
 go get -u go.mongodb.org/mongo-driver/bson/primitive
 go get -u go.mongodb.org/mongo-driver/mongo
 go get -u github.com/gin-gonic/gin
@@ -83,7 +83,7 @@ v1/
 | /users/logout   | 200             | POST   | Logout             |
 
 /register
-```
+```json
 {
     "email":"a@a.com",
     "name":"a",
@@ -91,14 +91,14 @@ v1/
 }
 ```
 /login
-```
+```json
 {
   "email":"a@a.com",
   "password":"1"
 }
 ```
 /users/me
-```
+```json
 {
   "_id": "84e6fc11-10b3-48dd-abbf-dc8c83d05be8",
   "name": "a",
@@ -106,17 +106,13 @@ v1/
 }
 ```
 /delete
-```
+```json
 {
   "email":"a@a.com"
 }
 ```
 /logout
-```
-{
-"email":"a@a.com"
-}
-```
+
 ## API Album
 v1/
 
@@ -125,68 +121,83 @@ v1/
 | /albums              | 200/401/500         | GET    | GetAllAlbums  |
 | /albums/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
 | /albums/add          | 201/400/500         | POST   | PostAlbums    |
-| /album/update        | 200/400/401/404/500 | POST   | UpdateAlbum   |
+| /albums/update       | 200/400/401/404/500 | POST   | UpdateAlbum   |
 | /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
 | /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
 /albums
-```
+```json
 [
   {
-    "_id": "3da442ff-8a54-46c0-806f-543ef74675eb",
-    "created_at": "2023-05-15T17:17:34.981396Z",
-    "updated_at": "2023-05-15T17:17:34.981396Z",
-    "title": "Test Titl1e",
-    "artist": "Test Artist1",
-    "price": 44.10200119018555,
-    "code": "I0001",
-    "description": "Description Test1",
-    "sender": "rest"
+    "_id": "fc1857ce-ac9e-4171-a253-366f4878572d",
+    "created_at": "2023-08-27T03:56:23.051288+03:00",
+    "updated_at": "2023-08-27T04:13:14.157717+03:00",
+    "title": "Marco Polo",
+    "artist": "Test Update",
+    "price": {
+      "number": "1.10",
+      "currency": "USD"
+    },
+    "code": "I00010",
+    "description": "Description Update",
+    "sender": "rest",
+    "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
   }
 ]
 ```
 /albums/I0001
-```
+```json
 {
-  "_id": "3da442ff-8a54-46c0-806f-543ef74675eb",
-  "created_at": "2023-05-15T17:17:34.981396Z",
-  "updated_at": "2023-05-15T17:17:34.981396Z",
+  "_id": "9ae2077e-cd38-4f0f-b476-aa85227af5fa",
+  "created_at": "2023-08-27T03:58:43.863071+03:00",
+  "updated_at": "2023-08-27T03:58:43.863072+03:00",
   "title": "Test Titl1e",
-  "artist": "Test Artist1",
-  "price": 44.10200119018555,
-  "code": "I0001",
+  "artist": "Test Artis22t1",
+  "price": {
+    "number": "44.10",
+    "currency": "USD"
+  },
+  "code": "I0007",
   "description": "Description Test1",
-  "sender": "amqp"
+  "sender": "rest",
+  "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
 ```
-/albums
-```
+/albums/add
+```json
 {
   "Title": "Test Titl1e",
-  "Artist": "Test Artist1",
-  "Price": 44.102,
+  "Artist": "Test Artis22t1",
+  "Price": {
+    "Number": "44.10",
+    "Currency": "USD"
+  },
   "Code": "I0001",
-  "Description": "Description Test1",
+  "Description": "Description Test1"
 }
 ```
 /albums/update
-```
+```json
 {
   "Title": "Marco Polo",
   "Artist": "Test Update",
-  "Price": 123.99,
-  "Code": "I0001",
+  "Price": {
+    "Number": "1.10",
+    "Currency": "USD"
+  },
+  "Code": "I00010",
   "Description": "Description Update",
+  "Completed": false
 }
 ```
 /albums/deleteAll
-```
+```json
 {
   "message": "OK"
 }
 ```
 /albums/delete/:code
-```
+```json
 {
   "message": "OK"
 }
@@ -203,13 +214,13 @@ v1/
 | /swagger             | 200          | GET    |                    |
 
 /health
-```
+```json
 {
   "status": "UP"
 }
 ```
 /v1/ping
-```
+```json
 {
   "message": "pong"
 }
@@ -223,7 +234,7 @@ get_albums_connect_mongodb_total 0
 ```
 
 ## Generate SWAGER
-```
+```shell
 swag init
 ```
 
@@ -245,8 +256,29 @@ Example:
 | sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                              |
 | sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                             |
 
----> PostAlbums Payload:
+---> PostAlbums solo album
+```json
+{
+  "action": "PostAlbums",
+  "albums": {
+    "album": [
+      {
+        "Title": "Test Title1",
+        "Artist": "Test Artist1",
+        "Price": {
+          "Number": "44.10",
+          "Currency": "USD"
+        },
+        "Code": "I0001",
+        "Description": "Description Test1"
+      }
+    ]
+  }
+}
 ```
+
+---> PostAlbums Payload many albums:
+```json
 {
     "action": "PostAlbums",
     "albums": {
@@ -254,21 +286,30 @@ Example:
             {
                 "Title": "Test Title1",
                 "Artist": "Test Artist1",
-                "Price": 44.102,
+                "Price": {
+                  "Number": "44.10",
+                  "Currency": "USD"
+                },
                 "Code": "I0001",
                 "Description": "Description Test1"
             },
             {
                 "Title": "Test Title2",
                 "Artist": "Test Artist2",
-                "Price": 23423,
+                "Price": {
+                  "Number": "44.10",
+                  "Currency": "USD"
+                },
                 "Code": "I0002",
                 "Description": "Description Test2"
             },
             {
                 "Title": "Test Title3",
                 "Artist": "Test Artist3",
-                "Price": 44.3242,
+                "Price": {
+                  "Number": "44.10",
+                  "Currency": "USD"
+                },
                 "Code": "I0003",
                 "Description": "Description Test3"
             }
@@ -278,13 +319,16 @@ Example:
 
 ```
 ---> UpdateAlbum Payload:
-```
+```json
 {
     "action": "UpdateAlbum",
     "album": {
       "Title": "Test Rabbitmq",
       "Artist": "Test Update RAbbit",
-      "Price": 1.99,
+      "Price": {
+         "Number": "1.10",
+         "Currency": "USD"
+      },
       "Code": "I0001",
       "Description": "Description Update Rabbitmq"
     }

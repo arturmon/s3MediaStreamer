@@ -51,7 +51,7 @@ type DBConfig struct {
 }
 
 type DBOperations interface {
-	Connect(logger *logging.Logger) error
+	Connect(_ *logging.Logger) error
 	Close(ctx context.Context) error
 	Ping(ctx context.Context) error
 	mongodb.MongoOperations

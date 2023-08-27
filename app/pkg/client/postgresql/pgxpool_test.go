@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bojanz/currency"
+
 	"github.com/google/uuid"
 
 	"skeleton-golange-application/app/internal/config"
@@ -86,14 +88,17 @@ func TestCreateIssue(t *testing.T) {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Artist:      "Artist name",
-		Price:       111.111,
 		Code:        "ALBUM123",
 		Description: "A short description of the application",
 		Sender:      "amqp",
 	}
+	price, err := currency.NewAmount("111.11", "USD")
+	assert.NoError(t, err)
+	expectedAlbum.Price = price
+
 	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedAlbum)).Return(nil)
 
-	err := mockCollectionQuery.CreateIssue(&expectedAlbum)
+	err = mockCollectionQuery.CreateIssue(&expectedAlbum)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -113,7 +118,6 @@ func TestCreateMany(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 1",
 			Artist:      "Artist 1",
-			Price:       111.111,
 			Code:        "ALBUM123",
 			Description: "Description 1",
 			Sender:      "amqp",
@@ -124,15 +128,21 @@ func TestCreateMany(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 2",
 			Artist:      "Artist 2",
-			Price:       222.222,
 			Code:        "ALBUM456",
 			Description: "Description 2",
 			Sender:      "amqp",
 		},
 	}
+	price, err := currency.NewAmount("111.11", "USD")
+	price2, err2 := currency.NewAmount("222.11", "EUR")
+	assert.NoError(t, err)
+	assert.NoError(t, err2)
+	expectedAlbums[0].Price = price
+	expectedAlbums[1].Price = price2
+
 	mockCollectionQuery.EXPECT().CreateMany(gomock.AssignableToTypeOf(expectedAlbums)).Return(nil)
 
-	err := mockCollectionQuery.CreateMany(expectedAlbums)
+	err = mockCollectionQuery.CreateMany(expectedAlbums)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -152,7 +162,6 @@ func TestGetAllIssues(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 1",
 			Artist:      "Artist 1",
-			Price:       111.111,
 			Code:        "ALBUM123",
 			Description: "Description 1",
 			Sender:      "amqp",
@@ -163,12 +172,18 @@ func TestGetAllIssues(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 2",
 			Artist:      "Artist 2",
-			Price:       222.222,
 			Code:        "ALBUM456",
 			Description: "Description 2",
 			Sender:      "amqp",
 		},
 	}
+	price, err := currency.NewAmount("111.11", "USD")
+	price2, err2 := currency.NewAmount("222.11", "EUR")
+	assert.NoError(t, err)
+	assert.NoError(t, err2)
+	expectedAlbums[0].Price = price
+	expectedAlbums[1].Price = price2
+
 	mockCollectionQuery.EXPECT().GetAllIssues().Return(expectedAlbums, nil)
 
 	albums, err := mockCollectionQuery.GetAllIssues()
@@ -191,11 +206,14 @@ func TestGetIssuesByCode(t *testing.T) {
 		UpdatedAt:   time.Now(),
 		Title:       "Title",
 		Artist:      "Artist",
-		Price:       123.45,
 		Code:        "ALBUM123",
 		Description: "Description",
 		Sender:      "amqp",
 	}
+	price, err := currency.NewAmount("111.11", "USD")
+	assert.NoError(t, err)
+	expectedAlbum.Price = price
+
 	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedAlbum, nil)
 
 	album, err := mockCollectionQuery.GetIssuesByCode("ALBUM123")
@@ -235,24 +253,6 @@ func TestDeleteAll(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-/*
-func TestMarkCompleted(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
-
-	// Set up an expected call on the mockCollectionQuery
-	mockCollectionQuery.EXPECT().MarkCompleted("ALBUM123").Return(nil)
-
-	err := mockCollectionQuery.MarkCompleted("ALBUM123")
-
-	// Verify the result
-	assert.NoError(t, err)
-}
-
-*/
-
 func TestUpdateIssue(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -268,13 +268,15 @@ func TestUpdateIssue(t *testing.T) {
 		UpdatedAt:   time.Now(),
 		Title:       "Updated Title",
 		Artist:      "Updated Artist",
-		Price:       99.99,
 		Code:        "ALBUM789",
 		Description: "Updated Description",
 		Sender:      "amqp",
 	}
+	price, err := currency.NewAmount("111.11", "USD")
+	assert.NoError(t, err)
+	albumToUpdate.Price = price
 
-	err := mockCollectionQuery.UpdateIssue(&albumToUpdate)
+	err = mockCollectionQuery.UpdateIssue(&albumToUpdate)
 
 	// Verify the result
 	assert.NoError(t, err)

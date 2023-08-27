@@ -66,7 +66,7 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 	return err
 }
 
-func (c *PgClient) Connect(logger *logging.Logger) error {
+func (c *PgClient) Connect(_ *logging.Logger) error {
 	if c.Pool != nil {
 		conn, connErr := c.Pool.Acquire(context.Background())
 		if connErr != nil {

@@ -1,15 +1,18 @@
 package gin
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -95,15 +98,30 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	newAlbum.UpdatedAt = time.Now()
 	newAlbum.Sender = "rest"
 
-	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+	// Чтение и вывод тела запроса
+	requestBody, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		a.logger.Errorf("Error reading request body: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
 		return
 	}
+	a.logger.Debugf("Received POST request body:\n%s", requestBody)
+
+	// Восстановление состояния Body после чтения (иначе его нельзя будет прочитать в c.BindJSON)
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
+
+	// Декодирование JSON и обработка запроса
+	if bindErr := json.Unmarshal(requestBody, &newAlbum); bindErr != nil {
+		a.logger.Debugf("Received POST request body:\n%s", bindErr)
+		a.logger.Errorf("Invalid request payload: %v", bindErr)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		return
+	}
+
 	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
 	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
 	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
 	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
-	newAlbum.CreatorUser = uuid.New()
 
 	// Read the user_id from the session
 	value, err := getSessionKey(c, "user_id")
@@ -119,7 +137,6 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error converting value"})
 		return
 	}
-
 	newAlbum.CreatorUser = valueUUID
 
 	if newAlbum.Code == "" || newAlbum.Artist == "" {
@@ -300,16 +317,14 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	if newAlbum.Artist != "" {
 		existingAlbum.Artist = newAlbum.Artist
 	}
-	if newAlbum.Price != 0 {
+	if !newAlbum.Price.IsZero() {
 		existingAlbum.Price = newAlbum.Price
 	}
+
 	if newAlbum.Description != "" {
 		existingAlbum.Description = newAlbum.Description
 	}
-	// TODO
-	if newAlbum.Sender != existingAlbum.Sender {
-		existingAlbum.Sender = newAlbum.Sender
-	}
+	existingAlbum.Sender = "rest"
 
 	existingAlbum.UpdatedAt = time.Now()
 	// Perform the update operation
