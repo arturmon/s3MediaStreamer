@@ -7,6 +7,8 @@ import (
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 
+	"github.com/panjf2000/ants/v2"
+
 	"github.com/streadway/amqp"
 )
 
@@ -94,4 +96,32 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 // Close closes the AMQP channel.
 func (c *MessageClient) Close() error {
 	return c.channel.Close()
+}
+
+func ConsumeMessages(ctx context.Context, logger logging.Logger, messageClient *MessageClient) {
+	if messageClient == nil {
+		return
+	}
+
+	poolSize := 10 // Set the desired pool size
+
+	pool, poolErr := ants.NewPool(poolSize)
+	if poolErr != nil {
+		logger.Fatal("Failed to create ants pool:", poolErr)
+	}
+	defer pool.Release()
+
+	consumeErr := pool.Submit(func() {
+		messages, consumeErr := messageClient.Consume(ctx)
+		if consumeErr != nil {
+			logger.Fatal("Failed to start consuming messages:", consumeErr)
+		}
+		// Wait for the background goroutine to finish
+		logger.Info("Waiting for the background goroutine to finish...")
+		<-messages
+		logger.Info("Finished consuming messages")
+	})
+	if consumeErr != nil {
+		logger.Fatal("Failed to submit task to ants pool:", consumeErr)
+	}
 }

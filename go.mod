@@ -3,7 +3,6 @@ module skeleton-golange-application
 go 1.18
 
 require (
-	github.com/Rhymond/go-money v1.0.10
 	github.com/bojanz/currency v1.1.2
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin-pg-adapter v1.2.1
@@ -19,6 +18,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
+	github.com/panjf2000/ants/v2 v2.8.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/streadway/amqp v1.1.0
@@ -29,7 +29,6 @@ require (
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.12.0
-	golang.org/x/text v0.12.0
 )
 
 require (
@@ -117,6 +116,7 @@ require (
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

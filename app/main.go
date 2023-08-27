@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"os"
-	"os/signal"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
-	"syscall"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -47,34 +44,10 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	// Setup signal handling to gracefully stop the application
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		select {
-		case <-sigCh:
-			logger.Info("Received termination signal. Stopping the application...")
-			cancel()
-		case <-ctx.Done():
-			// Context cancelled, exiting goroutine
-		}
-	}()
+	app.HandleSignals(ctx, logger, cancel)
+	amqp.ConsumeMessages(ctx, logger, myApp.GetMessageClient())
 
-	// Start consuming messages
-	if myApp.GetMessageClient() != nil {
-		go func() {
-			messages, consumeErr := myApp.GetMessageClient().Consume(ctx) // Use a different variable name (consumeErr)
-			if consumeErr != nil {
-				logger.Fatal("Failed to start consuming messages:", consumeErr)
-			}
-			// Wait for the background goroutine to finish
-			logger.Info("Waiting for the background goroutine to finish...")
-			<-messages
-			logger.Info("Finished consuming messages")
-		}()
-	}
-
-	// Call PreInit with the AMQPClient instance and the config
+	// Call PostInit with the AMQPClient instance and the config
 	if myApp.GetMessageClient() != nil {
 		err = amqp.PostInit(myApp.GetMessageClient(), cfg) // Use the existing variable name "err"
 		if err != nil {
