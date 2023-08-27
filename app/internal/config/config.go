@@ -30,7 +30,7 @@ type Album struct {
 	UpdatedAt   time.Time       `json:"updated_at" bson:"updated_at" pg:"default:now()" swaggerignore:"true"`
 	Title       string          `json:"title" bson:"title" example:"Title name"`
 	Artist      string          `json:"artist" bson:"artist" example:"Artist name"`
-	Price       currency.Amount `json:"price" bson:"price" example:"111.11"`
+	Price       currency.Amount `json:"price" bson:"price" example:"{Number: 1.10, Currency: EUR}" swaggertype:"string,string"`
 	Code        string          `json:"code" bson:"code" example:"I001"`
 	Description string          `json:"description" bson:"description" example:"A short description of the application"`
 	Sender      string          `json:"sender" bson:"sender" example:"amqp or rest"`

@@ -608,17 +608,17 @@
                     "type": "string",
                     "example": "I001"
                 },
-                "completed": {
-                    "type": "boolean",
-                    "example": false
-                },
                 "description": {
                     "type": "string",
                     "example": "A short description of the application"
                 },
                 "price": {
-                    "type": "number",
-                    "example": 111.111
+                    "type": "string",
+                    "example": "{Number: 1.10, Currency: EUR}"
+                },
+                "sender": {
+                    "type": "string",
+                    "example": "amqp or rest"
                 },
                 "title": {
                     "type": "string",

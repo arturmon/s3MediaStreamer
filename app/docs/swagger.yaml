@@ -8,15 +8,15 @@ definitions:
       code:
         example: I001
         type: string
-      completed:
-        example: false
-        type: boolean
       description:
         example: A short description of the application
         type: string
       price:
-        example: 111.111
-        type: number
+        example: '{Number: 1.10, Currency: EUR}'
+        type: string
+      sender:
+        example: amqp or rest
+        type: string
       title:
         example: Title name
         type: string
