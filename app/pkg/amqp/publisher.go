@@ -53,6 +53,6 @@ func (c *MessageClient) publishMessage(types string, data interface{}) error {
 	}
 
 	// Log the published message.
-	c.logger.Printf("Published message with action %s: %s", types, body)
+	c.logger.Debugf("Published message with action %s: %s", types, body)
 	return nil
 }

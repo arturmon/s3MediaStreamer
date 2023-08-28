@@ -22,7 +22,7 @@ type MongoCollectionQuery interface {
 	DeleteUser(email string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
-	GetAllIssues() ([]config.Album, error)
+	GetPaginatedAlbums(page, pageSize int) ([]config.Album, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
@@ -136,31 +136,39 @@ func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
 	return result, nil
 }
 
-func (c *MongoClient) GetAllIssues() ([]config.Album, error) {
-	filter := bson.D{{}}
-	var issues []config.Album
+func (c *MongoClient) GetPaginatedAlbums(page, pageSize int) ([]config.Album, error) {
+	if page < 1 || pageSize < 1 {
+		return nil, errors.New("invalid pagination parameters")
+	}
+
+	filter := bson.D{}
+	var albums []config.Album
 
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
-		return issues, err
+		return albums, err
 	}
-	cur, findError := collection.Find(context.TODO(), filter)
+
+	options := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(int64(pageSize))
+	cur, findError := collection.Find(context.TODO(), filter, options)
 	if findError != nil {
-		return issues, findError
+		return albums, findError
 	}
+
+	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
-		var t config.Album
-		decodeErr := cur.Decode(&t)
+		var album config.Album
+		decodeErr := cur.Decode(&album)
 		if decodeErr != nil {
-			return issues, decodeErr
+			return albums, decodeErr
 		}
-		issues = append(issues, t)
+		albums = append(albums, album)
 	}
-	cur.Close(context.TODO())
-	if len(issues) == 0 {
-		return issues, mongo.ErrNoDocuments
+
+	if len(albums) == 0 {
+		return albums, mongo.ErrNoDocuments
 	}
-	return issues, nil
+	return albums, nil
 }
 
 func (c *MongoClient) DeleteOne(code string) error {

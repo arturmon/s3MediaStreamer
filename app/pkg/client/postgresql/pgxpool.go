@@ -21,7 +21,7 @@ type PostgresCollectionQuery interface {
 	DeleteUser(email string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
-	GetAllIssues() ([]config.Album, error)
+	GetPaginatedAlbums(offset, limit int) ([]config.Album, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
@@ -205,28 +205,23 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 	return nil
 }
 
-func (c *PgClient) GetAllIssues() ([]config.Album, error) {
-	tableExists, tableErr := c.TableExists("album")
-	if tableErr != nil {
-		return nil, tableErr
-	}
-
-	if !tableExists {
-		// Return an empty slice if the table does not exist
-		return make([]config.Album, 0), nil
-	}
-
+// GetPaginatedAlbums Define the GetPaginatedAlbums function within your StorageOperations struct.
+func (c *PgClient) GetPaginatedAlbums(offset, limit int) ([]config.Album, error) {
 	query := `
-		SELECT _id, created_at, updated_at, title, artist,
-		price, code, description, sender, _creator_user
-		FROM album`
-	rows, queryErr := c.Pool.Query(context.TODO(), query)
+        SELECT _id, created_at, updated_at, title, artist,
+        price, code, description, sender, _creator_user
+        FROM album
+        ORDER BY created_at DESC
+        OFFSET $1 LIMIT $2
+    `
+
+	rows, queryErr := c.Pool.Query(context.TODO(), query, offset, limit)
 	if queryErr != nil {
 		return nil, queryErr
 	}
 	defer rows.Close()
 
-	albums := make([]config.Album, 0) // Initialize an empty slice.
+	albums := make([]config.Album, 0)
 	for rows.Next() {
 		var album config.Album
 		scanErr := rows.Scan(

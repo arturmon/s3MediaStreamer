@@ -1,13 +1,14 @@
-package gin
+package gin_test
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	_ "net/http"
 	"net/http/httptest"
-	_ "net/http/httptest"
 	"testing"
+
+	localgin "skeleton-golange-application/app/pkg/web/gin"
+
+	"github.com/gin-gonic/gin"
 )
 
 func TestPing(t *testing.T) {
@@ -15,7 +16,7 @@ func TestPing(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	router := gin.Default()
-	router.GET("/ping", Ping)
+	router.GET("/ping", localgin.Ping)
 
 	router.ServeHTTP(rec, req)
 

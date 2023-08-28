@@ -111,9 +111,9 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 	return nil
 }
 
-// amqpGetAllAlbums retrieves all albums using AMQP.
-func (c *MessageClient) amqpGetAllAlbums() ([]config.Album, error) {
-	albums, err := c.storage.Operations.GetAllIssues()
+// amqpGetAllAlbums retrieves paginated albums using AMQP.
+func (c *MessageClient) amqpGetAllAlbums(offset, limit int) ([]config.Album, error) {
+	albums, err := c.storage.Operations.GetPaginatedAlbums(offset, limit)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {

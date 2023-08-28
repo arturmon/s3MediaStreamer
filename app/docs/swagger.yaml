@@ -74,6 +74,17 @@ paths:
       consumes:
       - '*/*'
       description: responds with the list of all albums as JSON.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: page_size
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
+	"strconv"
 	"strings"
 	"time"
 
@@ -45,23 +46,33 @@ func Ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
 }
 
-// GetAllAlbums	godoc
+// GetPaginationAllAlbums	godoc
 // @Summary		Show the list of all albums.
 // @Description responds with the list of all albums as JSON.
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success		200 {array} config.Album	"OK"
+// @Param       page query   int           true "Page number"
+// @Param       page_size    query         int true "Number of items per page"
+// @Success		200 {array}  config.Album  "OK"
 // @Failure		401 {object} ErrorResponse "Unauthorized"
 // @Failure		500 {object} ErrorResponse "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums [get]
-func (a *WebApp) GetAllAlbums(c *gin.Context) {
-	// Increment the session-based counter
-
+func (a *WebApp) GetPaginationAllAlbums(c *gin.Context) {
 	a.metrics.GetAllAlbumsCounter.Inc()
-	albums, err := a.storage.Operations.GetAllIssues()
+	page := c.DefaultQuery("page", "1")
+	pageSize := c.DefaultQuery("page_size", "10")
 
+	// Convert page and pageSize to integers
+	pageInt, _ := strconv.Atoi(page)
+	pageSizeInt, _ := strconv.Atoi(pageSize)
+
+	// Calculate the offset based on the pagination parameters
+	offset := (pageInt - 1) * pageSizeInt
+
+	// Retrieve paginated albums from the storage
+	albums, err := a.storage.Operations.GetPaginatedAlbums(offset, pageSizeInt)
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})

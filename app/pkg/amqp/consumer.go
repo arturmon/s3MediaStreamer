@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/streadway/amqp"
 )
@@ -49,7 +50,7 @@ func (c *MessageClient) handleMessage(message amqp.Delivery) {
 		c.handleActionPostAlbums(data)
 
 	case "GetAllAlbums":
-		c.handleActionGetAllAlbums()
+		c.handleActionGetAllAlbums(data)
 
 	case "GetDeleteAll":
 		c.handleActionGetDeleteAll()
@@ -80,8 +81,33 @@ func (c *MessageClient) handleActionPostAlbums(data map[string]interface{}) {
 	c.handleResult(resultErr, "PostAlbums")
 }
 
-func (c *MessageClient) handleActionGetAllAlbums() {
-	resultErr := c.handleGetAllAlbums()
+func (c *MessageClient) handleActionGetAllAlbums(data map[string]interface{}) {
+	// Extract the offset and limit values from the data map.
+	offsetRaw, offsetExists := data["offset"]
+	limitRaw, limitExists := data["limit"]
+
+	if !offsetExists || !limitExists {
+		c.logger.Println("Missing offset or limit in message data")
+		return
+	}
+
+	// Convert the offset and limit values to integers.
+	offsetStr, offsetOK := offsetRaw.(string)
+	limitStr, limitOK := limitRaw.(string)
+
+	if !offsetOK || !limitOK {
+		c.logger.Println("Invalid offset or limit values in message data")
+		return
+	}
+	offset, errOffset := strconv.Atoi(offsetStr)
+	limit, errLimit := strconv.Atoi(limitStr)
+
+	if errOffset != nil || errLimit != nil {
+		c.logger.Println("Error converting offset or limit to integers")
+		return
+	}
+
+	resultErr := c.handleGetAllAlbums(offset, limit)
 	c.handleResult(resultErr, "GetAllAlbums")
 }
 
@@ -125,7 +151,7 @@ func (c *MessageClient) handleResult(resultErr error, action string) {
 		successData := map[string]interface{}{
 			"info": fmt.Sprintf("Successfully handled %s", action),
 		}
-		c.publishAndLogResult(TypePublisherMessage, successData)
+		c.publishAndLogResult(TypePublisherStatus, successData)
 	}
 }
 

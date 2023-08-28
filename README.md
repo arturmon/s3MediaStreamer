@@ -102,7 +102,8 @@ v1/
 {
   "_id": "84e6fc11-10b3-48dd-abbf-dc8c83d05be8",
   "name": "a",
-  "email": "a@a.com"
+  "email": "a@a.com",
+  "role": "member"
 }
 ```
 /delete
@@ -126,6 +127,8 @@ v1/
 | /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
 /albums
+or
+/albums?page=1&page_size=10
 ```json
 [
   {
@@ -247,7 +250,7 @@ Example:
 
 | Exchange            | Routing key      | Command         | Payload                                                                                |
 |---------------------|------------------|-----------------|----------------------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums"}`                                                            |
+| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums","offset":"1","limit":"10"}`                                  |
 | sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                                            |
 | sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                                      |
 | sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1","role":"member"}` |

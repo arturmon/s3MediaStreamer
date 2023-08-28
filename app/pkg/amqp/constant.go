@@ -23,4 +23,5 @@ const (
 
 	TypePublisherMessage = "logs.message"
 	TypePublisherError   = "logs.error"
+	TypePublisherStatus  = "logs.status"
 )

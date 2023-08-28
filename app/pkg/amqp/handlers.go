@@ -21,8 +21,8 @@ func (c *MessageClient) handlePostAlbums(data map[string]interface{}) error {
 }
 
 // handleGetAllAlbums handles the "GetAllAlbums" action by fetching and logging all albums.
-func (c *MessageClient) handleGetAllAlbums() error {
-	albums, err := c.amqpGetAllAlbums()
+func (c *MessageClient) handleGetAllAlbums(offset, limit int) error {
+	albums, err := c.amqpGetAllAlbums(offset, limit)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (c *MessageClient) handleGetAllAlbums() error {
 		return err
 	}
 
-	c.logger.Printf("Albums: %s", albumsJSON)
+	c.logger.Debugf("Albums: %s", albumsJSON)
 	return nil
 }
 

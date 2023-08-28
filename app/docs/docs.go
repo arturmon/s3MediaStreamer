@@ -42,6 +42,22 @@ const docTemplate = `{
                     "album-controller"
                 ],
                 "summary": "Show the list of all albums.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
