@@ -31,7 +31,7 @@ func (c *MessageClient) handleGetAllAlbums(page, pageSize int, sortBy, sortOrder
 	if err != nil {
 		return err
 	}
-	c.logger.Debugf("TotalRows: %s", totalRows)
+	c.logger.Debugf("TotalRows: %d", totalRows)
 	c.logger.Debugf("Albums: %s", albumsJSON)
 	return nil
 }

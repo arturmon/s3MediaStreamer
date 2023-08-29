@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -55,6 +56,9 @@ func Ping(c *gin.Context) {
 // @Produce		json
 // @Param       page query   int           true "Page number"
 // @Param       page_size    query         int true "Number of items per page"
+// @Param       sort_by      query         string false "Field to sort by (e.g., 'created_at')"
+// @Param       sort_order   query         string false "Sort order ('asc' or 'desc')"
+// @Param       filter       query         string false "Filter criteria"
 // @Success		200 {array}  config.Album  "OK"
 // @Failure		401 {object} ErrorResponse "Unauthorized"
 // @Failure		500 {object} ErrorResponse "Internal Server Error"
@@ -103,9 +107,17 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	totalPages := int(math.Ceil(float64(countTotal) / float64(pageSizeInt)))
 
 	res, _ := json.Marshal(albums)
+
+	baseURL := "http" // По умолчанию HTTP
+	if proto := c.GetHeader("X-Forwarded-Proto"); proto != "" {
+		baseURL = proto
+	}
+
+	baseURL = fmt.Sprintf("%s://%s", baseURL, c.Request.Host)
 	c.Header("X-Total-Count", strconv.Itoa(countTotal))
 	c.Header("X-Total-Pages", strconv.Itoa(totalPages))
-	c.Header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages")
+	c.Header("Link", generatePaginationLinks(baseURL, c.FullPath(), pageInt, totalPages, pageSize))
+	c.Header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,Link")
 	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.IndentedJSON(http.StatusOK, albums)
 	log.Debugf("Albums response: %s", res)

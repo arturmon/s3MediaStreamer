@@ -5,13 +5,13 @@ Content-Type: application/json
 GET http://localhost:10000/v1/albums
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/albums?page=11&page_size=10
+GET http://localhost:10000/v1/albums?page=2&page_size=10
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=price&sort_order=desc
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0004
+GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0005
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/albums/I0001
