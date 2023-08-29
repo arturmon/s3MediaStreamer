@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"skeleton-golange-application/app/internal/config"
 	"strconv"
@@ -46,7 +47,7 @@ func Ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
 }
 
-// GetPaginationAllAlbums	godoc
+// GetAllAlbums	godoc
 // @Summary		Show the list of all albums.
 // @Description responds with the list of all albums as JSON.
 // @Tags		album-controller
@@ -59,27 +60,53 @@ func Ping(c *gin.Context) {
 // @Failure		500 {object} ErrorResponse "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums [get]
-func (a *WebApp) GetPaginationAllAlbums(c *gin.Context) {
+func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	a.metrics.GetAllAlbumsCounter.Inc()
 	page := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("page_size", "10")
 
-	// Convert page and pageSize to integers
-	pageInt, _ := strconv.Atoi(page)
-	pageSizeInt, _ := strconv.Atoi(pageSize)
+	// Retrieve sorting and filtering parameters from the query
+	sortBy := c.DefaultQuery("sort_by", "created_at")
+	sortOrder := c.DefaultQuery("sort_order", "desc")
+	filter := c.DefaultQuery("filter", "")
+
+	// Convert page, pageSize, and totalPages to integers
+	pageInt, errPage := strconv.Atoi(page)
+	pageSizeInt, errPageSize := strconv.Atoi(pageSize)
+	if errPage != nil || errPageSize != nil {
+		a.logger.Error("Invalid page or page_size parameters")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid page or page_size parameters"})
+		return
+	}
+	var validSortOrders = map[string]string{
+		"asc":  "ASC",
+		"desc": "DESC",
+	}
+
+	// Check if provided sort_order parameter is valid
+	if _, validSortOrderExists := validSortOrders[sortOrder]; !validSortOrderExists {
+		sortOrder = "desc" // Default to descending order
+	}
 
 	// Calculate the offset based on the pagination parameters
 	offset := (pageInt - 1) * pageSizeInt
 
 	// Retrieve paginated albums from the storage
-	albums, err := a.storage.Operations.GetPaginatedAlbums(offset, pageSizeInt)
+	albums, countTotal, err := a.storage.Operations.GetAlbums(offset, pageSizeInt, sortBy, sortOrder, filter)
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
 		return
 	}
 
+	// Calculate total pages based on total count and page size
+	totalPages := int(math.Ceil(float64(countTotal) / float64(pageSizeInt)))
+
 	res, _ := json.Marshal(albums)
+	c.Header("X-Total-Count", strconv.Itoa(countTotal))
+	c.Header("X-Total-Pages", strconv.Itoa(totalPages))
+	c.Header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages")
+	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.IndentedJSON(http.StatusOK, albums)
 	log.Debugf("Albums response: %s", res)
 }

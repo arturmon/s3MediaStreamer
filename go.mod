@@ -4,9 +4,11 @@ go 1.18
 
 require (
 	github.com/bojanz/currency v1.1.2
+	github.com/booscaaa/go-paginate v0.0.11
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin-pg-adapter v1.2.1
 	github.com/casbin/casbin/v2 v2.73.1
+	github.com/gemcook/pagination-go v0.2.1
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1

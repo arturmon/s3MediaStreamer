@@ -22,7 +22,7 @@ type MongoCollectionQuery interface {
 	DeleteUser(email string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
-	GetPaginatedAlbums(page, pageSize int) ([]config.Album, error)
+	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
@@ -136,23 +136,38 @@ func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
 	return result, nil
 }
 
-func (c *MongoClient) GetPaginatedAlbums(page, pageSize int) ([]config.Album, error) {
-	if page < 1 || pageSize < 1 {
-		return nil, errors.New("invalid pagination parameters")
+func (c *MongoClient) GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error) {
+	if offset < 1 || limit < 1 {
+		return nil, 0, errors.New("invalid pagination parameters")
 	}
 
 	filter := bson.D{}
+	if filterArtist != "" {
+		filter = append(filter, bson.E{Key: "artist", Value: bson.M{"$regex": filterArtist, "$options": "i"}})
+	}
+
 	var albums []config.Album
 
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
-		return albums, err
+		return albums, 0, err
 	}
 
-	options := options.Find().SetSkip(int64((page - 1) * pageSize)).SetLimit(int64(pageSize))
-	cur, findError := collection.Find(context.TODO(), filter, options)
+	findOptions := options.Find()
+	findOptions.SetSkip(int64((offset - 1) * limit))
+	findOptions.SetLimit(int64(limit))
+
+	sortOptions := options.Find()
+	sortOrderValue := 1
+	if sortOrder == "desc" {
+		sortOrderValue = -1
+	}
+	sortOptions.SetSort(bson.D{{Key: sortBy, Value: sortOrderValue}})
+	findOptions.Sort = sortOptions.Sort
+
+	cur, findError := collection.Find(context.TODO(), filter, findOptions)
 	if findError != nil {
-		return albums, findError
+		return albums, 0, findError
 	}
 
 	defer cur.Close(context.TODO())
@@ -160,15 +175,20 @@ func (c *MongoClient) GetPaginatedAlbums(page, pageSize int) ([]config.Album, er
 		var album config.Album
 		decodeErr := cur.Decode(&album)
 		if decodeErr != nil {
-			return albums, decodeErr
+			return albums, 0, decodeErr
 		}
 		albums = append(albums, album)
 	}
 
-	if len(albums) == 0 {
-		return albums, mongo.ErrNoDocuments
+	totalCount, countErr := collection.CountDocuments(context.TODO(), filter)
+	if countErr != nil {
+		return albums, 0, countErr
 	}
-	return albums, nil
+
+	if len(albums) == 0 {
+		return albums, 0, mongo.ErrNoDocuments
+	}
+	return albums, int(totalCount), nil
 }
 
 func (c *MongoClient) DeleteOne(code string) error {

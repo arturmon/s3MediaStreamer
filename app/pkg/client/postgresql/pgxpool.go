@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lib/pq"
+
 	"github.com/jackc/pgx/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -21,7 +23,7 @@ type PostgresCollectionQuery interface {
 	DeleteUser(email string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
-	GetPaginatedAlbums(offset, limit int) ([]config.Album, error)
+	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
 	GetIssuesByCode(code string) (config.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
@@ -205,22 +207,56 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 	return nil
 }
 
-// GetPaginatedAlbums Define the GetPaginatedAlbums function within your StorageOperations struct.
-func (c *PgClient) GetPaginatedAlbums(offset, limit int) ([]config.Album, error) {
-	query := `
-        SELECT _id, created_at, updated_at, title, artist,
-        price, code, description, sender, _creator_user
-        FROM album
-        ORDER BY created_at DESC
-        OFFSET $1 LIMIT $2
-    `
+// GetAlbums Define the GetPaginatedAlbums function within your StorageOperations struct.
+func (c *PgClient) GetAlbums(offset, limit int, sortBy, sortOrder, filter string) ([]config.Album, int, error) {
+	// Construct the base SQL query for selecting albums
+	sql := "SELECT _id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user FROM album"
 
-	rows, queryErr := c.Pool.Query(context.TODO(), query, offset, limit)
+	// Create separate variables for WHERE and COUNT queries
+	where := ""
+	countTotal := "SELECT COUNT(_id) FROM album"
+
+	// Build the WHERE clause for filtering if filter is provided
+	if filter != "" {
+		filterColumns := []string{"title", "artist", "code", "sender", "_creator_user"}
+		quotedFilterColumns := make([]string, len(filterColumns))
+		for i, col := range filterColumns {
+			quotedFilterColumns[i] = fmt.Sprintf("%s ILIKE '%%%s%%'", pq.QuoteIdentifier(col), filter)
+		}
+		where = " WHERE " + strings.Join(quotedFilterColumns, " OR ")
+		countTotal += where
+	}
+
+	// Finalize the SQL query
+	sql = fmt.Sprintf("%s%s", sql, where)
+
+	// Build the ORDER BY clause if sortOrder and sortBy are provided
+	if sortOrder != "" && sortBy != "" {
+		sortOrder = strings.ToUpper(sortOrder)
+		if sortOrder != "ASC" && sortOrder != "DESC" {
+			sortOrder = "DESC" // Default to DESC if sortOrder is invalid
+		}
+		sql = fmt.Sprintf("%s ORDER BY %s %s", sql, pq.QuoteIdentifier(sortBy), sortOrder)
+	}
+
+	// Add LIMIT and OFFSET to the SQL query
+	sql = fmt.Sprintf("%s LIMIT %d OFFSET %d", sql, limit, offset)
+
+	// Execute the COUNT query to get the total count
+	var totalRows int
+	countErr := c.Pool.QueryRow(context.TODO(), countTotal).Scan(&totalRows)
+	if countErr != nil {
+		return nil, 0, countErr
+	}
+
+	// Execute the main query
+	rows, queryErr := c.Pool.Query(context.TODO(), sql)
 	if queryErr != nil {
-		return nil, queryErr
+		return nil, 0, queryErr
 	}
 	defer rows.Close()
 
+	// Process the results
 	albums := make([]config.Album, 0)
 	for rows.Next() {
 		var album config.Album
@@ -231,16 +267,16 @@ func (c *PgClient) GetPaginatedAlbums(offset, limit int) ([]config.Album, error)
 			&album.CreatorUser,
 		)
 		if scanErr != nil {
-			return nil, scanErr
+			return nil, totalRows, scanErr
 		}
 		albums = append(albums, album)
 	}
 
 	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
+		return nil, totalRows, rowsErr
 	}
 
-	return albums, nil
+	return albums, totalRows, nil
 }
 
 func (c *PgClient) DeleteAll() error {

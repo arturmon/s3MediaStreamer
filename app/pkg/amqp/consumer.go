@@ -82,33 +82,35 @@ func (c *MessageClient) handleActionPostAlbums(data map[string]interface{}) {
 }
 
 func (c *MessageClient) handleActionGetAllAlbums(data map[string]interface{}) {
-	// Extract the offset and limit values from the data map.
-	offsetRaw, offsetExists := data["offset"]
-	limitRaw, limitExists := data["limit"]
+	pageRaw, pageExists := data["page"]
+	pageSizeRaw, pageSizeExists := data["page_size"]
+	sortByRaw, sortByExists := data["sort_by"]
+	sortOrderRaw, sortOrderExists := data["sort_order"]
+	filterRaw, filterExists := data["filter"]
 
-	if !offsetExists || !limitExists {
-		c.logger.Println("Missing offset or limit in message data")
+	if !pageExists || !pageSizeExists || !sortByExists || !sortOrderExists || !filterExists {
+		c.logger.Println("Missing required parameters in message data")
 		return
 	}
 
-	// Convert the offset and limit values to integers.
-	offsetStr, offsetOK := offsetRaw.(string)
-	limitStr, limitOK := limitRaw.(string)
+	page, pageErr := strconv.Atoi(fmt.Sprint(pageRaw))
+	pageSize, pageSizeErr := strconv.Atoi(fmt.Sprint(pageSizeRaw))
+	sortBy := fmt.Sprint(sortByRaw)
+	sortOrder := fmt.Sprint(sortOrderRaw)
+	filter := fmt.Sprint(filterRaw)
 
-	if !offsetOK || !limitOK {
-		c.logger.Println("Invalid offset or limit values in message data")
-		return
-	}
-	offset, errOffset := strconv.Atoi(offsetStr)
-	limit, errLimit := strconv.Atoi(limitStr)
-
-	if errOffset != nil || errLimit != nil {
-		c.logger.Println("Error converting offset or limit to integers")
+	if pageErr != nil || pageSizeErr != nil {
+		c.logger.Println("Invalid parameter values in message data")
 		return
 	}
 
-	resultErr := c.handleGetAllAlbums(offset, limit)
-	c.handleResult(resultErr, "GetAllAlbums")
+	offset := (page - 1) * pageSize
+	limit := pageSize
+
+	err := c.handleGetAllAlbums(offset, limit, sortBy, sortOrder, filter)
+	if err != nil {
+		c.logger.Printf("Error handling GetAllAlbums action: %v", err)
+	}
 }
 
 func (c *MessageClient) handleActionGetDeleteAll() {

@@ -112,14 +112,14 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 }
 
 // amqpGetAllAlbums retrieves paginated albums using AMQP.
-func (c *MessageClient) amqpGetAllAlbums(offset, limit int) ([]config.Album, error) {
-	albums, err := c.storage.Operations.GetPaginatedAlbums(offset, limit)
+func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, filter string) ([]config.Album, int, error) {
+	albums, totalRows, err := c.storage.Operations.GetAlbums(page, pageSize, sortBy, sortOrder, filter)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
 			c.logger.Printf("Error publishing error message: %v", publishErr)
 		}
-		return nil, err
+		return nil, 0, err
 	}
 
 	err = c.publishMessage(TypePublisherMessage, albums)
@@ -127,7 +127,7 @@ func (c *MessageClient) amqpGetAllAlbums(offset, limit int) ([]config.Album, err
 		c.logger.Printf("Error publishing message: %v", err)
 	}
 
-	return albums, nil
+	return albums, totalRows, nil
 }
 
 // amqpGetDeleteAll deletes all albums using AMQP.

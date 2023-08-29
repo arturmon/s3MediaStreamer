@@ -137,7 +137,7 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 		}
 		albums := v1.Group("/albums")
 		{
-			albums.GET("", a.GetPaginationAllAlbums)
+			albums.GET("", a.GetAllAlbums)
 			albums.GET("/:code", a.GetAlbumByID)
 			albums.DELETE("/deleteAll", a.GetDeleteAll)
 			albums.DELETE("/delete/:code", a.GetDeleteByID)

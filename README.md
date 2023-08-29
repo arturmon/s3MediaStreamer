@@ -126,6 +126,18 @@ v1/
 | /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
 | /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
+```markdown
+GET http://localhost:10000/v1/albums
+Paginate:
+GET http://localhost:10000/v1/albums?page=11&page_size=10
+Sorting:
+GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=price&sort_order=desc
+Filtering:
+GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0004
+
+```
+
+
 /albums
 or
 /albums?page=1&page_size=10
@@ -248,16 +260,16 @@ Payload: `{"action":"GetAllAlbums"}`
 
 Example:
 
-| Exchange            | Routing key      | Command         | Payload                                                                                |
-|---------------------|------------------|-----------------|----------------------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums","offset":"1","limit":"10"}`                                  |
-| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                                            |
-| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                                      |
-| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1","role":"member"}` |
-| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                                        |
-| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                                   |
-| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                              |
-| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                             |
+| Exchange            | Routing key      | Command         | Payload                                                                                                         |
+|---------------------|------------------|-----------------|-----------------------------------------------------------------------------------------------------------------|
+| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums","page":"1","page_size":"10","sort_by":"price","sort_order":"desc","filter":"I0004"}`  |
+| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                                                                     |
+| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                                                               |
+| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1","role":"member"}`                          |
+| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                                                                 |
+| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                                                            |
+| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                                                       |
+| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                                                      |
 
 ---> PostAlbums solo album
 ```json
