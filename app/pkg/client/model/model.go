@@ -182,7 +182,8 @@ func NewClient(ctx context.Context, maxAttempts int,
 		logger.Println("Start migration...")
 		err = postgresql.RunMigrations(ctx, dsn.String())
 		if err != nil {
-			return fmt.Errorf("failed to run migrations: %w", err)
+			logger.Printf("Error: %s", err)
+			return err
 		}
 
 		return nil
