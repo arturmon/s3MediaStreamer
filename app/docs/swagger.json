@@ -1,6 +1,7 @@
 {
     "schemes": [
-        "http"
+        "http",
+        "https"
     ],
     "swagger": "2.0",
     "info": {
@@ -52,6 +53,24 @@
                         "name": "page_size",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Field to sort by (e.g., 'created_at')",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order ('asc' or 'desc')",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter criteria",
+                        "name": "filter",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -67,13 +86,13 @@
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -118,13 +137,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -161,25 +180,25 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -207,19 +226,19 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -264,25 +283,25 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -325,19 +344,19 @@
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -433,13 +452,13 @@
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -473,25 +492,25 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.okLoginResponce"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Incorrect Password",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -519,7 +538,7 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -545,21 +564,78 @@
                 "summary": "Get user information",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved user information",
+                        "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.UserResponse"
+                            "$ref": "#/definitions/gin.okLoginResponce"
                         }
                     },
                     "401": {
                         "description": "Unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Validates the provided refresh token, generates a new access token, and returns it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Refreshes the access token using a valid refresh token.",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gin.paramsRefreshTocken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully refreshed access token",
+                        "schema": {
+                            "$ref": "#/definitions/gin.responceRefreshTocken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/gin.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/gin.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -593,19 +669,19 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/config.User"
+                            "$ref": "#/definitions/gin.userResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request - User with this email exists",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/gin.errorResponse"
                         }
                     }
                 }
@@ -650,17 +726,13 @@
                     "type": "string",
                     "example": "aaaa@aaaa.com"
                 },
-                "name": {
+                "password": {
                     "type": "string",
-                    "example": "Artur"
-                },
-                "role": {
-                    "type": "string",
-                    "example": "-"
+                    "example": "1111"
                 }
             }
         },
-        "gin.ErrorResponse": {
+        "gin.errorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -668,16 +740,52 @@
                 }
             }
         },
-        "gin.UserResponse": {
+        "gin.okLoginResponce": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "refresh_token": {
+                    "type": "string"
                 },
-                "username": {
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "gin.paramsRefreshTocken": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                }
+            }
+        },
+        "gin.responceRefreshTocken": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                }
+            }
+        },
+        "gin.userResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

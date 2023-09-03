@@ -27,25 +27,46 @@ definitions:
       email:
         example: aaaa@aaaa.com
         type: string
-      name:
-        example: Artur
-        type: string
-      role:
-        example: '-'
+      password:
+        example: "1111"
         type: string
     type: object
-  gin.ErrorResponse:
+  gin.errorResponse:
     properties:
       message:
         type: string
     type: object
-  gin.UserResponse:
+  gin.okLoginResponce:
     properties:
       email:
         type: string
-      id:
-        type: integer
-      username:
+      refresh_token:
+        type: string
+      role:
+        type: string
+    type: object
+  gin.paramsRefreshTocken:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  gin.responceRefreshTocken:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  gin.userResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      refresh_token:
         type: string
     type: object
   monitoring.HealthResponse:
@@ -85,6 +106,18 @@ paths:
         name: page_size
         required: true
         type: integer
+      - description: Field to sort by (e.g., 'created_at')
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order ('asc' or 'desc')
+        in: query
+        name: sort_order
+        type: string
+      - description: Filter criteria
+        in: query
+        name: filter
+        type: string
       produces:
       - application/json
       responses:
@@ -97,11 +130,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Show the list of all albums.
@@ -130,15 +163,15 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Album whose ID value matches the id.
@@ -166,11 +199,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Adds an album from JSON.
@@ -194,19 +227,19 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Deletes album whose ID value matches the code.
@@ -223,15 +256,15 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Complete removal of all albums.
@@ -260,19 +293,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Updates an existing album with new data.
@@ -334,11 +367,11 @@ paths:
         "401":
           description: Unauthorized - User unauthenticated
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Deletes a user.
@@ -362,19 +395,19 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.okLoginResponce'
         "400":
           description: Bad Request - Incorrect Password
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       summary: Authenticates a user.
       tags:
       - user-controller
@@ -389,7 +422,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Logs out a user.
@@ -404,20 +437,57 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved user information
+          description: Success
           schema:
-            $ref: '#/definitions/gin.UserResponse'
+            $ref: '#/definitions/gin.okLoginResponce'
         "401":
           description: Unauthenticated
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get user information
+      tags:
+      - user-controller
+  /users/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Validates the provided refresh token, generates a new access token,
+        and returns it.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/gin.paramsRefreshTocken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully refreshed access token
+          schema:
+            $ref: '#/definitions/gin.responceRefreshTocken'
+        "400":
+          description: Bad Request - Invalid refresh token
+          schema:
+            $ref: '#/definitions/gin.errorResponse'
+        "401":
+          description: Unauthorized - Invalid refresh token
+          schema:
+            $ref: '#/definitions/gin.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Refreshes the access token using a valid refresh token.
       tags:
       - user-controller
   /users/register:
@@ -438,20 +508,21 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/config.User'
+            $ref: '#/definitions/gin.userResponse'
         "400":
           description: Bad Request - User with this email exists
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/gin.errorResponse'
       summary: Registers a new user.
       tags:
       - user-controller
 schemes:
 - http
+- https
 securityDefinitions:
   BasicAuth:
     type: basic

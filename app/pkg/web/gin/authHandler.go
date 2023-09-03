@@ -5,33 +5,11 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"time"
 
-	"github.com/gin-contrib/sessions"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
-
-const SecretKey = "secret"
-const bcryptCost = 14
-const jwtExpirationHours = 24
-const secondsInOneMinute = 60
-const minutesInOneHour = 60
-const hoursInOneDay = 24
-
-// UserResponse represents the response object for the user information endpoint.
-type UserResponse struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	// Add other fields from the config.User struct that you want to expose in the response.
-}
-
-// ErrorResponse represents the response object for error responses.
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
 
 // Register godoc
 // @Summary		Registers a new user.
@@ -40,9 +18,9 @@ type ErrorResponse struct {
 // @Accept		json
 // @Produce		json
 // @Param		user body config.User true "Register User"
-// @Success     201 {object} config.User  "Created"
-// @Failure     400 {object} ErrorResponse "Bad Request - User with this email exists"
-// @Failure     500 {object} ErrorResponse "Internal Server Error"
+// @Success     201 {object} userResponse  "Created"
+// @Failure     400 {object} errorResponse "Bad Request - User with this email exists"
+// @Failure     500 {object} errorResponse "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
 	// prometheus
@@ -83,14 +61,6 @@ func (a *WebApp) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
 		return
 	}
-	// Save the user's email in the session
-	session := sessions.Default(c)
-	session.Set("user_email", user.Email)
-	if saveErr := session.Save(); saveErr != nil {
-		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
-		return
-	}
 
 	a.metrics.RegisterSuccessCounter.Inc()
 	c.JSON(http.StatusCreated, user)
@@ -103,10 +73,10 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Accept		json
 // @Produce		json
 // @Param		login body config.User true "Login User"
-// @Success     200 {object} ErrorResponse  "Success"
-// @Failure     400 {object} ErrorResponse "Bad Request - Incorrect Password"
-// @Failure     404 {object} ErrorResponse "Not Found - User not found"
-// @Failure     500 {object} ErrorResponse "Internal Server Error"
+// @Success     200 {object} okLoginResponce  "Success"
+// @Failure     400 {object} errorResponse "Bad Request - Incorrect Password"
+// @Failure     404 {object} errorResponse "Not Found - User not found"
+// @Failure     500 {object} errorResponse "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
 	a.metrics.LoginAttemptCounter.Inc()
@@ -132,32 +102,29 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	// set vars session
-	err = setSessionKey(c, "user_id", user.ID.String())
+	accessToken, refreshToken, err := a.generateTokensAndCookies(c, user)
 	if err != nil {
-		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not set values session"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
 		return
 	}
 
-	var key = []byte(SecretKey)
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  user.Email,
-		"exp":  time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
-		"role": user.Role,                                             // Include the user's role as a claim
-	})
-
-	token, err := claims.SignedString(key)
+	// After successful authentication, set session keys
+	err = setSessionKey(c, "user_email", user.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not login"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create session"})
 		return
 	}
 
-	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
-	c.SetCookie("jwt", token, maxAge, "/", "localhost", false, true)
-	a.logger.Debugf("jwt: %s", token)
+	a.logger.Debugf("jwt: %s", accessToken)
 	a.metrics.LoginSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+
+	loginResponse := okLoginResponce{
+		Email:        user.Email,
+		Role:         user.Role,
+		Refreshtoken: refreshToken,
+	}
+
+	c.JSON(http.StatusOK, loginResponse)
 }
 
 // DeleteUser godoc
@@ -168,8 +135,8 @@ func (a *WebApp) Login(c *gin.Context) {
 // @Produce		json
 // @Security	ApiKeyAuth
 // @Success     200 {object} string "Success - User deleted"
-// @Failure     401 {object} ErrorResponse "Unauthorized - User unauthenticated"
-// @Failure     404 {object} ErrorResponse "Not Found - User not found"
+// @Failure     401 {object} errorResponse "Unauthorized - User unauthenticated"
+// @Failure     404 {object} errorResponse "Not Found - User not found"
 // @Router		/users/delete [delete]
 func (a *WebApp) DeleteUser(c *gin.Context) {
 	a.metrics.DeleteUserAttemptCounter.Inc()
@@ -215,13 +182,17 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
-// @Success     200 {object} ErrorResponse  "Success"
+// @Success     200 {object} errorResponse  "Success"
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
 	a.metrics.LogoutAttemptCounter.Inc()
 	expires := time.Now().Add(-time.Hour)
 	a.logger.Debugf("Expires: %s", expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
+	err := setSessionKey(c, "user_email", "")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not set logout session"})
+	}
 	a.metrics.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
@@ -233,23 +204,109 @@ func (a *WebApp) Logout(c *gin.Context) {
 // @Accept  */*
 // @Produce json
 // @Security ApiKeyAuth
-// @Success 200 {object} UserResponse "Successfully retrieved user information"
-// @Failure 401 {object} ErrorResponse "Unauthenticated"
-// @Failure 404 {object} ErrorResponse "User not found"
+// @Success	200	{object} okLoginResponce "Success"
+// @Failure 401 {object} errorResponse "Unauthenticated"
+// @Failure 404 {object} errorResponse "User not found"
 // @Router /users/me [get]
 func (a *WebApp) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
+		c.IndentedJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
 		return
 	}
 
 	var user config.User
 	user, err = a.storage.Operations.FindUserToEmail(email)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, ErrorResponse{Message: "user not found"})
+		c.IndentedJSON(http.StatusNotFound, errorResponse{Message: "user not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	loginResponse := okLoginResponce{
+		Email:        user.Email,
+		Role:         user.Role,
+		Refreshtoken: user.RefreshToken,
+	}
+
+	c.JSON(http.StatusOK, loginResponse)
+}
+
+// @Summary Refreshes the access token using a valid refresh token.
+// @Description Validates the provided refresh token, generates a new access token, and returns it.
+// @Tags user-controller
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param   refresh_token body paramsRefreshTocken true "Refresh token"
+// @Success 200 {object} responceRefreshTocken "Successfully refreshed access token"
+// @Failure 400 {object} errorResponse "Bad Request - Invalid refresh token"
+// @Failure 401 {object} errorResponse "Unauthorized - Invalid refresh token"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /users/refresh [post]
+func (a *WebApp) refreshTokenHandler(c *gin.Context) {
+	var data map[string]string
+
+	// Parse the JSON request body into the data map
+	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		return
+	}
+
+	refreshToken, exists := data["refresh_token"]
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid refresh token"})
+		return
+	}
+
+	claims := jwt.MapClaims{}
+
+	// Validate and parse the refresh token
+	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(RefreshTokenSecret), nil
+	})
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid refresh token"})
+		return
+	}
+
+	userEmail, ok := claims["sub"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid user email"})
+		return
+	}
+
+	// Check if the refresh token is stored and valid
+	storedRefreshToken, err := a.storage.Operations.GetStoredRefreshToken(userEmail)
+	if err != nil || refreshToken != storedRefreshToken {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid refresh token"})
+		return
+	}
+
+	// Generate a new access token and refresh token
+	user, err := a.storage.Operations.FindUserToEmail(userEmail)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to get user"})
+		return
+	}
+
+	accessToken, newRefreshToken, err := a.generateTokensAndCookies(c, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
+		return
+	}
+
+	// Respond with the new access token
+	refreshResponse := responceRefreshTocken{
+		Refresh_token: newRefreshToken,
+		Access_token:  accessToken,
+	}
+
+	c.JSON(http.StatusOK, refreshResponse)
+
+	// Update the stored refresh token with the new one
+	err = a.storage.Operations.SetStoredRefreshToken(userEmail, newRefreshToken)
+	if err != nil {
+		a.logger.Errorf("Failed to update stored refresh token: %v", err)
+		// Handle the error as needed
+	}
 }

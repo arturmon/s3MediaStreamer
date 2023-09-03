@@ -20,6 +20,8 @@ type MongoCollectionQuery interface {
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
 	DeleteUser(email string) error
+	GetStoredRefreshToken(userEmail string) (string, error)
+	SetStoredRefreshToken(userEmail, refreshToken string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
 	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
@@ -258,6 +260,36 @@ func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 	}
 	// Return the result without any error.
 	return result, nil
+}
+
+// GetStoredRefreshToken retrieves the refresh token for a user by email.
+func (c *MongoClient) GetStoredRefreshToken(userEmail string) (string, error) {
+	result := config.User{}
+	collection, err := c.FindCollections(config.CollectionUser)
+	if err != nil {
+		return "", err
+	}
+	filter := bson.M{"email": userEmail}
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return "", fmt.Errorf("user with email '%s' not found", userEmail)
+	}
+	return result.RefreshToken, nil
+}
+
+// SetStoredRefreshToken sets or updates the refresh token for a user by email.
+func (c *MongoClient) SetStoredRefreshToken(userEmail, refreshToken string) error {
+	collection, err := c.FindCollections(config.CollectionUser)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"email": userEmail}
+	update := bson.M{"$set": bson.M{"refreshtoken": refreshToken}}
+	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *MongoClient) UpdateIssue(album *config.Album) error {

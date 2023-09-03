@@ -60,8 +60,8 @@ func Ping(c *gin.Context) {
 // @Param       sort_order   query         string false "Sort order ('asc' or 'desc')"
 // @Param       filter       query         string false "Filter criteria"
 // @Success		200 {array}  config.Album  "OK"
-// @Failure		401 {object} ErrorResponse "Unauthorized"
-// @Failure		500 {object} ErrorResponse "Internal Server Error"
+// @Failure		401 {object} errorResponse "Unauthorized"
+// @Failure		500 {object} errorResponse "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums [get]
 func (a *WebApp) GetAllAlbums(c *gin.Context) {
@@ -131,8 +131,8 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Produce		json
 // @Param		request body config.Album true "Album details"
 // @Success     201 {object} config.Album  "Created"
-// @Failure     400 {object} ErrorResponse  "Bad Request"
-// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Failure     400 {object} errorResponse  "Bad Request"
+// @Failure     500 {object} errorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums/add [post]
 func (a *WebApp) PostAlbums(c *gin.Context) {
@@ -219,9 +219,9 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
 // @Success     200 {object} config.Album  "OK"
-// @Failure     401 {object} ErrorResponse  "Unauthorized"
-// @Failure     404 {object} ErrorResponse  "Not Found"
-// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Failure     401 {object} errorResponse  "Unauthorized"
+// @Failure     404 {object} errorResponse  "Not Found"
+// @Failure     500 {object} errorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums/{code} [get]
 func (a *WebApp) GetAlbumByID(c *gin.Context) {
@@ -250,9 +250,9 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success     204 {object}  ErrorResponse   "No Content"
-// @Failure     401 {object} ErrorResponse  "Unauthorized"
-// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Success     204 {object}  errorResponse   "No Content"
+// @Failure     401 {object} errorResponse  "Unauthorized"
+// @Failure     500 {object} errorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums/deleteAll [delete]
 func (a *WebApp) GetDeleteAll(c *gin.Context) {
@@ -277,10 +277,10 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 // @Accept		*/*
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
-// @Success     204 {object}  ErrorResponse   "No Content"
-// @Failure     401 {object} ErrorResponse  "Unauthorized"
-// @Failure     404 {object} ErrorResponse  "Not Found"
-// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Success     204 {object}  errorResponse   "No Content"
+// @Failure     401 {object} errorResponse  "Unauthorized"
+// @Failure     404 {object} errorResponse  "Not Found"
+// @Failure     500 {object} errorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums/delete/{code} [delete]
 func (a *WebApp) GetDeleteByID(c *gin.Context) {
@@ -319,10 +319,10 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Produce                json
 // @Param                request body config.Album true "Updated album details"
 // @Success     200 {object} config.Album  "OK"
-// @Failure     400 {object} ErrorResponse  "Bad Request"
-// @Failure     401 {object} ErrorResponse  "Unauthorized"
-// @Failure     404 {object} ErrorResponse  "Not Found"
-// @Failure     500 {object} ErrorResponse  "Internal Server Error"
+// @Failure     400 {object} errorResponse  "Bad Request"
+// @Failure     401 {object} errorResponse  "Unauthorized"
+// @Failure     404 {object} errorResponse  "Not Found"
+// @Failure     500 {object} errorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router                /albums/update [post]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {

@@ -73,6 +73,13 @@ Content-Type: application/json
   "password":"1"
 }
 ###
+POST http://localhost:10000/v1/users/refresh
+Content-Type: application/json
+
+{
+  "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTYzMzA0NTksInN1YiI6ImFAYS5jb20ifQ.5wejb-XaOpUvMPDP-JZRQET-HBcpJ5hDQVNN5A3A7y4"
+}
+###
 POST http://localhost:10000/v1/users/login
 Content-Type: application/json
 

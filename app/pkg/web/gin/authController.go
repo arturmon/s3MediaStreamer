@@ -1,187 +1,71 @@
 package gin
 
 import (
-	"errors"
-	"fmt"
-	"net"
-	"net/http"
-	"net/url"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/logging"
 	"time"
 
-	"github.com/go-pg/pg/v10"
-
-	pgadapter "github.com/casbin/casbin-pg-adapter"
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const timeoutDuration = 30 * time.Second
-
-func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error) {
-	uri := url.URL{
-		User: url.UserPassword(cfg.Storage.Username, cfg.Storage.Password),
-		Host: net.JoinHostPort(cfg.Storage.Host, cfg.Storage.Port),
-		Path: "/casbin",
-	}
-	options := &pg.Options{
-		Addr:            uri.Host,
-		User:            uri.User.Username(),
-		Password:        cfg.Storage.Password, // Use the password from the config
-		Database:        uri.Path[1:],         // Remove the leading slash from the path
-		DialTimeout:     timeoutDuration,
-		ReadTimeout:     timeoutDuration,
-		WriteTimeout:    timeoutDuration,
-		ApplicationName: "casbin",
-	}
-	adapter, err := pgadapter.NewAdapter(options)
-	if err != nil {
-		return nil, err
-	}
-
-	enforcer, err := casbin.NewEnforcer("acl/rbac_model.conf", adapter)
-	if err != nil {
-		return nil, err
-	}
-
-	return enforcer, nil
-}
-
-func initRoles(enf *casbin.Enforcer) error {
-	enf.ClearPolicy()
-
-	policies := []struct {
-		role   string
-		path   string
-		method string
-	}{
-		{"*", "/favicon.ico", "GET"},
-		{"*", "/v1/swagger/*", "GET"},
-		{"admin", "/*", "*"},
-		{"*", "/ping", "GET"},
-		{"*", "/healts", "GET"},
-		{"anonymous", "/v1/users/login", "POST"},
-		{"member", "/v1/users/me", "GET"},
-		{"member", "/v1/users/logout", "POST"},
-		{"member", "/v1/albums", "*"},
-		{"member", "/v1/albums/*", "*"},
-	}
-
-	for _, p := range policies {
-		if ok, err := enf.AddPolicy(p.role, p.path, p.method); err != nil || !ok {
-			return fmt.Errorf("failed to add policy: %s %s %s", p.role, p.path, p.method)
-		}
-	}
-
-	return enf.SavePolicy()
-}
-
-func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
-	cookie, err := c.Cookie("jwt")
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-		return "", err
-	}
-
+// GenerateAccessToken generates an access token for the given user.
+func generateAccessToken(user config.User) (string, error) {
 	key := []byte(SecretKey)
-	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return key, nil
-	})
+	claims := jwt.MapClaims{
+		"iss":  user.Email,
+		"exp":  time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
+		"role": user.Role,                                             // Include the user's role as a claim
+	}
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	accessToken, err := token.SignedString(key)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
 		return "", err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-		return "", fmt.Errorf("invalid JWT token")
-	}
-	return claims["iss"].(string), nil
+	return accessToken, nil
 }
 
-func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		jwtToken, err := c.Cookie("jwt") // Extract the JWT token from the cookie
-		if err != nil {
-			if errors.Is(err, http.ErrNoCookie) { // Use errors.Is to check for a specific error
-				// Handle the case when the JWT cookie is missing
-				// For example, this might mean that the user is not authenticated yet.
-				// You can proceed with authentication or respond with an appropriate error.
-				return
-			}
-			// Handle other errors
-			logger.Println("JWT Cookie Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-			return
-		}
-
-		// Your JWT validation and key retrieval logic here
-		key := []byte(SecretKey) // Replace SecretKey with your actual secret key
-		token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return key, nil
-		})
-		if err != nil || !token.Valid {
-			// Handle invalid or expired token
-			logger.Println("JWT Parse Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-			return
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			// Handle invalid claims format
-			logger.Println("JWT Claims Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-			return
-		}
-
-		logger.Println("Extracted Role:", claims["role"])
-		if role, exists := claims["role"].(string); exists {
-			c.Set("userRole", role) // Store the role in the context
-		} else {
-			// Handle missing role claim
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorResponse{Message: "unauthenticated"})
-			return
-		}
-
-		c.Next() // Indicate that the middleware execution is completed
+// GenerateRefreshToken generates a refresh token for the given user.
+func generateRefreshToken(user config.User) (string, error) {
+	key := []byte(RefreshTokenSecret)
+	claims := jwt.MapClaims{
+		"sub": user.Email,
+		"exp": time.Now().Add(refreshTokenExpiration).Unix(),
+		// You can include additional claims if needed
 	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	refreshToken, err := token.SignedString(key)
+	if err != nil {
+		return "", err
+	}
+
+	return refreshToken, nil
 }
 
-func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
-	roleExtractor func(*gin.Context) string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		role := roleExtractor(c) // Extract user's role using the provided function
-
-		// Log the extracted role, path, and method
-		path := c.Request.URL.Path
-		method := c.Request.Method
-
-		// Use the extracted role to enforce authorization using Casbin
-		allowed, err := e.Enforce(role, path, method)
-		logger.Printf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
-		if err != nil {
-			// Handle error
-			logger.Println("Authorization Error:", err)
-			c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorResponse{Message: "internal server error"})
-			return
-		}
-
-		if allowed {
-			c.Next()
-		} else {
-			c.AbortWithStatusJSON(http.StatusForbidden, ErrorResponse{Message: "forbidden"})
-		}
+func (a *WebApp) generateTokensAndCookies(c *gin.Context, user config.User) (string, string, error) {
+	accessToken, err := generateAccessToken(user)
+	if err != nil {
+		return "", "", err
 	}
+
+	refreshToken, err := generateRefreshToken(user)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Store the refresh token along with user information (e.g., in a database)
+	err = a.storage.Operations.SetStoredRefreshToken(user.Email, refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Set both tokens as cookies
+	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
+	c.SetCookie("jwt", accessToken, maxAge, "/", "localhost", false, true)
+	c.SetCookie("refresh_token", refreshToken, maxAge, "/", "localhost", false, true)
+
+	return accessToken, refreshToken, nil
 }

@@ -1,0 +1,7 @@
+p, *, /favicon.ico, GET
+p, *, /v1/swagger/*, GET
+p, admin, /*, *
+p, *, /healts, GET
+p, anonymous, /v1/users/login, POST
+p, member, /v1/users/me, GET
+p, member, /v1/users/logout, POST

@@ -21,6 +21,8 @@ type PostgresCollectionQuery interface {
 	FindUserToEmail(email string) (config.User, error)
 	CreateUser(user config.User) error
 	DeleteUser(email string) error
+	GetStoredRefreshToken(userEmail string) (string, error)
+	SetStoredRefreshToken(userEmail, refreshToken string) error
 	CreateIssue(task *config.Album) error
 	CreateMany(list []config.Album) error
 	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
@@ -120,9 +122,9 @@ func (c *PgClient) CreateUser(user config.User) error {
 
 func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
 	var user config.User
-	query := `SELECT _id, name, email, password, role FROM "users" WHERE email = $1`
+	query := `SELECT _id, name, email, password, role, refreshtoken FROM "users" WHERE email = $1`
 	err := c.Pool.QueryRow(context.TODO(), query, email).
-		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role)
+		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role, &user.RefreshToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return user, fmt.Errorf("user with email '%s' not found", email)
@@ -142,6 +144,35 @@ func (c *PgClient) DeleteUser(email string) error {
 	if rowsAffected == 0 {
 		return fmt.Errorf("user with email '%s' not found", email)
 	}
+	return nil
+}
+
+func (c *PgClient) GetStoredRefreshToken(userEmail string) (string, error) {
+	query := `SELECT refreshtoken
+        FROM users
+        WHERE email = $1;`
+	var refreshToken string
+	err := c.Pool.QueryRow(context.TODO(), query, userEmail).
+		Scan(&refreshToken)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("user with email '%s' not found", userEmail)
+		}
+		return "", err
+	}
+	return refreshToken, nil
+}
+
+func (c *PgClient) SetStoredRefreshToken(userEmail, refreshToken string) error {
+	// Update the user's refresh token
+	updateQuery := `UPDATE users
+        SET refreshtoken = $2
+        WHERE email = $1;`
+	_, err := c.Pool.Exec(context.TODO(), updateQuery, userEmail, refreshToken)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -21,12 +21,13 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @schemes http
+// @schemes http https
 // @host      localhost:10000
 // @BasePath	/v1
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 // @securityDefinitions.basic	BasicAuth
+// @authorizationurl http://localhost:10000/v1/users/login
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
