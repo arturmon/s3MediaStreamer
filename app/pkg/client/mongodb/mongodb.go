@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/model"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -17,18 +18,18 @@ import (
 
 type MongoCollectionQuery interface {
 	FindCollections(name string) (*mongo.Collection, error)
-	FindUserToEmail(email string) (config.User, error)
-	CreateUser(user config.User) error
+	FindUserToEmail(email string) (model.User, error)
+	CreateUser(user model.User) error
 	DeleteUser(email string) error
 	GetStoredRefreshToken(userEmail string) (string, error)
 	SetStoredRefreshToken(userEmail, refreshToken string) error
-	CreateIssue(task *config.Album) error
-	CreateMany(list []config.Album) error
-	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
-	GetIssuesByCode(code string) (config.Album, error)
+	CreateIssue(task *model.Album) error
+	CreateMany(list []model.Album) error
+	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Album, int, error)
+	GetIssuesByCode(code string) (model.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
-	UpdateIssue(album *config.Album) error
+	UpdateIssue(album *model.Album) error
 }
 
 type MongoOperations interface {
@@ -86,7 +87,7 @@ func (c *MongoClient) FindCollections(useCollections string) (*mongo.Collection,
 	}
 }
 
-func (c *MongoClient) CreateIssue(album *config.Album) error {
+func (c *MongoClient) CreateIssue(album *model.Album) error {
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err
@@ -98,7 +99,7 @@ func (c *MongoClient) CreateIssue(album *config.Album) error {
 	return nil
 }
 
-func (c *MongoClient) CreateMany(issues []config.Album) error {
+func (c *MongoClient) CreateMany(issues []model.Album) error {
 	insertableList := make([]interface{}, len(issues))
 	for i := range issues {
 		v := &issues[i] // Use a pointer to the current issue.
@@ -124,8 +125,8 @@ func (c *MongoClient) CreateMany(issues []config.Album) error {
 	return nil
 }
 
-func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
-	result := config.Album{}
+func (c *MongoClient) GetIssuesByCode(code string) (model.Album, error) {
+	result := model.Album{}
 	filter := bson.D{{Key: "code", Value: code}} // Fix the linting issue here
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
@@ -138,7 +139,7 @@ func (c *MongoClient) GetIssuesByCode(code string) (config.Album, error) {
 	return result, nil
 }
 
-func (c *MongoClient) GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error) {
+func (c *MongoClient) GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Album, int, error) {
 	if offset < 1 || limit < 1 {
 		return nil, 0, errors.New("invalid pagination parameters")
 	}
@@ -148,7 +149,7 @@ func (c *MongoClient) GetAlbums(offset, limit int, sortBy, sortOrder, filterArti
 		filter = append(filter, bson.E{Key: "artist", Value: bson.M{"$regex": filterArtist, "$options": "i"}})
 	}
 
-	var albums []config.Album
+	var albums []model.Album
 
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
@@ -174,7 +175,7 @@ func (c *MongoClient) GetAlbums(offset, limit int, sortBy, sortOrder, filterArti
 
 	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
-		var album config.Album
+		var album model.Album
 		decodeErr := cur.Decode(&album)
 		if decodeErr != nil {
 			return albums, 0, decodeErr
@@ -219,7 +220,7 @@ func (c *MongoClient) DeleteAll() error {
 	return nil
 }
 
-func (c *MongoClient) CreateUser(user config.User) error {
+func (c *MongoClient) CreateUser(user model.User) error {
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return err
@@ -245,8 +246,8 @@ func (c *MongoClient) CreateUser(user config.User) error {
 	return fmt.Errorf("user with email '%s' already exists", existingUser.Email)
 }
 
-func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
-	result := config.User{}
+func (c *MongoClient) FindUserToEmail(email string) (model.User, error) {
+	result := model.User{}
 	// Define filter query for fetching a specific document from the collection.
 	filter := bson.D{{Key: "email", Value: email}} // Fix the linting issue here
 	collection, err := c.FindCollections(config.CollectionUser)
@@ -264,7 +265,7 @@ func (c *MongoClient) FindUserToEmail(email string) (config.User, error) {
 
 // GetStoredRefreshToken retrieves the refresh token for a user by email.
 func (c *MongoClient) GetStoredRefreshToken(userEmail string) (string, error) {
-	result := config.User{}
+	result := model.User{}
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return "", err
@@ -292,7 +293,7 @@ func (c *MongoClient) SetStoredRefreshToken(userEmail, refreshToken string) erro
 	return nil
 }
 
-func (c *MongoClient) UpdateIssue(album *config.Album) error {
+func (c *MongoClient) UpdateIssue(album *model.Album) error {
 	collection, err := c.FindCollections(config.CollectionAlbum)
 	if err != nil {
 		return err

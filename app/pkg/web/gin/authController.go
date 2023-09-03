@@ -1,7 +1,7 @@
 package gin
 
 import (
-	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +10,7 @@ import (
 )
 
 // GenerateAccessToken generates an access token for the given user.
-func generateAccessToken(user config.User) (string, error) {
+func generateAccessToken(user model.User) (string, error) {
 	key := []byte(SecretKey)
 	claims := jwt.MapClaims{
 		"iss":  user.Email,
@@ -28,7 +28,7 @@ func generateAccessToken(user config.User) (string, error) {
 }
 
 // GenerateRefreshToken generates a refresh token for the given user.
-func generateRefreshToken(user config.User) (string, error) {
+func generateRefreshToken(user model.User) (string, error) {
 	key := []byte(RefreshTokenSecret)
 	claims := jwt.MapClaims{
 		"sub": user.Email,
@@ -45,7 +45,7 @@ func generateRefreshToken(user config.User) (string, error) {
 	return refreshToken, nil
 }
 
-func (a *WebApp) generateTokensAndCookies(c *gin.Context, user config.User) (string, string, error) {
+func (a *WebApp) generateTokensAndCookies(c *gin.Context, user model.User) (string, string, error) {
 	accessToken, err := generateAccessToken(user)
 	if err != nil {
 		return "", "", err

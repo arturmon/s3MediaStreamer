@@ -2,7 +2,7 @@ package gin
 
 import (
 	"net/http"
-	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +47,7 @@ func (a *WebApp) Register(c *gin.Context) {
 		return
 	}
 
-	user := config.User{
+	user := model.User{
 		ID:       uuid.New(),
 		Name:     data["name"],
 		Email:    data["email"],
@@ -118,7 +118,7 @@ func (a *WebApp) Login(c *gin.Context) {
 	a.logger.Debugf("jwt: %s", accessToken)
 	a.metrics.LoginSuccessCounter.Inc()
 
-	loginResponse := okLoginResponce{
+	loginResponse := model.OkLoginResponce{
 		Email:        user.Email,
 		Role:         user.Role,
 		Refreshtoken: refreshToken,
@@ -211,18 +211,18 @@ func (a *WebApp) Logout(c *gin.Context) {
 func (a *WebApp) User(c *gin.Context) {
 	email, err := a.checkAuthorization(c)
 	if err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+		c.IndentedJSON(http.StatusUnauthorized, model.ErrorResponse{Message: "unauthenticated"})
 		return
 	}
 
-	var user config.User
+	var user model.User
 	user, err = a.storage.Operations.FindUserToEmail(email)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, errorResponse{Message: "user not found"})
+		c.IndentedJSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
 	}
 
-	loginResponse := okLoginResponce{
+	loginResponse := model.OkLoginResponce{
 		Email:        user.Email,
 		Role:         user.Role,
 		Refreshtoken: user.RefreshToken,
@@ -296,7 +296,7 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 	}
 
 	// Respond with the new access token
-	refreshResponse := responceRefreshTocken{
+	refreshResponse := model.ResponceRefreshTocken{
 		Refresh_token: newRefreshToken,
 		Access_token:  accessToken,
 	}

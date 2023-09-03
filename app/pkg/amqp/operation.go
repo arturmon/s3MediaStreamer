@@ -3,7 +3,7 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
-	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 	"time"
 
 	"github.com/bojanz/currency"
@@ -15,7 +15,7 @@ import (
 const bcryptCost = 14
 
 // amqpGetAlbumByCode retrieves an album by its code using AMQP.
-func (c *MessageClient) amqpGetAlbumByCode(code string) (*config.Album, error) {
+func (c *MessageClient) amqpGetAlbumByCode(code string) (*model.Album, error) {
 	album, getErr := c.storage.Operations.GetIssuesByCode(code)
 	if getErr != nil {
 		publishErr := c.publishMessage(TypePublisherError, getErr.Error())
@@ -47,7 +47,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 		return fmt.Errorf("invalid albums data")
 	}
 	var newPrice currency.Amount
-	albumsList := make([]config.Album, 0, len(albumArray)) // Pre-allocate with the expected length
+	albumsList := make([]model.Album, 0, len(albumArray)) // Pre-allocate with the expected length
 	for _, albumObj := range albumArray {
 		albumData, castOk := albumObj.(map[string]interface{})
 		if !castOk {
@@ -74,7 +74,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			continue
 		}
 
-		album := config.Album{
+		album := model.Album{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
@@ -112,7 +112,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 }
 
 // amqpGetAllAlbums retrieves paginated albums using AMQP.
-func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, filter string) ([]config.Album, int, error) {
+func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, filter string) ([]model.Album, int, error) {
 	albums, totalRows, err := c.storage.Operations.GetAlbums(page, pageSize, sortBy, sortOrder, filter)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
@@ -157,7 +157,7 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 
 // amqpAddUser adds a user using AMQP.
 func (c *MessageClient) amqpAddUser(userEmail, name, password, role string) error {
-	user := config.User{
+	user := model.User{
 		ID:       uuid.New(),
 		Name:     name,
 		Email:    userEmail,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/model"
 	"strings"
 	"time"
 
@@ -18,18 +18,18 @@ import (
 )
 
 type PostgresCollectionQuery interface {
-	FindUserToEmail(email string) (config.User, error)
-	CreateUser(user config.User) error
+	FindUserToEmail(email string) (model.User, error)
+	CreateUser(user model.User) error
 	DeleteUser(email string) error
 	GetStoredRefreshToken(userEmail string) (string, error)
 	SetStoredRefreshToken(userEmail, refreshToken string) error
-	CreateIssue(task *config.Album) error
-	CreateMany(list []config.Album) error
-	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]config.Album, int, error)
-	GetIssuesByCode(code string) (config.Album, error)
+	CreateIssue(task *model.Album) error
+	CreateMany(list []model.Album) error
+	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Album, int, error)
+	GetIssuesByCode(code string) (model.Album, error)
 	DeleteOne(code string) error
 	DeleteAll() error
-	UpdateIssue(album *config.Album) error
+	UpdateIssue(album *model.Album) error
 }
 
 type PostgresOperations interface {
@@ -111,7 +111,7 @@ func (c *PgClient) Close(_ context.Context) error {
 	return nil
 }
 
-func (c *PgClient) CreateUser(user config.User) error {
+func (c *PgClient) CreateUser(user model.User) error {
 	query := `INSERT INTO "users" (_id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)`
 	_, err := c.Pool.Exec(context.TODO(), query, user.ID, user.Name, user.Email, user.Password, user.Role)
 	if err != nil {
@@ -120,8 +120,8 @@ func (c *PgClient) CreateUser(user config.User) error {
 	return nil
 }
 
-func (c *PgClient) FindUserToEmail(email string) (config.User, error) {
-	var user config.User
+func (c *PgClient) FindUserToEmail(email string) (model.User, error) {
+	var user model.User
 	query := `SELECT _id, name, email, password, role, refreshtoken FROM "users" WHERE email = $1`
 	err := c.Pool.QueryRow(context.TODO(), query, email).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role, &user.RefreshToken)
@@ -176,7 +176,7 @@ func (c *PgClient) SetStoredRefreshToken(userEmail, refreshToken string) error {
 	return nil
 }
 
-func (c *PgClient) CreateIssue(album *config.Album) error {
+func (c *PgClient) CreateIssue(album *model.Album) error {
 	// Check if the "album" table exists
 	tableExists, err := c.TableExists("album")
 	if err != nil {
@@ -199,7 +199,7 @@ func (c *PgClient) CreateIssue(album *config.Album) error {
 	return nil
 }
 
-func (c *PgClient) CreateMany(list []config.Album) error {
+func (c *PgClient) CreateMany(list []model.Album) error {
 	insertableList := make([]interface{}, len(list)*albumFieldCount)
 	for i := range list {
 		baseIndex := i * albumFieldCount
@@ -239,7 +239,7 @@ func (c *PgClient) CreateMany(list []config.Album) error {
 }
 
 // GetAlbums Define the GetPaginatedAlbums function within your StorageOperations struct.
-func (c *PgClient) GetAlbums(offset, limit int, sortBy, sortOrder, filter string) ([]config.Album, int, error) {
+func (c *PgClient) GetAlbums(offset, limit int, sortBy, sortOrder, filter string) ([]model.Album, int, error) {
 	// Construct the base SQL query for selecting albums
 	sql := "SELECT _id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user FROM album"
 
@@ -288,9 +288,9 @@ func (c *PgClient) GetAlbums(offset, limit int, sortBy, sortOrder, filter string
 	defer rows.Close()
 
 	// Process the results
-	albums := make([]config.Album, 0)
+	albums := make([]model.Album, 0)
 	for rows.Next() {
-		var album config.Album
+		var album model.Album
 		scanErr := rows.Scan(
 			&album.ID, &album.CreatedAt, &album.UpdatedAt,
 			&album.Title, &album.Artist, &album.Price,
@@ -346,8 +346,8 @@ func (c *PgClient) DeleteOne(code string) error {
 	return nil
 }
 
-func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
-	result := config.Album{}
+func (c *PgClient) GetIssuesByCode(code string) (model.Album, error) {
+	result := model.Album{}
 
 	// Check if the "album" table exists.
 	tableExists, err := c.TableExists("album")
@@ -383,7 +383,7 @@ func (c *PgClient) GetIssuesByCode(code string) (config.Album, error) {
 	return result, nil
 }
 
-func (c *PgClient) UpdateIssue(album *config.Album) error {
+func (c *PgClient) UpdateIssue(album *model.Album) error {
 	// Check if the "album" table exists.
 	tableExists, err := c.TableExists("album")
 	if err != nil {

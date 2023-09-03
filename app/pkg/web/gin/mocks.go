@@ -3,11 +3,11 @@ package gin
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 )
 
 type MockDBOperations struct {
-	mockAlbums []config.Album
+	mockAlbums []model.Album
 }
 
 func (m *MockDBOperations) Connect() error {
@@ -20,7 +20,7 @@ func (m *MockDBOperations) Ping(_ context.Context) error {
 	return nil
 }
 
-func (m *MockDBOperations) GetIssuesByCode(code string) (*config.Album, error) {
+func (m *MockDBOperations) GetIssuesByCode(code string) (*model.Album, error) {
 	// Implement mock behavior for GetIssuesByCode
 
 	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
@@ -60,7 +60,7 @@ func (m *MockDBOperations) DeleteAll() error {
 	// Implement mock behavior for DeleteAll
 
 	// Clear the list of mock albums to simulate deleting all records.
-	m.mockAlbums = []config.Album{}
+	m.mockAlbums = []model.Album{}
 
 	return nil // Return nil to indicate successful "deletion."
 }

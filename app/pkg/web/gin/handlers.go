@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
-	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 	"strconv"
 	"strings"
 	"time"
@@ -140,7 +140,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 
 	// Increment the counter for each request handled by PostAlbums
 	a.metrics.PostAlbumsCounter.Inc()
-	var newAlbum config.Album
+	var newAlbum model.Album
 
 	newAlbum.ID = uuid.New()
 
@@ -331,7 +331,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Increment the counter for each request handled by UpdateAlbum
 	a.metrics.UpdateAlbumCounter.Inc()
 
-	var newAlbum config.Album
+	var newAlbum model.Album
 
 	newAlbum.UpdatedAt = time.Now()
 

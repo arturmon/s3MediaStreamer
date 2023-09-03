@@ -1,7 +1,7 @@
-package gin
+package model
 
 // userResponse represents the response object for the user information endpoint.
-type userResponse struct {
+type UserResponse struct {
 	Username     string `json:"name"`
 	Email        string `json:"email"`
 	RefreshToken string `json:"refresh_token"`
@@ -9,21 +9,21 @@ type userResponse struct {
 }
 
 // errorResponse represents the response object for error responses.
-type errorResponse struct {
+type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-type okLoginResponce struct {
+type OkLoginResponce struct {
 	Email        string `json:"email"`
 	Role         string `json:"role"`
 	Refreshtoken string `json:"refresh_token"`
 }
 
-type paramsRefreshTocken struct {
+type ParamsRefreshTocken struct {
 	Refresh_token string `json:"refresh_token" example:"eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"`
 }
 
-type responceRefreshTocken struct {
+type ResponceRefreshTocken struct {
 	Refresh_token string `json:"refresh_token" example:"eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"`
 	Access_token  string `json:"access_token" example:"eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"`
 }

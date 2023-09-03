@@ -9,6 +9,7 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
+	model_all "skeleton-golange-application/model"
 
 	pgadapter "github.com/casbin/casbin-pg-adapter"
 	"github.com/casbin/casbin/v2"
@@ -79,7 +80,7 @@ func initRoles(enf *casbin.Enforcer) error {
 func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	cookie, err := c.Cookie("jwt")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 		return "", err
 	}
 
@@ -92,13 +93,13 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 		return "", fmt.Errorf("invalid JWT token")
 	}
 	return claims["iss"].(string), nil
@@ -116,7 +117,7 @@ func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
 			}
 			// Handle other errors
 			logger.Println("JWT Cookie Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
 
@@ -131,7 +132,7 @@ func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
 		if err != nil || !token.Valid {
 			// Handle invalid or expired token
 			logger.Println("JWT Parse Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
 
@@ -139,7 +140,7 @@ func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
 		if !ok {
 			// Handle invalid claims format
 			logger.Println("JWT Claims Error:", err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
 
@@ -148,7 +149,7 @@ func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
 			c.Set("userRole", role) // Store the role in the context
 		} else {
 			// Handle missing role claim
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Message: "unauthenticated"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
 
@@ -171,14 +172,14 @@ func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
 		if err != nil {
 			// Handle error
 			logger.Println("Authorization Error:", err)
-			c.AbortWithStatusJSON(http.StatusInternalServerError, errorResponse{Message: "internal server error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, model_all.ErrorResponse{Message: "internal server error"})
 			return
 		}
 
 		if allowed {
 			c.Next()
 		} else {
-			c.AbortWithStatusJSON(http.StatusForbidden, errorResponse{Message: "forbidden"})
+			c.AbortWithStatusJSON(http.StatusForbidden, model_all.ErrorResponse{Message: "forbidden"})
 		}
 	}
 }
