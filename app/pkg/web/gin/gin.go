@@ -55,8 +55,9 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	router := gin.New()
 	logger.Info("setup CORS")
 	router.Use(cors.New(ConfigCORS()))
-	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
 
 	logger.Info("prometheus initializing")
 	p := ginPrometheus.NewPrometheus("gin")
@@ -193,4 +194,8 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	}
 
 	a.logger.Info("Application stopped")
+}
+
+func LogWithLogrusf(logger *logging.Logger, format string, args ...interface{}) {
+	logger.Debugf(format, args...)
 }

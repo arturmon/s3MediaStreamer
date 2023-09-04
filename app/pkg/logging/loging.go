@@ -40,7 +40,6 @@ func newLogger(level string) Logger {
 		DisableColors: false,
 		FullTimestamp: true,
 	}
-
 	l.SetOutput(os.Stdout)
 	l.SetLevel(logrusLevel)
 

@@ -38,6 +38,7 @@ func main() {
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
+
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
 	}

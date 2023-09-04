@@ -145,7 +145,6 @@ func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
 			return
 		}
 
-		logger.Println("Extracted Role:", claims["role"])
 		if role, exists := claims["role"].(string); exists {
 			c.Set("userRole", role) // Store the role in the context
 		} else {
@@ -169,7 +168,7 @@ func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
 
 		// Use the extracted role to enforce authorization using Casbin
 		allowed, err := e.Enforce(role, path, method)
-		logger.Printf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
+		logger.Debugf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
 		if err != nil {
 			// Handle error
 			logger.Println("Authorization Error:", err)

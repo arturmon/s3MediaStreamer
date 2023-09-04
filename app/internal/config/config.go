@@ -28,7 +28,7 @@ type Config struct {
 		Port   string `env:"PORT" env-default:"10000"`
 	}
 	AppConfig struct {
-		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // debug, release
+		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // trace, debug, info, warn, error, fatal, panic
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 	}
 	Storage struct {
