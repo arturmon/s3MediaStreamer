@@ -29,13 +29,12 @@ import (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 // @securityDefinitions.basic	BasicAuth
 // @authorizationurl http://localhost:10000/v1/users/login
-
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := config.GetConfig()
-	logger := logging.GetLogger(cfg.AppConfig.LogLevel)
+	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
 

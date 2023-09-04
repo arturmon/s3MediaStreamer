@@ -29,6 +29,7 @@ type Config struct {
 	}
 	AppConfig struct {
 		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // trace, debug, info, warn, error, fatal, panic
+		LogType  string `env:"LOG_TYPE" env-default:"text"`    // text, json
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 	}
 	Storage struct {
