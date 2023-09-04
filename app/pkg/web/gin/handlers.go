@@ -54,8 +54,8 @@ func Ping(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Param       page query   int           true "Page number"
-// @Param       page_size    query         int true "Number of items per page"
+// @Param       page query   int           false "Page number"
+// @Param       page_size    query         int false "Number of items per page"
 // @Param       sort_by      query         string false "Field to sort by (e.g., 'created_at')"
 // @Param       sort_order   query         string false "Sort order ('asc' or 'desc')"
 // @Param       filter       query         string false "Filter criteria"

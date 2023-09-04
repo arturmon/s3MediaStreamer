@@ -126,12 +126,10 @@ paths:
       - description: Page number
         in: query
         name: page
-        required: true
         type: integer
       - description: Number of items per page
         in: query
         name: page_size
-        required: true
         type: integer
       - description: Field to sort by (e.g., 'created_at')
         in: query
