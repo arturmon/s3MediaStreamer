@@ -45,7 +45,7 @@ jobs:
 
       - name: Update SWAGGER
         working-directory: ./app
-        run: swag init
+        run: swag init --parseDependency --parseDepth=1
 
       - name: Test
         run: go test -v -coverprofile=profile.cov -race ./...
