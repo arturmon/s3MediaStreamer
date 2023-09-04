@@ -17,6 +17,7 @@ import (
 // @Tags		user-controller
 // @Accept		json
 // @Produce		json
+// @Security    ApiKeyAuth
 // @Param		user body model.User true "Register User"
 // @Success     201 {object} model.UserResponse  "Created"
 // @Failure     400 {object} model.ErrorResponse "Bad Request - User with this email exists"
@@ -204,7 +205,7 @@ func (a *WebApp) Logout(c *gin.Context) {
 // @Tags user-controller
 // @Accept  */*
 // @Produce json
-// @Security ApiKeyAuth
+// @Security    ApiKeyAuth
 // @Success	200	{object} model.OkLoginResponce "Success"
 // @Failure 401 {object} model.ErrorResponse "Unauthenticated"
 // @Failure 404 {object} model.ErrorResponse "User not found"

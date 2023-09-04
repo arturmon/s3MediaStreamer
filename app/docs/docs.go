@@ -854,6 +854,11 @@ const docTemplate = `{
         },
         "/users/register": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Register a new user with provided name, email, and password.",
                 "consumes": [
                     "application/json"

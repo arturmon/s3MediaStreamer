@@ -683,6 +683,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Registers a new user.
       tags:
       - user-controller
