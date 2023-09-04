@@ -2,14 +2,13 @@ package postgresql_test
 
 import (
 	"skeleton-golange-application/app/pkg/client/postgresql/mocks"
+	"skeleton-golange-application/model"
 	"testing"
 	"time"
 
 	"github.com/bojanz/currency"
 
 	"github.com/google/uuid"
-
-	"skeleton-golange-application/app/internal/config"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +21,7 @@ func TestFindUserToEmail(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedUser := config.User{
+	expectedUser := model.User{
 		Email: "john@example.com",
 	}
 	mockCollectionQuery.EXPECT().FindUserToEmail("john@example.com").Return(expectedUser, nil)
@@ -50,7 +49,7 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	// Test your PgClient method using the mockCollectionQuery
-	user := config.User{
+	user := model.User{
 		ID:       userID,
 		Name:     "John Doe",
 		Email:    "john@example.com",
@@ -83,7 +82,7 @@ func TestCreateIssue(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbum := config.Album{
+	expectedAlbum := model.Album{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -111,7 +110,7 @@ func TestCreateMany(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbums := []config.Album{
+	expectedAlbums := []model.Album{
 		{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
@@ -155,7 +154,7 @@ func TestGetAllIssues(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbums := []config.Album{
+	expectedAlbums := []model.Album{
 		{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
@@ -200,7 +199,7 @@ func TestGetIssuesByCode(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbum := config.Album{
+	expectedAlbum := model.Album{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -262,7 +261,7 @@ func TestUpdateIssue(t *testing.T) {
 	// Set up an expected call on the mockCollectionQuery
 	mockCollectionQuery.EXPECT().UpdateIssue(gomock.Any()).Return(nil)
 
-	albumToUpdate := config.Album{
+	albumToUpdate := model.Album{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),

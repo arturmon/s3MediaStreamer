@@ -1,6 +1,7 @@
 {
     "schemes": [
-        "http"
+        "http",
+        "https"
     ],
     "swagger": "2.0",
     "info": {
@@ -52,6 +53,24 @@
                         "name": "page_size",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Field to sort by (e.g., 'created_at')",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order ('asc' or 'desc')",
+                        "name": "sort_order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter criteria",
+                        "name": "filter",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -60,20 +79,20 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/config.Album"
+                                "$ref": "#/definitions/model.Album"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -104,7 +123,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/config.Album"
+                            "$ref": "#/definitions/model.Album"
                         }
                     }
                 ],
@@ -112,19 +131,19 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/config.Album"
+                            "$ref": "#/definitions/model.Album"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -161,25 +180,25 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -207,19 +226,19 @@
                     "204": {
                         "description": "No Content",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -250,7 +269,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/config.Album"
+                            "$ref": "#/definitions/model.Album"
                         }
                     }
                 ],
@@ -258,31 +277,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/config.Album"
+                            "$ref": "#/definitions/model.Album"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -319,25 +338,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/config.Album"
+                            "$ref": "#/definitions/model.Album"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -367,6 +386,215 @@
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/monitoring.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/otp/disable": {
+            "post": {
+                "description": "Disable OTP for a user by setting 'otp_enabled' to 'false' in the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Disable OTP for a user.",
+                "parameters": [
+                    {
+                        "description": "OTP input data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OTPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP disabled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.OkLoginResponce"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update OTP status",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/otp/generate": {
+            "post": {
+                "description": "Generate an OTP token for a user and store it in the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Generate OTP for a user.",
+                "parameters": [
+                    {
+                        "description": "OTP input data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OTPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP generated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.OkGenerateOTP"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid refresh payload",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Failed to find user or invalid email/password",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update OTP secret or URL",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/otp/validate": {
+            "post": {
+                "description": "Validates a One-Time Password (OTP) for a user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Validates a One-Time Password (OTP).",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "OTP Input",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OTPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP Valid",
+                        "schema": {
+                            "$ref": "#/definitions/model.OkResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid OTP",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - User not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/otp/verify": {
+            "post": {
+                "description": "Verify the OTP token for a user and update 'otp_enabled' and 'otp_verified' fields in the database.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Verify OTP for a user.",
+                "parameters": [
+                    {
+                        "description": "OTP input data",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OTPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.OkLoginResponce"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update OTP status",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -433,13 +661,13 @@
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -465,7 +693,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/config.User"
+                            "$ref": "#/definitions/model.User"
                         }
                     }
                 ],
@@ -473,25 +701,25 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Incorrect Password",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -519,7 +747,7 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -545,21 +773,78 @@
                 "summary": "Get user information",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved user information",
+                        "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/gin.UserResponse"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "401": {
                         "description": "Unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Validates the provided refresh token, generates a new access token, and returns it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Refreshes the access token using a valid refresh token.",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ParamsRefreshTocken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully refreshed access token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ResponceRefreshTocken"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -585,7 +870,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/config.User"
+                            "$ref": "#/definitions/model.User"
                         }
                     }
                 ],
@@ -593,19 +878,19 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/config.User"
+                            "$ref": "#/definitions/model.UserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request - User with this email exists",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/gin.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -613,7 +898,7 @@
         }
     },
     "definitions": {
-        "config.Album": {
+        "model.Album": {
             "type": "object",
             "properties": {
                 "artist": {
@@ -642,25 +927,7 @@
                 }
             }
         },
-        "config.User": {
-            "description": "User account information with: user _id, name, email, password",
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "aaaa@aaaa.com"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Artur"
-                },
-                "role": {
-                    "type": "string",
-                    "example": "-"
-                }
-            }
-        },
-        "gin.ErrorResponse": {
+        "model.ErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -668,16 +935,107 @@
                 }
             }
         },
-        "gin.UserResponse": {
+        "model.OTPInput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OkGenerateOTP": {
+            "type": "object",
+            "properties": {
+                "base32": {},
+                "otpauth_url": {}
+            }
+        },
+        "model.OkLoginResponce": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "otp_enabled": {
+                    "type": "boolean"
                 },
-                "username": {
+                "refresh_token": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OkResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ParamsRefreshTocken": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                }
+            }
+        },
+        "model.ResponceRefreshTocken": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI"
+                }
+            }
+        },
+        "model.User": {
+            "description": "User account information with: user _id, name, email, password",
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "aaaa@aaaa.com"
+                },
+                "otp_auth_url": {
+                    "type": "string"
+                },
+                "otp_enabled": {
+                    "type": "boolean"
+                },
+                "otp_secret": {
+                    "type": "string"
+                },
+                "otp_verified": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "1111"
+                }
+            }
+        },
+        "model.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

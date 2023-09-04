@@ -33,6 +33,7 @@ type HealthResponse struct {
 // @Tags health-controller
 // @Accept  */*
 // @Produce json
+// @BasePath	/
 // @Success 200 {object} HealthResponse
 // @Failure 500 {object} HealthResponse
 // @Router /health [get]

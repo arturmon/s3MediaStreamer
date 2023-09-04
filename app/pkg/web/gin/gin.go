@@ -134,6 +134,14 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 			users.GET("/me", a.User)
 			users.POST("/delete", a.DeleteUser)
 			users.POST("/logout", a.Logout)
+			users.POST("/refresh", a.refreshTokenHandler)
+			otp := users.Group("/otp")
+			{
+				otp.POST("/generate", a.GenerateOTP)
+				otp.POST("/verify", a.VerifyOTP)
+				otp.POST("/validate", a.ValidateOTP)
+				otp.POST("/disable", a.DisableOTP)
+			}
 		}
 		albums := v1.Group("/albums")
 		{

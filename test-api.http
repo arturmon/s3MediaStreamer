@@ -73,6 +73,13 @@ Content-Type: application/json
   "password":"1"
 }
 ###
+POST http://localhost:10000/v1/users/refresh
+Content-Type: application/json
+
+{
+  "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTYzMzA0NTksInN1YiI6ImFAYS5jb20ifQ.5wejb-XaOpUvMPDP-JZRQET-HBcpJ5hDQVNN5A3A7y4"
+}
+###
 POST http://localhost:10000/v1/users/login
 Content-Type: application/json
 
@@ -103,3 +110,33 @@ Content-Type: application/json
 ###
 GET http://localhost:10000/health
 Content-Type: application/json
+###-------------------------------------------------------OTP------------------------------------------------
+POST http://localhost:10000/v1/users/otp/generate
+Content-Type: application/json
+
+{
+  "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
+}
+###
+POST http://localhost:10000/v1/users/otp/verify
+Content-Type: application/json
+
+{
+  "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+  "token": "946767"
+}
+###
+POST http://localhost:10000/v1/users/otp/validate
+Content-Type: application/json
+
+{
+  "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+  "token": "946767"
+}
+###
+POST http://localhost:10000/v1/users/otp/disable
+Content-Type: application/json
+
+{
+  "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
+}

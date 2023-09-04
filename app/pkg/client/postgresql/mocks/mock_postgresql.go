@@ -6,7 +6,7 @@ package mocks
 
 import (
 	reflect "reflect"
-	config "skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/model"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -39,7 +39,7 @@ func (m *MockPostgresCollectionQuery) EXPECT() *MockPostgresCollectionQueryMockR
 }
 
 // CreateIssue mocks base method.
-func (m *MockPostgresCollectionQuery) CreateIssue(task *config.Album) error {
+func (m *MockPostgresCollectionQuery) CreateIssue(task *model.Album) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateIssue", task)
 	ret0, _ := ret[0].(error)
@@ -53,7 +53,7 @@ func (mr *MockPostgresCollectionQueryMockRecorder) CreateIssue(task interface{})
 }
 
 // CreateMany mocks base method.
-func (m *MockPostgresCollectionQuery) CreateMany(list []config.Album) error {
+func (m *MockPostgresCollectionQuery) CreateMany(list []model.Album) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateMany", list)
 	ret0, _ := ret[0].(error)
@@ -67,7 +67,7 @@ func (mr *MockPostgresCollectionQueryMockRecorder) CreateMany(list interface{}) 
 }
 
 // CreateUser mocks base method.
-func (m *MockPostgresCollectionQuery) CreateUser(user config.User) error {
+func (m *MockPostgresCollectionQuery) CreateUser(user model.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", user)
 	ret0, _ := ret[0].(error)
@@ -123,10 +123,10 @@ func (mr *MockPostgresCollectionQueryMockRecorder) DeleteUser(email interface{})
 }
 
 // FindUserToEmail mocks base method.
-func (m *MockPostgresCollectionQuery) FindUserToEmail(email string) (config.User, error) {
+func (m *MockPostgresCollectionQuery) FindUserToEmail(email string) (model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindUserToEmail", email)
-	ret0, _ := ret[0].(config.User)
+	ret0, _ := ret[0].(model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -138,10 +138,10 @@ func (mr *MockPostgresCollectionQueryMockRecorder) FindUserToEmail(email interfa
 }
 
 // GetAllIssues mocks base method.
-func (m *MockPostgresCollectionQuery) GetAllIssues() ([]config.Album, error) {
+func (m *MockPostgresCollectionQuery) GetAllIssues() ([]model.Album, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllIssues")
-	ret0, _ := ret[0].([]config.Album)
+	ret0, _ := ret[0].([]model.Album)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -153,10 +153,10 @@ func (mr *MockPostgresCollectionQueryMockRecorder) GetAllIssues() *gomock.Call {
 }
 
 // GetIssuesByCode mocks base method.
-func (m *MockPostgresCollectionQuery) GetIssuesByCode(code string) (config.Album, error) {
+func (m *MockPostgresCollectionQuery) GetIssuesByCode(code string) (model.Album, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetIssuesByCode", code)
-	ret0, _ := ret[0].(config.Album)
+	ret0, _ := ret[0].(model.Album)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -182,7 +182,7 @@ func (mr *MockPostgresCollectionQueryMockRecorder) MarkCompleted(code interface{
 }
 
 // UpdateIssue mocks base method.
-func (m *MockPostgresCollectionQuery) UpdateIssue(album *config.Album) error {
+func (m *MockPostgresCollectionQuery) UpdateIssue(album *model.Album) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateIssue", album)
 	ret0, _ := ret[0].(error)

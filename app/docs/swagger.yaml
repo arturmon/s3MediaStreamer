@@ -1,6 +1,6 @@
 basePath: /v1
 definitions:
-  config.Album:
+  model.Album:
     properties:
       artist:
         example: Artist name
@@ -21,31 +21,79 @@ definitions:
         example: Title name
         type: string
     type: object
-  config.User:
+  model.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  model.OTPInput:
+    properties:
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.OkGenerateOTP:
+    properties:
+      base32: {}
+      otpauth_url: {}
+    type: object
+  model.OkLoginResponce:
+    properties:
+      email:
+        type: string
+      otp_enabled:
+        type: boolean
+      refresh_token:
+        type: string
+      role:
+        type: string
+    type: object
+  model.OkResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  model.ParamsRefreshTocken:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  model.ResponceRefreshTocken:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  model.User:
     description: 'User account information with: user _id, name, email, password'
     properties:
       email:
         example: aaaa@aaaa.com
         type: string
-      name:
-        example: Artur
+      otp_auth_url:
         type: string
-      role:
-        example: '-'
+      otp_enabled:
+        type: boolean
+      otp_secret:
+        type: string
+      otp_verified:
+        type: boolean
+      password:
+        example: "1111"
         type: string
     type: object
-  gin.ErrorResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  gin.UserResponse:
+  model.UserResponse:
     properties:
       email:
         type: string
-      id:
-        type: integer
-      username:
+      name:
+        type: string
+      refresh_token:
         type: string
     type: object
   monitoring.HealthResponse:
@@ -85,6 +133,18 @@ paths:
         name: page_size
         required: true
         type: integer
+      - description: Field to sort by (e.g., 'created_at')
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order ('asc' or 'desc')
+        in: query
+        name: sort_order
+        type: string
+      - description: Filter criteria
+        in: query
+        name: filter
+        type: string
       produces:
       - application/json
       responses:
@@ -92,16 +152,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/config.Album'
+              $ref: '#/definitions/model.Album'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Show the list of all albums.
@@ -126,19 +186,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/config.Album'
+            $ref: '#/definitions/model.Album'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Album whose ID value matches the id.
@@ -155,22 +215,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/config.Album'
+          $ref: '#/definitions/model.Album'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/config.Album'
+            $ref: '#/definitions/model.Album'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Adds an album from JSON.
@@ -194,19 +254,19 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Deletes album whose ID value matches the code.
@@ -223,15 +283,15 @@ paths:
         "204":
           description: No Content
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Complete removal of all albums.
@@ -249,30 +309,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/config.Album'
+          $ref: '#/definitions/model.Album'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/config.Album'
+            $ref: '#/definitions/model.Album'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Updates an existing album with new data.
@@ -297,6 +357,145 @@ paths:
       summary: Get health status of the application
       tags:
       - health-controller
+  /otp/disable:
+    post:
+      consumes:
+      - application/json
+      description: Disable OTP for a user by setting 'otp_enabled' to 'false' in the
+        database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP disabled successfully
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP status
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Disable OTP for a user.
+      tags:
+      - OTP
+  /otp/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate an OTP token for a user and store it in the database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP generated successfully
+          schema:
+            $ref: '#/definitions/model.OkGenerateOTP'
+        "400":
+          description: Invalid refresh payload
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Failed to find user or invalid email/password
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP secret or URL
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Generate OTP for a user.
+      tags:
+      - OTP
+  /otp/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validates a One-Time Password (OTP) for a user.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: OTP Input
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP Valid
+          schema:
+            $ref: '#/definitions/model.OkResponse'
+        "400":
+          description: Bad Request - Invalid OTP
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found - User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Validates a One-Time Password (OTP).
+      tags:
+      - OTP
+  /otp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP token for a user and update 'otp_enabled' and 'otp_verified'
+        fields in the database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP verified successfully
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP status
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Verify OTP for a user.
+      tags:
+      - OTP
   /ping:
     get:
       consumes:
@@ -334,11 +533,11 @@ paths:
         "401":
           description: Unauthorized - User unauthenticated
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Deletes a user.
@@ -355,26 +554,26 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/config.User'
+          $ref: '#/definitions/model.User'
       produces:
       - application/json
       responses:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.OkLoginResponce'
         "400":
           description: Bad Request - Incorrect Password
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found - User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       summary: Authenticates a user.
       tags:
       - user-controller
@@ -389,7 +588,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Logs out a user.
@@ -404,20 +603,57 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved user information
+          description: Success
           schema:
-            $ref: '#/definitions/gin.UserResponse'
+            $ref: '#/definitions/model.OkLoginResponce'
         "401":
           description: Unauthenticated
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get user information
+      tags:
+      - user-controller
+  /users/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Validates the provided refresh token, generates a new access token,
+        and returns it.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/model.ParamsRefreshTocken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully refreshed access token
+          schema:
+            $ref: '#/definitions/model.ResponceRefreshTocken'
+        "400":
+          description: Bad Request - Invalid refresh token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid refresh token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Refreshes the access token using a valid refresh token.
       tags:
       - user-controller
   /users/register:
@@ -431,27 +667,28 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/config.User'
+          $ref: '#/definitions/model.User'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/config.User'
+            $ref: '#/definitions/model.UserResponse'
         "400":
           description: Bad Request - User with this email exists
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/gin.ErrorResponse'
+            $ref: '#/definitions/model.ErrorResponse'
       summary: Registers a new user.
       tags:
       - user-controller
 schemes:
 - http
+- https
 securityDefinitions:
   BasicAuth:
     type: basic

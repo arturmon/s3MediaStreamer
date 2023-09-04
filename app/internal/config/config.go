@@ -3,11 +3,7 @@ package config
 import (
 	"skeleton-golange-application/app/pkg/logging"
 	"sync"
-	"time"
 
-	"github.com/bojanz/currency"
-
-	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
 )
@@ -21,31 +17,6 @@ func getConfigManager() *Manager {
 type Manager struct {
 	instance *Config
 	once     sync.Once
-}
-
-// Album represents data about a record album.
-type Album struct {
-	ID          uuid.UUID       `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
-	CreatedAt   time.Time       `json:"created_at" bson:"created_at" pg:"default:now()" swaggerignore:"true"`
-	UpdatedAt   time.Time       `json:"updated_at" bson:"updated_at" pg:"default:now()" swaggerignore:"true"`
-	Title       string          `json:"title" bson:"title" example:"Title name"`
-	Artist      string          `json:"artist" bson:"artist" example:"Artist name"`
-	Price       currency.Amount `json:"price" bson:"price" example:"{Number: 1.10, Currency: EUR}" swaggertype:"string,string"`
-	Code        string          `json:"code" bson:"code" example:"I001"`
-	Description string          `json:"description" bson:"description" example:"A short description of the application"`
-	Sender      string          `json:"sender" bson:"sender" example:"amqp or rest"`
-	CreatorUser uuid.UUID       `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
-}
-
-// User represents user account information.
-// @Description User account information
-// @Description with: user _id, name, email, password
-type User struct {
-	ID       uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
-	Name     string    `json:"name" bson:"name" example:"Artur"`
-	Email    string    `json:"email" bson:"email" example:"aaaa@aaaa.com"`
-	Password []byte    `json:"-" bson:"password"  example:"1111"`
-	Role     string    `json:"role" bson:"role"  example:"-"`
 }
 
 // Config represents the application's configuration.
@@ -109,6 +80,10 @@ type Config struct {
 			PostgresqlUser     string `env:"SESSION_POSTGRESQL_USER" env-default:"root"`
 			PostgresqlPass     string `env:"SESSION_POSTGRESQL_PASS" env-default:"1qazxsw2"`
 		}
+	}
+	OTP struct {
+		Issuer     string `env:"OTP_ISSUER" env-default:"example.com"`
+		SecretSize uint   `env:"OTP_SECRET_SIZE" env-default:"15"`
 	}
 }
 
