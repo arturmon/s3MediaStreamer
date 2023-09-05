@@ -1,9 +1,10 @@
 package model
 
 import (
+	"time"
+
 	"github.com/bojanz/currency"
 	"github.com/google/uuid"
-	"time"
 )
 
 // Album represents data about a record album.
