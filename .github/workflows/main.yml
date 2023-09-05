@@ -130,72 +130,72 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  Clean-old-Deploy:
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    environment: ${{ vars.ENVIRONMENT_STAGE }}
-    needs: Docker
-    steps:
-      - name: Stop and Remove Old Containers
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host: ${{ secrets.REMOTE_HOST }}
-          port: 22
-          username: ${{ secrets.REMOTE_USER }}
-          script: |
-            # Stop and remove the old containers
-            podman stop albums-app || true
-            podman rm albums-app || true
+  #Clean-old-Deploy:
+  #  if: ${{ github.event_name == 'push' }}
+  #  runs-on: ubuntu-latest
+  #  environment: ${{ vars.ENVIRONMENT_STAGE }}
+  #  needs: Docker
+  #  steps:
+  #    - name: Stop and Remove Old Containers
+  #      uses: appleboy/ssh-action@v1.0.0
+  #      with:
+  #        key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #        host: ${{ secrets.REMOTE_HOST }}
+  #        port: 22
+  #        username: ${{ secrets.REMOTE_USER }}
+  #        script: |
+  #          # Stop and remove the old containers
+  #          podman stop albums-app || true
+  #          podman rm albums-app || true
             # Remove the old image
-            podman rmi docker.io/arturmon/albums:latest || true
+  #          podman rmi docker.io/arturmon/albums:latest || true
 
-  Deploy:
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    environment: ${{ vars.ENVIRONMENT_STAGE }}
-    needs: Clean-old-Deploy
-    steps:
-      - name: Deploy to Staging server
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host: ${{ secrets.REMOTE_HOST }}
-          port: 22
-          username: ${{ secrets.REMOTE_USER }}
-          script: |
-            echo "======VERSION======"
-            podman version
-            echo "======INFO========="
-            podman info
-            echo "======DEPLOY======="
-            podman pod create --name albums -p 3000:3000
+  #Deploy:
+  #  if: ${{ github.event_name == 'push' }}
+  #  runs-on: ubuntu-latest
+  #  environment: ${{ vars.ENVIRONMENT_STAGE }}
+  #  needs: Clean-old-Deploy
+  #  steps:
+  #    - name: Deploy to Staging server
+  #      uses: appleboy/ssh-action@v1.0.0
+  #      with:
+  #        key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #        host: ${{ secrets.REMOTE_HOST }}
+  #        port: 22
+  #        username: ${{ secrets.REMOTE_USER }}
+  #        script: |
+  #          echo "======VERSION======"
+  #          podman version
+  #          echo "======INFO========="
+  #          podman info
+  #          echo "======DEPLOY======="
+  #          podman pod create --name albums -p 3000:3000
             
-            podman run --pod albums --privileged --name postgresql-server \
-            -e POSTGRESQL_USERNAME="root" \
-            -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
-            -e POSTGRESQL_DATABASE="db_issue_album" \
-            -d docker.io/bitnami/postgresql:latest
+  #          podman run --pod albums --privileged --name postgresql-server \
+  #          -e POSTGRESQL_USERNAME="root" \
+  #          -e POSTGRESQL_PASSWORD="${{ secrets.POSTGRESQL_PASSWORD }}" \
+  #          -e POSTGRESQL_DATABASE="db_issue_album" \
+  #          -d docker.io/bitnami/postgresql:latest
 
-            echo "Up rabbitmq...."
-            podman run --pod albums --privileged --name rabbitmq \
-            -e RABBITMQ_DEFAULT_USER=user \
-            -e RABBITMQ_DEFAULT_PASS=password \
-            -d docker.io/rabbitmq:3.12.2
+  #          echo "Up rabbitmq...."
+  #          podman run --pod albums --privileged --name rabbitmq \
+  #          -e RABBITMQ_DEFAULT_USER=user \
+  #          -e RABBITMQ_DEFAULT_PASS=password \
+  #          -d docker.io/rabbitmq:3.12.2
             
-            podman run --pod albums --privileged --name albums-app \
-            -e STORAGE_HOST="postgresql-server" \
-            -e MQ_BROKER="rabbitmq" \
-            -e LOG_LEVEL="info" \
-            -d docker.io/arturmon/albums:latest
+  #          podman run --pod albums --privileged --name albums-app \
+  #          -e STORAGE_HOST="postgresql-server" \
+  #          -e MQ_BROKER="rabbitmq" \
+  #          -e LOG_LEVEL="info" \
+  #          -d docker.io/arturmon/albums:latest
 
-      - name: Wait for Albums App to Start
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host: ${{ secrets.REMOTE_HOST }}
-          port: 22
-          username: ${{ secrets.REMOTE_USER }}
-          script: |
-            # Wait for the albums-app container to be up and running
-            while ! podman inspect -f '{{.State.Running}}' albums-app; do sleep 5; done
+  #    - name: Wait for Albums App to Start
+  #      uses: appleboy/ssh-action@v1.0.0
+  #      with:
+  #        key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #        host: ${{ secrets.REMOTE_HOST }}
+  #        port: 22
+  #        username: ${{ secrets.REMOTE_USER }}
+  #        script: |
+  #          # Wait for the albums-app container to be up and running
+  #          while ! podman inspect -f '{{.State.Running}}' albums-app; do sleep 5; done
