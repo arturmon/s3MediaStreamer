@@ -393,6 +393,11 @@ const docTemplate = `{
         },
         "/otp/disable": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Disable OTP for a user by setting 'otp_enabled' to 'false' in the database.",
                 "consumes": [
                     "application/json"
@@ -445,6 +450,11 @@ const docTemplate = `{
         },
         "/otp/generate": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Generate an OTP token for a user and store it in the database.",
                 "consumes": [
                     "application/json"
@@ -497,6 +507,11 @@ const docTemplate = `{
         },
         "/otp/validate": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Validates a One-Time Password (OTP) for a user.",
                 "consumes": [
                     "application/json"
@@ -556,6 +571,11 @@ const docTemplate = `{
         },
         "/otp/verify": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Verify the OTP token for a user and update 'otp_enabled' and 'otp_verified' fields in the database.",
                 "consumes": [
                     "application/json"

@@ -15,6 +15,7 @@ import (
 // @Tags OTP
 // @Accept json
 // @Produce json
+// @Security    ApiKeyAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkGenerateOTP "OTP generated successfully"
 // @Failure 400 {object} model.ErrorResponse "Invalid refresh payload"
@@ -67,6 +68,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 // @Tags OTP
 // @Accept json
 // @Produce json
+// @Security    ApiKeyAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP verified successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"
@@ -121,6 +123,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 // @Tags OTP
 // @Accept json
 // @Produce json
+// @Security    ApiKeyAuth
 // @Param user_id path string true "User ID"
 // @Param payload body model.OTPInput true "OTP Input"
 // @Success 200 {object} model.OkResponse "OTP Valid"
@@ -159,6 +162,7 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 // @Tags OTP
 // @Accept json
 // @Produce json
+// @Security    ApiKeyAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP disabled successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"

@@ -387,6 +387,8 @@ paths:
           description: Failed to update OTP status
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Disable OTP for a user.
       tags:
       - OTP
@@ -421,6 +423,8 @@ paths:
           description: Failed to update OTP secret or URL
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Generate OTP for a user.
       tags:
       - OTP
@@ -460,6 +464,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Validates a One-Time Password (OTP).
       tags:
       - OTP
@@ -491,6 +497,8 @@ paths:
           description: Failed to update OTP status
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Verify OTP for a user.
       tags:
       - OTP
