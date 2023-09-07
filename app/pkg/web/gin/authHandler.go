@@ -228,6 +228,7 @@ func (a *WebApp) User(c *gin.Context) {
 		Email:        user.Email,
 		Role:         user.Role,
 		RefreshToken: user.RefreshToken,
+		OtpEnabled:   user.Otp_enabled,
 	}
 
 	c.JSON(http.StatusOK, loginResponse)
