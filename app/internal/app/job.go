@@ -6,6 +6,14 @@ import (
 	"github.com/bamzi/jobrunner"
 )
 
+// jobrunner.Schedule("* */5 * * * *", DoSomething{}) // every 5min do something
+// jobrunner.Schedule("@every 1h30m10s", ReminderEmails{})
+// jobrunner.Schedule("@midnight", DataStats{}) // every midnight do this..
+// jobrunner.Every(16*time.Minute, CleanS3{}) // evey 16 min clean...
+// jobrunner.In(10*time.Second, WelcomeEmail{}) // one time job. starts after 10sec
+// jobrunner.Now(NowDo{}) // do the job as soon as it's triggered
+// https://github.com/robfig/cron/blob/v2/doc.go
+
 func InitJob(logger *logging.Logger) error {
 	jobrunner.Start()
 	reminderEmails := NewReminderEmails(logger)
