@@ -60,6 +60,7 @@ func initRoles(enf *casbin.Enforcer) error {
 		{"admin", "/*", "*"},
 		{"*", "/ping", "GET"},
 		{"*", "/healts", "GET"},
+		{"*", "/job/status", "GET"},
 		{"anonymous", "/v1/users/login", "POST"},
 		{"member", "/v1/users/me", "GET"},
 		{"member", "/v1/users/logout", "POST"},

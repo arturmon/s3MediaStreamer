@@ -115,6 +115,7 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 		monitoring.HealthGET(c, a.healthMetrics) // Pass the healthMetrics to HealthGET.
 	})
 	a.router.GET("/ping", Ping)
+	a.router.GET("/job/status", JobStatus)
 
 	a.router.Use(ExtractUserRole(a.logger))
 	a.router.Use(NewAuthorizerWithRoleExtractor(a.enforcer, a.logger, func(c *gin.Context) string {

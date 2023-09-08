@@ -140,3 +140,6 @@ Content-Type: application/json
 {
   "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
+###-------------------------------------------------------JOB------------------------------------------------
+GET http://localhost:10000/job/status
+Content-Type: application/json

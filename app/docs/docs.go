@@ -391,6 +391,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/job/status": {
+            "get": {
+                "description": "Check if the application server is running jobs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health-controller"
+                ],
+                "summary": "All Job status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/otp/disable": {
             "post": {
                 "security": [

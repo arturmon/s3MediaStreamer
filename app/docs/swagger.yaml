@@ -355,6 +355,28 @@ paths:
       summary: Get health status of the application
       tags:
       - health-controller
+  /job/status:
+    get:
+      consumes:
+      - application/json
+      description: Check if the application server is running jobs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: All Job status
+      tags:
+      - health-controller
   /otp/disable:
     post:
       consumes:

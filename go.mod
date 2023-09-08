@@ -3,6 +3,7 @@ module skeleton-golange-application
 go 1.18
 
 require (
+	github.com/bamzi/jobrunner v1.0.0
 	github.com/bojanz/currency v1.1.2
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin-pg-adapter v1.2.1
@@ -94,6 +95,7 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
+	github.com/robfig/cron/v3 v3.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/tidwall/gjson v1.16.0 // indirect
