@@ -20,3 +20,5 @@
 # http
 *.cookies
 *.html
+*.http
+*.cookies
