@@ -109,14 +109,18 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	// After successful authentication, set session keys
-	err = setSessionKey(c, "user_email", user.Email)
+	dataSession := map[string]interface{}{
+		"user_email": user.Email,
+		"user_id":    user.ID.String(),
+	}
+	err = setSessionData(c, dataSession)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create session"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save session data"})
 		return
 	}
 
 	a.logger.Debugf("jwt: %s", accessToken)
+	a.logger.Debugf("refreshToken: %s", refreshToken)
 	a.metrics.LoginSuccessCounter.Inc()
 
 	loginResponse := model.OkLoginResponce{
@@ -191,9 +195,14 @@ func (a *WebApp) Logout(c *gin.Context) {
 	expires := time.Now().Add(-time.Hour)
 	a.logger.Debugf("Expires: %s", expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
-	err := setSessionKey(c, "user_email", "")
+	dataSession := map[string]interface{}{
+		"user_email": "",
+		"user_id":    "",
+	}
+	err := setSessionData(c, dataSession)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not set logout session"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save session data"})
+		return
 	}
 	a.metrics.LogoutSuccessCounter.Inc()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})

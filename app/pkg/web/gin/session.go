@@ -80,9 +80,8 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
 }
 
-func setSessionKey(c *gin.Context, key string, value string) error {
+func setSessionData(c *gin.Context, data map[string]interface{}) error {
 	session := sessions.Default(c)
-	session.Set(key, value)
 
 	// Set the cookie path to "/"
 	session.Options(sessions.Options{
@@ -91,6 +90,11 @@ func setSessionKey(c *gin.Context, key string, value string) error {
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
+
+	// Set the values in the session
+	for key, value := range data {
+		session.Set(key, value)
+	}
 
 	// Save the session
 	if err := session.Save(); err != nil {

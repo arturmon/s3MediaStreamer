@@ -202,7 +202,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 
 	err = a.storage.Operations.CreateIssue(&newAlbum)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error creating album"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -355,12 +355,11 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
 		} else {
 			a.logger.Error(getErr)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": getErr.Error()})
 		}
 		return
 	}
 
-	// Update only the fields that have new data
 	if newAlbum.Title != "" {
 		existingAlbum.Title = newAlbum.Title
 	}
@@ -374,13 +373,15 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	if newAlbum.Description != "" {
 		existingAlbum.Description = newAlbum.Description
 	}
+	existingAlbum.Likes = newAlbum.Likes
+
 	existingAlbum.Sender = "rest"
 
 	existingAlbum.UpdatedAt = time.Now()
 	// Perform the update operation
 	err := a.storage.Operations.UpdateIssue(&existingAlbum)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "error updating album"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 

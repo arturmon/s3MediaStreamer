@@ -46,6 +46,12 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	logger.Info("Starting initialize the job runner...")
+	err = app.InitJob(myApp)
+	if err != nil {
+		logger.Error("Failed to initialize the job runner:", err)
+	}
+
 	app.HandleSignals(ctx, logger, cancel)
 	amqp.ConsumeMessages(ctx, logger, myApp.GetMessageClient())
 

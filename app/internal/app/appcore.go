@@ -27,15 +27,10 @@ const maxRetries = 5
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	healthMetrics := monitoring.NewHealthMetrics()
-	logger.Info("Starting initialize the job runner...")
-	err := InitJob(logger)
-	if err != nil {
-		logger.Error("Failed to initialize the job runner:", err)
-	}
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
-	storage, errDB := model.NewDBConfig(cfg, logger)
-	if errDB != nil {
+	storage, err := model.NewDBConfig(cfg, logger)
+	if err != nil {
 		logger.Error("Failed to initialize the storage:", err)
 		return nil, err
 	}

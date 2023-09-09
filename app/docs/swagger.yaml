@@ -11,6 +11,8 @@ definitions:
       description:
         example: A short description of the application
         type: string
+      likes:
+        type: boolean
       price:
         example: '{Number: 1.10, Currency: EUR}'
         type: string

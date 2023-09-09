@@ -1,9 +1,10 @@
 package gin
 
 import (
+	"net/http"
+
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // JobStatus godoc

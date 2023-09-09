@@ -1,44 +1,43 @@
 package app
 
 import (
-	"skeleton-golange-application/app/pkg/logging"
-
 	"github.com/bamzi/jobrunner"
 )
 
-// jobrunner.Schedule("* */5 * * * *", DoSomething{}) // every 5min do something
-// jobrunner.Schedule("@every 1h30m10s", ReminderEmails{})
-// jobrunner.Schedule("@midnight", DataStats{}) // every midnight do this..
-// jobrunner.Every(16*time.Minute, CleanS3{}) // evey 16 min clean...
-// jobrunner.In(10*time.Second, WelcomeEmail{}) // one time job. starts after 10sec
-// jobrunner.Now(NowDo{}) // do the job as soon as it's triggered
-// https://github.com/robfig/cron/blob/v2/doc.go
-
-func InitJob(logger *logging.Logger) error {
+func InitJob(app *App) error {
 	jobrunner.Start()
-	reminderEmails := NewReminderEmails(logger)
-	err := jobrunner.Schedule("@every 5s", reminderEmails)
+	openAIJob := NewOpenAIJob(app)
+	err := jobrunner.Schedule(app.cfg.AppConfig.OpenAI.JonRun, openAIJob)
 	if err != nil {
-		logger.Error("Failed to schedule job:", err)
+		app.logger.Error("Failed to schedule job:", err)
+		return err
+	}
+	cleanJob := NewCleanJob(app)
+	err = jobrunner.Schedule(app.cfg.AppConfig.OpenAI.JonRun, cleanJob)
+	if err != nil {
+		app.logger.Error("Failed to schedule job:", err)
 		return err
 	}
 	return nil
 }
 
-func NewReminderEmails(logger *logging.Logger) *ReminderEmails {
-	return &ReminderEmails{
-		logger: logger,
+func NewOpenAIJob(app *App) *OpenAIJob {
+	return &OpenAIJob{
+		app: app,
 	}
 }
 
-// ReminderEmails Job Specific Functions.
-type ReminderEmails struct {
-	logger *logging.Logger
+// OpenAIJob Job Specific Functions.
+type OpenAIJob struct {
+	app *App
 }
 
-// Run ReminderEmails.Run() will get triggered automatically.
-func (e ReminderEmails) Run() {
-	// Queries the DB
-	// Sends some email
-	e.logger.Info("Every 5 seconds send reminder emails")
+func NewCleanJob(app *App) *CleanJob {
+	return &CleanJob{
+		app: app,
+	}
+}
+
+type CleanJob struct {
+	app *App
 }

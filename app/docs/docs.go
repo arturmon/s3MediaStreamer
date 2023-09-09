@@ -971,6 +971,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "A short description of the application"
                 },
+                "likes": {
+                    "type": "boolean"
+                },
                 "price": {
                     "type": "string",
                     "example": "{Number: 1.10, Currency: EUR}"

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/structs"
+
 	"github.com/lib/pq"
 
 	"github.com/jackc/pgx/v4"
@@ -31,6 +33,9 @@ type PostgresCollectionQuery interface {
 	DeleteOne(code string) error
 	DeleteAll() error
 	UpdateIssue(album *model.Album) error
+	GetAllAlbumsForLearn() ([]model.Album, error)
+	CreateManyTops(list []model.Tops) error
+	CleanupOldRecords(retentionPeriod time.Duration) error
 }
 
 type PostgresOperations interface {
@@ -191,10 +196,10 @@ func (c *PgClient) CreateIssue(album *model.Album) error {
 	}
 
 	query := `INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, 
-                   description, sender, _creator_user)
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+                   description, sender, _creator_user, likes)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 	_, err = c.Pool.Exec(context.TODO(), query, album.ID, album.CreatedAt, album.UpdatedAt, album.Title,
-		album.Artist, album.Price, album.Code, album.Description, album.Sender, album.CreatorUser)
+		album.Artist, album.Price, album.Code, album.Description, album.Sender, album.CreatorUser, album.Likes)
 	if err != nil {
 		return err
 	}
@@ -375,6 +380,7 @@ func (c *PgClient) GetIssuesByCode(code string) (model.Album, error) {
 		&result.Description,
 		&result.Sender,
 		&result.CreatorUser,
+		&result.Likes,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -406,12 +412,13 @@ func (c *PgClient) UpdateIssue(album *model.Album) error {
             artist = $4,
             price = $5,
             description = $6,
-            sender = $7
+            sender = $7,
+        	likes = $8
         WHERE
-            code = $8
+            code = $9
     `
 	_, err = c.Pool.Exec(context.TODO(), query,
-		album.CreatedAt, time.Now(), album.Title, album.Artist, album.Price, album.Description, album.Sender, album.Code)
+		album.CreatedAt, time.Now(), album.Title, album.Artist, album.Price, album.Description, album.Sender, album.Likes, album.Code)
 	if err != nil {
 		return err
 	}
@@ -445,6 +452,96 @@ func (c *PgClient) UpdateUserFieldsByEmail(email string, fields map[string]inter
 
 	// Execute the SQL query.
 	_, err := c.Pool.Exec(context.TODO(), query, values...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *PgClient) GetAllAlbumsForLearn() ([]model.Album, error) {
+	query := "SELECT * FROM album WHERE likes = true LIMIT $1 OFFSET $2" // Updated query
+	offset := 0
+	var albums []model.Album
+
+	for {
+		rows, err := c.Pool.Query(context.TODO(), query, ChunkSize, offset)
+		if err != nil {
+			return nil, err
+		}
+		var chunk []model.Album
+		for rows.Next() {
+			var album model.Album
+			err = rows.Scan(
+				&album.ID,
+				&album.CreatedAt,
+				&album.UpdatedAt,
+				&album.Title,
+				&album.Artist,
+				&album.Price,
+				&album.Code,
+				&album.Description,
+				&album.Sender,
+				&album.CreatorUser,
+				&album.Likes,
+			)
+			if err != nil {
+				return nil, err
+			}
+			chunk = append(chunk, album)
+		}
+		albums = append(albums, chunk...)
+		rows.Close()
+		if len(chunk) < ChunkSize {
+			break
+		}
+		offset += ChunkSize
+	}
+	return albums, nil
+}
+
+func (c *PgClient) CreateManyTops(list []model.Tops) error {
+	if len(list) == 0 {
+		return nil
+	}
+
+	query := `INSERT INTO chart (_id, created_at, updated_at, title, artist, description, sender, _creator_user) VALUES `
+
+	var placeholders []string
+	var insertableValues []interface{}
+
+	for i, item := range list {
+		itemFields := structs.Fields(item)
+
+		for _, field := range itemFields {
+			insertableValues = append(insertableValues, field.Value())
+		}
+
+		placeholderValues := make([]string, len(itemFields)) // Use len() to get the length of itemFields
+		for j := 0; j < len(itemFields); j++ {
+			placeholderValues[j] = fmt.Sprintf("$%d", (i*len(itemFields))+j+1)
+		}
+		placeholders = append(placeholders, "("+strings.Join(placeholderValues, ", ")+")")
+	}
+
+	query += strings.Join(placeholders, ", ")
+
+	_, err := c.Pool.Exec(context.TODO(), query, insertableValues...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *PgClient) CleanupOldRecords(retentionPeriod time.Duration) error {
+	cutoffTime := time.Now().Add(-retentionPeriod)
+	query := `
+        DELETE FROM chart
+        WHERE created_at < $1
+    `
+
+	_, err := c.Pool.Exec(context.TODO(), query, cutoffTime)
 	if err != nil {
 		return err
 	}

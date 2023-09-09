@@ -27,8 +27,9 @@ Content-Type: application/json
     "Number": "44.10",
     "Currency": "EUR"
   },
-  "Code": "I0005",
-  "Description": "Description Test1"
+  "Code": "I0001",
+  "Description": "Description Test1",
+  "Likes": true
 }
 ###
 POST http://localhost:10000/v1/albums/update
@@ -43,7 +44,7 @@ Content-Type: application/json
   },
   "Code": "I00010",
   "Description": "Description Update",
-  "Completed": false
+  "Likes": false
 }
 ###
 DELETE http://localhost:10000/v1/albums/delete/I0001
