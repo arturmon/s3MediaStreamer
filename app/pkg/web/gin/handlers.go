@@ -41,11 +41,10 @@ type Handler interface {
 // @Tags health-controller
 // @Accept */*
 // @Produce json
-// @Success 200 {object} map[string]interface{} "OK"
-// @Failure 404 {object} map[string]string "Not Found"
+// @Success 200 {object} model.UserResponse "OK"
 // @Router /ping [get]
 func Ping(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "pong"})
+	c.IndentedJSON(http.StatusOK, model.OkResponse{Message: "pong"})
 }
 
 // GetAllAlbums	godoc
@@ -79,7 +78,7 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	pageSizeInt, errPageSize := strconv.Atoi(pageSize)
 	if errPage != nil || errPageSize != nil {
 		a.logger.Error("Invalid page or page_size parameters")
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid page or page_size parameters"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Invalid page or page_size parameters"})
 		return
 	}
 	var validSortOrders = map[string]string{
@@ -99,7 +98,7 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	albums, countTotal, err := a.storage.Operations.GetAlbums(offset, pageSizeInt, sortBy, sortOrder, filter)
 	if err != nil {
 		a.logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
@@ -132,6 +131,8 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Param		request body model.Album true "Album details"
 // @Success     201 {object} model.Album  "Created"
 // @Failure     400 {object} model.ErrorResponse  "Bad Request"
+// @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
+// @Failure     409 {object} model.ErrorResponse  "album code already exists"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/albums/add [post]
@@ -152,7 +153,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	requestBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		a.logger.Errorf("Error reading request body: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 	a.logger.Debugf("Received POST request body:\n%s", requestBody)
@@ -164,7 +165,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	if bindErr := json.Unmarshal(requestBody, &newAlbum); bindErr != nil {
 		a.logger.Debugf("Received POST request body:\n%s", bindErr)
 		a.logger.Errorf("Invalid request payload: %v", bindErr)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
@@ -177,32 +178,32 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	value, err := getSessionKey(c, "user_id")
 	if err != nil {
 		a.logger.Errorf("Error getting session value: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not get session value"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "could not get session value"})
 		return
 	}
 
 	valueUUID, err := uuid.Parse(value.(string))
 	if err != nil {
 		a.logger.Errorf("Error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error converting value"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error converting value"})
 		return
 	}
 	newAlbum.CreatorUser = valueUUID
 
 	if newAlbum.Code == "" || newAlbum.Artist == "" {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "empty required fields `Code` or `Artist`"})
+		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
 		return
 	}
 
 	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if err == nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"message": "album code already exists"})
+		c.IndentedJSON(http.StatusConflict, model.ErrorResponse{Message: "album code already exists"})
 		return
 	}
 
 	err = a.storage.Operations.CreateIssue(&newAlbum)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -234,10 +235,10 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	result, err := a.storage.Operations.GetIssuesByCode(id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
 		} else {
 			a.logger.Error(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
 		}
 		return
 	}
@@ -250,7 +251,7 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		*/*
 // @Produce		json
-// @Success     204 {object} model.ErrorResponse   "No Content"
+// @Success     204 {object} model.OkResponse   "No Content"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
@@ -264,10 +265,10 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	err := a.storage.Operations.DeleteAll()
 	if err != nil {
 		a.logger.Fatal(err)
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error Delete all Album"})
+		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Error Delete all Album"})
 		return
 	}
-	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "OK"})
+	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
 }
 
 // GetDeleteByID godoc
@@ -277,7 +278,7 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 // @Accept		*/*
 // @Produce		json
 // @Param		code    path      string     true  "Code album"
-// @Success     204 {object} model.ErrorResponse   "No Content"
+// @Success     204 {object} model.OkResponse   "No Content"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
@@ -294,10 +295,10 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	_, err := a.storage.Operations.GetIssuesByCode(code)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
 		} else {
 			a.logger.Error(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal Server Error"})
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
 		}
 		return
 	}
@@ -305,10 +306,10 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	err = a.storage.Operations.DeleteOne(code)
 	if err != nil {
 		a.logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error deleting album"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error deleting album"})
 		return
 	}
-	c.IndentedJSON(http.StatusNoContent, gin.H{"message": "OK"})
+	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
 }
 
 // UpdateAlbum godoc
@@ -336,7 +337,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	newAlbum.UpdatedAt = time.Now()
 
 	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
@@ -345,17 +346,17 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
 
 	if newAlbum.Code == "" || newAlbum.Artist == "" {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "empty required fields `Code` or `Artist`"})
+		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
 		return
 	}
 
 	existingAlbum, getErr := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
 	if getErr != nil {
 		if errors.Is(getErr, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"message": "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
 		} else {
 			a.logger.Error(getErr)
-			c.JSON(http.StatusInternalServerError, gin.H{"message": getErr.Error()})
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: getErr.Error()})
 		}
 		return
 	}
@@ -381,7 +382,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Perform the update operation
 	err := a.storage.Operations.UpdateIssue(&existingAlbum)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 

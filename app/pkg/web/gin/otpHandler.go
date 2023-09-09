@@ -26,13 +26,13 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid email or Password"})
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "Invalid email or Password"})
 		return
 	}
 
@@ -51,7 +51,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 	}
 	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Not update Secret or URL OTP"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update Secret or URL OTP"})
 		return
 	}
 
@@ -72,28 +72,27 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP verified successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"
-// @Failure 400 {object} model.ErrorResponse "Invalid token or user not found"
-// @Failure 400 {object} model.ErrorResponse "Invalid token"
+// @Failure 401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/verify [post]
 func (a *WebApp) VerifyOTP(c *gin.Context) {
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	message := "Token is invalid or user doesn't exist"
 	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": message})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
 	}
 
 	valid := totp.Validate(payload.Token, result.Otp_secret)
 	if !valid {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": message})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
 	}
 
@@ -104,7 +103,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 
 	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Not update enabled or verified OTP"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update enabled or verified OTP"})
 		return
 	}
 
@@ -128,6 +127,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 // @Param payload body model.OTPInput true "OTP Input"
 // @Success 200 {object} model.OkResponse "OTP Valid"
 // @Failure 400 {object} model.ErrorResponse "Bad Request - Invalid OTP"
+// @Failure 401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure 404 {object} model.ErrorResponse "Not Found - User not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Router /otp/validate [post]
@@ -135,7 +135,7 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -143,13 +143,13 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 
 	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": message})
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: message})
 		return
 	}
 
 	valid := totp.Validate(payload.Token, result.Otp_secret)
 	if !valid {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": message})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: message})
 		return
 	}
 
@@ -166,6 +166,7 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP disabled successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"
+// @Failure 401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure 404 {object} model.ErrorResponse "User not found"
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/disable [post]
@@ -173,13 +174,13 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err})
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -189,7 +190,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 
 	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Not update disabled OTP"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update disabled OTP"})
 		return
 	}
 

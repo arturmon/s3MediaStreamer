@@ -21,6 +21,7 @@ import (
 // @Param		user body model.User true "Register User"
 // @Success     201 {object} model.UserResponse  "Created"
 // @Failure     400 {object} model.ErrorResponse "Bad Request - User with this email exists"
+// @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
@@ -29,7 +30,7 @@ func (a *WebApp) Register(c *gin.Context) {
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
@@ -37,14 +38,14 @@ func (a *WebApp) Register(c *gin.Context) {
 	_, err := a.storage.Operations.FindUserByType(data["email"], "email")
 	if err == nil {
 		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user with this email exists"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "user with this email exists"})
 		return
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcryptCost)
 	if err != nil {
 		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to create user"})
 		return
 	}
 
@@ -59,7 +60,7 @@ func (a *WebApp) Register(c *gin.Context) {
 	err = a.storage.Operations.CreateUser(user)
 	if err != nil {
 		a.metrics.RegisterErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to create user"})
 		return
 	}
 
@@ -73,7 +74,7 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Tags		user-controller
 // @Accept		json
 // @Produce		json
-// @Param		login body model.User true "Login User"
+// @Param		login body model.LoginInput true "Login User"
 // @Success     200 {object} model.OkLoginResponce  "Success"
 // @Failure     400 {object} model.ErrorResponse "Bad Request - Incorrect Password"
 // @Failure     404 {object} model.ErrorResponse "Not Found - User not found"
@@ -84,21 +85,21 @@ func (a *WebApp) Login(c *gin.Context) {
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
 	user, err := a.storage.Operations.FindUserByType(data["email"], "email")
 	if err != nil {
 		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
 	}
 
 	bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
 	if bcryptErr != nil {
 		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect password"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "incorrect password"})
 		a.metrics.ErrPasswordCounter.Inc() // Prometheus
 		return
 	}
@@ -109,13 +110,13 @@ func (a *WebApp) Login(c *gin.Context) {
 	}
 	err = setSessionData(c, dataSession)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save session data"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to save session data"})
 		return
 	}
 
 	accessToken, refreshToken, err := a.generateTokensAndCookies(c, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to generate tokens and cookies"})
 		return
 	}
 
@@ -149,36 +150,36 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 	email, ok := data["email"]
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "email not provided"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "email not provided"})
 		return
 	}
 
 	// directive
 	if email == "admin@admin.com" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user cannot be deleted: admin@admin.com"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "user cannot be deleted: admin@admin.com"})
 		return
 	}
 
 	user, err := a.storage.Operations.FindUserByType(email, "email")
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
 	}
 
 	err = a.storage.Operations.DeleteUser(user.Email)
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
 	}
 	a.metrics.DeleteUserSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
+	c.JSON(http.StatusOK, model.OkResponse{Message: "user deleted"})
 }
 
 // Logout godoc
@@ -188,7 +189,9 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
-// @Success     200 {object} model.ErrorResponse  "Success"
+// @Success     200 {object} model.OkResponse  "Success"
+// @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
+// @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
 	a.metrics.LogoutAttemptCounter.Inc()
@@ -199,11 +202,11 @@ func (a *WebApp) Logout(c *gin.Context) {
 	err := logoutSession(c)
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "session logout error"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "session logout error"})
 		return
 	}
 	a.metrics.LogoutSuccessCounter.Inc()
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, model.OkResponse{Message: "success"})
 }
 
 // User godoc
@@ -258,13 +261,13 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 
 	// Parse the JSON request body into the data map
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
 	refreshToken, exists := data["refresh_token"]
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid refresh token"})
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid refresh token"})
 		return
 	}
 
@@ -275,33 +278,33 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 		return []byte(RefreshTokenSecret), nil
 	})
 	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid refresh token"})
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid refresh token"})
 		return
 	}
 
 	userEmail, ok := claims["sub"].(string)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid user email"})
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid user email"})
 		return
 	}
 
 	// Check if the refresh token is stored and valid
 	storedRefreshToken, err := a.storage.Operations.GetStoredRefreshToken(userEmail)
 	if err != nil || refreshToken != storedRefreshToken {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid refresh token"})
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid refresh token"})
 		return
 	}
 
 	// Generate a new access token and refresh token
 	user, err := a.storage.Operations.FindUserByType(userEmail, "email")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to get user"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to get user"})
 		return
 	}
 
 	accessToken, newRefreshToken, err := a.generateTokensAndCookies(c, user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to generate tokens and cookies"})
 		return
 	}
 

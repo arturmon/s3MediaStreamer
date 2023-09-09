@@ -10,11 +10,16 @@ type UserResponse struct {
 
 // ErrorResponse represents the response object for error responses.
 type ErrorResponse struct {
-	Message string `json:"message"`
+	Message string `json:"error"`
 }
 
 type OkResponse struct {
 	Message string `json:"message"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type OkLoginResponce struct {
