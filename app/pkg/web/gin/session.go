@@ -11,11 +11,12 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 
+	"github.com/gin-contrib/sessions/cookie"
+
 	"github.com/google/uuid"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-contrib/sessions/memcached"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-contrib/sessions/mongo/mongodriver"
@@ -74,7 +75,12 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 	default:
 		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	}
-	store.Options(sessions.Options{MaxAge: sessionMaxAge}) // expire in a day
+	store.Options(sessions.Options{
+		MaxAge:   sessionMaxAge,
+		Path:     "/", // Set the cookie path to "/"
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 	sessionName := cfg.Session.SessionName
 	router.Use(sessions.Sessions(sessionName, store))
 	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
@@ -82,14 +88,6 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 
 func setSessionData(c *gin.Context, data map[string]interface{}) error {
 	session := sessions.Default(c)
-
-	// Set the cookie path to "/"
-	session.Options(sessions.Options{
-		MaxAge:   sessionMaxAge,
-		Path:     "/", // Set the cookie path to "/"
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	})
 
 	// Set the values in the session
 	for key, value := range data {
@@ -112,4 +110,17 @@ func getSessionKey(c *gin.Context, key string) (interface{}, error) {
 		return nil, errors.New("session value is nil")
 	}
 	return value, nil
+}
+
+func logoutSession(c *gin.Context) error {
+	session := sessions.Default(c)
+	session.Clear()
+	session.Options(sessions.Options{Path: "/", MaxAge: -1}) // this sets the cookie with a MaxAge of 0
+	// Save the session
+	if err := session.Save(); err != nil {
+		// Handle the error here, e.g., log it
+		logrus.Errorf("Error saving session: %v", err)
+		return err
+	}
+	return nil
 }

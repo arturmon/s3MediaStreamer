@@ -103,12 +103,6 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := a.generateTokensAndCookies(c, user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
-		return
-	}
-
 	dataSession := map[string]interface{}{
 		"user_email": user.Email,
 		"user_id":    user.ID.String(),
@@ -116,6 +110,12 @@ func (a *WebApp) Login(c *gin.Context) {
 	err = setSessionData(c, dataSession)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save session data"})
+		return
+	}
+
+	accessToken, refreshToken, err := a.generateTokensAndCookies(c, user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to generate tokens and cookies"})
 		return
 	}
 
@@ -195,13 +195,11 @@ func (a *WebApp) Logout(c *gin.Context) {
 	expires := time.Now().Add(-time.Hour)
 	a.logger.Debugf("Expires: %s", expires)
 	c.SetCookie("jwt", "", -1, "", "", false, true)
-	dataSession := map[string]interface{}{
-		"user_email": "",
-		"user_id":    "",
-	}
-	err := setSessionData(c, dataSession)
+	c.SetCookie("refresh_token", "", -1, "", "", false, true)
+	err := logoutSession(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save session data"})
+		a.metrics.DeleteUserErrorCounter.Inc()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "session logout error"})
 		return
 	}
 	a.metrics.LogoutSuccessCounter.Inc()
