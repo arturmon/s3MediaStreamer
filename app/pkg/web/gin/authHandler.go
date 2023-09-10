@@ -35,7 +35,7 @@ func (a *WebApp) Register(c *gin.Context) {
 	}
 
 	// Check if user already exists
-	_, err := a.storage.Operations.FindUserByType(data["email"], "email")
+	_, err := a.storage.Operations.FindUser(data["email"], "email")
 	if err == nil {
 		a.metrics.RegisterErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "user with this email exists"})
@@ -89,7 +89,7 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := a.storage.Operations.FindUserByType(data["email"], "email")
+	user, err := a.storage.Operations.FindUser(data["email"], "email")
 	if err != nil {
 		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
@@ -165,7 +165,7 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	user, err := a.storage.Operations.FindUserByType(email, "email")
+	user, err := a.storage.Operations.FindUser(email, "email")
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
@@ -228,7 +228,7 @@ func (a *WebApp) User(c *gin.Context) {
 	}
 
 	var user model.User
-	user, err = a.storage.Operations.FindUserByType(email, "email")
+	user, err = a.storage.Operations.FindUser(email, "email")
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
@@ -296,7 +296,7 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 	}
 
 	// Generate a new access token and refresh token
-	user, err := a.storage.Operations.FindUserByType(userEmail, "email")
+	user, err := a.storage.Operations.FindUser(userEmail, "email")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to get user"})
 		return

@@ -68,7 +68,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Filter criteria",
+                        "description": "Filter criteria ('I0001' or '=I0001')",
                         "name": "filter",
                         "in": "query"
                     }
@@ -123,7 +123,10 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Album"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Album"
+                            }
                         }
                     }
                 ],
@@ -131,7 +134,10 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/model.Album"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Album"
+                            }
                         }
                     },
                     "400": {
@@ -748,11 +754,6 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
                 "description": "Authenticates a user with provided email and password.",
                 "consumes": [
                     "application/json"

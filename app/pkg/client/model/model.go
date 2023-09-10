@@ -31,14 +31,6 @@ type StorageConfig struct {
 	pool             *pgxpool.Pool
 }
 
-const (
-	maxConnectionAttempts = 5
-	// maxAttempts is the maximum number of attempts to connect to the database.
-	maxAttempts = 10
-	// maxDelay is the maximum delay between connection attempts.
-	maxDelay = 5 * time.Second
-)
-
 type DBType string
 
 const (
@@ -81,7 +73,7 @@ func NewDBConfig(cfg *config.Config, logger *logging.Logger) (*DBConfig, error) 
 			},
 		}, nil
 	case PgSQLType:
-		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, &StorageConfig{
+		pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, &StorageConfig{
 			Type:     cfg.Storage.Type,
 			Host:     cfg.Storage.Host,
 			Port:     cfg.Storage.Port,
@@ -116,7 +108,7 @@ func (s *StorageConfig) Connect(logger *logging.Logger) error {
 		// Save the client in the s structure for future use.
 		s.client = client
 	case PgSQLType:
-		pool, err := NewClient(context.Background(), maxAttempts, maxDelay, s, logger)
+		pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, s, logger)
 		if err != nil {
 			metrics.DatabaseConnectionFailureCounter.Inc()
 			return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
@@ -164,7 +156,7 @@ func NewClient(ctx context.Context, maxAttempts int,
 	var pool *pgxpool.Pool
 
 	err := postgresql.DoWithAttempts(func() error {
-		ctxWithTimeout, cancel := context.WithTimeout(ctx, maxConnectionAttempts*time.Second)
+		ctxWithTimeout, cancel := context.WithTimeout(ctx, postgresql.MaxConnectionAttempts*time.Second)
 		defer cancel()
 
 		pgxCfg, err := pgxpool.ParseConfig(dsn.String())

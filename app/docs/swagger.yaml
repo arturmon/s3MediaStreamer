@@ -148,7 +148,7 @@ paths:
         in: query
         name: sort_order
         type: string
-      - description: Filter criteria
+      - description: Filter criteria ('I0001' or '=I0001')
         in: query
         name: filter
         type: string
@@ -222,14 +222,18 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/model.Album'
+          items:
+            $ref: '#/definitions/model.Album'
+          type: array
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/model.Album'
+            items:
+              $ref: '#/definitions/model.Album'
+            type: array
         "400":
           description: Bad Request
           schema:
@@ -624,8 +628,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - BasicAuth: []
       summary: Authenticates a user.
       tags:
       - user-controller

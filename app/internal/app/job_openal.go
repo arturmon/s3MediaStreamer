@@ -14,7 +14,7 @@ import (
 
 func (e OpenAIJob) Run() {
 	e.app.logger.Println("init ChatGPT...")
-	radDBdata, err := e.app.storage.Operations.GetAllAlbumsForLearn()
+	radDBdata, err := e.app.storage.Operations.GetAlbumsForLearn()
 	if err != nil {
 		e.app.logger.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func (e OpenAIJob) Run() {
 		}
 	}
 	e.app.logger.Tracef("AI: %+v", respAlbums)
-	err = e.app.storage.Operations.CreateManyTops(respAlbums)
+	err = e.app.storage.Operations.CreateTops(respAlbums)
 	if err != nil {
 		e.app.logger.Fatal(err)
 	}

@@ -26,17 +26,3 @@ func RunMigrations(_ context.Context, connectionString string) error {
 	}
 	return nil
 }
-
-func (c *PgClient) TableExists(tableName string) (bool, error) {
-	query := `
-		SELECT EXISTS (
-			SELECT FROM information_schema.tables
-			WHERE table_schema = current_schema() AND table_name = $1
-		)`
-	var exists bool
-	err := c.Pool.QueryRow(context.TODO(), query, tableName).Scan(&exists)
-	if err != nil {
-		return false, fmt.Errorf("failed to check table existence: %w", err)
-	}
-	return exists, nil
-}

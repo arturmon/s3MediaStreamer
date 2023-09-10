@@ -5,13 +5,15 @@ Content-Type: application/json
 GET http://localhost:10000/v1/albums
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/albums?page=2&page_size=10
+GET http://localhost:10000/v1/albums?page=1&page_size=10
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=price&sort_order=desc
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0005
+GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0001
+###
+GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter==I0001
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/albums/I0001
@@ -20,17 +22,30 @@ Content-Type: application/json
 POST http://localhost:10000/v1/albums/add
 Content-Type: application/json
 
-{
-  "Title": "Test Titl1e",
-  "Artist": "Test Artis22t1",
-  "Price": {
-    "Number": "44.10",
-    "Currency": "EUR"
+[
+  {
+    "Title": "Test Titl1e",
+    "Artist": "Test Artis22t1",
+    "Price": {
+      "Number": "44.10",
+      "Currency": "EUR"
+    },
+    "Code": "I00013",
+    "Description": "Description Test1",
+    "Likes": false
   },
-  "Code": "I0001",
-  "Description": "Description Test1",
-  "Likes": true
-}
+  {
+    "Title": "Test Tidsfsdftl1e",
+    "Artist": "Test Artsdfdsfis22t1",
+    "Price": {
+      "Number": "444.10",
+      "Currency": "EUR"
+    },
+    "Code": "I00012",
+    "Description": "Descrsdasdiption Test1",
+    "Likes": false
+  }
+]
 ###
 POST http://localhost:10000/v1/albums/update
 Content-Type: application/json
@@ -42,7 +57,7 @@ Content-Type: application/json
     "Number": "1.10",
     "Currency": "USD"
   },
-  "Code": "I00010",
+  "Code": "I0001",
   "Description": "Description Update",
   "Likes": false
 }
@@ -144,3 +159,156 @@ Content-Type: application/json
 ###-------------------------------------------------------JOB------------------------------------------------
 GET http://localhost:10000/job/status
 Content-Type: application/json
+
+
+
+###
+POST http://localhost:10000/v1/albums/add
+Content-Type: application/json
+
+[
+{
+"_id": "20feefc3-99ac-43c5-9cde-6cc31c9c0499",
+"created_at": "2023-09-09T14:19:52.589725+03:00",
+"updated_at": "2023-09-09T14:38:31.868646+03:00",
+"title": "Marco Polo",
+"artist": "Test Update",
+"price": {
+"number": "1.10",
+"currency": "USD"
+},
+"code": "I0001",
+"description": "Description Update",
+"sender": "rest",
+"_creator_user": "fe79171e-9b64-49ef-b129-7fde18dbddc9",
+"likes": false
+},
+{
+"_id": "b06dd11d-43d9-4863-9534-00b2e90e56e0",
+"created_at": "2023-08-29T15:49:40.617604+03:00",
+"updated_at": "2023-08-29T15:49:40.617604+03:00",
+"title": "The Beautiful People",
+"artist": "Marilyn Manson",
+"price": {
+"number": "44.10",
+"currency": "USD"
+},
+"code": "I00015",
+"description": "Description Test1",
+"sender": "amqp",
+"_creator_user": "00000000-0000-0000-0000-000000000000",
+"likes": false
+},
+{
+"_id": "9f749b0f-662e-494e-b6ec-99862b327e92",
+"created_at": "2023-08-27T13:25:46.166289+03:00",
+"updated_at": "2023-08-27T13:25:46.166289+03:00",
+"title": "Deutshland",
+"artist": "Rammstein",
+"price": {
+"number": "44.10",
+"currency": "EUR"
+},
+"code": "I0005",
+"description": "Description Test1",
+"sender": "rest",
+"_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+"likes": false
+},
+{
+"_id": "f4d62644-63a2-4cee-ad5b-5c8f9f5250e9",
+"created_at": "2023-08-27T13:21:41.305007+03:00",
+"updated_at": "2023-08-27T13:38:11.741549+03:00",
+"title": "Auslander",
+"artist": "Rammstein",
+"price": {
+"number": "1.10",
+"currency": "USD"
+},
+"code": "I0003",
+"description": "Description Update Rabbitmq",
+"sender": "amqp",
+"_creator_user": "00000000-0000-0000-0000-000000000000",
+"likes": true
+},
+{
+"_id": "7f69f056-1228-4008-a8ed-47e66fdd6987",
+"created_at": "2023-08-27T13:21:41.305005+03:00",
+"updated_at": "2023-08-27T13:22:34.968954+03:00",
+"title": "Pussy",
+"artist": "Rammstein",
+"price": {
+"number": "44.10",
+"currency": "USD"
+},
+"code": "I0002",
+"description": "Description Update Rabbitmq",
+"sender": "amqp",
+"_creator_user": "00000000-0000-0000-0000-000000000000",
+"likes": false
+},
+{
+"_id": "b0432528-c4e1-409c-a154-48642e54d5f6",
+"created_at": "2023-08-27T13:21:41.305002+03:00",
+"updated_at": "2023-08-27T13:21:41.305002+03:00",
+"title": "Haifisch",
+"artist": "Rammstein",
+"price": {
+"number": "44.10",
+"currency": "USD"
+},
+"code": "I0004",
+"description": "Description Test1",
+"sender": "amqp",
+"_creator_user": "00000000-0000-0000-0000-000000000000",
+"likes": false
+},
+{
+"_id": "9ae2077e-cd38-4f0f-b476-aa85227af5fa",
+"created_at": "2023-08-27T03:58:43.863071+03:00",
+"updated_at": "2023-08-27T03:58:43.863072+03:00",
+"title": "This is The New Shift",
+"artist": "Marilyn Manson",
+"price": {
+"number": "44.10",
+"currency": "USD"
+},
+"code": "I0007",
+"description": "Description Test1",
+"sender": "rest",
+"_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+"likes": false
+},
+{
+"_id": "c7662832-6ce4-47a8-91e4-9bcab168b4cc",
+"created_at": "2023-08-27T03:57:18.553155+03:00",
+"updated_at": "2023-08-27T03:57:18.553155+03:00",
+"title": "Tainted Love",
+"artist": "Marilyn Manson",
+"price": {
+"number": "44.10",
+"currency": "USD"
+},
+"code": "I0009",
+"description": "Description Test1",
+"sender": "rest",
+"_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+"likes": false
+},
+{
+"_id": "fc1857ce-ac9e-4171-a253-366f4878572d",
+"created_at": "2023-08-27T03:56:23.051288+03:00",
+"updated_at": "2023-08-27T04:13:14.157717+03:00",
+"title": "Personal Jesus",
+"artist": "Marilyn Manson",
+"price": {
+"number": "1.10",
+"currency": "USD"
+},
+"code": "I00010",
+"description": "Description Update",
+"sender": "rest",
+"_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+"likes": true
+}
+]

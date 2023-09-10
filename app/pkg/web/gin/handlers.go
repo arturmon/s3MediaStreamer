@@ -1,11 +1,9 @@
 package gin
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"skeleton-golange-application/model"
@@ -57,7 +55,7 @@ func Ping(c *gin.Context) {
 // @Param       page_size    query         int false "Number of items per page"
 // @Param       sort_by      query         string false "Field to sort by (e.g., 'created_at')"
 // @Param       sort_order   query         string false "Sort order ('asc' or 'desc')"
-// @Param       filter       query         string false "Filter criteria"
+// @Param       filter       query         string false "Filter criteria ('I0001' or '=I0001')"
 // @Success		200 {array}  model.Album  "OK"
 // @Failure		401 {object} model.ErrorResponse "Unauthorized"
 // @Failure		500 {object} model.ErrorResponse "Internal Server Error"
@@ -128,8 +126,8 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Tags		album-controller
 // @Accept		json
 // @Produce		json
-// @Param		request body model.Album true "Album details"
-// @Success     201 {object} model.Album  "Created"
+// @Param		request body []model.Album true "Album details"
+// @Success     201 {object} []model.Album  "Created"
 // @Failure     400 {object} model.ErrorResponse  "Bad Request"
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure     409 {object} model.ErrorResponse  "album code already exists"
@@ -137,77 +135,80 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/albums/add [post]
 func (a *WebApp) PostAlbums(c *gin.Context) {
-	// Increment the session-based counter
-
-	// Increment the counter for each request handled by PostAlbums
 	a.metrics.PostAlbumsCounter.Inc()
-	var newAlbum model.Album
 
-	newAlbum.ID = uuid.New()
+	var albums []model.Album
 
-	newAlbum.CreatedAt = time.Now()
-	newAlbum.UpdatedAt = time.Now()
-	newAlbum.Sender = "rest"
-
-	// Чтение и вывод тела запроса
-	requestBody, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		a.logger.Errorf("Error reading request body: %v", err)
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
-		return
-	}
-	a.logger.Debugf("Received POST request body:\n%s", requestBody)
-
-	// Восстановление состояния Body после чтения (иначе его нельзя будет прочитать в c.BindJSON)
-	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
-
-	// Декодирование JSON и обработка запроса
-	if bindErr := json.Unmarshal(requestBody, &newAlbum); bindErr != nil {
-		a.logger.Debugf("Received POST request body:\n%s", bindErr)
-		a.logger.Errorf("Invalid request payload: %v", bindErr)
+	// Decode the request body as an array of model.Album
+	if err := c.BindJSON(&albums); err != nil {
+		a.logger.Errorf("Invalid request payload: %v", err)
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
-	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
-	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
-	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
-	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
+	// Create an array to store insertion errors, if any
+	var insertionErrors []error
 
-	// Read the user_id from the session
-	value, err := getSessionKey(c, "user_id")
-	if err != nil {
-		a.logger.Errorf("Error getting session value: %v", err)
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "could not get session value"})
+	// Loop through the albums and prepare them
+	for i := range albums {
+		album := &albums[i]
+
+		album.ID = uuid.New()
+		album.CreatedAt = time.Now()
+		album.UpdatedAt = time.Now()
+		album.Sender = "rest"
+
+		// Read user_id from the session
+		value, err := getSessionKey(c, "user_id")
+		if err != nil {
+			a.logger.Errorf("Error getting session value: %v", err)
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "could not get session value"})
+			return
+		}
+
+		valueUUID, err := uuid.Parse(value.(string))
+		if err != nil {
+			a.logger.Errorf("Error: %v", err)
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error converting value"})
+			return
+		}
+		album.CreatorUser = valueUUID
+
+		album.Title = strings.TrimSpace(album.Title)
+		album.Artist = strings.TrimSpace(album.Artist)
+		album.Code = strings.TrimSpace(album.Code)
+		album.Description = strings.TrimSpace(album.Description)
+
+		if album.Code == "" || album.Artist == "" {
+			c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
+			return
+		}
+
+		// Check if the album code already exists
+		_, err = a.storage.Operations.GetAlbumsByCode(album.Code)
+		if err == nil {
+			insertionErrors = append(insertionErrors, fmt.Errorf("album code already exists for album %s", album.Title))
+			continue
+		}
+	}
+
+	// Check if there were insertion errors
+	if len(insertionErrors) > 0 {
+		errorMessages := make([]string, len(insertionErrors))
+		for i, err := range insertionErrors {
+			errorMessages[i] = err.Error()
+		}
+		c.IndentedJSON(http.StatusConflict, model.ErrorResponse{Message: "Some albums could not be inserted"})
 		return
 	}
 
-	valueUUID, err := uuid.Parse(value.(string))
-	if err != nil {
-		a.logger.Errorf("Error: %v", err)
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error converting value"})
-		return
-	}
-	newAlbum.CreatorUser = valueUUID
-
-	if newAlbum.Code == "" || newAlbum.Artist == "" {
-		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
-		return
-	}
-
-	_, err = a.storage.Operations.GetIssuesByCode(newAlbum.Code)
-	if err == nil {
-		c.IndentedJSON(http.StatusConflict, model.ErrorResponse{Message: "album code already exists"})
-		return
-	}
-
-	err = a.storage.Operations.CreateIssue(&newAlbum)
-	if err != nil {
+	// Insert all albums into the database
+	if err := a.storage.Operations.CreateAlbums(albums); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, newAlbum)
+	c.IndentedJSON(http.StatusCreated, albums)
 }
 
 // GetAlbumByID godoc
@@ -232,7 +233,7 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 	a.metrics.GetAlbumByIDCounter.Inc()
 
 	id := c.Param("code")
-	result, err := a.storage.Operations.GetIssuesByCode(id)
+	result, err := a.storage.Operations.GetAlbumsByCode(id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
@@ -262,7 +263,7 @@ func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	// Increment the counter for each request handled by GetDeleteAll
 	a.metrics.GetDeleteAllCounter.Inc()
 
-	err := a.storage.Operations.DeleteAll()
+	err := a.storage.Operations.DeleteAlbumsAll()
 	if err != nil {
 		a.logger.Fatal(err)
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Error Delete all Album"})
@@ -292,7 +293,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 
 	code := c.Param("code")
 
-	_, err := a.storage.Operations.GetIssuesByCode(code)
+	_, err := a.storage.Operations.GetAlbumsByCode(code)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
@@ -303,7 +304,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 		return
 	}
 
-	err = a.storage.Operations.DeleteOne(code)
+	err = a.storage.Operations.DeleteAlbums(code)
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error deleting album"})
@@ -350,7 +351,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 		return
 	}
 
-	existingAlbum, getErr := a.storage.Operations.GetIssuesByCode(newAlbum.Code)
+	existingAlbum, getErr := a.storage.Operations.GetAlbumsByCode(newAlbum.Code)
 	if getErr != nil {
 		if errors.Is(getErr, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
@@ -380,7 +381,7 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 
 	existingAlbum.UpdatedAt = time.Now()
 	// Perform the update operation
-	err := a.storage.Operations.UpdateIssue(&existingAlbum)
+	err := a.storage.Operations.UpdateAlbums(&existingAlbum)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return

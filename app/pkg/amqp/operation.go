@@ -16,7 +16,7 @@ const bcryptCost = 14
 
 // amqpGetAlbumByCode retrieves an album by its code using AMQP.
 func (c *MessageClient) amqpGetAlbumByCode(code string) (*model.Album, error) {
-	album, getErr := c.storage.Operations.GetIssuesByCode(code)
+	album, getErr := c.storage.Operations.GetAlbumsByCode(code)
 	if getErr != nil {
 		publishErr := c.publishMessage(TypePublisherError, getErr.Error())
 		if publishErr != nil {
@@ -90,7 +90,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 		albumsList = append(albumsList, album)
 	}
 
-	err = c.storage.Operations.CreateMany(albumsList)
+	err = c.storage.Operations.CreateAlbums(albumsList)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -132,7 +132,7 @@ func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, 
 
 // amqpGetDeleteAll deletes all albums using AMQP.
 func (c *MessageClient) amqpGetDeleteAll() error {
-	err := c.storage.Operations.DeleteAll()
+	err := c.storage.Operations.DeleteAlbumsAll()
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -166,7 +166,7 @@ func (c *MessageClient) amqpAddUser(userEmail, name, password, role string) erro
 	}
 
 	// Check if user already exists
-	_, err := c.storage.Operations.FindUserByType(userEmail, "email")
+	_, err := c.storage.Operations.FindUser(userEmail, "email")
 	if err == nil {
 		// User with this email already exists
 		errMsg := fmt.Errorf("user %s with this email already exists", userEmail)
@@ -232,7 +232,7 @@ func (c *MessageClient) amqpDeleteUser(userEmail string) error {
 
 // amqpFindUserToEmail finds a user by email using AMQP.
 func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
-	info, err := c.storage.Operations.FindUserByType(userEmail, "email")
+	info, err := c.storage.Operations.FindUser(userEmail, "email")
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -264,7 +264,7 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	}
 
 	// Fetch the album from the database based on the provided code
-	existingAlbum, getErr := c.storage.Operations.GetIssuesByCode(code)
+	existingAlbum, getErr := c.storage.Operations.GetAlbumsByCode(code)
 	if getErr != nil {
 		c.logger.Printf("Error fetching album with code %s: %v", code, getErr)
 		return getErr
@@ -303,7 +303,7 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 	}
 
 	// Update the album in the database
-	err = c.storage.Operations.UpdateIssue(&existingAlbum)
+	err = c.storage.Operations.UpdateAlbums(&existingAlbum)
 	if err != nil {
 		c.logger.Printf("Error updating album with code %s: %v", code, err)
 		return err

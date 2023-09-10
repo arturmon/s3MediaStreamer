@@ -30,7 +30,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "Invalid email or Password"})
 		return
@@ -49,7 +49,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 		"otp_secret":   key.Secret(),
 		"otp_auth_url": key.URL(),
 	}
-	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update Secret or URL OTP"})
 		return
@@ -84,7 +84,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 	}
 
 	message := "Token is invalid or user doesn't exist"
-	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
@@ -101,7 +101,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 		"otp_verified": true,
 	}
 
-	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update enabled or verified OTP"})
 		return
@@ -141,7 +141,7 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 
 	message := "Token is invalid or user doesn't exist"
 
-	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: message})
 		return
@@ -178,7 +178,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUserByType(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: err.Error()})
 		return
@@ -188,7 +188,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		"otp_enabled": false,
 	}
 
-	err = a.storage.Operations.UpdateUserFieldsByEmail(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update disabled OTP"})
 		return
