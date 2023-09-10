@@ -1,6 +1,17 @@
+###-------------------------------------------------------SYSTEM------------------------------------------------
 ###
 GET http://localhost:10000/ping
 Content-Type: application/json
+###
+GET http://localhost:10000/metrics
+Content-Type: application/json
+###
+GET http://localhost:10000/health
+Content-Type: application/json
+###---------------------------------------------------------JOB-------------------------------------------------
+GET http://localhost:10000/job/status
+Content-Type: application/json
+###-------------------------------------------------------ALBUMS------------------------------------------------
 ###
 GET http://localhost:10000/v1/albums
 Content-Type: application/json
@@ -67,10 +78,8 @@ Content-Type: application/json
 ###
 DELETE http://localhost:10000/v1/albums/deleteAll
 Content-Type: application/json
-###
-GET http://localhost:10000/metrics
-Content-Type: application/json
-###
+
+###--------------------------------------------------------USERS------------------------------------------------
 POST http://localhost:10000/v1/users/register
 Content-Type: application/json
 
@@ -87,13 +96,6 @@ Content-Type: application/json
 {
   "email":"a@a.com",
   "password":"1"
-}
-###
-POST http://localhost:10000/v1/users/refresh
-Content-Type: application/json
-
-{
-  "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTYzMzA0NTksInN1YiI6ImFAYS5jb20ifQ.5wejb-XaOpUvMPDP-JZRQET-HBcpJ5hDQVNN5A3A7y4"
 }
 ###
 POST http://localhost:10000/v1/users/login
@@ -124,8 +126,12 @@ Content-Type: application/json
   "email":"admin@admin.com"
 }
 ###
-GET http://localhost:10000/health
+POST http://localhost:10000/v1/users/refresh
 Content-Type: application/json
+
+{
+  "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTYzMzA0NTksInN1YiI6ImFAYS5jb20ifQ.5wejb-XaOpUvMPDP-JZRQET-HBcpJ5hDQVNN5A3A7y4"
+}
 ###-------------------------------------------------------OTP------------------------------------------------
 POST http://localhost:10000/v1/users/otp/generate
 Content-Type: application/json
@@ -156,13 +162,8 @@ Content-Type: application/json
 {
   "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
-###-------------------------------------------------------JOB------------------------------------------------
-GET http://localhost:10000/job/status
-Content-Type: application/json
 
-
-
-###
+###-------------------------------------------------------ALBUMS------------------------------------------------
 POST http://localhost:10000/v1/albums/add
 Content-Type: application/json
 
