@@ -40,7 +40,7 @@ type Config struct {
 			JonRun        string `env:"JOB_RUN" env-default:"@midnight"`
 			JobCleanChart string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
 			UUIDWriteUser string `env:"UUID_WRITE_USER" env-default:"5488dc54-4eb3-11ee-be56-0242ac120002"`
-			OpenAiKey     string `env:"OPENAI_KEY" env-default:"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"`
+			OpenAiKey     string `env:"OPENAI_KEY" env-default:""`
 		}
 	}
 	Storage struct {
