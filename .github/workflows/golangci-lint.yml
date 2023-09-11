@@ -33,4 +33,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           skip-cache: true
+          version: v1.54
         
