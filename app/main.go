@@ -1,13 +1,14 @@
 package main
 
 import (
-	"context"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	_ "skeleton-golange-application/app/pkg/web/gin"
+
+	"context"
 
 	_ "github.com/joho/godotenv/autoload"
 )
