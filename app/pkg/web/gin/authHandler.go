@@ -128,7 +128,7 @@ func (a *WebApp) Login(c *gin.Context) {
 		Email:        user.Email,
 		Role:         user.Role,
 		RefreshToken: refreshToken,
-		OtpEnabled:   user.Otp_enabled,
+		OtpEnabled:   user.OtpEnabled,
 	}
 
 	c.JSON(http.StatusOK, loginResponse)
@@ -238,7 +238,7 @@ func (a *WebApp) User(c *gin.Context) {
 		Email:        user.Email,
 		Role:         user.Role,
 		RefreshToken: user.RefreshToken,
-		OtpEnabled:   user.Otp_enabled,
+		OtpEnabled:   user.OtpEnabled,
 	}
 
 	c.JSON(http.StatusOK, loginResponse)

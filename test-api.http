@@ -22,6 +22,7 @@ Content-Type: application/json
 GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=price&sort_order=desc
 Content-Type: application/json
 ###
+### Postgresql LIKE filters (use _, %, \% )
 GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0001
 ###
 GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter==I0001

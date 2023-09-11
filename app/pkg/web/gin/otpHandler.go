@@ -30,7 +30,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "Invalid email or Password"})
 		return
@@ -84,13 +84,13 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 	}
 
 	message := "Token is invalid or user doesn't exist"
-	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
 	}
 
-	valid := totp.Validate(payload.Token, result.Otp_secret)
+	valid := totp.Validate(payload.Token, result.OtpSecret)
 	if !valid {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
@@ -111,7 +111,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 		"id":          result.ID.String(),
 		"name":        result.Name,
 		"email":       result.Email,
-		"otp_enabled": result.Otp_enabled,
+		"otp_enabled": result.OtpEnabled,
 	}
 	c.JSON(http.StatusOK, gin.H{"otp_verified": true, "user": userResponse})
 }
@@ -141,13 +141,13 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 
 	message := "Token is invalid or user doesn't exist"
 
-	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: message})
 		return
 	}
 
-	valid := totp.Validate(payload.Token, result.Otp_secret)
+	valid := totp.Validate(payload.Token, result.OtpSecret)
 	if !valid {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: message})
 		return
@@ -178,7 +178,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUser(payload.UserId, "_id")
+	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: err.Error()})
 		return
@@ -198,7 +198,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		"id":          result.ID.String(),
 		"name":        result.Name,
 		"email":       result.Email,
-		"otp_enabled": result.Otp_enabled,
+		"otp_enabled": result.OtpEnabled,
 	}
 	c.JSON(http.StatusOK, gin.H{"otp_disabled": true, "user": userResponse})
 }

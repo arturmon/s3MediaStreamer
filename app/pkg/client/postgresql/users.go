@@ -23,7 +23,7 @@ func (c *PgClient) FindUser(value interface{}, columnType string) (model.User, e
 	// Execute the query and scan the result into the user model.
 	err := c.Pool.QueryRow(context.TODO(), query, args...).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role,
-			&user.RefreshToken, &user.Otp_enabled, &user.Otp_secret, &user.Otp_auth_url)
+			&user.RefreshToken, &user.OtpEnabled, &user.OtpSecret, &user.OtpAuthURL)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

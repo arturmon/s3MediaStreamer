@@ -12,9 +12,9 @@ type User struct {
 	Password     []byte    `json:"password" bson:"password"  example:"1111" swaggertype:"string"`
 	Role         string    `json:"role" bson:"role"  example:"-" swaggerignore:"true"`
 	RefreshToken string    `json:"refreshtoken" bson:"refreshtoken" swaggerignore:"true"`
-	Otp_enabled  bool      `json:"otp_enabled" bson:"otp_enabled"`
-	Otp_verified bool      `json:"otp_verified" bson:"otp_verified"`
+	OtpEnabled   bool      `json:"otp_enabled" bson:"otp_enabled"`
+	OtpVerified  bool      `json:"otp_verified" bson:"otp_verified"`
 
-	Otp_secret   string `bson:"otp_secret"`
-	Otp_auth_url string `bson:"otp_auth_url"`
+	OtpSecret  string `bson:"otp_secret"`
+	OtpAuthURL string `bson:"otp_auth_url"`
 }
