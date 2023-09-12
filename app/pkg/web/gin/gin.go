@@ -77,10 +77,6 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 		return nil, err
 	}
 
-	initErr := initRoles(enforcer)
-	if initErr != nil {
-		return nil, initErr
-	}
 	if saveErr := enforcer.SavePolicy(); saveErr != nil {
 		return nil, saveErr
 	}

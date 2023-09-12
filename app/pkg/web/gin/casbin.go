@@ -3,6 +3,7 @@ package gin
 import (
 	"errors"
 	"fmt"
+	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 	"net"
 	"net/http"
 	"net/url"
@@ -34,49 +35,28 @@ func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error
 		WriteTimeout:    timeoutDuration,
 		ApplicationName: "casbin",
 	}
-	adapter, err := pgadapter.NewAdapter(options)
+	adapterDB, err := pgadapter.NewAdapter(options)
 	if err != nil {
 		return nil, err
 	}
 
-	enforcer, err := casbin.NewEnforcer("acl/rbac_model.conf", adapter)
-	if err != nil {
-		return nil, err
-	}
+	var enforcer *casbin.Enforcer
 
-	return enforcer, nil
-}
-
-func initRoles(enf *casbin.Enforcer) error {
-	enf.ClearPolicy()
-
-	policies := []struct {
-		role   string
-		path   string
-		method string
-	}{
-		{"*", "/favicon.ico", "GET"},
-		{"*", "/v1/swagger/*", "GET"},
-		{"admin", "/*", "*"},
-		{"*", "/ping", "GET"},
-		{"*", "/healts", "GET"},
-		{"*", "/job/status", "GET"},
-		{"anonymous", "/v1/users/login", "POST"},
-		{"member", "/v1/users/me", "GET"},
-		{"member", "/v1/users/logout", "POST"},
-		{"member", "/v1/users/refresh", "POST"},
-		{"member", "/v1/users/otp/*", "*"},
-		{"member", "/v1/albums", "*"},
-		{"member", "/v1/albums/*", "*"},
-	}
-
-	for _, p := range policies {
-		if ok, err := enf.AddPolicy(p.role, p.path, p.method); err != nil || !ok {
-			return fmt.Errorf("failed to add policy: %s %s %s", p.role, p.path, p.method)
+	if adapterDB == nil {
+		adapter := fileadapter.NewAdapter("/acl/policy.csv")
+		enforcer, err = casbin.NewEnforcer("acl/rbac_model.conf", adapter)
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	return enf.SavePolicy()
+	} else {
+		enforcer, err = casbin.NewEnforcer("acl/rbac_model.conf", adapterDB)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+	return enforcer, nil
 }
 
 func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
