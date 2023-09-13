@@ -84,14 +84,14 @@ definitions:
       email:
         example: aaaa@aaaa.com
         type: string
-      otp_auth_url:
-        type: string
       otp_enabled:
         type: boolean
-      otp_secret:
-        type: string
       otp_verified:
         type: boolean
+      otpAuthURL:
+        type: string
+      otpSecret:
+        type: string
       password:
         example: "1111"
         type: string
@@ -317,7 +317,7 @@ paths:
       tags:
       - album-controller
   /albums/update:
-    post:
+    patch:
       consumes:
       - application/json
       description: updates an existing album with new data based on the ID parameter

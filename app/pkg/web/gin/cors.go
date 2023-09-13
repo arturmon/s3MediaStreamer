@@ -16,7 +16,7 @@ const (
 func ConfigCORS() cors.Config {
 	return cors.Config{
 		AllowOrigins:  []string{"http://localhost:3000"},
-		AllowMethods:  []string{"POST", "OPTIONS", "GET", "PUT", "DELETE"},
+		AllowMethods:  []string{"POST", "OPTIONS", "GET", "PATCH", "DELETE"},
 		ExposeHeaders: []string{"Origin"},
 		AllowHeaders: []string{
 			"Content-Type", "Content-Length", "Accept-Encoding",

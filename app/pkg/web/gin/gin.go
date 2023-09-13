@@ -148,7 +148,7 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 			albums.DELETE("/deleteAll", a.GetDeleteAll)
 			albums.DELETE("/delete/:code", a.GetDeleteByID)
 			albums.POST("/add", a.PostAlbums)
-			albums.POST("/update", a.UpdateAlbum)
+			albums.PATCH("/update", a.UpdateAlbum)
 		}
 		a.logger.Info("swagger docs initializing")
 		swagger := v1.Group("/swagger")

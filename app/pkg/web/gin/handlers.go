@@ -326,7 +326,7 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router                /albums/update [post]
+// @Router                /albums/update [patch]
 func (a *WebApp) UpdateAlbum(c *gin.Context) {
 	// Increment the session-based counter
 

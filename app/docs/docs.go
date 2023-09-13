@@ -263,7 +263,7 @@ const docTemplate = `{
             }
         },
         "/albums/update": {
-            "post": {
+            "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -1124,14 +1124,14 @@ const docTemplate = `{
                     "type": "string",
                     "example": "aaaa@aaaa.com"
                 },
-                "otp_auth_url": {
+                "otpAuthURL": {
+                    "type": "string"
+                },
+                "otpSecret": {
                     "type": "string"
                 },
                 "otp_enabled": {
                     "type": "boolean"
-                },
-                "otp_secret": {
-                    "type": "string"
                 },
                 "otp_verified": {
                     "type": "boolean"

@@ -169,7 +169,7 @@ v1/
 | /albums              | 200/401/500         | GET    | GetAllAlbums  |
 | /albums/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
 | /albums/add          | 201/400/500         | POST   | PostAlbums    |
-| /albums/update       | 200/400/401/404/500 | POST   | UpdateAlbum   |
+| /albums/update       | 200/400/401/404/500 | PATCH  | UpdateAlbum   |
 | /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
 | /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
