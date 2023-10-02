@@ -29,15 +29,15 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Go modules Cache
-        uses: actions/cache_manager@v3
-        id: go-cache_manager
+        uses: actions/cache@v3
+        id: go-cache
         with:
           path: ~/go/pkg/mod
           #key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      - if: steps.go-cache_manager.outputs.cache_manager-hit != 'true'
+      - if: steps.go-cache.outputs.cache-hit != 'true'
         run: go mod download
 
       - name: Install SWAGGER
