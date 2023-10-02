@@ -22,7 +22,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
-	github.com/panjf2000/ants/v2 v2.8.1
+	github.com/panjf2000/ants/v2 v2.8.2
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
