@@ -29,6 +29,7 @@ type PostgresCollectionQuery interface {
 	GetAlbumsForLearn() ([]model.Album, error)
 	CreateTops(list []model.Tops) error
 	CleanupRecords(retentionPeriod time.Duration) error
+	GetAllAlbums() ([]model.Album, error)
 }
 
 type PostgresOperations interface {

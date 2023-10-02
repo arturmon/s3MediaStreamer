@@ -14,11 +14,11 @@ import (
 
 // App represents the main application struct.
 type App struct {
-	cfg        *config.Config
-	logger     *logging.Logger
-	storage    *model.DBConfig
+	Cfg        *config.Config
+	Logger     *logging.Logger
+	Storage    *model.DBConfig
 	Gin        *gin.WebApp
-	amqpClient *amqp.MessageClient
+	AMQPClient *amqp.MessageClient
 }
 
 const retryDelaySeconds = 5
@@ -49,6 +49,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		monitoring.PingStorage(ctx, storage.Operations, healthMetrics)
 	}()
 
+	logger.Info("Starting initialize the Gin...")
 	// Initialize the Gin web framework.
 	myGin, err := gin.NewAppUseGin(ctx, cfg, logger)
 	if err != nil {
@@ -60,6 +61,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
 	if cfg.MessageQueue.Enable {
+		logger.Info("Starting initialize the amqp...")
 		for retry := 1; retry <= maxRetries; retry++ {
 			amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
 			if err == nil {
@@ -77,27 +79,27 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 
 	// Return a new App instance with all initialized components.
 	return &App{
-		cfg:        cfg,
-		logger:     logger,
-		storage:    storage,
+		Cfg:        cfg,
+		Logger:     logger,
+		Storage:    storage,
 		Gin:        myGin,
-		amqpClient: amqpClient,
+		AMQPClient: amqpClient,
 	}, nil
 }
 
 // GetStorage returns the initialized database storage instance.
 func (a *App) GetStorage() (*model.DBConfig, error) {
-	return a.storage, nil
+	return a.Storage, nil
 }
 
 // GetLogger returns the logger instance used in the application.
 func (a *App) GetLogger() *logging.Logger {
-	return a.logger
+	return a.Logger
 }
 
 // GetCfg returns the application's configuration.
 func (a *App) GetCfg() *config.Config {
-	return a.cfg
+	return a.Cfg
 }
 
 // GetGin returns the initialized Gin web framework instance.
@@ -107,7 +109,7 @@ func (a *App) GetGin() (*gin.WebApp, error) {
 
 // GetMessageClient returns the initialized AMQP client instance.
 func (a *App) GetMessageClient() *amqp.MessageClient {
-	return a.amqpClient
+	return a.AMQPClient
 }
 
 // Ensure that App implements the interfaces.AppInterface interface.

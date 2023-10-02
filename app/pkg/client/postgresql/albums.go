@@ -34,8 +34,8 @@ func (c *PgClient) CreateAlbums(list []model.Album) error {
 	// Add INSERT queries to the batch for each album
 	for _, album := range list {
 		query := `
-			INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user, likes)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+			INSERT INTO album (_id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user, likes, path)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		`
 		args := []interface{}{
 			album.ID,
@@ -49,6 +49,7 @@ func (c *PgClient) CreateAlbums(list []model.Album) error {
 			album.Sender,
 			album.CreatorUser,
 			album.Likes,
+			album.Path,
 		}
 
 		batch.Queue(query, args...)
@@ -246,4 +247,12 @@ func (c *PgClient) UpdateAlbums(album *model.Album) error {
 	}
 
 	return nil
+}
+
+func (c *PgClient) GetAllAlbums() ([]model.Album, error) {
+	selectBuilder := squirrel.Select("*").
+		From("album").
+		Limit(ChunkSize) // Adjust the limit based on your requirements
+
+	return c.executeSelectQuery(selectBuilder)
 }

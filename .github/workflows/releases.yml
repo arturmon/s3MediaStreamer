@@ -29,14 +29,14 @@ jobs:
         go-version: ${{ matrix.go-version }}
         
     - name: Go modules Cache
-      uses: actions/cache@v3
-      id: go-cache
+      uses: actions/cache_manager@v3
+      id: go-cache_manager
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: ${{ runner.os }}-go-
 
-    - if: steps.go-cache.outputs.cache-hit != 'true'
+    - if: steps.go-cache_manager.outputs.cache_manager-hit != 'true'
       run: go mod download
 
   unit_tests:

@@ -7,15 +7,15 @@ CREATE TABLE IF NOT EXISTS album (
                                      _id               TEXT,
                                      created_at        TIMESTAMPTZ NOT NULL,
                                      updated_at        TIMESTAMPTZ,
-                                     title             TEXT,
-                                     artist            TEXT,
+                                     title             TEXT DEFAULT '',
+                                     artist            TEXT DEFAULT '',
                                      price       price NOT NULL,
                                      code              TEXT UNIQUE,
-                                     description       TEXT,
-                                     sender            TEXT CHECK (sender IN ('amqp', 'rest')),
+                                     description       TEXT DEFAULT '',
+                                     sender            TEXT CHECK (sender IN ('amqp@system', 'rest', 'jobs@system')),
                                      _creator_user     TEXT,
                                      likes             BOOLEAN DEFAULT FALSE,
-                                     path              TEXT
+                                     path              TEXT DEFAULT ''
 );
 CREATE INDEX idx_album_code ON album (code);
 alter table album owner to root;

@@ -164,3 +164,37 @@ func (c *MongoClient) UpdateAlbums(album *model.Album) error {
 
 	return nil
 }
+
+func (c *MongoClient) GetAllAlbums() ([]model.Album, error) {
+	collection, err := c.FindCollections(config.CollectionAlbum)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), mongoTimeout)
+	defer cancel()
+
+	filter := bson.M{} // Add your filter criteria if needed
+
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var albums []model.Album
+
+	for cursor.Next(ctx) {
+		var album model.Album
+		if err = cursor.Decode(&album); err != nil {
+			return nil, err
+		}
+		albums = append(albums, album)
+	}
+
+	if err = cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return albums, nil
+}

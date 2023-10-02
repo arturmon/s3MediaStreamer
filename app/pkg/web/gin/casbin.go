@@ -3,7 +3,6 @@ package gin
 import (
 	"errors"
 	"fmt"
-	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 	"net"
 	"net/http"
 	"net/url"
@@ -11,6 +10,8 @@ import (
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	model_all "skeleton-golange-application/model"
+
+	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
 	pgadapter "github.com/casbin/casbin-pg-adapter"
 	"github.com/casbin/casbin/v2"
@@ -48,13 +49,11 @@ func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error
 		if err != nil {
 			return nil, err
 		}
-
 	} else {
 		enforcer, err = casbin.NewEnforcer("acl/rbac_model.conf", adapterDB)
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	return enforcer, nil
 }

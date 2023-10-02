@@ -25,3 +25,6 @@
 
 #secret
 app/internal/config/config.go
+
+# music
+music

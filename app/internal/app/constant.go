@@ -18,5 +18,6 @@ const (
 	SixMonths           = 6 * 30 * 24 * time.Hour // 6 Months
 	OneYear             = 365 * 24 * time.Hour    // 1 OneYear (approximately)
 
-	minSubmatchesCount = 4
+	minSubmatchesCount       = 4
+	lengthRandomGenerateCode = 8
 )

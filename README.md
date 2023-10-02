@@ -11,7 +11,7 @@ Use MongoDB docker container
 ```shell
 docker run -d --name mongodb \
 -p 27017:27017 \
--v /Users/amudrykh/mongodb:/bitnami/mongodb \
+-v /home/amudrykh/mongodb:/bitnami/mongodb \
 -e MONGODB_ROOT_PASSWORD=1qazxsw2 \
 -e MONGODB_USERNAME=root -e MONGODB_PASSWORD=1qazxsw2 \
 -e MONGODB_DATABASE=db_issue_album \
@@ -21,7 +21,7 @@ Use Postgresql docker container
 ```shell
 docker run -d --name postgresql-server \
 -p 5432:5432 \
--v /Users/amudrykh/postgresql:/bitnami/postgresql \
+-v /home/amudrykh/postgresql:/bitnami/postgresql \
 -e POSTGRESQL_USERNAME=root \
 -e POSTGRESQL_PASSWORD=1qazxsw2 \
 -e POSTGRESQL_DATABASE=db_issue_album bitnami/postgresql:latest
@@ -47,8 +47,8 @@ rabbitmq:3-management
 Use Session
 Redis
 ```shell
-docker run --name redis -d redis
 docker run --name redis -d \
+-p 6379:6379 \
 -e ALLOW_EMPTY_PASSWORD=yes \
 bitnami/redis:latest
 ```
@@ -57,7 +57,6 @@ memcached
 docker run --name memcache -d \
 bitnami/memcached:latest
 ```
-
 
 
 Downloading dependencies

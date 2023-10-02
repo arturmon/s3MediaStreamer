@@ -20,6 +20,7 @@ type Album struct {
 	Sender      string          `json:"sender" bson:"sender" example:"amqp or rest"`
 	CreatorUser uuid.UUID       `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 	Likes       bool            `json:"likes" bson:"likes"`
+	Path        string          `json:"path" bson:"path"`
 }
 
 type Tops struct {

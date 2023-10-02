@@ -74,6 +74,18 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			continue
 		}
 
+		systemUser, errSystemUser := c.storage.Operations.FindUser(c.cfg.MessageQueue.SystemWriteUser, "email")
+		if errSystemUser != nil {
+			c.logger.Println("Error find system user")
+			return errSystemUser
+		}
+
+		parsedUUID, errUUID := uuid.Parse(systemUser.ID.String())
+		if errUUID != nil {
+			c.logger.Println("Error parsing system user uuid")
+			return errUUID
+		}
+
 		album := model.Album{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
@@ -83,8 +95,8 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			Price:       newPrice,
 			Code:        albumData["Code"].(string),
 			Description: albumData["Description"].(string),
-			Sender:      "amqp",
-			CreatorUser: uuid.Nil,
+			Sender:      systemUser.Name,
+			CreatorUser: parsedUUID,
 		}
 
 		albumsList = append(albumsList, album)
