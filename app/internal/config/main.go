@@ -26,11 +26,6 @@ type Config struct {
 			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"jobs@system"`
 			OpenAiKey       string `env:"JOB_OPENAI_KEY" env-default:""`
 		}
-		CacheManager struct {
-			OneLevelCacheType     string `env:"ONE_LEVEL_CACHE_TYPE" env-default:"ristretto"`
-			EnabledTwoLevelCache  bool   `env:"ENABLED_TWO_LEVEL_CACHE" env-default:"true"`
-			TwoLevelCacheRedisURL string `env:"TWO_LEVEL_CACHE_REDIS_URL" env-default:"127.0.0.1:6379"`
-		}
 	}
 	Storage struct {
 		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"` // mongodb, postgresql
