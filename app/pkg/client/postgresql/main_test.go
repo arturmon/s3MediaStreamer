@@ -1,8 +1,8 @@
 package postgresql_test
 
 import (
+	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/client/postgresql/mocks"
-	"skeleton-golange-application/model"
 	"testing"
 	"time"
 

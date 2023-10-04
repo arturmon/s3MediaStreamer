@@ -16,7 +16,6 @@ import (
 )
 
 func GetEnforcer(_ *model.DBConfig) (*casbin.Enforcer, error) {
-
 	var enforcer *casbin.Enforcer
 
 	adapter := fileadapter.NewAdapter("acl/policy.csv")

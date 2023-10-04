@@ -12,7 +12,7 @@ run:
   # Default: 1m
   timeout: 3m
   skip-files:
-    - model/swagger.go
+    - app/model/swagger.go
 
 
 # This file contains only configs which differ from defaults.
