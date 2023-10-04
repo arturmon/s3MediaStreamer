@@ -45,3 +45,19 @@ INSERT INTO users (
              'admin',
              ''
          );
+
+INSERT INTO users (
+    _id,
+    name,
+    email,
+    password,
+    role,
+    refreshtoken
+) VALUES (
+             '81584b50-6305-11ee-8c99-0242ac120002',
+             'Rest',
+             'rest@system',
+             '$2a$14$5QbZV6I7oLTbDfmUgG2vteVKcYWVHX5o9pT0jMD4B6UhMrziku82G',
+             'admin',
+             ''
+         );

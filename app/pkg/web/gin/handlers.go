@@ -149,6 +149,12 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 	// Create an array to store insertion errors, if any
 	var insertionErrors []error
 
+	systemUser, errSystemUser := a.storage.Operations.FindUser(a.cfg.RESTSystemUser, "email")
+	if errSystemUser != nil {
+		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "Error find system user"})
+		return
+	}
+
 	// Loop through the albums and prepare them
 	for i := range albums {
 		album := &albums[i]
@@ -156,7 +162,7 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		album.ID = uuid.New()
 		album.CreatedAt = time.Now()
 		album.UpdatedAt = time.Now()
-		album.Sender = "rest"
+		album.Sender = systemUser.Name
 
 		// Read user_id from the session
 		value, err := getSessionKey(c, "user_id")

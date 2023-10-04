@@ -106,6 +106,7 @@ type Config struct {
 		Issuer     string `env:"OTP_ISSUER" env-default:"example.com"`
 		SecretSize uint   `env:"OTP_SECRET_SIZE" env-default:"15"`
 	}
+	RESTSystemUser string `env:"REST_SYSTEM_USER" env-default:"rest@system"`
 }
 
 // GetConfig returns the singleton instance of the configuration.

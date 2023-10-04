@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS album (
                                      price       price NOT NULL,
                                      code              TEXT UNIQUE,
                                      description       TEXT DEFAULT '',
-                                     sender            TEXT CHECK (sender IN ('amqp@system', 'rest', 'jobs@system')),
+                                     sender            TEXT CHECK (sender IN ('Amqp', 'Rest', 'Jobs')),
                                      _creator_user     TEXT,
                                      likes             BOOLEAN DEFAULT FALSE,
                                      path              TEXT DEFAULT ''
