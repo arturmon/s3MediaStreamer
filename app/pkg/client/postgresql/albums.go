@@ -3,7 +3,7 @@ package postgresql
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"strings"
 
 	"github.com/Masterminds/squirrel"

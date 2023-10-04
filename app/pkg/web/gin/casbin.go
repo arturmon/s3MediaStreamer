@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	model_all "skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
-	model_all "skeleton-golange-application/model"
 
 	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 

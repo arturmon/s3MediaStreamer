@@ -3,7 +3,7 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"time"
 
 	"github.com/bojanz/currency"

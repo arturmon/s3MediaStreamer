@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

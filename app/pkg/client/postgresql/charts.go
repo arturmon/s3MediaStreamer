@@ -2,7 +2,7 @@ package postgresql
 
 import (
 	"context"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"time"
 
 	"github.com/Masterminds/squirrel"

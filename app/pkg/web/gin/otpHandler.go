@@ -2,7 +2,7 @@ package gin
 
 import (
 	"net/http"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 
 	"github.com/gin-gonic/gin"
 

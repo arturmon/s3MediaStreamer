@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"time"
 
 	"github.com/ayush6624/go-chatgpt"

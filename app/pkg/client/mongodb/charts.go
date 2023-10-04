@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"

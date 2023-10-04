@@ -1,7 +1,7 @@
 package gin
 
 import (
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"time"
 
 	"github.com/gin-gonic/gin"

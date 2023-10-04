@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 	"strconv"
 	"strings"
 	"time"

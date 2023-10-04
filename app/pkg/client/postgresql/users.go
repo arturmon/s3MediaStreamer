@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"skeleton-golange-application/model"
+	"skeleton-golange-application/app/model"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4"

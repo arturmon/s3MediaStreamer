@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/model"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
