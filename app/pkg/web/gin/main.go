@@ -72,7 +72,7 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	reg := prometheus.NewRegistry()
 	metrics := monitoring.NewMetrics(reg)
 
-	enforcer, err := GetEnforcer(cfg, storage)
+	enforcer, err := GetEnforcer(storage)
 	if err != nil {
 		return nil, err
 	}

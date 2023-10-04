@@ -3,58 +3,28 @@ package gin
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
-	"net/url"
-	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	model_all "skeleton-golange-application/model"
 
 	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
-	pgadapter "github.com/casbin/casbin-pg-adapter"
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/go-pg/pg/v10"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GetEnforcer(cfg *config.Config, _ *model.DBConfig) (*casbin.Enforcer, error) {
-	uri := url.URL{
-		User: url.UserPassword(cfg.Storage.Username, cfg.Storage.Password),
-		Host: net.JoinHostPort(cfg.Storage.Host, cfg.Storage.Port),
-		Path: "/casbin",
-	}
-	options := &pg.Options{
-		Addr:            uri.Host,
-		User:            uri.User.Username(),
-		Password:        cfg.Storage.Password, // Use the password from the config
-		Database:        uri.Path[1:],         // Remove the leading slash from the path
-		DialTimeout:     timeoutDuration,
-		ReadTimeout:     timeoutDuration,
-		WriteTimeout:    timeoutDuration,
-		ApplicationName: "casbin",
-	}
-	adapterDB, err := pgadapter.NewAdapter(options)
+func GetEnforcer(_ *model.DBConfig) (*casbin.Enforcer, error) {
+
+	var enforcer *casbin.Enforcer
+
+	adapter := fileadapter.NewAdapter("acl/policy.csv")
+	enforcer, err := casbin.NewEnforcer("acl/rbac_model.conf", adapter)
 	if err != nil {
 		return nil, err
 	}
 
-	var enforcer *casbin.Enforcer
-
-	if adapterDB == nil {
-		adapter := fileadapter.NewAdapter("/acl/policy.csv")
-		enforcer, err = casbin.NewEnforcer("acl/rbac_model.conf", adapter)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		enforcer, err = casbin.NewEnforcer("acl/rbac_model.conf", adapterDB)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return enforcer, nil
 }
 
