@@ -62,7 +62,7 @@ jobs:
         run: CGO_ENABLED=0 GOOS=linux go build -v -o app-${{ matrix.go-version }}
 
       - name: Upload Build results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Go-results-${{ matrix.go-version }}
           path: ./app/app-${{ matrix.go-version }}
