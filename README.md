@@ -386,9 +386,9 @@ get_albums_connect_mongodb_total 0
 ...
 ```
 
-## Generate SWAGER
+## Generate SWAGGER
 ```shell
-swag init --parseDependency --parseDepth=1
+cd app && swag init --parseDependency --parseDepth=1
 ```
 
 
