@@ -18,14 +18,14 @@ type Config struct {
 		LogType  string `env:"LOG_TYPE" env-default:"text"`    // text, json
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 		Jobs     struct {
-			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
-			JonRun          string `env:"JOB_RUN" env-default:"@midnight"`
-			JobCleanChart   string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
-			JobReadFolder   string `env:"JOB_READ_FOLDER" env-default:"@every 15m"`
-			JobReadPath     string `env:"MUSIC_PATH" env-default:"music"`
-			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"jobs@system"`
-			OpenAiKey       string `env:"JOB_OPENAI_KEY" env-default:""`
+			JobIDUserRun          string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
+			JonRun                string `env:"JOB_RUN" env-default:"@midnight"`
+			JobCleanChart         string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
+			JobCleanTrackPathNull string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
+			SystemWriteUser       string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
+			OpenAiKey             string `env:"JOB_OPENAI_KEY" env-default:""`
 		}
+		MusicPath string `env:"MUSIC_PATH" env-default:"music"`
 	}
 	Storage struct {
 		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"` // mongodb, postgresql

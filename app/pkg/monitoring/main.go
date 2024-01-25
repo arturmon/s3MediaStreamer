@@ -18,12 +18,12 @@ type Metrics struct {
 	DeleteUserErrorCounter   prometheus.Counter
 	LogoutAttemptCounter     prometheus.Counter
 	LogoutSuccessCounter     prometheus.Counter
-	GetAllAlbumsCounter      prometheus.Counter
-	PostAlbumsCounter        prometheus.Counter
-	GetAlbumByIDCounter      prometheus.Counter
+	GetAllTracksCounter      prometheus.Counter
+	PostTracksCounter        prometheus.Counter
+	GetTrackByIDCounter      prometheus.Counter
 	GetDeleteAllCounter      prometheus.Counter
 	GetDeleteByIDCounter     prometheus.Counter
-	UpdateAlbumCounter       prometheus.Counter
+	UpdateTrackCounter       prometheus.Counter
 }
 
 func NewMetrics(reg prometheus.Registerer) *Metrics {
@@ -76,17 +76,17 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "logout_success_count_total",
 			Help: "Total number of successful logouts",
 		}),
-		GetAllAlbumsCounter: promauto.NewCounter(prometheus.CounterOpts{
+		GetAllTracksCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "app_get_all_albums_requests_total",
-			Help: "Total number of requests handled by GetAllAlbums",
+			Help: "Total number of requests handled by GetAllTracks",
 		}),
-		PostAlbumsCounter: promauto.NewCounter(prometheus.CounterOpts{
+		PostTracksCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "app_post_albums_requests_total",
-			Help: "Total number of requests handled by PostAlbums",
+			Help: "Total number of requests handled by PostTracks",
 		}),
-		GetAlbumByIDCounter: promauto.NewCounter(prometheus.CounterOpts{
+		GetTrackByIDCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "app_get_album_by_id_requests_total",
-			Help: "Total number of requests handled by GetAlbumByID",
+			Help: "Total number of requests handled by GetTrackByID",
 		}),
 		GetDeleteAllCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "app_get_delete_all_requests_total",
@@ -96,9 +96,9 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "app_get_delete_by_id_requests_total",
 			Help: "Total number of requests handled by GetDeleteByID",
 		}),
-		UpdateAlbumCounter: promauto.NewCounter(prometheus.CounterOpts{
+		UpdateTrackCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "app_update_album_requests_total",
-			Help: "Total number of requests handled by UpdateAlbum",
+			Help: "Total number of requests handled by UpdateTrack",
 		}),
 	}
 
@@ -115,12 +115,12 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 		m.DeleteUserErrorCounter,
 		m.LogoutAttemptCounter,
 		m.LogoutSuccessCounter,
-		m.GetAllAlbumsCounter,
-		m.PostAlbumsCounter,
-		m.GetAlbumByIDCounter,
+		m.GetAllTracksCounter,
+		m.PostTracksCounter,
+		m.GetTrackByIDCounter,
 		m.GetDeleteAllCounter,
 		m.GetDeleteByIDCounter,
-		m.UpdateAlbumCounter,
+		m.UpdateTrackCounter,
 	)
 
 	return m

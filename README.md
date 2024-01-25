@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/arturmon/skeleton-golange-application/main.yml?branch=main)](https://github.com/arturmon/skeleton-golange-application/actions/workflows/main.yml?query=branch%3Amain)
 ![Supported Go Versions](https://img.shields.io/badge/Go-1.18%2C%201.19%2C%201.20-lightgrey.svg)
 [![Coverage Status](https://coveralls.io/repos/github/arturmon/skeleton-golange-application/badge.svg?branch=main)](https://coveralls.io/github/arturmon/skeleton-golange-application?branch=main)
-[![Docker](https://img.shields.io/docker/pulls/arturmon/albums)](https://hub.docker.com/r/arturmon/albums)
+[![Docker](https://img.shields.io/docker/pulls/arturmon/tracks)](https://hub.docker.com/r/arturmon/tracks)
 ## Generate specification Swager
 ```shell
 cd skeleton-golange-application
@@ -160,33 +160,33 @@ v1/
 ```
 /logout
 
-## API Album
+## API Track
 v1/
 
 | url                  | code                | method | status        |
 |----------------------|---------------------|--------|---------------|
-| /albums              | 200/401/500         | GET    | GetAllAlbums  |
-| /albums/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
-| /albums/add          | 201/400/500         | POST   | PostAlbums    |
-| /albums/update       | 200/400/401/404/500 | PATCH  | UpdateAlbum   |
-| /albums/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
-| /albums/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
+| /tracks              | 200/401/500         | GET    | GetAllAlbums  |
+| /tracks/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
+| /tracks/add          | 201/400/500         | POST   | PostAlbums    |
+| /tracks/update       | 200/400/401/404/500 | PATCH  | UpdateAlbum   |
+| /tracks/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
+| /tracks/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
 
 ```markdown
-GET http://localhost:10000/v1/albums
+GET http://localhost:10000/v1/tracks
 Paginate:
-GET http://localhost:10000/v1/albums?page=11&page_size=10
+GET http://localhost:10000/v1/tracks?page=11&page_size=10
 Sorting:
-GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=price&sort_order=desc
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=price&sort_order=desc
 Filtering:
-GET http://localhost:10000/v1/albums?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0004
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0004
 
 ```
 
 
-/albums
+/tracks
 or
-/albums?page=1&page_size=10
+/tracks?page=1&page_size=10
 ```json
 [
   {
@@ -206,7 +206,7 @@ or
   }
 ]
 ```
-/albums/I0001
+/tracks/I0001
 ```json
 {
   "_id": "9ae2077e-cd38-4f0f-b476-aa85227af5fa",
@@ -224,7 +224,7 @@ or
   "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
 ```
-/albums/add
+/tracks/add
 ```json
 {
   "Title": "Test Titl1e",
@@ -237,7 +237,7 @@ or
   "Description": "Description Test1"
 }
 ```
-/albums/update
+/tracks/update
 ```json
 {
   "Title": "Marco Polo",
@@ -251,19 +251,82 @@ or
   "Completed": false
 }
 ```
-/albums/deleteAll
+/tracks/deleteAll
 ```json
 {
   "message": "OK"
 }
 ```
-/albums/delete/:code
+/tracks/delete/:code
 ```json
 {
   "message": "OK"
 }
 ```
 
+## API Audio
+
+| url               | code                | method | status    |
+|-------------------|---------------------|--------|-----------|
+| /stream/:segment  | 200/404/500         | GET    | StreamM3U |
+| /:playlist_id     | 200/500             | GET    | Audio     |
+| /upload           | 200/400/401/404/500 | POST   | PostFiles |
+
+/stream/:segment
+```azure
+stream audio
+```
+/:playlist_id
+```json
+
+```
+
+## API PLayList
+
+| url                                  | code             | method | status             |
+|--------------------------------------|------------------|--------|--------------------|
+| /:playlist_id/add/track/:track_id    | 201/400/404/500  | POST   | AddToPlaylist      |
+| /:playlist_id/remove/track/:track_id | 200/400/404/500  | DELETE | RemoveFromPlaylist |
+| /:playlist_id/clear                  | 200/400/404/500  | DELETE | ClearPlaylist      |
+| /create                              | 201/400/404/500  | POST   | CreatePlaylist     |
+| /delete/:id                          | 204/400/404/500  | DELETE | DeletePlaylist     |
+| /:playlist_id/set                    | 200/400/404/500  | POST   | SetFromPlaylist    |
+
+/playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/add/track/679fcd2d-3eee-4f94-8989-06765b3b5426
+```json
+
+```
+playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/remove/track/89ffa57f-7186-4435-9604-cc21e9458489
+```json
+
+```
+playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
+```json
+
+```
+playlist/create
+```json
+{
+  "level":"1",
+  "title":"test Play list",
+  "description":"test Play list"
+}
+```
+playlist/delete/7c9c0650-5e1e-4374-ba25-de076d6d7c57
+```json
+
+```
+playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/set
+```json
+{
+  "track_order":
+  [
+    "679fcd2d-3eee-4f94-8989-06765b3b5426",
+    "09748eee-abe5-46e5-b054-a2cbba26586c",
+    "088a1e6a-5a80-4624-8a21-58c7717075b5"
+  ]
+}
+```
 
 ## API Other
 
@@ -346,12 +409,12 @@ Example:
 | sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                                                       |
 | sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                                                      |
 
----> PostAlbums solo album
+---> PostAlbums solo track
 ```json
 {
   "action": "PostAlbums",
-  "albums": {
-    "album": [
+  "tracks": {
+    "track": [
       {
         "Title": "Test Title1",
         "Artist": "Test Artist1",
@@ -367,12 +430,12 @@ Example:
 }
 ```
 
----> PostAlbums Payload many albums:
+---> PostAlbums Payload many tracks:
 ```json
 {
     "action": "PostAlbums",
-    "albums": {
-        "album": [
+    "tracks": {
+        "track": [
             {
                 "Title": "Test Title1",
                 "Artist": "Test Artist1",
@@ -412,7 +475,7 @@ Example:
 ```json
 {
     "action": "UpdateAlbum",
-    "album": {
+    "track": {
       "Title": "Test Rabbitmq",
       "Artist": "Test Update RAbbit",
       "Price": {
@@ -431,7 +494,7 @@ types: `logs.error`
 
 | Payload                                                    | Errors                                                  |
 |------------------------------------------------------------|---------------------------------------------------------|
-| `{"action":"GetAlbumByCode","albumCode":"I0001fsdfsd"}`    | `{"error":"no album found with code: I0001fsdfsd"}`     |
+| `{"action":"GetAlbumByCode","albumCode":"I0001fsdfsd"}`    | `{"error":"no track found with code: I0001fsdfsd"}`     |
 | `{"action":"FindUserToEmail","userEmail":"a@assss.com"}`   | `{"error":"user with email 'a@assss.com' not found"}`   |
 | `{"action":"DeleteUser","userEmail":"a@aasdas.com"}`       | `{"error":"user with email 'a@aasdas.com' not found"}`  |
 

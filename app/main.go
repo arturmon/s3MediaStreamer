@@ -1,14 +1,16 @@
 package main
 
 import (
+	"context"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/internal/jobs"
+	"skeleton-golange-application/app/internal/wathers"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	_ "skeleton-golange-application/app/pkg/web/gin"
-
-	"context"
+	"sync"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -31,6 +33,7 @@ import (
 // @securityDefinitions.basic	BasicAuth
 // @authorizationurl http://localhost:10000/v1/users/login
 func main() {
+	var fileQueue = make(chan string, config.FileQueue)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -38,17 +41,16 @@ func main() {
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
-
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
 	}
 	myApp, err := app.NewAppInit(cfg, &logger)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error("Failed to initialize the new my app:", err)
 	}
 
 	logger.Info("Starting initialize the job runner...")
-	err = app.InitJob(myApp)
+	err = jobs.InitJob(myApp)
 	if err != nil {
 		logger.Error("Failed to initialize the job runner:", err)
 	}
@@ -62,6 +64,14 @@ func main() {
 		if err != nil {
 			logger.Fatal("Failed to pre-initialize AMQP:", err)
 		}
+	}
+
+	// Init watcher folders
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go wathers.MonitorDirectory(ctx, myApp, &wg, fileQueue)
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	logger.Info("🚀 Running Application...")
