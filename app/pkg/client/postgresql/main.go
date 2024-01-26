@@ -20,16 +20,25 @@ type PostgresCollectionQuery interface {
 	UpdateUser(email string, fields map[string]interface{}) error
 	GetStoredRefreshToken(userEmail string) (string, error)
 	SetStoredRefreshToken(userEmail, refreshToken string) error
-	CreateAlbums(list []model.Album) error
-	GetAlbums(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Album, int, error)
-	GetAlbumsByCode(code string) (model.Album, error)
-	DeleteAlbums(code string) error
-	DeleteAlbumsAll() error
-	UpdateAlbums(album *model.Album) error
-	GetAlbumsForLearn() ([]model.Album, error)
+	CreateTracks(list []model.Track) error
+	GetTracks(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
+	GetTracksByColumns(code, columns string) (*model.Track, error)
+	DeleteTracks(code, columns string) error
+	DeleteTracksAll() error
+	UpdateTracks(track *model.Track) error
+	AddTrackToPlaylist(playlistID, trackID string) error
+	RemoveTrackFromPlaylist(playlistID, trackID string) error
+	GetTracksForLearn() ([]model.Track, error)
 	CreateTops(list []model.Tops) error
 	CleanupRecords(retentionPeriod time.Duration) error
-	GetAllAlbums() ([]model.Album, error)
+	GetAllTracks() ([]model.Track, error)
+	CreatePlayListName(newPlaylist model.PLayList) error
+	GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error)
+	DeletePlaylist(playlistID string) error
+	PlaylistExists(playlistID string) bool
+	ClearPlayList(playlistID string) error
+	UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest []string) error
+	GetAllTracksByPositions(playlistID string) ([]model.Track, error)
 }
 
 type PostgresOperations interface {

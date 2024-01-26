@@ -1,4 +1,4 @@
-package app
+package jobs
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 
 func (e OpenAIJob) Run() {
 	e.app.Logger.Println("init ChatGPT...")
-	radDBdata, err := e.app.Storage.Operations.GetAlbumsForLearn()
+	radDBdata, err := e.app.Storage.Operations.GetTracksForLearn()
 	if err != nil {
 		e.app.Logger.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func (e OpenAIJob) Run() {
 		return
 	}
 
-	var respAlbums []model.Tops
+	var respTracks []model.Tops
 	client, errAi := chatgpt.NewClient(e.app.Cfg.AppConfig.Jobs.OpenAiKey)
 	if errAi != nil {
 		e.app.Logger.Fatal(err)
@@ -33,8 +33,8 @@ func (e OpenAIJob) Run() {
 	ctx := context.Background()
 
 	var titleAndArtist string
-	for _, album := range radDBdata {
-		titleAndArtist += fmt.Sprintf("Title: %s, Artist: %s,", album.Title, album.Artist)
+	for _, track := range radDBdata {
+		titleAndArtist += fmt.Sprintf("Title: %s, Artist: %s,", track.Title, track.Artist)
 	}
 
 	res, errSend := client.Send(ctx, &chatgpt.ChatCompletionRequest{
@@ -84,7 +84,7 @@ func (e OpenAIJob) Run() {
 				e.app.Logger.Errorf("Failed to parse response: %v", err)
 				continue
 			}
-			respAlbum := model.Tops{
+			respTrack := model.Tops{
 				ID:          uuid.New(),
 				CreatedAt:   time.Now(),
 				UpdatedAt:   time.Now(),
@@ -93,12 +93,12 @@ func (e OpenAIJob) Run() {
 				Description: submatches[3],
 				Sender:      systemUser.Name,
 			}
-			respAlbum.CreatorUser = parsedUUID
-			respAlbums = append(respAlbums, respAlbum)
+			respTrack.CreatorUser = parsedUUID
+			respTracks = append(respTracks, respTrack)
 		}
 	}
-	e.app.Logger.Tracef("AI: %+v", respAlbums)
-	err = e.app.Storage.Operations.CreateTops(respAlbums)
+	e.app.Logger.Tracef("AI: %+v", respTracks)
+	err = e.app.Storage.Operations.CreateTops(respTracks)
 	if err != nil {
 		e.app.Logger.Fatal(err)
 	}

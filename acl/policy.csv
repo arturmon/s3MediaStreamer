@@ -9,5 +9,10 @@ p, member, /v1/users/me, GET
 p, member, /v1/users/logout, POST
 p, member, /v1/users/refresh, POST
 p, member, /v1/users/otp/*, *
-p, member, /v1/albums, *
-p, member, /v1/albums/*, *
+p, member, /v1/tracks, *
+p, member, /v1/tracks/*, *
+p, anonymous, /v1/audio, *
+p, anonymous, /v1/audio/*, *
+p, anonymous, /v1/playlist/*, *
+p, anonymous, /v1/player/*, *
+p, anonymous, /v1/audio/play/stream/*, *
