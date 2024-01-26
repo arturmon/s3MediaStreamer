@@ -10,6 +10,7 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin/v2 v2.77.2
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1

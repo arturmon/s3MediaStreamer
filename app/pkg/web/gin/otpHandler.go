@@ -56,8 +56,8 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 	}
 
 	otpResponse := gin.H{
-		"base32":      key.Secret(),
-		"otpauth_url": key.URL(),
+		"base32":       key.Secret(),
+		"otp-auth_url": key.URL(),
 	}
 	c.JSON(http.StatusOK, otpResponse)
 }
