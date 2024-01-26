@@ -8,11 +8,11 @@ import (
 	"github.com/Masterminds/squirrel"
 )
 
-// GetAlbumsForLearn retrieves all albums with 'likes' set to true.
-func (c *PgClient) GetAlbumsForLearn() ([]model.Album, error) {
+// GetTracksForLearn retrieves all tracks with 'likes' set to true.
+func (c *PgClient) GetTracksForLearn() ([]model.Track, error) {
 	// Create a new instance of squirrel.SelectBuilder
 	selectBuilder := squirrel.Select("*").
-		From("album").
+		From("track").
 		Where(squirrel.Eq{"likes": true}).
 		Limit(ChunkSize) // Adjust the limit based on your requirements
 
