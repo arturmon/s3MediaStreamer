@@ -21,9 +21,6 @@ type App struct {
 	AMQPClient *amqp.MessageClient
 }
 
-const retryDelaySeconds = 5
-const maxRetries = 5
-
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	healthMetrics := monitoring.NewHealthMetrics()

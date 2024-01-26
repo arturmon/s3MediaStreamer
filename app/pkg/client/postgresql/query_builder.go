@@ -67,8 +67,8 @@ func GenerateDeleteQuery(table string, condition squirrel.Sqlizer) (string, []in
 	return query, args
 }
 
-// GetTotalAlbumCount returns the total count of albums based on the query builder.
-func (c *PgClient) GetTotalAlbumCount(queryBuilder squirrel.SelectBuilder) (int, error) {
+// GetTotalTrackCount returns the total count of tracks based on the query builder.
+func (c *PgClient) GetTotalTrackCount(queryBuilder squirrel.SelectBuilder) (int, error) {
 	countQuery := squirrel.Select("COUNT(*)").FromSelect(queryBuilder, "subquery")
 	sql, args, err := countQuery.ToSql()
 	if err != nil {

@@ -21,7 +21,8 @@ func ConfigCORS() cors.Config {
 		AllowHeaders: []string{
 			"Content-Type", "Content-Length", "Accept-Encoding",
 			"X-CSRF-Token", "Authorization", "accept", "origin",
-			"Cache-Control", "X-Requested-With",
+			"Cache-Control", "X-Requested-With", "Connection",
+			"Transfer-Encoding",
 		},
 		AllowCredentials: true,
 		MaxAge:           maxAgeDuration,

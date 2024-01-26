@@ -73,7 +73,7 @@ func (c *MongoClient) UpdateUser(email string, fields map[string]interface{}) er
 	options := options.Update().SetUpsert(false)
 
 	// Perform the update operation.
-	collection, err := c.FindCollections(config.CollectionAlbum)
+	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return err
 	}

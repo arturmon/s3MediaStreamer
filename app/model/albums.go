@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Album represents data about a record album.
-type Album struct {
+// Track represents data about a record track.
+type Track struct {
 	ID          uuid.UUID       `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
 	CreatedAt   time.Time       `json:"created_at" bson:"created_at" pg:"default:now()" swaggerignore:"true"`
 	UpdatedAt   time.Time       `json:"updated_at" bson:"updated_at" pg:"default:now()" swaggerignore:"true"`
@@ -17,7 +17,7 @@ type Album struct {
 	Price       currency.Amount `json:"price" bson:"price" example:"{Number: 1.10, Currency: EUR}" swaggertype:"string,string"`
 	Code        string          `json:"code" bson:"code" example:"I001"`
 	Description string          `json:"description" bson:"description" example:"A short description of the application"`
-	Sender      string          `json:"sender" bson:"sender" example:"amqp or rest"`
+	Sender      string          `json:"sender" bson:"sender" example:"sender set"`
 	CreatorUser uuid.UUID       `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 	Likes       bool            `json:"likes" bson:"likes"`
 	Path        string          `json:"path" bson:"path"`

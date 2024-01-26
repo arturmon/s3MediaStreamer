@@ -40,5 +40,5 @@ type ResponceRefreshTocken struct {
 
 type OkGenerateOTP struct {
 	Base32     interface{} `json:"base32"`
-	OtpauthUrl interface{} `json:"otpauth_url"`
+	OtpauthURL interface{} `json:"otp-auth_url"`
 }

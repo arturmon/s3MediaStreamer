@@ -82,7 +82,7 @@ func TestCreateIssue(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbum := model.Album{
+	expectedTrack := model.Track{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -93,11 +93,11 @@ func TestCreateIssue(t *testing.T) {
 	}
 	price, err := currency.NewAmount("111.11", "USD")
 	assert.NoError(t, err)
-	expectedAlbum.Price = price
+	expectedTrack.Price = price
 
-	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedAlbum)).Return(nil)
+	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedTrack)).Return(nil)
 
-	err = mockCollectionQuery.CreateIssue(&expectedAlbum)
+	err = mockCollectionQuery.CreateIssue(&expectedTrack)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -110,7 +110,7 @@ func TestCreateMany(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbums := []model.Album{
+	expectedTracks := []model.Track{
 		{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
@@ -136,12 +136,12 @@ func TestCreateMany(t *testing.T) {
 	price2, err2 := currency.NewAmount("222.11", "EUR")
 	assert.NoError(t, err)
 	assert.NoError(t, err2)
-	expectedAlbums[0].Price = price
-	expectedAlbums[1].Price = price2
+	expectedTracks[0].Price = price
+	expectedTracks[1].Price = price2
 
-	mockCollectionQuery.EXPECT().CreateMany(gomock.AssignableToTypeOf(expectedAlbums)).Return(nil)
+	mockCollectionQuery.EXPECT().CreateMany(gomock.AssignableToTypeOf(expectedTracks)).Return(nil)
 
-	err = mockCollectionQuery.CreateMany(expectedAlbums)
+	err = mockCollectionQuery.CreateMany(expectedTracks)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -154,7 +154,7 @@ func TestGetAllIssues(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbums := []model.Album{
+	expectedTracks := []model.Track{
 		{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
@@ -180,16 +180,16 @@ func TestGetAllIssues(t *testing.T) {
 	price2, err2 := currency.NewAmount("222.11", "EUR")
 	assert.NoError(t, err)
 	assert.NoError(t, err2)
-	expectedAlbums[0].Price = price
-	expectedAlbums[1].Price = price2
+	expectedTracks[0].Price = price
+	expectedTracks[1].Price = price2
 
-	mockCollectionQuery.EXPECT().GetAllIssues().Return(expectedAlbums, nil)
+	mockCollectionQuery.EXPECT().GetAllIssues().Return(expectedTracks, nil)
 
-	albums, err := mockCollectionQuery.GetAllIssues()
+	tracks, err := mockCollectionQuery.GetAllIssues()
 
 	// Verify the result
 	assert.NoError(t, err)
-	assert.Equal(t, expectedAlbums, albums)
+	assert.Equal(t, expectedTracks, tracks)
 }
 
 func TestGetIssuesByCode(t *testing.T) {
@@ -199,7 +199,7 @@ func TestGetIssuesByCode(t *testing.T) {
 	mockCollectionQuery := mocks.NewMockPostgresCollectionQuery(ctrl)
 
 	// Set up an expected call on the mockCollectionQuery
-	expectedAlbum := model.Album{
+	expectedTrack := model.Track{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -211,15 +211,15 @@ func TestGetIssuesByCode(t *testing.T) {
 	}
 	price, err := currency.NewAmount("111.11", "USD")
 	assert.NoError(t, err)
-	expectedAlbum.Price = price
+	expectedTrack.Price = price
 
-	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedAlbum, nil)
+	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedTrack, nil)
 
-	album, err := mockCollectionQuery.GetIssuesByCode("ALBUM123")
+	track, err := mockCollectionQuery.GetIssuesByCode("ALBUM123")
 
 	// Verify the result
 	assert.NoError(t, err)
-	assert.Equal(t, expectedAlbum, album)
+	assert.Equal(t, expectedTrack, track)
 }
 
 func TestDeleteOne(t *testing.T) {
@@ -261,7 +261,7 @@ func TestUpdateIssue(t *testing.T) {
 	// Set up an expected call on the mockCollectionQuery
 	mockCollectionQuery.EXPECT().UpdateIssue(gomock.Any()).Return(nil)
 
-	albumToUpdate := model.Album{
+	albumToUpdate := model.Track{
 		ID:          uuid.New(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),

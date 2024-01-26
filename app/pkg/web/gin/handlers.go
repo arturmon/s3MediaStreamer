@@ -19,9 +19,9 @@ import (
 )
 
 type Handler interface {
-	GetAllAlbums(c *gin.Context)
-	PostAlbums(c *gin.Context)
-	GetAlbumByID(c *gin.Context)
+	GetAllTracks(c *gin.Context)
+	PostTracks(c *gin.Context)
+	GetTrackByID(c *gin.Context)
 	GetDeleteAll(c *gin.Context)
 	GetDeleteByID(c *gin.Context)
 	Register(c *gin.Context)
@@ -30,7 +30,7 @@ type Handler interface {
 	Logout(c *gin.Context)
 	User(c *gin.Context)
 	checkAuthorization(c *gin.Context) (string, error)
-	UpdateAlbum(c *gin.Context)
+	UpdateTrack(c *gin.Context)
 }
 
 // Ping godoc
@@ -45,10 +45,10 @@ func Ping(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, model.OkResponse{Message: "pong"})
 }
 
-// GetAllAlbums	godoc
-// @Summary		Show the list of all albums.
-// @Description responds with the list of all albums as JSON.
-// @Tags		album-controller
+// GetAllTracks	godoc
+// @Summary		Show the list of all tracks.
+// @Description responds with the list of all tracks as JSON.
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
 // @Param       page query   int           false "Page number"
@@ -56,13 +56,14 @@ func Ping(c *gin.Context) {
 // @Param       sort_by      query         string false "Field to sort by (e.g., 'created_at')"
 // @Param       sort_order   query         string false "Sort order ('asc' or 'desc')"
 // @Param       filter       query         string false "Filter criteria ('I0001' or '=I0001')"
-// @Success		200 {array}  model.Album  "OK"
+// @Success		200 {array}  model.Track  "OK"
+// @Failure		400 {object} model.ErrorResponse "Invalid page or page_size parameters"
 // @Failure		401 {object} model.ErrorResponse "Unauthorized"
 // @Failure		500 {object} model.ErrorResponse "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/albums [get]
-func (a *WebApp) GetAllAlbums(c *gin.Context) {
-	a.metrics.GetAllAlbumsCounter.Inc()
+// @Router		/tracks [get]
+func (a *WebApp) GetAllTracks(c *gin.Context) {
+	a.metrics.GetAllTracksCounter.Inc()
 	page := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("page_size", "10")
 
@@ -92,8 +93,8 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	// Calculate the offset based on the pagination parameters
 	offset := (pageInt - 1) * pageSizeInt
 
-	// Retrieve paginated albums from the storage
-	albums, countTotal, err := a.storage.Operations.GetAlbums(offset, pageSizeInt, sortBy, sortOrder, filter)
+	// Retrieve paginated tracks from the storage
+	tracks, countTotal, err := a.storage.Operations.GetTracks(offset, pageSizeInt, sortBy, sortOrder, filter)
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
@@ -103,7 +104,7 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	// Calculate total pages based on total count and page size
 	totalPages := int(math.Ceil(float64(countTotal) / float64(pageSizeInt)))
 
-	res, _ := json.Marshal(albums)
+	res, _ := json.Marshal(tracks)
 
 	baseURL := "http" // По умолчанию HTTP
 	if proto := c.GetHeader("X-Forwarded-Proto"); proto != "" {
@@ -116,31 +117,31 @@ func (a *WebApp) GetAllAlbums(c *gin.Context) {
 	c.Header("Link", generatePaginationLinks(baseURL, c.FullPath(), pageInt, totalPages, pageSize))
 	c.Header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,Link")
 	c.Header("Content-Type", "application/json; charset=utf-8")
-	c.IndentedJSON(http.StatusOK, albums)
-	log.Debugf("Albums response: %s", res)
+	c.IndentedJSON(http.StatusOK, tracks)
+	log.Debugf("Tracks response: %s", res)
 }
 
-// PostAlbums	godoc
-// @Summary		Adds an album from JSON.
-// @Description adds an album from JSON received in the request body.
-// @Tags		album-controller
+// PostTracks	godoc
+// @Summary		Adds an track from JSON.
+// @Description adds an track from JSON received in the request body.
+// @Tags		track-controller
 // @Accept		json
 // @Produce		json
-// @Param		request body []model.Album true "Album details"
-// @Success     201 {object} []model.Album  "Created"
+// @Param		request body []model.Track true "Track details"
+// @Success     201 {object} []model.Track  "Created"
 // @Failure     400 {object} model.ErrorResponse  "Bad Request"
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
-// @Failure     409 {object} model.ErrorResponse  "album code already exists"
+// @Failure     409 {object} model.ErrorResponse  "track code already exists"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/albums/add [post]
-func (a *WebApp) PostAlbums(c *gin.Context) {
-	a.metrics.PostAlbumsCounter.Inc()
+// @Router		/tracks/add [post]
+func (a *WebApp) PostTracks(c *gin.Context) {
+	a.metrics.PostTracksCounter.Inc()
 
-	var albums []model.Album
+	var tracks []model.Track
 
-	// Decode the request body as an array of model.Album
-	if err := c.BindJSON(&albums); err != nil {
+	// Decode the request body as an array of model.Track
+	if err := c.BindJSON(&tracks); err != nil {
 		a.logger.Errorf("Invalid request payload: %v", err)
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
@@ -155,14 +156,14 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		return
 	}
 
-	// Loop through the albums and prepare them
-	for i := range albums {
-		album := &albums[i]
+	// Loop through the tracks and prepare them
+	for i := range tracks {
+		track := &tracks[i]
 
-		album.ID = uuid.New()
-		album.CreatedAt = time.Now()
-		album.UpdatedAt = time.Now()
-		album.Sender = systemUser.Name
+		track.ID = uuid.New()
+		track.CreatedAt = time.Now()
+		track.UpdatedAt = time.Now()
+		track.Sender = systemUser.Name
 
 		// Read user_id from the session
 		value, err := getSessionKey(c, "user_id")
@@ -178,22 +179,23 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error converting value"})
 			return
 		}
-		album.CreatorUser = valueUUID
+		track.CreatorUser = valueUUID
 
-		album.Title = strings.TrimSpace(album.Title)
-		album.Artist = strings.TrimSpace(album.Artist)
-		album.Code = strings.TrimSpace(album.Code)
-		album.Description = strings.TrimSpace(album.Description)
+		track.Title = strings.TrimSpace(track.Title)
+		track.Artist = strings.TrimSpace(track.Artist)
+		track.Code = strings.TrimSpace(track.Code)
+		track.Description = strings.TrimSpace(track.Description)
+		track.Path = strings.TrimSpace(track.Path)
 
-		if album.Code == "" || album.Artist == "" {
-			c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
+		if track.Code == "" || track.Artist == "" || track.Path == "" {
+			c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist` or `Path`"})
 			return
 		}
 
-		// Check if the album code already exists
-		_, err = a.storage.Operations.GetAlbumsByCode(album.Code)
+		// Check if the track code already exists
+		_, err = a.storage.Operations.GetTracksByColumns(track.Code, "code")
 		if err == nil {
-			insertionErrors = append(insertionErrors, fmt.Errorf("album code already exists for album %s", album.Title))
+			insertionErrors = append(insertionErrors, fmt.Errorf("track code already exists for track %s", track.Title))
 			continue
 		}
 	}
@@ -204,45 +206,45 @@ func (a *WebApp) PostAlbums(c *gin.Context) {
 		for i, err := range insertionErrors {
 			errorMessages[i] = err.Error()
 		}
-		c.IndentedJSON(http.StatusConflict, model.ErrorResponse{Message: "Some albums could not be inserted"})
+		c.IndentedJSON(http.StatusConflict, model.ErrorResponse{Message: "Some tracks could not be inserted"})
 		return
 	}
 
-	// Insert all albums into the database
-	if err := a.storage.Operations.CreateAlbums(albums); err != nil {
+	// Insert all tracks into the database
+	if err := a.storage.Operations.CreateTracks(tracks); err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, albums)
+	c.IndentedJSON(http.StatusCreated, tracks)
 }
 
-// GetAlbumByID godoc
-// @Summary		Album whose ID value matches the id.
+// GetTrackByID godoc
+// @Summary		Track whose ID value matches the id.
 // noinspection
-// @Description locates the album whose ID value matches the id parameter sent by the client,
-// @Description	then returns that album as a response.
-// @Tags		album-controller
+// @Description locates the track whose ID value matches the id parameter sent by the client,
+// @Description	then returns that track as a response.
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		code    path      string     true  "Code album"
-// @Success     200 {object} model.Album  "OK"
+// @Param		code    path      string     true  "Code track"
+// @Success     200 {object} model.Track  "OK"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/albums/{code} [get]
-func (a *WebApp) GetAlbumByID(c *gin.Context) {
+// @Router		/tracks/{code} [get]
+func (a *WebApp) GetTrackByID(c *gin.Context) {
 	// Increment the session-based counter
 
-	// If user is authorized, proceed with getting the album
-	a.metrics.GetAlbumByIDCounter.Inc()
+	// If user is authorized, proceed with getting the track
+	a.metrics.GetTrackByIDCounter.Inc()
 
 	id := c.Param("code")
-	result, err := a.storage.Operations.GetAlbumsByCode(id)
+	result, err := a.storage.Operations.GetTracksByColumns(id, "code")
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "track not found"})
 		} else {
 			a.logger.Error(err)
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
@@ -253,56 +255,56 @@ func (a *WebApp) GetAlbumByID(c *gin.Context) {
 }
 
 // GetDeleteAll godoc
-// @Summary		Complete removal of all albums.
+// @Summary		Complete removal of all tracks.
 // @Description Delete ALL.
-// @Tags		album-controller
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
 // @Success     204 {object} model.OkResponse   "No Content"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/albums/deleteAll [delete]
+// @Router		/tracks/deleteAll [delete]
 func (a *WebApp) GetDeleteAll(c *gin.Context) {
 	// Increment the session-based counter
 
 	// Increment the counter for each request handled by GetDeleteAll
 	a.metrics.GetDeleteAllCounter.Inc()
 
-	err := a.storage.Operations.DeleteAlbumsAll()
+	err := a.storage.Operations.DeleteTracksAll()
 	if err != nil {
 		a.logger.Fatal(err)
-		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Error Delete all Album"})
+		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Error Delete all Track"})
 		return
 	}
 	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
 }
 
 // GetDeleteByID godoc
-// @Summary		Deletes album whose ID value matches the code.
-// @Description locates the album whose ID value matches the id parameter and deletes it.
-// @Tags		album-controller
+// @Summary		Deletes track whose ID value matches the code.
+// @Description locates the track whose ID value matches the id parameter and deletes it.
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		code    path      string     true  "Code album"
+// @Param		code    path      string     true  "Code track"
 // @Success     204 {object} model.OkResponse   "No Content"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router		/albums/delete/{code} [delete]
+// @Router		/tracks/delete/{code} [delete]
 func (a *WebApp) GetDeleteByID(c *gin.Context) {
 	// Increment the session-based counter
 
-	// If user is authorized, proceed with deleting the album by ID
+	// If user is authorized, proceed with deleting the track by ID
 	a.metrics.GetDeleteByIDCounter.Inc()
 
 	code := c.Param("code")
 
-	_, err := a.storage.Operations.GetAlbumsByCode(code)
+	_, err := a.storage.Operations.GetTracksByColumns(code, "code")
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "track not found"})
 		} else {
 			a.logger.Error(err)
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
@@ -310,57 +312,57 @@ func (a *WebApp) GetDeleteByID(c *gin.Context) {
 		return
 	}
 
-	err = a.storage.Operations.DeleteAlbums(code)
+	err = a.storage.Operations.DeleteTracks(code, "code")
 	if err != nil {
 		a.logger.Error(err)
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error deleting album"})
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "error deleting track"})
 		return
 	}
 	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
 }
 
-// UpdateAlbum godoc
-// @Summary                Updates an existing album with new data.
-// @Description updates an existing album with new data based on the ID parameter sent by the client.
-// @Tags                album-controller
+// UpdateTrack godoc
+// @Summary                Updates an existing track with new data.
+// @Description updates an existing track with new data based on the ID parameter sent by the client.
+// @Tags                track-controller
 // @Accept              json
 // @Produce             json
-// @Param               request body model.Album true "Updated album details"
-// @Success     200 {object} model.Album  "OK"
+// @Param               request body model.Track true "Updated track details"
+// @Success     200 {object} model.Track  "OK"
 // @Failure     400 {object} model.ErrorResponse  "Bad Request"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
-// @Router                /albums/update [patch]
-func (a *WebApp) UpdateAlbum(c *gin.Context) {
+// @Router                /tracks/update [patch]
+func (a *WebApp) UpdateTrack(c *gin.Context) {
 	// Increment the session-based counter
 
-	// Increment the counter for each request handled by UpdateAlbum
-	a.metrics.UpdateAlbumCounter.Inc()
+	// Increment the counter for each request handled by UpdateTrack
+	a.metrics.UpdateTrackCounter.Inc()
 
-	var newAlbum model.Album
+	var newTrack model.Track
 
-	newAlbum.UpdatedAt = time.Now()
+	newTrack.UpdatedAt = time.Now()
 
-	if bindErr := c.BindJSON(&newAlbum); bindErr != nil {
+	if bindErr := c.BindJSON(&newTrack); bindErr != nil {
 		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
-	newAlbum.Title = strings.TrimSpace(newAlbum.Title)
-	newAlbum.Artist = strings.TrimSpace(newAlbum.Artist)
-	newAlbum.Code = strings.TrimSpace(newAlbum.Code)
-	newAlbum.Description = strings.TrimSpace(newAlbum.Description)
+	newTrack.Title = strings.TrimSpace(newTrack.Title)
+	newTrack.Artist = strings.TrimSpace(newTrack.Artist)
+	newTrack.Code = strings.TrimSpace(newTrack.Code)
+	newTrack.Description = strings.TrimSpace(newTrack.Description)
 
-	if newAlbum.Code == "" || newAlbum.Artist == "" {
+	if newTrack.Code == "" || newTrack.Artist == "" {
 		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
 		return
 	}
 
-	existingAlbum, getErr := a.storage.Operations.GetAlbumsByCode(newAlbum.Code)
+	existingTrack, getErr := a.storage.Operations.GetTracksByColumns(newTrack.Code, "code")
 	if getErr != nil {
 		if errors.Is(getErr, pgx.ErrNoRows) {
-			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "album not found"})
+			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "track not found"})
 		} else {
 			a.logger.Error(getErr)
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: getErr.Error()})
@@ -368,30 +370,30 @@ func (a *WebApp) UpdateAlbum(c *gin.Context) {
 		return
 	}
 
-	if newAlbum.Title != "" {
-		existingAlbum.Title = newAlbum.Title
+	if newTrack.Title != "" {
+		existingTrack.Title = newTrack.Title
 	}
-	if newAlbum.Artist != "" {
-		existingAlbum.Artist = newAlbum.Artist
+	if newTrack.Artist != "" {
+		existingTrack.Artist = newTrack.Artist
 	}
-	if !newAlbum.Price.IsZero() {
-		existingAlbum.Price = newAlbum.Price
+	if !newTrack.Price.IsZero() {
+		existingTrack.Price = newTrack.Price
 	}
 
-	if newAlbum.Description != "" {
-		existingAlbum.Description = newAlbum.Description
+	if newTrack.Description != "" {
+		existingTrack.Description = newTrack.Description
 	}
-	existingAlbum.Likes = newAlbum.Likes
+	existingTrack.Likes = newTrack.Likes
 
-	existingAlbum.Sender = "rest"
+	existingTrack.Sender = "rest"
 
-	existingAlbum.UpdatedAt = time.Now()
+	existingTrack.UpdatedAt = time.Now()
 	// Perform the update operation
-	err := a.storage.Operations.UpdateAlbums(&existingAlbum)
+	err := a.storage.Operations.UpdateTracks(existingTrack)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, existingAlbum)
+	c.IndentedJSON(http.StatusOK, existingTrack)
 }

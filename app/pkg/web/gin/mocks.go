@@ -7,7 +7,7 @@ import (
 )
 
 type MockDBOperations struct {
-	mockAlbums []model.Album
+	mockTracks []model.Track
 }
 
 func (m *MockDBOperations) Connect() error {
@@ -20,47 +20,47 @@ func (m *MockDBOperations) Ping(_ context.Context) error {
 	return nil
 }
 
-func (m *MockDBOperations) GetIssuesByCode(code string) (*model.Album, error) {
+func (m *MockDBOperations) GetIssuesByCode(code string) (*model.Track, error) {
 	// Implement mock behavior for GetIssuesByCode
 
-	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
-	// We will iterate through the list and find the album with the given code.
-	for i := range m.mockAlbums {
-		if m.mockAlbums[i].Code == code {
-			// If we find the album with the given code, we return a pointer to it as the result.
-			return &m.mockAlbums[i], nil
+	// Let's assume that we have a mockTracks variable which holds the list of mock tracks.
+	// We will iterate through the list and find the track with the given code.
+	for i := range m.mockTracks {
+		if m.mockTracks[i].Code == code {
+			// If we find the track with the given code, we return a pointer to it as the result.
+			return &m.mockTracks[i], nil
 		}
 	}
 
-	// If the album with the given code was not found, we can return an error.
+	// If the track with the given code was not found, we can return an error.
 	// You can customize the error message based on your requirements.
-	return nil, fmt.Errorf("album with code %s not found", code)
+	return nil, fmt.Errorf("track with code %s not found", code)
 }
 
 func (m *MockDBOperations) DeleteOne(code string) error {
 	// Implement mock behavior for DeleteOne
 
-	// Let's assume that we have a mockAlbums variable which holds the list of mock albums.
-	// We will iterate through the list and find the album with the given code.
-	for i := 0; i < len(m.mockAlbums); i++ {
-		if m.mockAlbums[i].Code == code {
-			// If we find the album with the given code, we will "delete" it from the list.
-			// In this example, "deleting" means removing the album from the list.
-			m.mockAlbums = append(m.mockAlbums[:i], m.mockAlbums[i+1:]...)
+	// Let's assume that we have a mockTracks variable which holds the list of mock tracks.
+	// We will iterate through the list and find the track with the given code.
+	for i := 0; i < len(m.mockTracks); i++ {
+		if m.mockTracks[i].Code == code {
+			// If we find the track with the given code, we will "delete" it from the list.
+			// In this example, "deleting" means removing the track from the list.
+			m.mockTracks = append(m.mockTracks[:i], m.mockTracks[i+1:]...)
 			return nil // Return nil to indicate successful "deletion."
 		}
 	}
 
-	// If the album with the given code was not found, we can return an error.
+	// If the track with the given code was not found, we can return an error.
 	// You can customize the error message based on your requirements.
-	return fmt.Errorf("album with code %s not found", code)
+	return fmt.Errorf("track with code %s not found", code)
 }
 
 func (m *MockDBOperations) DeleteAll() error {
 	// Implement mock behavior for DeleteAll
 
-	// Clear the list of mock albums to simulate deleting all records.
-	m.mockAlbums = []model.Album{}
+	// Clear the list of mock tracks to simulate deleting all records.
+	m.mockTracks = []model.Track{}
 
 	return nil // Return nil to indicate successful "deletion."
 }

@@ -1,28 +1,5 @@
 basePath: /v1
 definitions:
-  model.Album:
-    properties:
-      artist:
-        example: Artist name
-        type: string
-      code:
-        example: I001
-        type: string
-      description:
-        example: A short description of the application
-        type: string
-      likes:
-        type: boolean
-      price:
-        example: '{Number: 1.10, Currency: EUR}'
-        type: string
-      sender:
-        example: amqp or rest
-        type: string
-      title:
-        example: Title name
-        type: string
-    type: object
   model.ErrorResponse:
     properties:
       error:
@@ -45,7 +22,7 @@ definitions:
   model.OkGenerateOTP:
     properties:
       base32: {}
-      otpauth_url: {}
+      otp-auth_url: {}
     type: object
   model.OkLoginResponce:
     properties:
@@ -63,6 +40,18 @@ definitions:
       message:
         type: string
     type: object
+  model.PLayList:
+    properties:
+      description:
+        example: A short description of the application
+        type: string
+      level:
+        example: 34
+        type: integer
+      title:
+        example: Title name
+        type: string
+    type: object
   model.ParamsRefreshTocken:
     properties:
       refresh_token:
@@ -76,6 +65,31 @@ definitions:
         type: string
       refresh_token:
         example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  model.Track:
+    properties:
+      artist:
+        example: Artist name
+        type: string
+      code:
+        example: I001
+        type: string
+      description:
+        example: A short description of the application
+        type: string
+      likes:
+        type: boolean
+      path:
+        type: string
+      price:
+        example: '{Number: 1.10, Currency: EUR}'
+        type: string
+      sender:
+        example: sender set
+        type: string
+      title:
+        example: Title name
         type: string
     type: object
   model.User:
@@ -126,80 +140,33 @@ info:
   title: Sceleton Golang Application API
   version: 0.0.1
 paths:
-  /albums:
+  /audio/{playlist_id}:
     get:
       consumes:
       - '*/*'
-      description: responds with the list of all albums as JSON.
+      description: Streams audio files in the specified directory as MP3 or FLAC.
       parameters:
-      - description: Page number
-        in: query
-        name: page
-        type: integer
-      - description: Number of items per page
-        in: query
-        name: page_size
-        type: integer
-      - description: Field to sort by (e.g., 'created_at')
-        in: query
-        name: sort_by
+      - description: Playlist ID
+        in: path
+        name: playlist_id
         type: string
-      - description: Sort order ('asc' or 'desc')
-        in: query
-        name: sort_order
-        type: string
-      - description: Filter criteria ('I0001' or '=I0001')
-        in: query
-        name: filter
+      - description: Control operation playlist play
+        in: path
+        name: control
         type: string
       produces:
-      - application/json
+      - audio/mpeg
+      - audio/flac
+      - application/octet-stream
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Album'
+              $ref: '#/definitions/model.Track'
             type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Show the list of all albums.
-      tags:
-      - album-controller
-  /albums/{code}:
-    get:
-      consumes:
-      - '*/*'
-      description: |-
-        locates the album whose ID value matches the id parameter sent by the client,
-        then returns that album as a response.
-      parameters:
-      - description: Code album
-        in: path
-        name: code
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Album'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Not Found
+          description: Segment not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -208,144 +175,30 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Album whose ID value matches the id.
+      summary: Stream audio files.
       tags:
-      - album-controller
-  /albums/add:
+      - track-controller
+  /audio/upload:
     post:
       consumes:
-      - application/json
-      description: adds an album from JSON received in the request body.
-      parameters:
-      - description: Album details
-        in: body
-        name: request
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/model.Album'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            items:
-              $ref: '#/definitions/model.Album'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized - User unauthenticated
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "409":
-          description: album code already exists
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Adds an album from JSON.
-      tags:
-      - album-controller
-  /albums/delete/{code}:
-    delete:
-      consumes:
       - '*/*'
-      description: locates the album whose ID value matches the id parameter and deletes
-        it.
+      description: Streams audio files in the specified directory as MP3 or FLAC.
       parameters:
-      - description: Code album
+      - description: Upload media files
         in: path
-        name: code
-        required: true
+        name: control
         type: string
       produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.OkResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Deletes album whose ID value matches the code.
-      tags:
-      - album-controller
-  /albums/deleteAll:
-    delete:
-      consumes:
       - '*/*'
-      description: Delete ALL.
-      produces:
-      - application/json
       responses:
-        "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.OkResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Complete removal of all albums.
-      tags:
-      - album-controller
-  /albums/update:
-    patch:
-      consumes:
-      - application/json
-      description: updates an existing album with new data based on the ID parameter
-        sent by the client.
-      parameters:
-      - description: Updated album details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.Album'
-      produces:
-      - application/json
-      responses:
-        "200":
+        "201":
           description: OK
           schema:
-            $ref: '#/definitions/model.Album'
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
         "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Not Found
+          description: empty required fields
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -354,9 +207,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Updates an existing album with new data.
+      summary: Stream audio files.
       tags:
-      - album-controller
+      - track-controller
   /health:
     get:
       consumes:
@@ -572,6 +425,505 @@ paths:
       summary: Application liveness check function
       tags:
       - health-controller
+  /play/{playlist_id}:
+    get:
+      consumes:
+      - '*/*'
+      description: Streams and plays audio tracks from the specified playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Stream and play audio tracks from a playlist.
+      tags:
+      - track-controller
+  /playlist/{playlist_id}/add/track/{track_id}:
+    post:
+      consumes:
+      - application/json
+      description: Add a track to an existing playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: Track ID
+        in: path
+        name: track_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Track added to the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist or track not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add a track to a playlist
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/set:
+    post:
+      consumes:
+      - application/json
+      description: Set tracks in a playlist by providing a list of track IDs.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: List of track IDs to set in the playlist
+        in: body
+        name: track_ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks set in the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Set tracks in a playlist.
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/track/{track_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a track from the specified playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: Track ID
+        in: path
+        name: track_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Track removed from playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist or track not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove a track from the playlist.
+      tags:
+      - playlist-controller
+  /playlist/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new playlist with the provided information.
+      parameters:
+      - description: PLayList details
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/model.PLayList'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Playlist created successfully
+          schema:
+            items:
+              $ref: '#/definitions/model.PLayList'
+            type: array
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new playlist.
+      tags:
+      - playlist-controller
+  /playlist/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a playlist based on its unique ID.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a playlist by ID.
+      tags:
+      - playlist-controller
+  /playlists/{playlist_id}/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Removes all tracks from a playlist, effectively clearing it.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Playlist cleared successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear a playlist by removing all tracks from it.
+      tags:
+      - playlist-controller
+  /tracks:
+    get:
+      consumes:
+      - '*/*'
+      description: responds with the list of all tracks as JSON.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: page_size
+        type: integer
+      - description: Field to sort by (e.g., 'created_at')
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order ('asc' or 'desc')
+        in: query
+        name: sort_order
+        type: string
+      - description: Filter criteria ('I0001' or '=I0001')
+        in: query
+        name: filter
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "400":
+          description: Invalid page or page_size parameters
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Show the list of all tracks.
+      tags:
+      - track-controller
+  /tracks/{code}:
+    get:
+      consumes:
+      - '*/*'
+      description: |-
+        locates the track whose ID value matches the id parameter sent by the client,
+        then returns that track as a response.
+      parameters:
+      - description: Code track
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Track'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Track whose ID value matches the id.
+      tags:
+      - track-controller
+  /tracks/add:
+    post:
+      consumes:
+      - application/json
+      description: adds an track from JSON received in the request body.
+      parameters:
+      - description: Track details
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/model.Track'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "409":
+          description: track code already exists
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Adds an track from JSON.
+      tags:
+      - track-controller
+  /tracks/delete/{code}:
+    delete:
+      consumes:
+      - '*/*'
+      description: locates the track whose ID value matches the id parameter and deletes
+        it.
+      parameters:
+      - description: Code track
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/model.OkResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes track whose ID value matches the code.
+      tags:
+      - track-controller
+  /tracks/deleteAll:
+    delete:
+      consumes:
+      - '*/*'
+      description: Delete ALL.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/model.OkResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Complete removal of all tracks.
+      tags:
+      - track-controller
+  /tracks/update:
+    patch:
+      consumes:
+      - application/json
+      description: updates an existing track with new data based on the ID parameter
+        sent by the client.
+      parameters:
+      - description: Updated track details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Track'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Track'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Updates an existing track with new data.
+      tags:
+      - track-controller
   /users/delete:
     delete:
       consumes:

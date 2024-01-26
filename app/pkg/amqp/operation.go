@@ -14,9 +14,9 @@ import (
 
 const bcryptCost = 14
 
-// amqpGetAlbumByCode retrieves an album by its code using AMQP.
-func (c *MessageClient) amqpGetAlbumByCode(code string) (*model.Album, error) {
-	album, getErr := c.storage.Operations.GetAlbumsByCode(code)
+// amqpGetTrackByCode retrieves an track by its code using AMQP.
+func (c *MessageClient) amqpGetTrackByCode(code string) (*model.Track, error) {
+	track, getErr := c.storage.Operations.GetTracksByColumns(code, "code")
 	if getErr != nil {
 		publishErr := c.publishMessage(TypePublisherError, getErr.Error())
 		if publishErr != nil {
@@ -25,33 +25,33 @@ func (c *MessageClient) amqpGetAlbumByCode(code string) (*model.Album, error) {
 		return nil, getErr
 	}
 
-	err := c.publishMessage(TypePublisherMessage, album)
+	err := c.publishMessage(TypePublisherMessage, track)
 	if err != nil {
 		c.logger.Printf("Error publishing message: %v", err)
 	}
 
-	return &album, nil
+	return track, nil
 }
 
-// amqpPostAlbums posts albums data using AMQP.
-func (c *MessageClient) amqpPostAlbums(albumsData string) error {
+// amqpPostTracks posts tracks data using AMQP.
+func (c *MessageClient) amqpPostTracks(albumsData string) error {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(albumsData), &data)
 	if err != nil {
 		return err
 	}
 
-	albumArray, ok := data["album"].([]interface{})
+	albumArray, ok := data["track"].([]interface{})
 	if !ok {
-		c.logger.Println("Invalid albums data")
-		return fmt.Errorf("invalid albums data")
+		c.logger.Println("Invalid tracks data")
+		return fmt.Errorf("invalid tracks data")
 	}
 	var newPrice currency.Amount
-	albumsList := make([]model.Album, 0, len(albumArray)) // Pre-allocate with the expected length
+	albumsList := make([]model.Track, 0, len(albumArray)) // Pre-allocate with the expected length
 	for _, albumObj := range albumArray {
 		albumData, castOk := albumObj.(map[string]interface{})
 		if !castOk {
-			c.logger.Println("Invalid album data")
+			c.logger.Println("Invalid track data")
 			continue
 		}
 		priceData, castOk := albumData["Price"].(map[string]interface{})
@@ -86,7 +86,7 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			return errUUID
 		}
 
-		album := model.Album{
+		track := model.Track{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
@@ -99,10 +99,10 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 			CreatorUser: parsedUUID,
 		}
 
-		albumsList = append(albumsList, album)
+		albumsList = append(albumsList, track)
 	}
 
-	err = c.storage.Operations.CreateAlbums(albumsList)
+	err = c.storage.Operations.CreateTracks(albumsList)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -112,20 +112,20 @@ func (c *MessageClient) amqpPostAlbums(albumsData string) error {
 	}
 
 	messageData := map[string]interface{}{
-		"info": "Albums have been successfully posted",
+		"info": "Tracks have been successfully posted",
 	}
 
 	err = c.publishMessage(TypePublisherMessage, messageData)
 	if err != nil {
-		c.logger.Println("Failed to publish PostAlbumsSuccess message:", err)
+		c.logger.Println("Failed to publish PostTracksSuccess message:", err)
 	}
 
 	return nil
 }
 
-// amqpGetAllAlbums retrieves paginated albums using AMQP.
-func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, filter string) ([]model.Album, int, error) {
-	albums, totalRows, err := c.storage.Operations.GetAlbums(page, pageSize, sortBy, sortOrder, filter)
+// amqpGetAllTracks retrieves paginated tracks using AMQP.
+func (c *MessageClient) amqpGetAllTracks(page, pageSize int, sortBy, sortOrder, filter string) ([]model.Track, int, error) {
+	tracks, totalRows, err := c.storage.Operations.GetTracks(page, pageSize, sortBy, sortOrder, filter)
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -134,17 +134,17 @@ func (c *MessageClient) amqpGetAllAlbums(page, pageSize int, sortBy, sortOrder, 
 		return nil, 0, err
 	}
 
-	err = c.publishMessage(TypePublisherMessage, albums)
+	err = c.publishMessage(TypePublisherMessage, tracks)
 	if err != nil {
 		c.logger.Printf("Error publishing message: %v", err)
 	}
 
-	return albums, totalRows, nil
+	return tracks, totalRows, nil
 }
 
-// amqpGetDeleteAll deletes all albums using AMQP.
+// amqpGetDeleteAll deletes all tracks using AMQP.
 func (c *MessageClient) amqpGetDeleteAll() error {
-	err := c.storage.Operations.DeleteAlbumsAll()
+	err := c.storage.Operations.DeleteTracksAll()
 	if err != nil {
 		publishErr := c.publishMessage(TypePublisherError, err.Error())
 		if publishErr != nil {
@@ -154,7 +154,7 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 	}
 
 	messageData := map[string]interface{}{
-		"info": "Delete all albums request",
+		"info": "Delete all tracks request",
 	}
 
 	err = c.publishMessage(TypePublisherMessage, messageData)
@@ -162,7 +162,7 @@ func (c *MessageClient) amqpGetDeleteAll() error {
 		return err
 	}
 
-	c.logger.Println("All albums have been successfully deleted.")
+	c.logger.Println("All tracks have been successfully deleted.")
 
 	return nil
 }
@@ -261,33 +261,33 @@ func (c *MessageClient) amqpFindUserToEmail(userEmail string) error {
 	return nil
 }
 
-// amqpUpdateAlbum updates an album using AMQP.
-func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
+// amqpUpdateTrack updates an track using AMQP.
+func (c *MessageClient) amqpUpdateTrack(albumsData string) error {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(albumsData), &data)
 	if err != nil {
 		return err
 	}
 
-	// Fetch the album code from the data
+	// Fetch the track code from the data
 	code, codeOk := data["Code"].(string)
 	if !codeOk {
 		return fmt.Errorf("invalid code field")
 	}
 
-	// Fetch the album from the database based on the provided code
-	existingAlbum, getErr := c.storage.Operations.GetAlbumsByCode(code)
+	// Fetch the track from the database based on the provided code
+	existingTrack, getErr := c.storage.Operations.GetTracksByColumns(code, "code")
 	if getErr != nil {
-		c.logger.Printf("Error fetching album with code %s: %v", code, getErr)
+		c.logger.Printf("Error fetching track with code %s: %v", code, getErr)
 		return getErr
 	}
 
-	// Update the album fields based on the data received
+	// Update the track fields based on the data received
 	if title, titleOk := data["Title"].(string); titleOk {
-		existingAlbum.Title = title
+		existingTrack.Title = title
 	}
 	if artist, artistOk := data["Artist"].(string); artistOk {
-		existingAlbum.Artist = artist
+		existingTrack.Artist = artist
 	}
 	var newPrice currency.Amount
 	// Handle price data
@@ -304,23 +304,23 @@ func (c *MessageClient) amqpUpdateAlbum(albumsData string) error {
 			return err
 		}
 
-		existingAlbum.Price = newPrice
+		existingTrack.Price = newPrice
 	}
 
 	if description, descOk := data["Description"].(string); descOk {
-		existingAlbum.Description = description
+		existingTrack.Description = description
 	}
 	if sender, senderOk := data["Sender"].(string); senderOk {
-		existingAlbum.Sender = sender
+		existingTrack.Sender = sender
 	}
 
-	// Update the album in the database
-	err = c.storage.Operations.UpdateAlbums(&existingAlbum)
+	// Update the track in the database
+	err = c.storage.Operations.UpdateTracks(existingTrack)
 	if err != nil {
-		c.logger.Printf("Error updating album with code %s: %v", code, err)
+		c.logger.Printf("Error updating track with code %s: %v", code, err)
 		return err
 	}
 
-	c.logger.Printf("Album with code %s updated successfully", code)
+	c.logger.Printf("Track with code %s updated successfully", code)
 	return nil
 }

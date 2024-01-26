@@ -7,8 +7,8 @@ import (
 	"github.com/Masterminds/squirrel"
 )
 
-func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]model.Album, error) {
-	var albums []model.Album
+func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]model.Track, error) {
+	var tracks []model.Track
 
 	for {
 		// Generate the SQL query and arguments
@@ -23,27 +23,28 @@ func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]m
 			return nil, err
 		}
 
-		var chunk []model.Album
+		var chunk []model.Track
 
 		for rows.Next() {
-			var album model.Album
+			var track model.Track
 			err = rows.Scan(
-				&album.ID,
-				&album.CreatedAt,
-				&album.UpdatedAt,
-				&album.Title,
-				&album.Artist,
-				&album.Price,
-				&album.Code,
-				&album.Description,
-				&album.Sender,
-				&album.CreatorUser,
-				&album.Likes,
+				&track.ID,
+				&track.CreatedAt,
+				&track.UpdatedAt,
+				&track.Title,
+				&track.Artist,
+				&track.Price,
+				&track.Code,
+				&track.Description,
+				&track.Sender,
+				&track.CreatorUser,
+				&track.Likes,
+				&track.Path,
 			)
 			if err != nil {
 				return nil, err
 			}
-			chunk = append(chunk, album)
+			chunk = append(chunk, track)
 		}
 
 		rows.Close()
@@ -53,11 +54,11 @@ func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]m
 			break
 		}
 
-		albums = append(albums, chunk...)
+		tracks = append(tracks, chunk...)
 
 		// Adjust the OFFSET for the next batch
 		selectBuilder = selectBuilder.Offset(uint64(len(chunk)))
 	}
 
-	return albums, nil
+	return tracks, nil
 }

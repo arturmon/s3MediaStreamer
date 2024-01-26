@@ -46,17 +46,17 @@ func (c *MessageClient) handleMessage(message amqp.Delivery) {
 
 	// Based on the action, handle different types of messages.
 	switch action {
-	case "PostAlbums":
-		c.handleActionPostAlbums(data)
+	case "PostTracks":
+		c.handleActionPostTracks(data)
 
-	case "GetAllAlbums":
-		c.handleActionGetAllAlbums(data)
+	case "GetAllTracks":
+		c.handleActionGetAllTracks(data)
 
 	case "GetDeleteAll":
 		c.handleActionGetDeleteAll()
 
-	case "GetAlbumByCode":
-		c.handleActionGetAlbumByCode(data)
+	case "GetTrackByCode":
+		c.handleActionGetTrackByCode(data)
 
 	case "AddUser":
 		c.handleActionAddUser(data)
@@ -67,8 +67,8 @@ func (c *MessageClient) handleMessage(message amqp.Delivery) {
 	case "FindUserToEmail":
 		c.handleActionFindUserToEmail(data)
 
-	case "UpdateAlbum":
-		c.handleActionUpdateAlbum(data)
+	case "UpdateTrack":
+		c.handleActionUpdateTrack(data)
 
 	default:
 		c.logger.Printf("Unknown action: %s", action)
@@ -76,12 +76,12 @@ func (c *MessageClient) handleMessage(message amqp.Delivery) {
 	}
 }
 
-func (c *MessageClient) handleActionPostAlbums(data map[string]interface{}) {
-	resultErr := c.handlePostAlbums(data)
-	c.handleResult(resultErr, "PostAlbums")
+func (c *MessageClient) handleActionPostTracks(data map[string]interface{}) {
+	resultErr := c.handlePostTracks(data)
+	c.handleResult(resultErr, "PostTracks")
 }
 
-func (c *MessageClient) handleActionGetAllAlbums(data map[string]interface{}) {
+func (c *MessageClient) handleActionGetAllTracks(data map[string]interface{}) {
 	pageRaw, pageExists := data["page"]
 	pageSizeRaw, pageSizeExists := data["page_size"]
 	sortByRaw, sortByExists := data["sort_by"]
@@ -107,9 +107,9 @@ func (c *MessageClient) handleActionGetAllAlbums(data map[string]interface{}) {
 	offset := (page - 1) * pageSize
 	limit := pageSize
 
-	err := c.handleGetAllAlbums(offset, limit, sortBy, sortOrder, filter)
+	err := c.handleGetAllTracks(offset, limit, sortBy, sortOrder, filter)
 	if err != nil {
-		c.logger.Printf("Error handling GetAllAlbums action: %v", err)
+		c.logger.Printf("Error handling GetAllTracks action: %v", err)
 	}
 }
 
@@ -118,9 +118,9 @@ func (c *MessageClient) handleActionGetDeleteAll() {
 	c.handleResult(resultErr, "GetDeleteAll")
 }
 
-func (c *MessageClient) handleActionGetAlbumByCode(data map[string]interface{}) {
-	resultErr := c.handleGetAlbumByCode(data)
-	c.handleResult(resultErr, "GetAlbumByCode")
+func (c *MessageClient) handleActionGetTrackByCode(data map[string]interface{}) {
+	resultErr := c.handleGetTrackByCode(data)
+	c.handleResult(resultErr, "GetTrackByCode")
 }
 
 func (c *MessageClient) handleActionAddUser(data map[string]interface{}) {
@@ -138,9 +138,9 @@ func (c *MessageClient) handleActionFindUserToEmail(data map[string]interface{})
 	c.handleResult(resultErr, "FindUserToEmail")
 }
 
-func (c *MessageClient) handleActionUpdateAlbum(data map[string]interface{}) {
-	resultErr := c.handleUpdateAlbum(data)
-	c.handleResult(resultErr, "UpdateAlbum")
+func (c *MessageClient) handleActionUpdateTrack(data map[string]interface{}) {
+	resultErr := c.handleUpdateTrack(data)
+	c.handleResult(resultErr, "UpdateTrack")
 }
 
 func (c *MessageClient) handleResult(resultErr error, action string) {
