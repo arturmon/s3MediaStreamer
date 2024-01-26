@@ -2,8 +2,10 @@ package config
 
 //goland:noinspection ALL
 const (
-	ListenTypeSock  = "sock"
-	ListenTypePort  = "port"
-	CollectionAlbum = "album"
-	CollectionUser  = "user"
+	ListenTypeSock     = "sock"
+	ListenTypePort     = "port"
+	CollectionTrack    = "track"
+	CollectionPlaylist = "playlist"
+	CollectionUser     = "user"
+	FileQueue          = 100
 )

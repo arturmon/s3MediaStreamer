@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-// handlePostAlbums handles the "PostAlbums" action by processing the incoming album data.
-func (c *MessageClient) handlePostAlbums(data map[string]interface{}) error {
-	albumsData, ok := data["albums"].(map[string]interface{})
+// handlePostTracks handles the "PostTracks" action by processing the incoming track data.
+func (c *MessageClient) handlePostTracks(data map[string]interface{}) error {
+	albumsData, ok := data["tracks"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("invalid albums data")
+		return fmt.Errorf("invalid tracks data")
 	}
 
 	albumsJSON, err := json.Marshal(albumsData)
@@ -17,26 +17,26 @@ func (c *MessageClient) handlePostAlbums(data map[string]interface{}) error {
 		return err
 	}
 
-	return c.amqpPostAlbums(string(albumsJSON))
+	return c.amqpPostTracks(string(albumsJSON))
 }
 
-// handleGetAllAlbums handles the "GetAllAlbums" action by fetching and logging all albums.
-func (c *MessageClient) handleGetAllAlbums(page, pageSize int, sortBy, sortOrder, filter string) error {
-	albums, totalRows, err := c.amqpGetAllAlbums(page, pageSize, sortBy, sortOrder, filter)
+// handleGetAllTracks handles the "GetAllTracks" action by fetching and logging all tracks.
+func (c *MessageClient) handleGetAllTracks(page, pageSize int, sortBy, sortOrder, filter string) error {
+	tracks, totalRows, err := c.amqpGetAllTracks(page, pageSize, sortBy, sortOrder, filter)
 	if err != nil {
 		return err
 	}
 
-	albumsJSON, err := json.Marshal(albums)
+	albumsJSON, err := json.Marshal(tracks)
 	if err != nil {
 		return err
 	}
 	c.logger.Debugf("TotalRows: %d", totalRows)
-	c.logger.Debugf("Albums: %s", albumsJSON)
+	c.logger.Debugf("Tracks: %s", albumsJSON)
 	return nil
 }
 
-// handleGetDeleteAll handles the "GetDeleteAll" action by deleting all albums.
+// handleGetDeleteAll handles the "GetDeleteAll" action by deleting all tracks.
 func (c *MessageClient) handleGetDeleteAll() error {
 	err := c.amqpGetDeleteAll()
 	if err != nil {
@@ -46,19 +46,19 @@ func (c *MessageClient) handleGetDeleteAll() error {
 	return nil
 }
 
-// handleGetAlbumByCode handles the "GetAlbumByCode" action by fetching and logging an album by its code.
-func (c *MessageClient) handleGetAlbumByCode(data map[string]interface{}) error {
+// handleGetTrackByCode handles the "GetTrackByCode" action by fetching and logging an track by its code.
+func (c *MessageClient) handleGetTrackByCode(data map[string]interface{}) error {
 	albumCode, ok := data["albumCode"].(string)
 	if !ok {
 		return fmt.Errorf("invalid albumCode")
 	}
 
-	album, err := c.amqpGetAlbumByCode(albumCode)
+	track, err := c.amqpGetTrackByCode(albumCode)
 	if err != nil {
 		return err
 	}
 
-	c.logger.Printf("Album: %+v", album)
+	c.logger.Printf("Track: %+v", track)
 	return nil
 }
 
@@ -104,17 +104,17 @@ func (c *MessageClient) handleFindUserToEmail(data map[string]interface{}) error
 	return c.amqpFindUserToEmail(userEmail)
 }
 
-// HandlerUpdateAlbum handles the "UpdateAlbum" action by updating an album's data.
-func (c *MessageClient) handleUpdateAlbum(data map[string]interface{}) error {
-	newAlbumsData, ok := data["album"].(map[string]interface{})
+// HandlerUpdateTrack handles the "UpdateTrack" action by updating an track's data.
+func (c *MessageClient) handleUpdateTrack(data map[string]interface{}) error {
+	newTracksData, ok := data["track"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("invalid albums data")
+		return fmt.Errorf("invalid tracks data")
 	}
 
-	albumsJSON, err := json.Marshal(newAlbumsData)
+	albumsJSON, err := json.Marshal(newTracksData)
 	if err != nil {
 		return err
 	}
 
-	return c.amqpUpdateAlbum(string(albumsJSON))
+	return c.amqpUpdateTrack(string(albumsJSON))
 }

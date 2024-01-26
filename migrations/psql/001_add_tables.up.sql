@@ -3,8 +3,8 @@ CREATE TYPE price AS (
                          currency_code TEXT
                      );
 
-CREATE TABLE IF NOT EXISTS album (
-                                     _id               TEXT,
+CREATE TABLE IF NOT EXISTS tracks (
+                                     _id               TEXT NOT NULL PRIMARY KEY,
                                      created_at        TIMESTAMPTZ NOT NULL,
                                      updated_at        TIMESTAMPTZ,
                                      title             TEXT DEFAULT '',
@@ -13,12 +13,12 @@ CREATE TABLE IF NOT EXISTS album (
                                      code              TEXT UNIQUE,
                                      description       TEXT DEFAULT '',
                                      sender            TEXT CHECK (sender IN ('Amqp', 'Rest', 'Jobs')),
-                                     _creator_user     TEXT,
+                                     _creator_user     TEXT NOT NULL,
                                      likes             BOOLEAN DEFAULT FALSE,
                                      path              TEXT DEFAULT ''
 );
-CREATE INDEX idx_album_code ON album (code);
-alter table album owner to root;
+CREATE INDEX idx_album_code ON tracks (code);
+alter table tracks owner to root;
 
 CREATE TABLE IF NOT EXISTS users (
                                       _id           TEXT,
@@ -48,3 +48,22 @@ CREATE TABLE IF NOT EXISTS chart (
 );
 CREATE INDEX idx_album_id ON chart (_id);
 alter table chart owner to root;
+
+CREATE TABLE IF NOT EXISTS playlists (
+                                        _id               TEXT NOT NULL PRIMARY KEY,
+                                        created_at        TIMESTAMPTZ NOT NULL,
+                                        level             BIGINT,
+                                        title             TEXT DEFAULT '',
+                                        description       TEXT DEFAULT '',
+                                        _creator_user     TEXT
+);
+CREATE INDEX idx_album_playlist ON playlists (_id);
+alter table playlists owner to root;
+
+-- Intermediate Table for Many-to-Many Relationship
+CREATE TABLE IF NOT EXISTS playlist_tracks (
+                                               playlist_id TEXT NOT NULL REFERENCES playlists(_id),
+                                               track_id TEXT NOT NULL REFERENCES tracks(_id),
+                                               position BIGINT NOT NULL,
+                                               PRIMARY KEY (playlist_id, track_id)
+);

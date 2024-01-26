@@ -10,8 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *MongoClient) GetAlbumsForLearn() ([]model.Album, error) {
-	collection, err := c.FindCollections(config.CollectionAlbum)
+func (c *MongoClient) GetTracksForLearn() ([]model.Track, error) {
+	collection, err := c.FindCollections(config.CollectionTrack)
 
 	filter := bson.M{}
 	ctx := context.TODO()
@@ -21,26 +21,26 @@ func (c *MongoClient) GetAlbumsForLearn() ([]model.Album, error) {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	var albums []model.Album
+	var tracks []model.Track
 
 	for cursor.Next(ctx) {
-		var album model.Album
-		if err = cursor.Decode(&album); err != nil {
+		var track model.Track
+		if err = cursor.Decode(&track); err != nil {
 			return nil, err
 		}
-		albums = append(albums, album)
-		if len(albums) == ChunkSize {
+		tracks = append(tracks, track)
+		if len(tracks) == ChunkSize {
 			break
 		}
 	}
 	if err = cursor.Err(); err != nil {
 		return nil, err
 	}
-	return albums, nil
+	return tracks, nil
 }
 
 func (c *MongoClient) CreateTops(list []model.Tops) error {
-	collection, err := c.FindCollections(config.CollectionAlbum)
+	collection, err := c.FindCollections(config.CollectionTrack)
 	insertableList := make([]interface{}, len(list))
 	if err != nil {
 		return err
