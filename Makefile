@@ -30,3 +30,6 @@ install-tools:
 
 tidy:
 	go mod tidy
+
+goimports:
+	goimports -w file_name.go

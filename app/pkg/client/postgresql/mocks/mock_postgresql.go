@@ -39,7 +39,7 @@ func (m *MockPostgresCollectionQuery) EXPECT() *MockPostgresCollectionQueryMockR
 }
 
 // CreateIssue mocks base method.
-func (m *MockPostgresCollectionQuery) CreateIssue(task *model.Album) error {
+func (m *MockPostgresCollectionQuery) CreateIssue(task *model.Track) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateIssue", task)
 	ret0, _ := ret[0].(error)
@@ -53,7 +53,7 @@ func (mr *MockPostgresCollectionQueryMockRecorder) CreateIssue(task interface{})
 }
 
 // CreateMany mocks base method.
-func (m *MockPostgresCollectionQuery) CreateMany(list []model.Album) error {
+func (m *MockPostgresCollectionQuery) CreateMany(list []model.Track) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateMany", list)
 	ret0, _ := ret[0].(error)
@@ -138,10 +138,10 @@ func (mr *MockPostgresCollectionQueryMockRecorder) FindUserToEmail(email interfa
 }
 
 // GetAllIssues mocks base method.
-func (m *MockPostgresCollectionQuery) GetAllIssues() ([]model.Album, error) {
+func (m *MockPostgresCollectionQuery) GetAllIssues() ([]model.Track, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllIssues")
-	ret0, _ := ret[0].([]model.Album)
+	ret0, _ := ret[0].([]model.Track)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -153,10 +153,10 @@ func (mr *MockPostgresCollectionQueryMockRecorder) GetAllIssues() *gomock.Call {
 }
 
 // GetIssuesByCode mocks base method.
-func (m *MockPostgresCollectionQuery) GetIssuesByCode(code string) (model.Album, error) {
+func (m *MockPostgresCollectionQuery) GetIssuesByCode(code string) (model.Track, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetIssuesByCode", code)
-	ret0, _ := ret[0].(model.Album)
+	ret0, _ := ret[0].(model.Track)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -182,17 +182,17 @@ func (mr *MockPostgresCollectionQueryMockRecorder) MarkCompleted(code interface{
 }
 
 // UpdateIssue mocks base method.
-func (m *MockPostgresCollectionQuery) UpdateIssue(album *model.Album) error {
+func (m *MockPostgresCollectionQuery) UpdateIssue(track *model.Track) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateIssue", album)
+	ret := m.ctrl.Call(m, "UpdateIssue", track)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateIssue indicates an expected call of UpdateIssue.
-func (mr *MockPostgresCollectionQueryMockRecorder) UpdateIssue(album interface{}) *gomock.Call {
+func (mr *MockPostgresCollectionQueryMockRecorder) UpdateIssue(track interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIssue", reflect.TypeOf((*MockPostgresCollectionQuery)(nil).UpdateIssue), album)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIssue", reflect.TypeOf((*MockPostgresCollectionQuery)(nil).UpdateIssue), track)
 }
 
 // MockPostgresOperations is a mock of PostgresOperations interface.
@@ -274,7 +274,7 @@ func (mr *MockPostgresOperationsMockRecorder) MarkCompleted(code interface{}) *g
 }
 
 // UpdateIssue indicates an expected call of UpdateIssue.
-func (mr *MockPostgresOperationsMockRecorder) UpdateIssue(album interface{}) *gomock.Call {
+func (mr *MockPostgresOperationsMockRecorder) UpdateIssue(track interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIssue", reflect.TypeOf((*MockPostgresOperations)(nil).UpdateIssue), album)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateIssue", reflect.TypeOf((*MockPostgresOperations)(nil).UpdateIssue), track)
 }
