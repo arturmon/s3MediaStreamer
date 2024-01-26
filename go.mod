@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/ayush6624/go-chatgpt v0.3.0
 	github.com/bamzi/jobrunner v1.0.0
-	github.com/bojanz/currency v1.1.2
+	github.com/bojanz/currency v1.2.1
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin/v2 v2.77.2
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
@@ -17,7 +17,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/mock v1.6.0
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.5.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
@@ -31,8 +31,8 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	github.com/zsais/go-gin-prometheus v0.1.0
-	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.14.0
+	go.mongodb.org/mongo-driver v1.13.1
+	golang.org/x/crypto v0.13.0
 )
 
 require (
@@ -48,7 +48,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
-	github.com/cockroachdb/apd/v3 v3.1.2 // indirect
+	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
