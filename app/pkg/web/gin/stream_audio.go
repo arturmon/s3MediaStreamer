@@ -1,15 +1,12 @@
 package gin
 
 import (
+	"context"
 	"fmt"
-	"io"
+	"github.com/gin-gonic/gin"
 	"net/http"
-	"os"
 	"path/filepath"
 	"skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/files"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Audio godoc
@@ -55,6 +52,7 @@ func (a *WebApp) Audio(c *gin.Context) {
 // @Param control path string false "Control operation playlist play"
 // @Success 200 {array} model.Track "OK"
 // @Failure 404 {object} model.ErrorResponse "Segment not found"
+// @Failure 406 {object} model.ErrorResponse "Segment not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /audio/{playlist_id} [get]
@@ -68,28 +66,26 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 		return
 	}
 
-	fileInfo, err := os.Stat(track.Path)
+	findObject, err := a.S3.FindObjectFromVersion(context.Background(), track.S3Version)
 	if err != nil {
-		a.logger.Errorf("Error getting file info: %v", err)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
 		return
 	}
 
-	file, err := os.Open(track.Path)
+	fileData, err := a.S3.DownloadFilesS3(context.Background(), findObject.Key)
 	if err != nil {
-		a.logger.Errorf("Error opening file: %v", err)
+		c.IndentedJSON(http.StatusNotAcceptable, gin.H{"error": "Error downloading file"})
 		return
 	}
-	defer file.Close()
 
-	contentType := files.GetContentType(fileInfo.Name())
-	c.Header("Content-Type", contentType)
-	c.Header("Content-Disposition", "inline; filename="+fileInfo.Name())
-	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
+	c.Header("Content-Type", findObject.Metadata.Get("Content-Type"))
+	c.Header("Content-Disposition", "inline; filename="+findObject.Key)
+	c.Header("Content-Length", fmt.Sprintf("%d", findObject.Size))
 	// c.Header("Cache-Control", "public, max-age=3600")
 	// c.Header("Accept-Encoding", "*")
 	c.Header("Transfer-Encoding", "chunked")
 
-	_, err = io.Copy(c.Writer, file)
+	_, err = c.Writer.Write(fileData)
 	if err != nil {
 		// Log the error, but don't treat it as a critical error
 		a.logger.Errorf("Error streaming audio: %v", err)
@@ -113,7 +109,7 @@ func (a *WebApp) generateM3U8Playlist(filePaths *[]model.Track) []*model.Playlis
 
 func (a *WebApp) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
 	c.Header("Content-Type", "application/x-mpegURL")
-	// c.Header("Content-Type", "application/json")
+	//c.Header("Content-Type", "application/json")
 
 	_, err := fmt.Fprintf(c.Writer, "#EXTM3U\n")
 	if err != nil {

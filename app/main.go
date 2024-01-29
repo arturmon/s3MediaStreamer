@@ -6,7 +6,7 @@ import (
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
-	"skeleton-golange-application/app/internal/wathers"
+	"skeleton-golange-application/app/internal/s3"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	_ "skeleton-golange-application/app/pkg/web/gin"
@@ -33,7 +33,6 @@ import (
 // @securityDefinitions.basic	BasicAuth
 // @authorizationurl http://localhost:10000/v1/users/login
 func main() {
-	var fileQueue = make(chan string, config.FileQueue)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -66,10 +65,10 @@ func main() {
 		}
 	}
 
-	// Init watcher folders
+	// Init watcher
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go wathers.MonitorDirectory(ctx, myApp, &wg, fileQueue)
+	go s3.HandlersWatherS3(ctx, &wg, myApp)
 	if err != nil {
 		logger.Fatal(err)
 	}

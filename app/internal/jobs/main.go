@@ -20,8 +20,8 @@ func InitJob(app *app.App) error {
 		app.Logger.Error("Failed to schedule job:", err)
 		return err
 	}
-	cleanTracksJob := NewCleanTracksJob(app)
-	err = jobrunner.Schedule(app.Cfg.AppConfig.Jobs.JobCleanTrackPathNull, cleanTracksJob)
+	cleanS3Job := NewCleanS3Job(app)
+	err = jobrunner.Schedule(app.Cfg.AppConfig.Jobs.JobCleanTrackS3, cleanS3Job)
 	if err != nil {
 		app.Logger.Error("Failed to schedule job:", err)
 		return err
@@ -49,12 +49,12 @@ type CleanChartJob struct {
 	app *app.App
 }
 
-func NewCleanTracksJob(app *app.App) *CleanTracksJob {
-	return &CleanTracksJob{
+func NewCleanS3Job(app *app.App) *CleanS3Job {
+	return &CleanS3Job{
 		app: app,
 	}
 }
 
-type CleanTracksJob struct {
+type CleanS3Job struct {
 	app *app.App
 }

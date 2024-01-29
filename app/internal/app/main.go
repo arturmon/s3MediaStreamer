@@ -8,6 +8,7 @@ import (
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
+	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
 	"time"
 )
@@ -19,6 +20,7 @@ type App struct {
 	Storage    *model.DBConfig
 	Gin        *gin.WebApp
 	AMQPClient *amqp.MessageClient
+	S3         *s3.HandlerFromS3
 }
 
 // NewAppInit initializes a new App instance.
@@ -54,6 +56,16 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		logger.Fatal(err)
 		return nil, err
 	}
+	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(ctx, cfg, logger)
+	if s3err != nil {
+		logger.Error("Failed to initialize S3:", s3err)
+		logger.Fatal(s3err)
+		return nil, s3err
+	}
+	err = s3client.InitS3(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
@@ -81,6 +93,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		Storage:    storage,
 		Gin:        myGin,
 		AMQPClient: amqpClient,
+		S3:         s3client,
 	}, nil
 }
 
@@ -107,6 +120,10 @@ func (a *App) GetGin() (*gin.WebApp, error) {
 // GetMessageClient returns the initialized AMQP client instance.
 func (a *App) GetMessageClient() *amqp.MessageClient {
 	return a.AMQPClient
+}
+
+func (a *App) GetS3Client() (*s3.HandlerFromS3, error) {
+	return a.S3, nil
 }
 
 // Ensure that App implements the interfaces.AppInterface interface.

@@ -199,12 +199,14 @@ func (c *PgClient) UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest
 		// Check if the track exists in the new order
 		newPosition, exists := newPositions[trackID]
 		if exists {
-			updateQuery := squirrel.Update("playlist_tracks").
-				Set("position", newPosition).
-				Where(squirrel.Eq{"playlist_id": playlistID, "track_id": trackID})
+			// Use the ON CONFLICT clause to handle conflicts by inserting the track
+			updateQuery := squirrel.Insert("playlist_tracks").
+				Columns("playlist_id", "track_id", "position").
+				Values(playlistID, trackID, newPosition).
+				Suffix("ON CONFLICT (playlist_id, track_id) DO UPDATE SET position = EXCLUDED.position")
 
-			sql, args, errUpdateQuery := updateQuery.PlaceholderFormat(squirrel.Dollar).ToSql()
-			if errUpdateQuery != nil {
+			sql, args, errInsertQuery := updateQuery.PlaceholderFormat(squirrel.Dollar).ToSql()
+			if errInsertQuery != nil {
 				return err
 			}
 
@@ -249,7 +251,7 @@ func (c *PgClient) GetTracksByPlaylist(playlistID string) ([]model.Track, error)
 	var tracks []model.Track
 	for rows.Next() {
 		var track model.Track
-		err = rows.Scan(&track.ID, &track.CreatedAt, &track.UpdatedAt, &track.Title, &track.Artist, &track.Price, &track.Code, &track.Description, &track.Sender, &track.CreatorUser, &track.Likes, &track.Path)
+		err = rows.Scan(&track.ID, &track.CreatedAt, &track.UpdatedAt, &track.Title, &track.Artist, &track.Price, &track.Code, &track.Description, &track.Sender, &track.CreatorUser, &track.Likes, &track.S3Version)
 		if err != nil {
 			return nil, err
 		}

@@ -500,3 +500,26 @@ types: `logs.error`
 
 ### ChatGPP
 Get your API key from the OpenAI Dashboard - [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
+
+### S3
+
+```shell
+docker run -d --name minio \
+-p 9000:9000 \
+-p 9001:9001 \
+-v /home/amudrykh/minio_data:/data \
+-e MINIO_ROOT_USER=admin \
+-e MINIO_ROOT_PASSWORD=12345678 -e MINIO_DEFAULT_BUCKETS=img:none,img-cache:none \
+-e MINIO_BROWSER=on -e CONSOLE_SECURE_TLS_REDIRECT=off \
+bitnami/minio:latest
+```
+## Env variables
+```
+JOB_CLEAN_ALBUM_PATH_NULL env-default:"@every 10m"
+S3_ENDPOINT" env-default:"localhost:9000"
+S3_ACCESS_KEY_ID" env-default:"dfggrhgrtfh"
+S3_SECRET_ACCESS_KEY" env-default:"fdgdfgdfgdfgfd"
+S3_USE_SSL" env-default:"false"
+S3_BUCKET_NAME" env-default:"music-bucket"
+S3_LOCATION" env-default:"us-east-1"
+```

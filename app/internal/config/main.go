@@ -1,6 +1,6 @@
 package config
 
-// jobrunner.Schedule("* */5 * * * *", DoSomething{}) // every 5min do something
+// jobrunner.Schedule("@every 5m", DoSomething{}) // every 5min do something
 // jobrunner.Schedule("@every 1h30m10s", ReminderEmails{})
 // jobrunner.Schedule("@midnight", DataStats{}) // every midnight do this..
 // https://github.com/robfig/cron/blob/v2/doc.go
@@ -18,14 +18,22 @@ type Config struct {
 		LogType  string `env:"LOG_TYPE" env-default:"text"`    // text, json
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 		Jobs     struct {
-			JobIDUserRun          string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
-			JonRun                string `env:"JOB_RUN" env-default:"@midnight"`
-			JobCleanChart         string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
-			JobCleanTrackPathNull string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
-			SystemWriteUser       string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
-			OpenAiKey             string `env:"JOB_OPENAI_KEY" env-default:""`
+			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
+			JonRun          string `env:"JOB_RUN" env-default:"@midnight"`
+			JobCleanChart   string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
+			JobCleanTrackS3 string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
+			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
+			OpenAiKey       string `env:"JOB_OPENAI_KEY" env-default:""`
 		}
 		MusicPath string `env:"MUSIC_PATH" env-default:"music"`
+		S3        struct {
+			Endpoint        string `env:"S3_ENDPOINT" env-default:"localhost:9000"`
+			AccessKeyID     string `env:"S3_ACCESS_KEY_ID" env-default:""`
+			SecretAccessKey string `env:"S3_SECRET_ACCESS_KEY" env-default:""`
+			UseSSL          bool   `env:"S3_USE_SSL" env-default:"false"`
+			BucketName      string `env:"S3_BUCKET_NAME" env-default:"music-bucket"`
+			Location        string `env:"S3_LOCATION" env-default:"us-east-1"`
+		}
 	}
 	Storage struct {
 		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"` // mongodb, postgresql

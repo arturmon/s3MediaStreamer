@@ -34,7 +34,7 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
 		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user, likes, path)
+			INSERT INTO tracks (_id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user, likes, s3Version)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		`
 		args := []interface{}{
@@ -49,7 +49,7 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 			track.Sender,
 			track.CreatorUser,
 			track.Likes,
-			track.Path,
+			track.S3Version,
 		}
 
 		batch.Queue(query, args...)
@@ -137,7 +137,7 @@ func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string
 			&track.ID, &track.CreatedAt, &track.UpdatedAt,
 			&track.Title, &track.Artist, &track.Price,
 			&track.Code, &track.Description, &track.Sender,
-			&track.CreatorUser, &track.Likes, &track.Path,
+			&track.CreatorUser, &track.Likes, &track.S3Version,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -180,7 +180,7 @@ func (c *PgClient) GetTracksByColumns(code, columns string) (*model.Track, error
 		&track.ID, &track.CreatedAt, &track.UpdatedAt,
 		&track.Title, &track.Artist, &track.Price,
 		&track.Code, &track.Description, &track.Sender,
-		&track.CreatorUser, &track.Likes, &track.Path,
+		&track.CreatorUser, &track.Likes, &track.S3Version,
 	)
 	if err != nil {
 		return nil, err
@@ -248,7 +248,7 @@ func (c *PgClient) UpdateTracks(track *model.Track) error {
 		"description": track.Description,
 		"sender":      track.Sender,
 		"likes":       track.Likes,
-		"path":        track.Path,
+		"s3Version":   track.S3Version,
 	})
 
 	// Add a WHERE condition to identify the record to update based on the provided code
@@ -397,7 +397,7 @@ func (c *PgClient) GetAllTracksByPositions(playlistID string) ([]model.Track, er
 		if err = rows.Scan(&trackPlaylistID, &position, &track.ID, &track.CreatedAt,
 			&track.UpdatedAt, &track.Title, &track.Artist, &track.Price,
 			&track.Code, &track.Description, &track.Sender, &track.CreatorUser,
-			&track.Likes, &track.Path); err != nil {
+			&track.Likes, &track.S3Version); err != nil {
 			return nil, err
 		}
 

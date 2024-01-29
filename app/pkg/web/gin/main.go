@@ -8,9 +8,7 @@ import (
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
-
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"skeleton-golange-application/app/pkg/s3"
 
 	"github.com/gin-contrib/cors"
 
@@ -34,6 +32,7 @@ type WebApp struct {
 	healthMetrics *monitoring.HealthMetrics
 	metrics       *monitoring.Metrics
 	enforcer      *casbin.Enforcer
+	S3            *s3.HandlerFromS3
 }
 
 func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
@@ -85,6 +84,17 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	healthMetrics := monitoring.NewHealthMetrics()
 	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)
 
+	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(ctx, cfg, logger)
+	if s3err != nil {
+		logger.Error("Failed to initialize S3:", s3err)
+		logger.Fatal(s3err)
+		return nil, s3err
+	}
+	err = s3client.InitS3(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &WebApp{
 		cfg:           cfg,
 		logger:        logger,
@@ -93,6 +103,7 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 		healthMetrics: healthMetrics,
 		metrics:       metrics,
 		enforcer:      enforcer,
+		S3:            s3client,
 	}, nil
 }
 
@@ -126,66 +137,6 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	a.shutdownServer(server)
 
 	a.logger.Info("Application stopped")
-}
-
-func (a *WebApp) setupAppRoutesV1() {
-	v1 := a.router.Group("/v1")
-	{
-		users := v1.Group("/users")
-		{
-			users.POST("/register", a.Register)
-			users.OPTIONS("/login", handleOptions)
-			users.POST("/login", a.Login)
-			users.GET("/me", a.User)
-			users.POST("/delete", a.DeleteUser)
-			users.POST("/logout", a.Logout)
-			users.POST("/refresh", a.refreshTokenHandler)
-			otp := users.Group("/otp")
-			{
-				otp.POST("/generate", a.GenerateOTP)
-				otp.POST("/verify", a.VerifyOTP)
-				otp.POST("/validate", a.ValidateOTP)
-				otp.POST("/disable", a.DisableOTP)
-			}
-		}
-		tracks := v1.Group("/tracks")
-		{
-			tracks.GET("", a.GetAllTracks)
-			tracks.GET("/:code", a.GetTrackByID)
-			tracks.DELETE("/deleteAll", a.GetDeleteAll)
-			tracks.DELETE("/delete/:code", a.GetDeleteByID)
-			tracks.POST("/add", a.PostTracks)
-			tracks.PATCH("/update", a.UpdateTrack)
-		}
-		a.logger.Info("swagger docs initializing")
-		swagger := v1.Group("/swagger")
-		{
-			swagger.GET("", func(c *gin.Context) {
-				c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-			})
-			swagger.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-		}
-		audio := v1.Group("/audio")
-		{
-			audio.GET("/stream/:segment", a.StreamM3U)
-			audio.GET("/:playlist_id", a.Audio)
-			audio.POST("/upload", a.PostFiles)
-		}
-		playlist := v1.Group("/playlist")
-		{
-			playlist.POST("/:playlist_id/add/track/:track_id", a.AddToPlaylist)
-			playlist.DELETE("/:playlist_id/remove/track/:track_id", a.RemoveFromPlaylist)
-			playlist.DELETE("/:playlist_id/clear", a.ClearPlaylist)
-			playlist.POST("/create", a.CreatePlaylist)
-			playlist.DELETE("/delete/:id", a.DeletePlaylist)
-			playlist.POST("/:playlist_id/set", a.SetFromPlaylist)
-		}
-
-		player := v1.Group("/player")
-		{
-			player.GET("/play/:playlist_id", a.Play)
-		}
-	}
 }
 
 func (a *WebApp) setupStaticFiles() {

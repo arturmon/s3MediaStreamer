@@ -5,6 +5,7 @@ import (
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
 )
 
@@ -14,4 +15,5 @@ type AppInterface interface {
 	GetCfg() *config.Config
 	GetGin() (*gin.WebApp, error)
 	GetMessageClient() *amqp.MessageClient
+	GetS3Client() (*s3.HandlerFromS3, error)
 }

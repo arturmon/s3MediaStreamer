@@ -13,6 +13,5 @@ p, member, /v1/tracks, *
 p, member, /v1/tracks/*, *
 p, anonymous, /v1/audio, *
 p, anonymous, /v1/audio/*, *
-p, anonymous, /v1/playlist/*, *
+p, member, /v1/playlist/*, *
 p, anonymous, /v1/player/*, *
-p, anonymous, /v1/audio/play/stream/*, *

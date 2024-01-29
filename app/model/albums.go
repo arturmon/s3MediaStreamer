@@ -20,7 +20,7 @@ type Track struct {
 	Sender      string          `json:"sender" bson:"sender" example:"sender set"`
 	CreatorUser uuid.UUID       `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 	Likes       bool            `json:"likes" bson:"likes"`
-	Path        string          `json:"path" bson:"path"`
+	S3Version   string          `json:"s3Version" bson:"s3Version"`
 }
 
 type Tops struct {

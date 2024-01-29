@@ -1,7 +1,8 @@
 package tags
 
 import (
-	"os"
+	"fmt"
+	"io"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/logging"
@@ -12,38 +13,30 @@ import (
 	"github.com/google/uuid"
 )
 
-func ReadTags(filePath string, cfg *config.Config, logger *logging.Logger) (*model.Track, error) {
+func ReadTags(reader io.ReadSeeker, cfg *config.Config, logger *logging.Logger) (*model.Track, error) {
 	var track model.Track
 	creatorUserUUID, err := uuid.Parse(cfg.AppConfig.Jobs.JobIDUserRun)
 	if err != nil {
 		return nil, err
 	}
 
-	file, errOpen := os.Open(filePath)
-	if errOpen != nil {
-		logger.Errorf("Error opening file: %v\n", err)
-		return nil, errOpen
-	}
-
-	tags, errTag := tag.ReadFrom(file)
+	tags, errTag := tag.ReadFrom(reader)
 	if errTag != nil {
-		logger.Errorf("Error reading tags %s: %v\n", filePath, errTag)
 		return nil, errTag
 	}
+
+	// Convert the year to a time.Time value
+	createdAt := time.Date(tags.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	price, errPrice := currency.NewAmount("0", "EUR")
 	if errPrice != nil {
 		return nil, errPrice
 	}
 
-	fileInfo, _ := file.Stat()
-	createdAt := fileInfo.ModTime()
-	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			return
-		}
-	}(file)
+	if tags.Title() == "" || tags.Artist() == "" {
+		return nil, fmt.Errorf("failed to read tags: empty title or artist")
+	}
+
 	track = model.Track{
 		ID:          uuid.New(),
 		CreatedAt:   createdAt,
@@ -53,10 +46,10 @@ func ReadTags(filePath string, cfg *config.Config, logger *logging.Logger) (*mod
 		Price:       price,
 		Code:        randomString(lengthRandomGenerateCode),
 		Description: tags.Comment(),
-		Sender:      cfg.AppConfig.Jobs.SystemWriteUser,
+		Sender:      "",
 		CreatorUser: creatorUserUUID,
 		Likes:       false,
-		Path:        filePath,
+		S3Version:   "",
 	}
 
 	return &track, nil

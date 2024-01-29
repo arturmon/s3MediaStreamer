@@ -185,9 +185,9 @@ func (a *WebApp) PostTracks(c *gin.Context) {
 		track.Artist = strings.TrimSpace(track.Artist)
 		track.Code = strings.TrimSpace(track.Code)
 		track.Description = strings.TrimSpace(track.Description)
-		track.Path = strings.TrimSpace(track.Path)
+		track.S3Version = strings.TrimSpace(track.S3Version)
 
-		if track.Code == "" || track.Artist == "" || track.Path == "" {
+		if track.Code == "" || track.Artist == "" || track.S3Version == "" {
 			c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist` or `Path`"})
 			return
 		}

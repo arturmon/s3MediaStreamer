@@ -39,7 +39,7 @@ func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]m
 				&track.Sender,
 				&track.CreatorUser,
 				&track.Likes,
-				&track.Path,
+				&track.S3Version,
 			)
 			if err != nil {
 				return nil, err
