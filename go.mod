@@ -10,8 +10,7 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin/v2 v2.81.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
-	github.com/fsnotify/fsnotify v1.4.9
-	github.com/gin-contrib/cors v1.4.0
+	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.0.0
@@ -44,7 +43,7 @@ require (
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/bos-hieu/mongostore v0.0.2 // indirect
 	github.com/bradleypeabody/gorilla-sessions-memcache v0.0.0-20181103040241-659414f458e1 // indirect
-	github.com/bytedance/sonic v1.10.0-rc3 // indirect
+	github.com/bytedance/sonic v1.10.1 // indirect
 	github.com/casbin/govaluate v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -60,7 +59,7 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.0 // indirect
+	github.com/go-playground/validator/v10 v10.15.5 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -93,7 +92,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
-	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
+	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
@@ -111,7 +110,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/arch v0.4.0 // indirect
+	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
