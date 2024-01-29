@@ -1,10 +1,11 @@
 package gin
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"net/http"
 )
 
 func (a *WebApp) setupAppRoutesV1() {

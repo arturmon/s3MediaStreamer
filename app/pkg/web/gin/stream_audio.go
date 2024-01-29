@@ -3,10 +3,11 @@ package gin
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
 	"skeleton-golange-application/app/model"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Audio godoc
@@ -109,7 +110,7 @@ func (a *WebApp) generateM3U8Playlist(filePaths *[]model.Track) []*model.Playlis
 
 func (a *WebApp) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
 	c.Header("Content-Type", "application/x-mpegURL")
-	//c.Header("Content-Type", "application/json")
+	// c.Header("Content-Type", "application/json")
 
 	_, err := fmt.Fprintf(c.Writer, "#EXTM3U\n")
 	if err != nil {

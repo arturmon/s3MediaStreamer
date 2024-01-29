@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/logging"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func (h *HandlerFromS3) NewClientS3(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
+func (h *HandlerFromS3) NewClientS3(cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
 	logger.Info("S3 initializing...")
 	minioClient, err := minio.New(cfg.AppConfig.S3.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AppConfig.S3.AccessKeyID, cfg.AppConfig.S3.SecretAccessKey, ""),
@@ -56,7 +57,7 @@ func (h *HandlerFromS3) InitS3(ctx context.Context) error {
 	return nil
 }
 
-func (h *HandlerFromS3) UploadFilesS3(upload *model.UploadS3, ctx context.Context) error {
+func (h *HandlerFromS3) UploadFilesS3(ctx context.Context, upload *model.UploadS3) error {
 	info, err := h.s3Handler.FPutObject(
 		ctx, h.cfg.AppConfig.S3.BucketName,
 		upload.ObjectName,
@@ -78,7 +79,7 @@ func (h *HandlerFromS3) DownloadFilesS3(ctx context.Context, name string) ([]byt
 	defer object.Close()
 
 	var buffer bytes.Buffer
-	if _, err := io.Copy(&buffer, object); err != nil {
+	if _, err = io.Copy(&buffer, object); err != nil {
 		return nil, err
 	}
 
@@ -127,5 +128,5 @@ func (h *HandlerFromS3) FindObjectFromVersion(ctx context.Context, s3tag string)
 	}
 
 	// Object not found, return an error
-	return minio.ObjectInfo{}, fmt.Errorf("Object not found")
+	return minio.ObjectInfo{}, fmt.Errorf("object not found")
 }

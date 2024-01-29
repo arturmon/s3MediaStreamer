@@ -2,13 +2,12 @@ package s3
 
 import (
 	"context"
+
 	"github.com/minio/minio-go/v7/pkg/notification"
 )
 
 // MonitoringDirectoryS3 monitors the addition of new objects in an S3 bucket.
 func (h *HandlerFromS3) MonitoringDirectoryS3(ctx context.Context) (<-chan notification.Info, error) {
-	// Choose an appropriate buffer size based on your expected event load
-	bufferSize := 10
 	// Listen for bucket notifications on "mybucket" filtered by prefix, suffix, and events.
 	notificationChannel := make(chan notification.Info, bufferSize)
 

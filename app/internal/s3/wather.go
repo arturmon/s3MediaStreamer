@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/minio/minio-go/v7/pkg/notification"
 	"regexp"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/tags"
 	"strings"
 	"sync"
+
+	"github.com/minio/minio-go/v7/pkg/notification"
 )
 
 type eventS3 struct {
@@ -50,25 +51,32 @@ func HandlersWatherS3(ctx context.Context, wg *sync.WaitGroup, app *app.App) {
 			}
 
 			app.Logger.Printf("Track name: %v\n", structS3.Name)
-
-			switch structS3.Type {
-			case "Put":
-				err := checkObjectS3(ctx, structS3, app)
-				if err != nil {
-					app.Logger.Printf("Error handling object: %v\n", err)
-					continue
-				}
-			case "Delete":
-				err := app.Storage.Operations.DeleteTracks(structS3.VersionID, "s3Version")
-				if err != nil {
-					app.Logger.Printf("Error deleting filename: %v\n", err)
-				}
-				app.Logger.Printf("Delete track: %s\n", structS3.Name)
-			default:
-				app.Logger.Printf("Unsupported event type: %s\n", structS3.Type)
+			err = workSwitchS3Type(ctx, structS3, app)
+			if err != nil {
+				continue
 			}
 		}
 	}
+}
+
+func workSwitchS3Type(ctx context.Context, structS3 *eventS3, app *app.App) error {
+	switch structS3.Type {
+	case "Put":
+		err := checkObjectS3(ctx, structS3, app)
+		if err != nil {
+			app.Logger.Printf("Error handling object: %v\n", err)
+			return err
+		}
+	case "Delete":
+		err := app.Storage.Operations.DeleteTracks(structS3.VersionID, "s3Version")
+		if err != nil {
+			app.Logger.Printf("Error deleting filename: %v\n", err)
+		}
+		app.Logger.Printf("Delete track: %s\n", structS3.Name)
+	default:
+		app.Logger.Printf("Unsupported event type: %s\n", structS3.Type)
+	}
+	return nil
 }
 
 func fillStruct(event notification.Info) (*eventS3, error) {
@@ -83,7 +91,7 @@ func fillStruct(event notification.Info) (*eventS3, error) {
 		return nil, fmt.Errorf("no S3 key in the event")
 	}
 	parts := strings.Split(firstRecord.EventName, ":")
-	if len(parts) != 3 {
+	if len(parts) != eventStripRecordObjectKey {
 		return nil, fmt.Errorf("invalid event type format")
 	}
 
@@ -109,7 +117,7 @@ func checkObjectS3(ctx context.Context, object *eventS3, app *app.App) error {
 	}
 
 	// Create a Track from the file data
-	objectTags, errReadTags := tags.ReadTags(bytes.NewReader(fileData), app.Cfg, app.Logger)
+	objectTags, errReadTags := tags.ReadTags(bytes.NewReader(fileData), app.Cfg)
 	if errReadTags != nil {
 		app.Logger.Printf("Error processing file: %s Error: %v\n", object.Name, errReadTags)
 		return err

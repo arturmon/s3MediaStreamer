@@ -3,9 +3,10 @@ package jobs
 import (
 	"bytes"
 	"context"
-	"github.com/minio/minio-go/v7"
 	"skeleton-golange-application/app/pkg/tags"
 	"sync"
+
+	"github.com/minio/minio-go/v7"
 )
 
 func (j *CleanS3Job) Run() {
@@ -35,7 +36,7 @@ func (j *CleanS3Job) Run() {
 			}
 
 			// Create a Track from the file data
-			_, errReadTags := tags.ReadTags(bytes.NewReader(fileData), j.app.Cfg, j.app.Logger)
+			_, errReadTags := tags.ReadTags(bytes.NewReader(fileData), j.app.Cfg)
 			if errReadTags != nil {
 				j.app.Logger.Printf("Find empty file: %s\n", obj.Key)
 				err = j.app.S3.DeleteObjectS3(ctx, obj.Key)

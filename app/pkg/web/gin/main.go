@@ -84,7 +84,7 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	healthMetrics := monitoring.NewHealthMetrics()
 	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)
 
-	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(ctx, cfg, logger)
+	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(cfg, logger)
 	if s3err != nil {
 		logger.Error("Failed to initialize S3:", s3err)
 		logger.Fatal(s3err)

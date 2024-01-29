@@ -5,7 +5,6 @@ import (
 	"io"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/logging"
 	"time"
 
 	"github.com/bojanz/currency"
@@ -13,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func ReadTags(reader io.ReadSeeker, cfg *config.Config, logger *logging.Logger) (*model.Track, error) {
+func ReadTags(reader io.ReadSeeker, cfg *config.Config) (*model.Track, error) {
 	var track model.Track
 	creatorUserUUID, err := uuid.Parse(cfg.AppConfig.Jobs.JobIDUserRun)
 	if err != nil {

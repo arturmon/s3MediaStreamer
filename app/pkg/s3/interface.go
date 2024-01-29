@@ -2,9 +2,10 @@ package s3
 
 import (
 	"context"
-	"github.com/minio/minio-go/v7"
 	"skeleton-golange-application/app/internal/config"
 	"sync"
+
+	"github.com/minio/minio-go/v7"
 
 	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/logging"
