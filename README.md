@@ -7,58 +7,15 @@
 cd skeleton-golange-application
 swag init
 ```
-Use MongoDB docker container 
-```shell
-docker run -d --name mongodb \
--p 27017:27017 \
--v /home/amudrykh/mongodb:/bitnami/mongodb \
--e MONGODB_ROOT_PASSWORD=1qazxsw2 \
--e MONGODB_USERNAME=root -e MONGODB_PASSWORD=1qazxsw2 \
--e MONGODB_DATABASE=db_issue_album \
-bitnami/mongodb:latest
-```
-Use Postgresql docker container
-```shell
-docker run -d --name postgresql-server \
--p 5432:5432 \
--v /home/amudrykh/postgresql:/bitnami/postgresql \
--e POSTGRESQL_USERNAME=root \
--e POSTGRESQL_PASSWORD=1qazxsw2 \
--e POSTGRESQL_DATABASE=db_issue_album bitnami/postgresql:latest
-```
 create add db
 ```sql
-create database casbin
+create database db_issue_album
     with owner root;
 create database session
     with owner root;
-
+create database casbin
+    with owner root;
 ```
-
-Use MQ
-GUi port `15672`
-
-```shell
-docker run -d --name some-rabbit \
--e RABBITMQ_DEFAULT_USER=user \
--e RABBITMQ_DEFAULT_PASS=password \
-rabbitmq:3-management
-```
-Use Session
-Redis
-```shell
-docker run --name redis -d \
--p 6379:6379 \
--e ALLOW_EMPTY_PASSWORD=yes \
-bitnami/redis:latest
-```
-memcached
-```shell
-docker run --name memcache -d \
-bitnami/memcached:latest
-```
-
-
 Downloading dependencies
 ```shell
 go get -u go.mongodb.org/mongo-driver/bson/primitive

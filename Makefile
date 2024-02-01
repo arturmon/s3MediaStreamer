@@ -33,3 +33,7 @@ tidy:
 
 goimports:
 	goimports -w file_name.go
+
+compose-down: ### Down docker-compose
+	docker-compose down --remove-orphans
+.PHONY: compose-down

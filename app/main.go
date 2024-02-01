@@ -6,11 +6,9 @@ import (
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
-	"skeleton-golange-application/app/internal/s3"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	_ "skeleton-golange-application/app/pkg/web/gin"
-	"sync"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -55,23 +53,24 @@ func main() {
 	}
 
 	app.HandleSignals(ctx, logger, cancel)
-	amqp.ConsumeMessages(ctx, logger, myApp.GetMessageClient())
+	/*
+		go func() {
+			if err := amqp.ConsumeMessages(ctx, logger, myApp.GetMessageClient()); err != nil {
+				logger.Fatal(err)
+			}
+		}()
 
-	// Call PostInit with the AMQPClient instance and the config
-	if myApp.GetMessageClient() != nil {
-		err = amqp.PostInit(myApp.GetMessageClient(), cfg) // Use the existing variable name "err"
-		if err != nil {
-			logger.Fatal("Failed to pre-initialize AMQP:", err)
+	*/
+
+	// Specify the number of workers in the pool
+	numWorkers := 5
+	workerDone := make(chan struct{})
+	go func() {
+		if err = amqp.ConsumeMessagesWithPool(ctx, logger, myApp.GetMessageClient(), numWorkers, workerDone); err != nil {
+			// Handle error
+			logger.Fatal(err)
 		}
-	}
-
-	// Init watcher
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go s3.HandlersWatherS3(ctx, &wg, myApp)
-	if err != nil {
-		logger.Fatal(err)
-	}
+	}()
 
 	logger.Info("🚀 Running Application...")
 	myApp.Gin.Run(ctx) // The app will run

@@ -3,8 +3,6 @@ package amqp
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"strconv"
 
 	"github.com/streadway/amqp"
 )
@@ -23,12 +21,14 @@ func (c *MessageClient) consumeMessages(ctx context.Context, messages <-chan amq
 			}
 
 			// Handle the message based on its action
-			c.handleMessage(message)
+			go c.handleMessage(ctx, message)
 		}
 	}
 }
 
-func (c *MessageClient) handleMessage(message amqp.Delivery) {
+func (c *MessageClient) handleMessage(ctx context.Context, message amqp.Delivery) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	// Decode the incoming JSON message body.
 	var data map[string]interface{}
 	err := json.Unmarshal(message.Body, &data)
@@ -38,128 +38,54 @@ func (c *MessageClient) handleMessage(message amqp.Delivery) {
 	}
 
 	// Extract the action field from the message data.
-	action, ok := data["action"].(string)
+	action, ok := data["EventName"].(string)
 	if !ok {
 		c.logger.Println("Invalid action field")
 		return
 	}
 
+	s3event, errExtract := extractRecordsEvent(data)
+	c.logger.Debugf("%v\n", s3event)
+	if errExtract != nil {
+		c.logger.Printf("Error extract message: %v", errExtract)
+		return
+	}
 	// Based on the action, handle different types of messages.
 	switch action {
-	case "PostTracks":
-		c.handleActionPostTracks(data)
-
-	case "GetAllTracks":
-		c.handleActionGetAllTracks(data)
-
-	case "GetDeleteAll":
-		c.handleActionGetDeleteAll()
-
-	case "GetTrackByCode":
-		c.handleActionGetTrackByCode(data)
-
-	case "AddUser":
-		c.handleActionAddUser(data)
-
-	case "DeleteUser":
-		c.handleActionDeleteUser(data)
-
-	case "FindUserToEmail":
-		c.handleActionFindUserToEmail(data)
-
-	case "UpdateTrack":
-		c.handleActionUpdateTrack(data)
-
-	default:
-		c.logger.Printf("Unknown action: %s", action)
+	case "s3:ObjectRemoved:Delete":
+		err = c.deleteEvent(ctx, s3event)
+		if err != nil {
+			c.logger.Printf("Error handling deleteEvent: %v", err)
+			return
+		}
+		return
+	case "s3:ObjectCreated:Put":
+		err = c.putEvent(ctx, s3event)
+		if err != nil {
+			c.logger.Printf("Error handling putEvent: %v", err)
+			return
+		}
 		return
 	}
 }
 
-func (c *MessageClient) handleActionPostTracks(data map[string]interface{}) {
-	resultErr := c.handlePostTracks(data)
-	c.handleResult(resultErr, "PostTracks")
-}
-
-func (c *MessageClient) handleActionGetAllTracks(data map[string]interface{}) {
-	pageRaw, pageExists := data["page"]
-	pageSizeRaw, pageSizeExists := data["page_size"]
-	sortByRaw, sortByExists := data["sort_by"]
-	sortOrderRaw, sortOrderExists := data["sort_order"]
-	filterRaw, filterExists := data["filter"]
-
-	if !pageExists || !pageSizeExists || !sortByExists || !sortOrderExists || !filterExists {
-		c.logger.Println("Missing required parameters in message data")
-		return
-	}
-
-	page, pageErr := strconv.Atoi(fmt.Sprint(pageRaw))
-	pageSize, pageSizeErr := strconv.Atoi(fmt.Sprint(pageSizeRaw))
-	sortBy := fmt.Sprint(sortByRaw)
-	sortOrder := fmt.Sprint(sortOrderRaw)
-	filter := fmt.Sprint(filterRaw)
-
-	if pageErr != nil || pageSizeErr != nil {
-		c.logger.Println("Invalid parameter values in message data")
-		return
-	}
-
-	offset := (page - 1) * pageSize
-	limit := pageSize
-
-	err := c.handleGetAllTracks(offset, limit, sortBy, sortOrder, filter)
+func extractRecordsEvent(data map[string]interface{}) (*MessageBody, error) {
+	jsonData, err := json.Marshal(data)
 	if err != nil {
-		c.logger.Printf("Error handling GetAllTracks action: %v", err)
+		return &MessageBody{}, err
 	}
-}
 
-func (c *MessageClient) handleActionGetDeleteAll() {
-	resultErr := c.handleGetDeleteAll()
-	c.handleResult(resultErr, "GetDeleteAll")
-}
-
-func (c *MessageClient) handleActionGetTrackByCode(data map[string]interface{}) {
-	resultErr := c.handleGetTrackByCode(data)
-	c.handleResult(resultErr, "GetTrackByCode")
-}
-
-func (c *MessageClient) handleActionAddUser(data map[string]interface{}) {
-	resultErr := c.handleAddUser(data)
-	c.handleResult(resultErr, "AddUser")
-}
-
-func (c *MessageClient) handleActionDeleteUser(data map[string]interface{}) {
-	resultErr := c.handleDeleteUser(data)
-	c.handleResult(resultErr, "DeleteUser")
-}
-
-func (c *MessageClient) handleActionFindUserToEmail(data map[string]interface{}) {
-	resultErr := c.handleFindUserToEmail(data)
-	c.handleResult(resultErr, "FindUserToEmail")
-}
-
-func (c *MessageClient) handleActionUpdateTrack(data map[string]interface{}) {
-	resultErr := c.handleUpdateTrack(data)
-	c.handleResult(resultErr, "UpdateTrack")
-}
-
-func (c *MessageClient) handleResult(resultErr error, action string) {
-	if resultErr != nil {
-		errorData := map[string]interface{}{
-			"error": resultErr.Error(),
-		}
-		c.publishAndLogResult(TypePublisherError, errorData)
-	} else {
-		successData := map[string]interface{}{
-			"info": fmt.Sprintf("Successfully handled %s", action),
-		}
-		c.publishAndLogResult(TypePublisherStatus, successData)
+	// Unmarshal the JSON data into a Records struct
+	var messageBody MessageBody
+	err = json.Unmarshal(jsonData, &messageBody)
+	if err != nil {
+		return &MessageBody{}, err
 	}
-}
 
-func (c *MessageClient) publishAndLogResult(resultType string, data map[string]interface{}) {
-	publishErr := c.publishMessage(resultType, data)
-	if publishErr != nil {
-		c.logger.Printf("Error publishing %s message: %v", resultType, publishErr)
+	// Check if Records array is not empty
+	if len(messageBody.Records) == 0 {
+		return &MessageBody{}, err
 	}
+
+	return &messageBody, nil
 }

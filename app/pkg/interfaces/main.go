@@ -15,5 +15,5 @@ type AppInterface interface {
 	GetCfg() *config.Config
 	GetGin() (*gin.WebApp, error)
 	GetMessageClient() *amqp.MessageClient
-	GetS3Client() (*s3.HandlerFromS3, error)
+	GetS3Client() (s3.HandlerS3, error)
 }

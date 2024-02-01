@@ -195,18 +195,18 @@ Content-Type: application/json
 DELETE http://localhost:10000/v1/playlist/delete/7c9c0650-5e1e-4374-ba25-de076d6d7c57
 Content-Type: application/json
 ### SetFromPlaylist
-POST http://localhost:10000/v1/playlist/96eff55a-0bc6-4a8b-b157-236c61ca7c2a/set
+POST http://localhost:10000/v1/playlist/8a93063f-8374-4334-8ac5-0f4008117a41/set
 Content-Type: application/json
 
 {
   "track_order":
   [
-    "33164e83-8348-4b83-b268-ad5159c0ccf3",
-    "6ce80cd1-33b3-4889-9b10-5e9939184865",
-    "62288a7d-21bc-4d7b-a4ae-b0ebac7ace33",
-    "67415238-3ba5-4d9c-956b-52761bf339db",
-    "c439f01f-9c2d-4607-8d78-f11961b159e7",
-    "dd0fc7ff-01b3-41cb-a43c-726e84450f85"
+    "0629f906-5b42-4862-a6d9-07fd6f95f275",
+    "9d09b920-ca3b-4522-ac1e-101050b7d891",
+    "cfed9ea6-03fc-44b6-bdbf-3f69d8fd538f",
+    "05e137ef-eeae-4601-9e56-41128ee1eaf0",
+    "95039448-e3c2-480c-b64f-2a842f8a9144",
+    "070ac8c6-89bf-43bd-badb-a082b4d6fb84"
   ]
 }
 

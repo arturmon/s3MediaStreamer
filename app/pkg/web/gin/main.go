@@ -32,7 +32,7 @@ type WebApp struct {
 	healthMetrics *monitoring.HealthMetrics
 	metrics       *monitoring.Metrics
 	enforcer      *casbin.Enforcer
-	S3            *s3.HandlerFromS3
+	S3            s3.HandlerS3
 }
 
 func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
@@ -84,15 +84,11 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	healthMetrics := monitoring.NewHealthMetrics()
 	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)
 
-	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(cfg, logger)
+	s3Handler, s3err := s3.NewClientS3(cfg, logger)
 	if s3err != nil {
 		logger.Error("Failed to initialize S3:", s3err)
 		logger.Fatal(s3err)
 		return nil, s3err
-	}
-	err = s3client.InitS3(ctx)
-	if err != nil {
-		return nil, err
 	}
 
 	return &WebApp{
@@ -103,7 +99,7 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 		healthMetrics: healthMetrics,
 		metrics:       metrics,
 		enforcer:      enforcer,
-		S3:            s3client,
+		S3:            s3Handler,
 	}, nil
 }
 

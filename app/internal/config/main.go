@@ -48,14 +48,9 @@ type Config struct {
 	}
 	// MessageQueue
 	MessageQueue struct {
-		Enable          bool   `env:"MQ_ENABLE" env-default:"false"`
-		SubRoutingKey   string `env:"MQ_ROUTING_KEY" env-default:"sub-routing-key"`
-		SubQueueName    string `env:"MQ_QUEUE_NAME" env-default:"sub_queue"`
-		PubExchange     string `env:"MQ_EXCHANGE" env-default:"pub-exchange"`
-		PubRoutingKey   string `env:"MQ_ROUTING_KEY" env-default:"pub-routing-key"`
-		PubQueueName    string `env:"MQ_QUEUE_NAME" env-default:"pub_queue"`
-		User            string `env:"MQ_USER" env-default:"user"`
-		Pass            string `env:"MQ_PASS" env-default:"password"`
+		SubQueueName    string `env:"MQ_QUEUE_NAME" env-default:"s3_queue"`
+		User            string `env:"MQ_USER" env-default:"guest"`
+		Pass            string `env:"MQ_PASS" env-default:"guest"`
 		Broker          string `env:"MQ_BROKER" env-default:"localhost"`
 		BrokerPort      int    `env:"MQ_BROKER_PORT" env-default:"5672"`
 		SystemWriteUser string `env:"MQ_SYSTEM_WRITER_USER" env-default:"amqp@system"`

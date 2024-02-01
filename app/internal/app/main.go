@@ -10,7 +10,6 @@ import (
 	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
-	"time"
 )
 
 // App represents the main application struct.
@@ -20,7 +19,7 @@ type App struct {
 	Storage    *model.DBConfig
 	Gin        *gin.WebApp
 	AMQPClient *amqp.MessageClient
-	S3         *s3.HandlerFromS3
+	S3         s3.HandlerS3
 }
 
 // NewAppInit initializes a new App instance.
@@ -56,34 +55,19 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		logger.Fatal(err)
 		return nil, err
 	}
-	s3client, s3err := (&s3.HandlerFromS3{}).NewClientS3(cfg, logger)
+	s3client, s3err := s3.NewClientS3(cfg, logger)
 	if s3err != nil {
 		logger.Error("Failed to initialize S3:", s3err)
 		logger.Fatal(s3err)
 		return nil, s3err
 	}
-	err = s3client.InitS3(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
-	if cfg.MessageQueue.Enable {
-		logger.Info("Starting initialize the amqp...")
-		for retry := 1; retry <= maxRetries; retry++ {
-			amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
-			if err == nil {
-				break // Break out of the loop if the connection is successful.
-			}
-			logger.Error("Failed to initialize MQ:", err)
-			if retry < maxRetries {
-				logger.Info("Retrying in", retryDelaySeconds, "seconds...")
-				time.Sleep(retryDelaySeconds * time.Second)
-			} else {
-				logger.Fatal("Failed to initialize MQ after", maxRetries, "attempts")
-			}
-		}
+	logger.Info("Starting initialize the amqp...")
+	amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
+	if err != nil {
+		logger.Error("Failed to initialize MQ:", err)
 	}
 
 	// Return a new App instance with all initialized components.
@@ -122,7 +106,7 @@ func (a *App) GetMessageClient() *amqp.MessageClient {
 	return a.AMQPClient
 }
 
-func (a *App) GetS3Client() (*s3.HandlerFromS3, error) {
+func (a *App) GetS3Client() (s3.HandlerS3, error) {
 	return a.S3, nil
 }
 
