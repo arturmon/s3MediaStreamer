@@ -19,16 +19,16 @@ Content-Type: application/json
 GET http://localhost:10000/v1/tracks?page=1&page_size=10
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=price&sort_order=desc
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=desc
 Content-Type: application/json
 ###
 ### Postgresql LIKE filters (use _, %, \% )
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0001
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter=0127b619-be74-499c-97f8-c8748194d7fd
 ###
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=code&sort_order=asc&filter==I0001
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter==0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/tracks/I00012
+GET http://localhost:10000/v1/tracks/0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
 ###
 POST http://localhost:10000/v1/tracks/add
@@ -38,11 +38,6 @@ Content-Type: application/json
   {
     "Title": "Test Titl1e",
     "Artist": "Test Artis22t1",
-    "Price": {
-      "Number": "44.10",
-      "Currency": "EUR"
-    },
-    "Code": "I00013",
     "Description": "Description Test1",
     "Likes": false,
     "Path": "C:/music"
@@ -50,16 +45,12 @@ Content-Type: application/json
   {
     "Title": "Test Tidsfsdftl1e",
     "Artist": "Test Artsdfdsfis22t1",
-    "Price": {
-      "Number": "444.10",
-      "Currency": "EUR"
-    },
-    "Code": "I00012",
     "Description": "Descrsdasdiption Test1",
     "Likes": false,
     "Path": "C:/music"
   }
 ]
+
 ###
 PATCH http://localhost:10000/v1/tracks/update
 Content-Type: application/json
@@ -67,16 +58,11 @@ Content-Type: application/json
 {
   "Title": "Marco Polo",
   "Artist": "Test Update",
-  "Price": {
-    "Number": "1.10",
-    "Currency": "USD"
-  },
-  "Code": "I0001",
   "Description": "Description Update",
   "Likes": false
 }
 ###
-DELETE http://localhost:10000/v1/tracks/delete/I0001
+DELETE http://localhost:10000/v1/tracks/delete/0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
 ###
 DELETE http://localhost:10000/v1/tracks/deleteAll

@@ -134,9 +134,9 @@ GET http://localhost:10000/v1/tracks
 Paginate:
 GET http://localhost:10000/v1/tracks?page=11&page_size=10
 Sorting:
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=price&sort_order=desc
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=title&sort_order=desc
 Filtering:
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=code&sort_order=asc&filter=I0004
+GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter=0127b619-be74-499c-97f8-c8748194d7fd
 
 ```
 
@@ -152,18 +152,13 @@ or
     "updated_at": "2023-08-27T04:13:14.157717+03:00",
     "title": "Marco Polo",
     "artist": "Test Update",
-    "price": {
-      "number": "1.10",
-      "currency": "USD"
-    },
-    "code": "I00010",
     "description": "Description Update",
     "sender": "rest",
     "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
   }
 ]
 ```
-/tracks/I0001
+/tracks/0127b619-be74-499c-97f8-c8748194d7fd
 ```json
 {
   "_id": "9ae2077e-cd38-4f0f-b476-aa85227af5fa",
@@ -171,11 +166,6 @@ or
   "updated_at": "2023-08-27T03:58:43.863072+03:00",
   "title": "Test Titl1e",
   "artist": "Test Artis22t1",
-  "price": {
-    "number": "44.10",
-    "currency": "USD"
-  },
-  "code": "I0007",
   "description": "Description Test1",
   "sender": "rest",
   "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
@@ -186,11 +176,6 @@ or
 {
   "Title": "Test Titl1e",
   "Artist": "Test Artis22t1",
-  "Price": {
-    "Number": "44.10",
-    "Currency": "USD"
-  },
-  "Code": "I0001",
   "Description": "Description Test1"
 }
 ```
@@ -199,11 +184,6 @@ or
 {
   "Title": "Marco Polo",
   "Artist": "Test Update",
-  "Price": {
-    "Number": "1.10",
-    "Currency": "USD"
-  },
-  "Code": "I00010",
   "Description": "Description Update",
   "Completed": false
 }
@@ -375,11 +355,6 @@ Example:
       {
         "Title": "Test Title1",
         "Artist": "Test Artist1",
-        "Price": {
-          "Number": "44.10",
-          "Currency": "USD"
-        },
-        "Code": "I0001",
         "Description": "Description Test1"
       }
     ]
@@ -396,31 +371,16 @@ Example:
             {
                 "Title": "Test Title1",
                 "Artist": "Test Artist1",
-                "Price": {
-                  "Number": "44.10",
-                  "Currency": "USD"
-                },
-                "Code": "I0001",
                 "Description": "Description Test1"
             },
             {
                 "Title": "Test Title2",
                 "Artist": "Test Artist2",
-                "Price": {
-                  "Number": "44.10",
-                  "Currency": "USD"
-                },
-                "Code": "I0002",
                 "Description": "Description Test2"
             },
             {
                 "Title": "Test Title3",
                 "Artist": "Test Artist3",
-                "Price": {
-                  "Number": "44.10",
-                  "Currency": "USD"
-                },
-                "Code": "I0003",
                 "Description": "Description Test3"
             }
         ]
@@ -435,11 +395,6 @@ Example:
     "track": {
       "Title": "Test Rabbitmq",
       "Artist": "Test Update RAbbit",
-      "Price": {
-         "Number": "1.10",
-         "Currency": "USD"
-      },
-      "Code": "I0001",
       "Description": "Description Update Rabbitmq"
     }
 }

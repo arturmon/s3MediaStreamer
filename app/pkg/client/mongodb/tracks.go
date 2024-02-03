@@ -141,14 +141,13 @@ func (c *MongoClient) UpdateTracks(track *model.Track) error {
 	}
 
 	// Define the filter to find the track by its code.
-	filter := bson.D{{Key: "code", Value: track.Code}}
+	filter := bson.D{{Key: "_id", Value: track.ID}}
 
 	// Define the update fields using the $set operator to update only the specified fields.
 	update := bson.D{
 		{Key: "$set", Value: bson.D{
 			{Key: "title", Value: track.Title},
 			{Key: "artist", Value: track.Artist},
-			{Key: "price", Value: track.Price},
 			{Key: "description", Value: track.Description},
 			{Key: "sender", Value: track.Sender},
 		}},

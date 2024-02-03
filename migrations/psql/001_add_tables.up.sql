@@ -9,15 +9,13 @@ CREATE TABLE IF NOT EXISTS tracks (
                                      updated_at        TIMESTAMPTZ,
                                      title             TEXT DEFAULT '',
                                      artist            TEXT DEFAULT '',
-                                     price       price NOT NULL,
-                                     code              TEXT UNIQUE,
                                      description       TEXT DEFAULT '',
                                      sender            TEXT CHECK (sender IN ('Amqp', 'Rest', 'Jobs','Event')),
                                      _creator_user     TEXT NOT NULL,
                                      likes             BOOLEAN DEFAULT FALSE,
                                      s3Version         TEXT DEFAULT ''
 );
-CREATE INDEX idx_album_code ON tracks (code);
+CREATE INDEX idx_album_code ON tracks (_id);
 alter table tracks owner to root;
 
 CREATE TABLE IF NOT EXISTS users (

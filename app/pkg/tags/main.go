@@ -7,7 +7,6 @@ import (
 	"skeleton-golange-application/app/model"
 	"time"
 
-	"github.com/bojanz/currency"
 	"github.com/dhowden/tag"
 	"github.com/google/uuid"
 )
@@ -27,11 +26,6 @@ func ReadTags(reader io.ReadSeeker, cfg *config.Config) (*model.Track, error) {
 	// Convert the year to a time.Time value
 	createdAt := time.Date(tags.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	price, errPrice := currency.NewAmount("0", "EUR")
-	if errPrice != nil {
-		return nil, errPrice
-	}
-
 	if tags.Title() == "" || tags.Artist() == "" {
 		return nil, fmt.Errorf("failed to read tags: empty title or artist")
 	}
@@ -42,8 +36,6 @@ func ReadTags(reader io.ReadSeeker, cfg *config.Config) (*model.Track, error) {
 		UpdatedAt:   time.Now(),
 		Title:       tags.Title(),
 		Artist:      tags.Artist(),
-		Price:       price,
-		Code:        randomString(lengthRandomGenerateCode),
 		Description: tags.Comment(),
 		Sender:      "",
 		CreatorUser: creatorUserUUID,
@@ -52,8 +44,4 @@ func ReadTags(reader io.ReadSeeker, cfg *config.Config) (*model.Track, error) {
 	}
 
 	return &track, nil
-}
-
-func randomString(length int) string {
-	return uuid.NewString()[:length]
 }

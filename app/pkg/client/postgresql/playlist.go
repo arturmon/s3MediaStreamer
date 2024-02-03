@@ -251,7 +251,7 @@ func (c *PgClient) GetTracksByPlaylist(playlistID string) ([]model.Track, error)
 	var tracks []model.Track
 	for rows.Next() {
 		var track model.Track
-		err = rows.Scan(&track.ID, &track.CreatedAt, &track.UpdatedAt, &track.Title, &track.Artist, &track.Price, &track.Code, &track.Description, &track.Sender, &track.CreatorUser, &track.Likes, &track.S3Version)
+		err = rows.Scan(&track.ID, &track.CreatedAt, &track.UpdatedAt, &track.Title, &track.Artist, &track.Description, &track.Sender, &track.CreatorUser, &track.Likes, &track.S3Version)
 		if err != nil {
 			return nil, err
 		}

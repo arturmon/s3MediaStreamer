@@ -33,8 +33,6 @@ func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]m
 				&track.UpdatedAt,
 				&track.Title,
 				&track.Artist,
-				&track.Price,
-				&track.Code,
 				&track.Description,
 				&track.Sender,
 				&track.CreatorUser,

@@ -183,17 +183,16 @@ func (a *WebApp) PostTracks(c *gin.Context) {
 
 		track.Title = strings.TrimSpace(track.Title)
 		track.Artist = strings.TrimSpace(track.Artist)
-		track.Code = strings.TrimSpace(track.Code)
 		track.Description = strings.TrimSpace(track.Description)
 		track.S3Version = strings.TrimSpace(track.S3Version)
 
-		if track.Code == "" || track.Artist == "" || track.S3Version == "" {
+		if track.Artist == "" || track.S3Version == "" {
 			c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist` or `Path`"})
 			return
 		}
 
 		// Check if the track code already exists
-		_, err = a.storage.Operations.GetTracksByColumns(track.Code, "code")
+		_, err = a.storage.Operations.GetTracksByColumns(track.ID.String(), "_id")
 		if err == nil {
 			insertionErrors = append(insertionErrors, fmt.Errorf("track code already exists for track %s", track.Title))
 			continue
@@ -351,15 +350,14 @@ func (a *WebApp) UpdateTrack(c *gin.Context) {
 	}
 	newTrack.Title = strings.TrimSpace(newTrack.Title)
 	newTrack.Artist = strings.TrimSpace(newTrack.Artist)
-	newTrack.Code = strings.TrimSpace(newTrack.Code)
 	newTrack.Description = strings.TrimSpace(newTrack.Description)
 
-	if newTrack.Code == "" || newTrack.Artist == "" {
+	if newTrack.Artist == "" {
 		c.IndentedJSON(http.StatusBadRequest, model.ErrorResponse{Message: "empty required fields `Code` or `Artist`"})
 		return
 	}
 
-	existingTrack, getErr := a.storage.Operations.GetTracksByColumns(newTrack.Code, "code")
+	existingTrack, getErr := a.storage.Operations.GetTracksByColumns(newTrack.ID.String(), "_id")
 	if getErr != nil {
 		if errors.Is(getErr, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "track not found"})
@@ -376,10 +374,6 @@ func (a *WebApp) UpdateTrack(c *gin.Context) {
 	if newTrack.Artist != "" {
 		existingTrack.Artist = newTrack.Artist
 	}
-	if !newTrack.Price.IsZero() {
-		existingTrack.Price = newTrack.Price
-	}
-
 	if newTrack.Description != "" {
 		existingTrack.Description = newTrack.Description
 	}

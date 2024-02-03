@@ -34,8 +34,8 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
 		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, title, artist, price, code, description, sender, _creator_user, likes, s3Version)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+			INSERT INTO tracks (_id, created_at, updated_at, title, artist, description, sender, _creator_user, likes, s3Version)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		`
 		args := []interface{}{
 			track.ID,
@@ -43,8 +43,6 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 			track.UpdatedAt,
 			track.Title,
 			track.Artist,
-			track.Price,
-			track.Code,
 			track.Description,
 			track.Sender,
 			track.CreatorUser,
@@ -79,7 +77,7 @@ func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string
 
 	// Build the WHERE clause for filtering if filter is provided
 	if filter != "" {
-		filterColumns := []string{"title", "artist", "code", "sender", "_creator_user"}
+		filterColumns := []string{"title", "artist", "sender", "_creator_user"}
 
 		// Create a slice to hold the individual filter conditions
 		var filterExprs []string
@@ -135,8 +133,8 @@ func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string
 		var track model.Track
 		err = rows.Scan(
 			&track.ID, &track.CreatedAt, &track.UpdatedAt,
-			&track.Title, &track.Artist, &track.Price,
-			&track.Code, &track.Description, &track.Sender,
+			&track.Title, &track.Artist,
+			&track.Description, &track.Sender,
 			&track.CreatorUser, &track.Likes, &track.S3Version,
 		)
 		if err != nil {
@@ -178,8 +176,8 @@ func (c *PgClient) GetTracksByColumns(code, columns string) (*model.Track, error
 	}
 	err = rows.Scan(
 		&track.ID, &track.CreatedAt, &track.UpdatedAt,
-		&track.Title, &track.Artist, &track.Price,
-		&track.Code, &track.Description, &track.Sender,
+		&track.Title, &track.Artist,
+		&track.Description, &track.Sender,
 		&track.CreatorUser, &track.Likes, &track.S3Version,
 	)
 	if err != nil {
@@ -244,7 +242,6 @@ func (c *PgClient) UpdateTracks(track *model.Track) error {
 		"updated_at":  track.UpdatedAt,
 		"title":       track.Title,
 		"artist":      track.Artist,
-		"price":       track.Price,
 		"description": track.Description,
 		"sender":      track.Sender,
 		"likes":       track.Likes,
@@ -252,7 +249,7 @@ func (c *PgClient) UpdateTracks(track *model.Track) error {
 	})
 
 	// Add a WHERE condition to identify the record to update based on the provided code
-	updateBuilder = updateBuilder.Where(squirrel.Eq{"code": track.Code})
+	updateBuilder = updateBuilder.Where(squirrel.Eq{"_id": track.ID})
 
 	// Generate the SQL query and arguments
 	sql, args, err := updateBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
@@ -395,8 +392,8 @@ func (c *PgClient) GetAllTracksByPositions(playlistID string) ([]model.Track, er
 		var position int64
 		var trackPlaylistID string
 		if err = rows.Scan(&trackPlaylistID, &position, &track.ID, &track.CreatedAt,
-			&track.UpdatedAt, &track.Title, &track.Artist, &track.Price,
-			&track.Code, &track.Description, &track.Sender, &track.CreatorUser,
+			&track.UpdatedAt, &track.Title, &track.Artist,
+			&track.Description, &track.Sender, &track.CreatorUser,
 			&track.Likes, &track.S3Version); err != nil {
 			return nil, err
 		}
