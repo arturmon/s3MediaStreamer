@@ -32,10 +32,6 @@ func (a *WebApp) setupAppRoutesV1() {
 		{
 			tracks.GET("", a.GetAllTracks)
 			tracks.GET("/:code", a.GetTrackByID)
-			tracks.DELETE("/deleteAll", a.GetDeleteAll)
-			tracks.DELETE("/delete/:code", a.GetDeleteByID)
-			tracks.POST("/add", a.PostTracks)
-			tracks.PATCH("/update", a.UpdateTrack)
 		}
 		a.logger.Info("swagger docs initializing")
 		swagger := v1.Group("/swagger")

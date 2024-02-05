@@ -124,10 +124,7 @@ v1/
 |----------------------|---------------------|--------|---------------|
 | /tracks              | 200/401/500         | GET    | GetAllAlbums  |
 | /tracks/:code        | 200/401/404/500     | GET    | GetAlbumByID  |
-| /tracks/add          | 201/400/500         | POST   | PostAlbums    |
-| /tracks/update       | 200/400/401/404/500 | PATCH  | UpdateAlbum   |
-| /tracks/deleteAll    | 204/401/500         | DELETE | GetDeleteAll  |
-| /tracks/delete/:code | 204/401/404/500     | DELETE | GetDeleteByID |
+
 
 ```markdown
 GET http://localhost:10000/v1/tracks
@@ -169,35 +166,6 @@ or
   "description": "Description Test1",
   "sender": "rest",
   "_creator_user": "cac22f72-1fa2-4a81-876d-39fcf1cc9159"
-}
-```
-/tracks/add
-```json
-{
-  "Title": "Test Titl1e",
-  "Artist": "Test Artis22t1",
-  "Description": "Description Test1"
-}
-```
-/tracks/update
-```json
-{
-  "Title": "Marco Polo",
-  "Artist": "Test Update",
-  "Description": "Description Update",
-  "Completed": false
-}
-```
-/tracks/deleteAll
-```json
-{
-  "message": "OK"
-}
-```
-/tracks/delete/:code
-```json
-{
-  "message": "OK"
 }
 ```
 
