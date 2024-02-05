@@ -72,18 +72,12 @@ definitions:
       artist:
         example: Artist name
         type: string
-      code:
-        example: I001
-        type: string
       description:
         example: A short description of the application
         type: string
       likes:
         type: boolean
-      path:
-        type: string
-      price:
-        example: '{Number: 1.10, Currency: EUR}'
+      s3Version:
         type: string
       sender:
         example: sender set
@@ -169,36 +163,8 @@ paths:
           description: Segment not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Stream audio files.
-      tags:
-      - track-controller
-  /audio/upload:
-    post:
-      consumes:
-      - '*/*'
-      description: Streams audio files in the specified directory as MP3 or FLAC.
-      parameters:
-      - description: Upload media files
-        in: path
-        name: control
-        type: string
-      produces:
-      - '*/*'
-      responses:
-        "201":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Track'
-            type: array
-        "400":
-          description: empty required fields
+        "406":
+          description: Segment not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -776,152 +742,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Track whose ID value matches the id.
-      tags:
-      - track-controller
-  /tracks/add:
-    post:
-      consumes:
-      - application/json
-      description: adds an track from JSON received in the request body.
-      parameters:
-      - description: Track details
-        in: body
-        name: request
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/model.Track'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            items:
-              $ref: '#/definitions/model.Track'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized - User unauthenticated
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "409":
-          description: track code already exists
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Adds an track from JSON.
-      tags:
-      - track-controller
-  /tracks/delete/{code}:
-    delete:
-      consumes:
-      - '*/*'
-      description: locates the track whose ID value matches the id parameter and deletes
-        it.
-      parameters:
-      - description: Code track
-        in: path
-        name: code
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.OkResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Deletes track whose ID value matches the code.
-      tags:
-      - track-controller
-  /tracks/deleteAll:
-    delete:
-      consumes:
-      - '*/*'
-      description: Delete ALL.
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.OkResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Complete removal of all tracks.
-      tags:
-      - track-controller
-  /tracks/update:
-    patch:
-      consumes:
-      - application/json
-      description: updates an existing track with new data based on the ID parameter
-        sent by the client.
-      parameters:
-      - description: Updated track details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/model.Track'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Track'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Updates an existing track with new data.
       tags:
       - track-controller
   /users/delete:

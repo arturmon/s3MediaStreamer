@@ -21,57 +21,6 @@
     "host": "localhost:10000",
     "basePath": "/v1",
     "paths": {
-        "/audio/upload": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "*/*"
-                ],
-                "tags": [
-                    "track-controller"
-                ],
-                "summary": "Stream audio files.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Upload media files",
-                        "name": "control",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Track"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "empty required fields",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/audio/{playlist_id}": {
             "get": {
                 "security": [
@@ -117,6 +66,12 @@
                         }
                     },
                     "404": {
+                        "description": "Segment not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "406": {
                         "description": "Segment not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
@@ -957,233 +912,6 @@
                 }
             }
         },
-        "/tracks/add": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "adds an track from JSON received in the request body.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "track-controller"
-                ],
-                "summary": "Adds an track from JSON.",
-                "parameters": [
-                    {
-                        "description": "Track details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Track"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Track"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - User unauthenticated",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "track code already exists",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/tracks/delete/{code}": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "locates the track whose ID value matches the id parameter and deletes it.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "track-controller"
-                ],
-                "summary": "Deletes track whose ID value matches the code.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Code track",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/model.OkResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/tracks/deleteAll": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete ALL.",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "track-controller"
-                ],
-                "summary": "Complete removal of all tracks.",
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/model.OkResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/tracks/update": {
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "updates an existing track with new data based on the ID parameter sent by the client.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "track-controller"
-                ],
-                "summary": "Updates an existing track with new data.",
-                "parameters": [
-                    {
-                        "description": "Updated track details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Track"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Track"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/tracks/{code}": {
             "get": {
                 "security": [
@@ -1635,10 +1363,6 @@
                     "type": "string",
                     "example": "Artist name"
                 },
-                "code": {
-                    "type": "string",
-                    "example": "I001"
-                },
                 "description": {
                     "type": "string",
                     "example": "A short description of the application"
@@ -1646,12 +1370,8 @@
                 "likes": {
                     "type": "boolean"
                 },
-                "path": {
+                "s3Version": {
                     "type": "string"
-                },
-                "price": {
-                    "type": "string",
-                    "example": "{Number: 1.10, Currency: EUR}"
                 },
                 "sender": {
                     "type": "string",
