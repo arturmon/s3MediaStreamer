@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bojanz/currency"
-
 	"github.com/google/uuid"
 
 	"github.com/golang/mock/gomock"
@@ -87,17 +85,13 @@ func TestCreateIssue(t *testing.T) {
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Artist:      "Artist name",
-		Code:        "ALBUM123",
 		Description: "A short description of the application",
 		Sender:      "amqp",
 	}
-	price, err := currency.NewAmount("111.11", "USD")
-	assert.NoError(t, err)
-	expectedTrack.Price = price
 
 	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedTrack)).Return(nil)
 
-	err = mockCollectionQuery.CreateIssue(&expectedTrack)
+	err := mockCollectionQuery.CreateIssue(&expectedTrack)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -117,7 +111,6 @@ func TestCreateMany(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 1",
 			Artist:      "Artist 1",
-			Code:        "ALBUM123",
 			Description: "Description 1",
 			Sender:      "amqp",
 		},
@@ -127,21 +120,14 @@ func TestCreateMany(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 2",
 			Artist:      "Artist 2",
-			Code:        "ALBUM456",
 			Description: "Description 2",
 			Sender:      "amqp",
 		},
 	}
-	price, err := currency.NewAmount("111.11", "USD")
-	price2, err2 := currency.NewAmount("222.11", "EUR")
-	assert.NoError(t, err)
-	assert.NoError(t, err2)
-	expectedTracks[0].Price = price
-	expectedTracks[1].Price = price2
 
 	mockCollectionQuery.EXPECT().CreateMany(gomock.AssignableToTypeOf(expectedTracks)).Return(nil)
 
-	err = mockCollectionQuery.CreateMany(expectedTracks)
+	err := mockCollectionQuery.CreateMany(expectedTracks)
 
 	// Verify the result
 	assert.NoError(t, err)
@@ -161,7 +147,6 @@ func TestGetAllIssues(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 1",
 			Artist:      "Artist 1",
-			Code:        "ALBUM123",
 			Description: "Description 1",
 			Sender:      "amqp",
 		},
@@ -171,17 +156,10 @@ func TestGetAllIssues(t *testing.T) {
 			UpdatedAt:   time.Now(),
 			Title:       "Title 2",
 			Artist:      "Artist 2",
-			Code:        "ALBUM456",
 			Description: "Description 2",
 			Sender:      "amqp",
 		},
 	}
-	price, err := currency.NewAmount("111.11", "USD")
-	price2, err2 := currency.NewAmount("222.11", "EUR")
-	assert.NoError(t, err)
-	assert.NoError(t, err2)
-	expectedTracks[0].Price = price
-	expectedTracks[1].Price = price2
 
 	mockCollectionQuery.EXPECT().GetAllIssues().Return(expectedTracks, nil)
 
@@ -205,13 +183,9 @@ func TestGetIssuesByCode(t *testing.T) {
 		UpdatedAt:   time.Now(),
 		Title:       "Title",
 		Artist:      "Artist",
-		Code:        "ALBUM123",
 		Description: "Description",
 		Sender:      "amqp",
 	}
-	price, err := currency.NewAmount("111.11", "USD")
-	assert.NoError(t, err)
-	expectedTrack.Price = price
 
 	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedTrack, nil)
 
@@ -267,15 +241,11 @@ func TestUpdateIssue(t *testing.T) {
 		UpdatedAt:   time.Now(),
 		Title:       "Updated Title",
 		Artist:      "Updated Artist",
-		Code:        "ALBUM789",
 		Description: "Updated Description",
 		Sender:      "amqp",
 	}
-	price, err := currency.NewAmount("111.11", "USD")
-	assert.NoError(t, err)
-	albumToUpdate.Price = price
 
-	err = mockCollectionQuery.UpdateIssue(&albumToUpdate)
+	err := mockCollectionQuery.UpdateIssue(&albumToUpdate)
 
 	// Verify the result
 	assert.NoError(t, err)
