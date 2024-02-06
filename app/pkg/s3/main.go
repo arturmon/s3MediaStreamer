@@ -96,14 +96,16 @@ func (h *HandlerFromS3) ListObjectS3(ctx context.Context) ([]minio.ObjectInfo, e
 	return objects, nil
 }
 
-func (h *HandlerFromS3) DeleteObjectS3(ctx context.Context, object string) error {
+func (h *HandlerFromS3) DeleteObjectS3(ctx context.Context, object *minio.ObjectInfo) error {
 	opts := minio.RemoveObjectOptions{
 		GovernanceBypass: true,
+		VersionID:        object.VersionID,
 	}
-	err := h.s3Handler.RemoveObject(ctx, h.cfg.AppConfig.S3.BucketName, object, opts)
+	err := h.s3Handler.RemoveObject(ctx, h.cfg.AppConfig.S3.BucketName, object.Key, opts)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

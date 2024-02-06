@@ -39,7 +39,7 @@ func (j *CleanS3Job) Run() {
 			_, errReadTags := tags.ReadTags(bytes.NewReader(fileData), j.app.Cfg)
 			if errReadTags != nil {
 				j.app.Logger.Printf("Find empty file: %s\n", obj.Key)
-				err = j.app.S3.DeleteObjectS3(ctx, obj.Key)
+				err = j.app.S3.DeleteObjectS3(ctx, &obj)
 				if err != nil {
 					j.app.Logger.Printf("Error delete file %s from S3: %v\n", obj.Key, err)
 				}

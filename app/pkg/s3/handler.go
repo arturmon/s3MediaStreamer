@@ -38,7 +38,7 @@ func (h *Handler) ListObjectS3(ctx context.Context) ([]minio.ObjectInfo, error) 
 	return h.handler.ListObjectS3(ctx)
 }
 
-func (h *Handler) DeleteObjectS3(ctx context.Context, object string) error {
+func (h *Handler) DeleteObjectS3(ctx context.Context, object *minio.ObjectInfo) error {
 	return h.handler.DeleteObjectS3(ctx, object)
 }
 
