@@ -53,14 +53,6 @@ func main() {
 	}
 
 	app.HandleSignals(ctx, logger, cancel)
-	/*
-		go func() {
-			if err := amqp.ConsumeMessages(ctx, logger, myApp.GetMessageClient()); err != nil {
-				logger.Fatal(err)
-			}
-		}()
-
-	*/
 
 	// Specify the number of workers in the pool
 	numWorkers := 5

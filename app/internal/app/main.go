@@ -55,7 +55,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		logger.Fatal(err)
 		return nil, err
 	}
-	s3client, s3err := s3.NewClientS3(cfg, logger)
+	s3client, s3err := s3.NewClientS3(ctx, cfg, logger)
 	if s3err != nil {
 		logger.Error("Failed to initialize S3:", s3err)
 		logger.Fatal(s3err)

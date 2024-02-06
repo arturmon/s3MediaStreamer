@@ -15,7 +15,7 @@ type Handler struct {
 
 // NewS3Handler creates a new instance of S3Handler.
 func NewS3Handler(cfg *config.Config, logger *logging.Logger) (*Handler, error) {
-	s3Handler, err := NewClientS3(cfg, logger)
+	s3Handler, err := NewClientS3(context.Background(), cfg, logger)
 	if err != nil {
 		return nil, err
 	}

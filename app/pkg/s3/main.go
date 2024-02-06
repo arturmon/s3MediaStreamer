@@ -3,6 +3,7 @@ package s3
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -13,13 +14,25 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func NewClientS3(cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
+func NewClientS3(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
 	logger.Info("S3 initializing...")
+
+	// Check that AccessKeyID and SecretAccessKey are not empty
+	if cfg.AppConfig.S3.AccessKeyID == "" || cfg.AppConfig.S3.SecretAccessKey == "" {
+		return nil, errors.New("AccessKeyID or SecretAccessKey is empty")
+	}
+
 	minioClient, err := minio.New(cfg.AppConfig.S3.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AppConfig.S3.AccessKeyID, cfg.AppConfig.S3.SecretAccessKey, ""),
 		Secure: cfg.AppConfig.S3.UseSSL,
 		Region: cfg.AppConfig.S3.Location,
 	})
+	if err != nil {
+		logger.Fatalln(err)
+		return nil, err
+	}
+
+	_, err = minioClient.ListBuckets(ctx)
 	if err != nil {
 		logger.Fatalln(err)
 	}
