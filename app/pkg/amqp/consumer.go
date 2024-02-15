@@ -58,15 +58,16 @@ func (c *MessageClient) handleMessage(ctx context.Context, message amqp.Delivery
 			c.logger.Printf("Error handling deleteEvent: %v", err)
 			return
 		}
-		return
 	case "s3:ObjectCreated:Put":
 		err = c.putEvent(ctx, s3event)
 		if err != nil {
 			c.logger.Printf("Error handling putEvent: %v", err)
 			return
 		}
-		return
+	default:
+		c.logger.Debugf("Event: %s not processed", action)
 	}
+
 }
 
 func extractRecordsEvent(data map[string]interface{}) (*MessageBody, error) {

@@ -3,6 +3,7 @@ package gin
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"path/filepath"
 	"skeleton-golange-application/app/model"
@@ -73,7 +74,7 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 		return
 	}
 
-	fileData, err := a.S3.DownloadFilesS3(context.Background(), findObject.Key)
+	fileName, err := a.S3.DownloadFilesS3(context.Background(), findObject.Key)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotAcceptable, gin.H{"error": "Error downloading file"})
 		return
@@ -86,10 +87,23 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 	// c.Header("Accept-Encoding", "*")
 	c.Header("Transfer-Encoding", "chunked")
 
-	_, err = c.Writer.Write(fileData)
+	// Open the file
+	f, err := a.S3.OpenTemplateFile(fileName)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error reading file data"})
+		return
+	}
+	defer f.Close()
+
+	// Copy the file content to the response writer
+	_, err = io.Copy(c.Writer, f)
 	if err != nil {
 		// Log the error, but don't treat it as a critical error
 		a.logger.Errorf("Error streaming audio: %v", err)
+	}
+	err = a.S3.CleanTemplateFile(fileName)
+	if err != nil {
+		return
 	}
 }
 

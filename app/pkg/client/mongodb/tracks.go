@@ -148,7 +148,15 @@ func (c *MongoClient) UpdateTracks(track *model.Track) error {
 		{Key: "$set", Value: bson.D{
 			{Key: "title", Value: track.Title},
 			{Key: "artist", Value: track.Artist},
-			{Key: "description", Value: track.Description},
+			{Key: "album", Value: track.Album},              // Adding album field
+			{Key: "album_artist", Value: track.AlbumArtist}, // Adding album_artist field
+			{Key: "composer", Value: track.Composer},        // Adding composer field
+			{Key: "genre", Value: track.Genre},              // Adding genre field
+			{Key: "lyrics", Value: track.Lyrics},            // Adding lyrics field
+			{Key: "year", Value: track.Year},                // Adding year field
+			{Key: "comment", Value: track.Comment},          // Adding comment field
+			{Key: "disc", Value: track.Disc},                // Adding disc field
+			{Key: "track", Value: track.Track},              // Adding track field
 			{Key: "sender", Value: track.Sender},
 		}},
 		{Key: "$currentDate", Value: bson.D{

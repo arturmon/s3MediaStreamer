@@ -112,7 +112,7 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 	// Start processing the messages in a separate goroutine
 	go c.consumeMessages(ctx, messages)
 
-	c.logger.Infof("AMQP Consume: %s", c.queue.Name)
+	c.logger.Infof("AMQP Consume Queue: %s", c.queue.Name)
 	return messages, nil
 }
 

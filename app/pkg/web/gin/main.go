@@ -116,11 +116,13 @@ func (a *WebApp) startHTTP(ctx context.Context) {
 	// Group: v1
 	a.setupAppRoutesV1()
 
-	a.logger.Info("view Casbin Policies:")
+	a.logger.Debug("view Casbin Policies:")
 	policies := a.enforcer.GetPolicy()
+	var logMessage string
 	for _, p := range policies {
-		a.logger.Infof("Policy: %v", p)
+		logMessage += fmt.Sprintf("Policy: %v\n", p)
 	}
+	a.logger.Debugf(logMessage)
 	a.logger.Info("application completely initialized, ...started")
 	a.logger.Infof("The service is ready to listen and serve on %s:%s.", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
 	// Start server

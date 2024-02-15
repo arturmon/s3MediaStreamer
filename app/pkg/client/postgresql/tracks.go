@@ -34,16 +34,26 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
 		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, title, artist, description, sender, _creator_user, likes, s3Version)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, sender, _creator_user, likes, s3Version)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
 		`
 		args := []interface{}{
 			track.ID,
 			track.CreatedAt,
 			track.UpdatedAt,
+			track.Album,
+			track.AlbumArtist,
+			track.Composer,
+			track.Genre,
+			track.Lyrics,
 			track.Title,
 			track.Artist,
-			track.Description,
+			track.Year,
+			track.Comment,
+			track.Disc,
+			track.DiscTotal,
+			track.Track,
+			track.TrackTotal,
 			track.Sender,
 			track.CreatorUser,
 			track.Likes,
@@ -133,9 +143,12 @@ func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string
 		var track model.Track
 		err = rows.Scan(
 			&track.ID, &track.CreatedAt, &track.UpdatedAt,
-			&track.Title, &track.Artist,
-			&track.Description, &track.Sender,
-			&track.CreatorUser, &track.Likes, &track.S3Version,
+			&track.Album, &track.AlbumArtist, &track.Composer,
+			&track.Genre, &track.Lyrics, &track.Title,
+			&track.Artist, &track.Year, &track.Comment,
+			&track.Disc, &track.DiscTotal, &track.Track,
+			&track.TrackTotal, &track.Sender, &track.CreatorUser,
+			&track.Likes, &track.S3Version,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -176,9 +189,12 @@ func (c *PgClient) GetTracksByColumns(code, columns string) (*model.Track, error
 	}
 	err = rows.Scan(
 		&track.ID, &track.CreatedAt, &track.UpdatedAt,
-		&track.Title, &track.Artist,
-		&track.Description, &track.Sender,
-		&track.CreatorUser, &track.Likes, &track.S3Version,
+		&track.Album, &track.AlbumArtist, &track.Composer,
+		&track.Genre, &track.Lyrics, &track.Title,
+		&track.Artist, &track.Year, &track.Comment,
+		&track.Disc, &track.DiscTotal, &track.Track,
+		&track.TrackTotal, &track.Sender, &track.CreatorUser,
+		&track.Likes, &track.S3Version,
 	)
 	if err != nil {
 		return nil, err
@@ -238,14 +254,24 @@ func (c *PgClient) UpdateTracks(track *model.Track) error {
 
 	// Add SET clauses to specify the columns and their new values
 	updateBuilder = updateBuilder.SetMap(map[string]interface{}{
-		"created_at":  track.CreatedAt,
-		"updated_at":  track.UpdatedAt,
-		"title":       track.Title,
-		"artist":      track.Artist,
-		"description": track.Description,
-		"sender":      track.Sender,
-		"likes":       track.Likes,
-		"s3Version":   track.S3Version,
+		"created_at":   track.CreatedAt,
+		"updated_at":   track.UpdatedAt,
+		"album":        track.Album,
+		"album_artist": track.AlbumArtist,
+		"composer":     track.Composer,
+		"genre":        track.Genre,
+		"lyrics":       track.Lyrics,
+		"title":        track.Title,
+		"artist":       track.Artist,
+		"year":         track.Year,
+		"comment":      track.Comment,
+		"disc":         track.Disc,
+		"disc_total":   track.DiscTotal,
+		"track":        track.Track,
+		"track_total":  track.TrackTotal,
+		"sender":       track.Sender,
+		"likes":        track.Likes,
+		"s3Version":    track.S3Version,
 	})
 
 	// Add a WHERE condition to identify the record to update based on the provided code
@@ -391,10 +417,21 @@ func (c *PgClient) GetAllTracksByPositions(playlistID string) ([]model.Track, er
 		var track model.Track
 		var position int64
 		var trackPlaylistID string
-		if err = rows.Scan(&trackPlaylistID, &position, &track.ID, &track.CreatedAt,
-			&track.UpdatedAt, &track.Title, &track.Artist,
-			&track.Description, &track.Sender, &track.CreatorUser,
-			&track.Likes, &track.S3Version); err != nil {
+		if err = rows.Scan(
+			//			&trackPlaylistID, &position, &track.ID, &track.CreatedAt,
+			//			&track.UpdatedAt, &track.Title, &track.Artist,
+			//			&track.Description, &track.Sender, &track.CreatorUser,
+			//			&track.Likes, &track.S3Version,
+
+			&trackPlaylistID, &position, &track.ID,
+			&track.CreatedAt, &track.UpdatedAt,
+			&track.Album, &track.AlbumArtist, &track.Composer,
+			&track.Genre, &track.Lyrics, &track.Title,
+			&track.Artist, &track.Year, &track.Comment,
+			&track.Disc, &track.DiscTotal, &track.Track,
+			&track.TrackTotal, &track.Sender, &track.CreatorUser,
+			&track.Likes, &track.S3Version,
+		); err != nil {
 			return nil, err
 		}
 

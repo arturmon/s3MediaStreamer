@@ -2,28 +2,35 @@ package app
 
 import (
 	"context"
+	election "github.com/dmitriyGarden/consul-leader-election"
+	"github.com/hashicorp/consul/api"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/client/model"
+	"skeleton-golange-application/app/pkg/consul"
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
+	"time"
 )
 
 // App represents the main application struct.
 type App struct {
-	Cfg        *config.Config
-	Logger     *logging.Logger
-	Storage    *model.DBConfig
-	Gin        *gin.WebApp
-	AMQPClient *amqp.MessageClient
-	S3         s3.HandlerS3
+	Cfg            *config.Config
+	Logger         *logging.Logger
+	Storage        *model.DBConfig
+	Gin            *gin.WebApp
+	AMQPClient     *amqp.MessageClient
+	S3             s3.HandlerS3
+	LeaderElection *election.Election
+	AppName        string
 }
 
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
+	appName := "s3MediaStreamer"
 	healthMetrics := monitoring.NewHealthMetrics()
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
@@ -70,14 +77,42 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		logger.Error("Failed to initialize MQ:", err)
 	}
 
+	logger.Info("Starting initialize the consul...")
+	consulConfig := api.DefaultConfig()
+	consulConfig.Address = cfg.Consul.URL                                    // Specify your Consul server address
+	consulConfig.WaitTime = time.Duration(cfg.Consul.WaitTime) * time.Second // Specify your WaitTime
+
+	consulClient, _ := api.NewClient(consulConfig)
+	logger.Info("Register service consul...")
+
+	consulErr := consul.RegisterService(consulClient, appName, cfg)
+	if consulErr != nil {
+		logger.Infof("Failed to register service: %s\n", appName)
+		return nil, consulErr
+	}
+
+	n := &consul.Notify{T: appName}
+	check := "service:" + appName
+	key := "service/" + appName + "/leader"
+	electionConfig := &consul.LeaderElectionConfig{
+		CheckTimeout: 5 * time.Second,
+		Client:       consulClient,
+		Checks:       []string{check},
+		Key:          key,
+		LogLevel:     election.LogDebug,
+		Event:        n,
+	}
+	leaderElection := consul.InitializeLeaderElection(electionConfig)
 	// Return a new App instance with all initialized components.
 	return &App{
-		Cfg:        cfg,
-		Logger:     logger,
-		Storage:    storage,
-		Gin:        myGin,
-		AMQPClient: amqpClient,
-		S3:         s3client,
+		Cfg:            cfg,
+		Logger:         logger,
+		Storage:        storage,
+		Gin:            myGin,
+		AMQPClient:     amqpClient,
+		S3:             s3client,
+		LeaderElection: leaderElection,
+		AppName:        appName,
 	}, nil
 }
 

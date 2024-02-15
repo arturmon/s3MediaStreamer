@@ -1,17 +1,16 @@
 package s3
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
+	"os"
 	"path/filepath"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
-
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 func NewClientS3(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
@@ -60,22 +59,19 @@ func (h *HandlerFromS3) UploadFilesS3(ctx context.Context, upload *UploadS3) err
 	return nil
 }
 
-func (h *HandlerFromS3) DownloadFilesS3(ctx context.Context, name string) ([]byte, error) {
+func (h *HandlerFromS3) DownloadFilesS3(ctx context.Context, name string) (string, error) {
 	// Extract the object name after the last "/"
 	objectName := filepath.Base(name)
+	tempDir := os.TempDir()
+	h.logger.Debugln("Temporary directory:", tempDir)
+	fullFilePath := tempDir + "/" + objectName
 
-	object, err := h.s3Handler.GetObject(ctx, h.cfg.AppConfig.S3.BucketName, objectName, minio.GetObjectOptions{})
+	err := h.s3Handler.FGetObject(ctx, h.cfg.AppConfig.S3.BucketName, objectName, fullFilePath, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, err
-	}
-	defer object.Close()
-
-	var buffer bytes.Buffer
-	if _, err = io.Copy(&buffer, object); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return buffer.Bytes(), nil
+	return fullFilePath, nil
 }
 
 func (h *HandlerFromS3) ListObjectS3(ctx context.Context) ([]minio.ObjectInfo, error) {
@@ -123,4 +119,45 @@ func (h *HandlerFromS3) FindObjectFromVersion(ctx context.Context, s3tag string)
 
 	// Object not found, return an error
 	return minio.ObjectInfo{}, fmt.Errorf("object not found")
+}
+
+func (h *HandlerFromS3) DownloadFilesS3Stream(ctx context.Context, name string, callback func(io.Reader) error) error {
+	// Extract the object name after the last "/"
+	objectName := filepath.Base(name)
+
+	object, err := h.s3Handler.GetObject(ctx, h.cfg.AppConfig.S3.BucketName, objectName, minio.GetObjectOptions{})
+	if err != nil {
+		return err
+	}
+	defer object.Close()
+
+	// Use the provided callback to stream the content without loading it entirely into memory
+	if err = callback(object); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *HandlerFromS3) CleanTemplateFile(fileName string) error {
+	err := os.Remove(fileName)
+	if err != nil {
+		return fmt.Errorf("error deleting file %s: %v", fileName, err)
+	}
+	h.logger.Debugf("File %s deleted successfully\n", fileName)
+	return nil
+}
+
+func (h *HandlerFromS3) OpenTemplateFile(fileName string) (*os.File, error) {
+	_, err := os.Stat(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(fileName)
+	if err != nil {
+		return nil, err
+	}
+	//defer f.Close()
+	return f, nil
 }

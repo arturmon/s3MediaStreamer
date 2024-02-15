@@ -1,7 +1,6 @@
 package amqp
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"regexp"
@@ -28,14 +27,18 @@ func (c *MessageClient) putEvent(ctx context.Context, s3event *MessageBody) erro
 
 func checkObjectS3(ctx context.Context, object *MessageBody, c *MessageClient) error {
 	// Download file data from S3
-	fileData, err := c.s3Handler.DownloadFilesS3(ctx, object.Key)
+	fileName, err := c.s3Handler.DownloadFilesS3(ctx, object.Key)
 	if err != nil {
 		c.logger.Printf("Error downloading file %s from S3: %v\n", object.Key, err)
 		return err
 	}
 
 	// Create a Track from the file data
-	objectTags, errReadTags := tags.ReadTags(bytes.NewReader(fileData), c.cfg)
+	objectTags, errReadTags := tags.ReadTags(fileName, c.cfg)
+	err = c.s3Handler.CleanTemplateFile(fileName)
+	if err != nil {
+		return err
+	}
 	if errReadTags != nil {
 		c.logger.Printf("Error processing file: %s Error: %v\n", object.Records[0].S3.Object.Key, errReadTags)
 		return err

@@ -13,8 +13,12 @@ type Config struct {
 		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
 		Port   string `env:"PORT" env-default:"10000"`
 	}
+	Consul struct {
+		URL      string `env:"CONSUL_URL" env-default:"localhost:8500"`
+		WaitTime int    `env:"CONSUL_WAIT_TIME" env-default:"5"`
+	}
 	AppConfig struct {
-		LogLevel string `env:"LOG_LEVEL" env-default:"debug"`  // trace, debug, info, warn, error, fatal, panic
+		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // trace, debug, info, warn, error, fatal, panic
 		LogType  string `env:"LOG_TYPE" env-default:"text"`    // text, json
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 		Jobs     struct {

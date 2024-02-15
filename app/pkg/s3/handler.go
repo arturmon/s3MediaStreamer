@@ -2,6 +2,8 @@ package s3
 
 import (
 	"context"
+	"io"
+	"os"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 
@@ -30,7 +32,7 @@ func (h *Handler) UploadFilesS3(ctx context.Context, upload *UploadS3) error {
 	return h.handler.UploadFilesS3(ctx, upload)
 }
 
-func (h *Handler) DownloadFilesS3(ctx context.Context, name string) ([]byte, error) {
+func (h *Handler) DownloadFilesS3(ctx context.Context, name string) (string, error) {
 	return h.handler.DownloadFilesS3(ctx, name)
 }
 
@@ -44,4 +46,15 @@ func (h *Handler) DeleteObjectS3(ctx context.Context, object *minio.ObjectInfo) 
 
 func (h *Handler) FindObjectFromVersion(ctx context.Context, s3tag string) (minio.ObjectInfo, error) {
 	return h.handler.FindObjectFromVersion(ctx, s3tag)
+}
+
+func (h *Handler) DownloadFilesS3Stream(ctx context.Context, name string, callback func(io.Reader) error) error {
+	return h.handler.DownloadFilesS3Stream(ctx, name, callback)
+}
+
+func (h *Handler) CleanTemplateFile(fileName string) error {
+	return h.handler.CleanTemplateFile(fileName)
+}
+func (h *Handler) OpenTemplateFile(fileName string) (*os.File, error) {
+	return h.handler.OpenTemplateFile(fileName)
 }

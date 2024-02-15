@@ -21,3 +21,5 @@ const (
 	minSubmatchesCount       = 4
 	lengthRandomGenerateCode = 8
 )
+
+var sem = make(chan struct{}, 2)

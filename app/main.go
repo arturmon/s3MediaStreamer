@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	_ "github.com/joho/godotenv/autoload"
+	"net/http"
+	_ "net/http/pprof"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
@@ -9,8 +12,6 @@ import (
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/logging"
 	_ "skeleton-golange-application/app/pkg/web/gin"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title			Sceleton Golang Application API
@@ -31,16 +32,23 @@ import (
 // @securityDefinitions.basic	BasicAuth
 // @authorizationurl http://localhost:10000/v1/users/login
 func main() {
+	//debug.SetMemoryLimit(2048)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
+	logger.Printf("App Version: %s Build Time: %s\n", Version, BuildTime)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
+		//http://localhost:6060/debug/pprof/
+		go func() {
+			logger.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
 	}
+	//myApp, err := app.NewAppInit(cfg, &logger, AppName)
 	myApp, err := app.NewAppInit(cfg, &logger)
 	if err != nil {
 		logger.Error("Failed to initialize the new my app:", err)
@@ -64,6 +72,8 @@ func main() {
 		}
 	}()
 
+	go myApp.LeaderElection.Init()
+
 	logger.Info("🚀 Running Application...")
 	myApp.Gin.Run(ctx) // The app will run
 	if err != nil {
@@ -71,5 +81,11 @@ func main() {
 	}
 	// Wait for the context to be cancelled before exiting
 	<-ctx.Done()
+	myApp.LeaderElection.Stop()
 	logger.Info("Application stopped")
 }
+
+var (
+	Version   = "0.0.1"
+	BuildTime = "0000-00-00 UTC"
+)
