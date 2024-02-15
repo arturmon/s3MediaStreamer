@@ -31,7 +31,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	github.com/zsais/go-gin-prometheus v0.1.0
-	go.mongodb.org/mongo-driver v1.13.1
+	go.mongodb.org/mongo-driver v1.14.0
 	golang.org/x/crypto v0.17.0
 )
 
