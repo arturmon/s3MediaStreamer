@@ -109,7 +109,8 @@ jobs:
 
       - shell: bash
         run: |
-          mv app/Go-results-*.x/* "$(ls -1d app/Go-results-*.x | sort -V | tail -n 1)"
+          latest_version=$(ls -d app/Go-results-*/app-* | sort -V | tail -n 1)
+          mv "$latest_version" album
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
