@@ -105,15 +105,11 @@ jobs:
           path: app
           pattern: Go-results-*
 
-      - run: ls -R .
-
       - shell: bash
         run: |
           latest_version=$(ls -d app/Go-results-*/app-* | sort -V | tail -n 1)
           echo $latest_version
-          mv "$latest_version" album
-
-      - run: ls .
+          mv $latest_version albums
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
