@@ -20,6 +20,24 @@ create database session
 create database casbin
     with owner root;
 ```
+## Environment
+
+use docker-compose.yaml to run all the necessary components
+
+| Service           | required | 
+|-------------------|----------|
+| postgresql        | [*]      |
+| postgres-exporter | [-]      |
+| redis             | [-]      |
+| memcache          | [-]      |
+| mongodb           | [-]      |
+| rabbitmq          | [*]      |
+| minio             | [*]      |
+| minio-mc          | [*]      |
+| prometheus        | [-]      |
+| grafana           | [-]      |
+| consul            | [*]      |
+
 Downloading dependencies
 ```shell
 go get -u go.mongodb.org/mongo-driver/bson/primitive
@@ -303,100 +321,13 @@ cd app && swag init --parseDependency --parseDepth=1
 
 ## MQ
 
-Payload: `{"action":"GetAllAlbums"}`
-
-Example:
-
-| Exchange            | Routing key      | Command         | Payload                                                                                                         |
-|---------------------|------------------|-----------------|-----------------------------------------------------------------------------------------------------------------|
-| sub-command         | sub-routing-key  | GetAllAlbums    | `{"action":"GetAllAlbums","page":"1","page_size":"10","sort_by":"price","sort_order":"desc","filter":"I0004"}`  |
-| sub-command         | sub-routing-key  | GetDeleteAll    | `{"action":"GetDeleteAll"}`                                                                                     |
-| sub-command         | sub-routing-key  | GetAlbumByCode  | `{"action":"GetAlbumByCode","albumCode":"I0001"}`                                                               |
-| sub-command         | sub-routing-key  | AddUser         | `{"action":"AddUser","userEmail":"a@a.com","name":"a","password":"1","role":"member"}`                          |
-| sub-command         | sub-routing-key  | DeleteUser      | `{"action":"DeleteUser","userEmail":"a@a.com"}`                                                                 |
-| sub-command         | sub-routing-key  | FindUserToEmail | `{"action":"FindUserToEmail","userEmail":"a@a.com"}`                                                            |
-| sub-command         | sub-routing-key  | PostAlbums      | PostAlbums Payload:  --->                                                                                       |
-| sub-command         | sub-routing-key  | UpdateAlbum     | UpdateAlbum Payload:  --->                                                                                      |
-
----> PostAlbums solo track
-```json
-{
-  "action": "PostAlbums",
-  "tracks": {
-    "track": [
-      {
-        "Title": "Test Title1",
-        "Artist": "Test Artist1",
-        "Description": "Description Test1"
-      }
-    ]
-  }
-}
-```
-
----> PostAlbums Payload many tracks:
-```json
-{
-    "action": "PostAlbums",
-    "tracks": {
-        "track": [
-            {
-                "Title": "Test Title1",
-                "Artist": "Test Artist1",
-                "Description": "Description Test1"
-            },
-            {
-                "Title": "Test Title2",
-                "Artist": "Test Artist2",
-                "Description": "Description Test2"
-            },
-            {
-                "Title": "Test Title3",
-                "Artist": "Test Artist3",
-                "Description": "Description Test3"
-            }
-        ]
-    }
-}
-
-```
----> UpdateAlbum Payload:
-```json
-{
-    "action": "UpdateAlbum",
-    "track": {
-      "Title": "Test Rabbitmq",
-      "Artist": "Test Update RAbbit",
-      "Description": "Description Update Rabbitmq"
-    }
-}
-```
-
-example errors:
-
-types: `logs.error`
-
-| Payload                                                    | Errors                                                  |
-|------------------------------------------------------------|---------------------------------------------------------|
-| `{"action":"GetAlbumByCode","albumCode":"I0001fsdfsd"}`    | `{"error":"no track found with code: I0001fsdfsd"}`     |
-| `{"action":"FindUserToEmail","userEmail":"a@assss.com"}`   | `{"error":"user with email 'a@assss.com' not found"}`   |
-| `{"action":"DeleteUser","userEmail":"a@aasdas.com"}`       | `{"error":"user with email 'a@aasdas.com' not found"}`  |
+used only for exchanging messages with S3
 
 ### ChatGPP
 Get your API key from the OpenAI Dashboard - [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
 
 ### S3
 
-```shell
-docker run -d --name minio \
--p 9000:9000 \
--p 9001:9001 \
--v /home/amudrykh/minio_data:/data \
--e MINIO_ROOT_USER=admin \
--e MINIO_ROOT_PASSWORD=12345678 -e MINIO_DEFAULT_BUCKETS=img:none,img-cache:none \
--e MINIO_BROWSER=on -e CONSOLE_SECURE_TLS_REDIRECT=off \
-bitnami/minio:latest
-```
 ## Env variables
 ```
 JOB_CLEAN_ALBUM_PATH_NULL env-default:"@every 10m"
