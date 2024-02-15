@@ -2,6 +2,10 @@
 ![Supported Go Versions](https://img.shields.io/badge/Go-%201.19%2C%201.20%2C%201.21-lightgrey.svg)
 [![Coverage Status](https://coveralls.io/repos/github/arturmon/skeleton-golange-application/badge.svg?branch=main)](https://coveralls.io/github/arturmon/skeleton-golange-application?branch=main)
 [![Docker](https://img.shields.io/docker/pulls/arturmon/albums)](https://hub.docker.com/r/arturmon/albums)
+[![Docker Stars](https://badgen.net/docker/stars/arturmon/albums?icon=docker&label=stars)](https://hub.docker.com/r/arturmon/albums)
+[![Docker Image Size](https://badgen.net/docker/size/arturmon/albums?icon=docker&label=image%20size)](https://hub.docker.com/r/arturmon/albums)
+![Github issues](https://img.shields.io/github/issues/arturmon/skeleton-golange-application)
+
 ## Generate specification Swager
 ```shell
 cd skeleton-golange-application
