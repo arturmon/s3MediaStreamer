@@ -109,7 +109,7 @@ jobs:
 
       - shell: bash
         run: |
-          mv $(ls -d app-* | sort -V | tail -n 1) albums
+          mv app/Go-results-*.x/* "$(ls -1d app/Go-results-*.x | sort -V | tail -n 1)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
