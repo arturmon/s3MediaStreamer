@@ -1,7 +1,7 @@
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/arturmon/skeleton-golange-application/main.yml?branch=main)](https://github.com/arturmon/skeleton-golange-application/actions/workflows/main.yml?query=branch%3Amain)
 ![Supported Go Versions](https://img.shields.io/badge/Go-%201.19%2C%201.20%2C%201.21-lightgrey.svg)
 [![Coverage Status](https://coveralls.io/repos/github/arturmon/skeleton-golange-application/badge.svg?branch=main)](https://coveralls.io/github/arturmon/skeleton-golange-application?branch=main)
-[![Docker](https://img.shields.io/docker/pulls/arturmon/tracks)](https://hub.docker.com/r/arturmon/tracks)
+[![Docker](https://img.shields.io/docker/pulls/arturmon/albums)](https://hub.docker.com/r/arturmon/albums)
 ## Generate specification Swager
 ```shell
 cd skeleton-golange-application
