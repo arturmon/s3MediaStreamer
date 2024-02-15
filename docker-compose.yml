@@ -13,6 +13,15 @@ services:
       - POSTGRESQL_PASSWORD=1qazxsw2
       - POSTGRESQL_DATABASE=db_issue_album
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    ports:
+      - 9187:9187
+    environment:
+      DATA_SOURCE_NAME: "postgresql://root:1qazxsw2@postgres:5432/shop?sslmode=disable"
+    depends_on:
+      - postgresql
+
   redis:
     container_name: redis
     image: bitnami/redis:latest
