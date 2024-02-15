@@ -111,6 +111,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - ./infra/grafana:/etc/grafana/provisioning/datasources
       - ./infra/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml

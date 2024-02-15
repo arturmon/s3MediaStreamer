@@ -17,7 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/gin-gonic/gin"
-	ginPrometheus "github.com/zsais/go-gin-prometheus"
+	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
 )
 
 type AppInterface interface {
@@ -56,7 +56,8 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
 
 	logger.Info("prometheus initializing")
-	p := ginPrometheus.NewPrometheus("gin")
+	p := ginPrometheus.GetMonitor()
+	p.SetMetricPath("/metrics")
 	p.Use(router)
 
 	logger.Info("storage initializing")
