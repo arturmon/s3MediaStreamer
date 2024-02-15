@@ -15,6 +15,7 @@ services:
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
+    restart: unless-stopped
     ports:
       - 9187:9187
     environment:
@@ -54,6 +55,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"
     volumes:
       - ./infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./infra/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
