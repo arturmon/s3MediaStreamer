@@ -33,7 +33,6 @@ jobs:
         id: go-cache
         with:
           path: ~/go/pkg/mod
-          #key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
@@ -100,14 +99,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download a single artifact
+      - name: Download the latest artifact
         uses: actions/download-artifact@v4
         with:
           name: Go-results-${{ matrix.go-version }}
+          path: ./app
 
       - shell: bash
         run: |
-          mv app-1.19.x albums
+          mv app-${{ matrix.go-version }} albums
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
