@@ -18,7 +18,7 @@ services:
     ports:
       - 9187:9187
     environment:
-      DATA_SOURCE_NAME: "postgresql://root:1qazxsw2@postgres:5432/shop?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://root:1qazxsw2@postgres:5432/postgres?sslmode=disable"
     depends_on:
       - postgresql
 
