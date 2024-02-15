@@ -7,7 +7,7 @@ require (
 	github.com/ayush6624/go-chatgpt v0.3.0
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
-	github.com/casbin/casbin/v2 v2.81.0
+	github.com/casbin/casbin/v2 v2.82.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/dmitriyGarden/consul-leader-election v1.2.3
 	github.com/gin-contrib/cors v1.5.0
