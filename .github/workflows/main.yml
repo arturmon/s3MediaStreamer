@@ -103,7 +103,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Go-results-${{ matrix.go-version }}
-          path: ./app
+          path: ./app/app-${{ matrix.go-version }}
 
       - shell: bash
         run: |
