@@ -3,15 +3,13 @@ updates:
   - package-ecosystem: gomod
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "09:00"
+      interval: daily
     reviewers:
       - "arturmon"
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
     open-pull-requests-limit: 99
     reviewers:
       - "arturmon"
