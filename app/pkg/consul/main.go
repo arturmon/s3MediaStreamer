@@ -70,8 +70,8 @@ func RegisterService(client *api.Client, appName string, cfg *config.Config) err
 	}
 
 	serviceRegistration := &api.AgentServiceRegistration{
-		ID:      appName,
-		Name:    appName + hostname,
+		ID:      appName + "-" + hostname,
+		Name:    appName,
 		Port:    port,
 		Address: ip, // Change to your actual service address
 		Tags:    []string{"microservice", "golang"},
