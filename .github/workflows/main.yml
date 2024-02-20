@@ -109,7 +109,7 @@ jobs:
         run: |
           latest_version=$(ls -d app/Go-results-*/app-* | sort -V | tail -n 1)
           echo $latest_version
-          mv $latest_version albums
+          mv $latest_version s3stream
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -128,7 +128,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: arturmon/albums:latest
+          tags: arturmon/s3stream:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
