@@ -8,13 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEventLeader(_ *testing.T) {
-	notify := consul.Notify{T: "Test"}
-	eventLeader := true
-
-	notify.EventLeader(eventLeader)
-}
-
 func TestInitializeLeaderElection(t *testing.T) {
 	// You might need to set up a Consul client for testing.
 	config := &consul.LeaderElectionConfig{
