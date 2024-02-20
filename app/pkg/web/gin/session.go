@@ -67,10 +67,12 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 		db, err := sql.Open("postgres", dsn.String())
 		if err != nil {
 			logger.Errorf("Error creating Postgres store: %v", err)
+			return
 		}
 		store, err = postgres.NewStore(db, []byte(cfg.Session.Cookies.SessionSecretKey))
 		if err != nil {
 			logger.Errorf("Error creating Postres store: %v", err)
+			return
 		}
 	default:
 		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))

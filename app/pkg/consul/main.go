@@ -3,6 +3,7 @@ package consul
 import (
 	"fmt"
 	"net"
+	"os"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 	"strconv"
@@ -62,9 +63,15 @@ func RegisterService(client *api.Client, appName string, cfg *config.Config) err
 	}
 	ip := GetLocalIP()
 
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Println("Ошибка при получении имени хоста:", err)
+		return err
+	}
+
 	serviceRegistration := &api.AgentServiceRegistration{
 		ID:      appName,
-		Name:    appName,
+		Name:    appName + hostname,
 		Port:    port,
 		Address: ip, // Change to your actual service address
 		Tags:    []string{"microservice", "golang"},
