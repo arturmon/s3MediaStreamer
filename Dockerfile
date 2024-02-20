@@ -6,6 +6,7 @@ LABEL author="Artur Mudrykh"
 WORKDIR /app
 COPY /migrations/psql/ ./migrations/psql/
 COPY s3stream .
+COPY acl/ acl/
 RUN chown -R appuser:appuser /app
 RUN chmod +x /app/s3stream
 USER appuser
