@@ -63,14 +63,8 @@ func RegisterService(client *api.Client, appName string, cfg *config.Config) err
 	}
 	ip := GetLocalIP()
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		fmt.Println("Ошибка при получении имени хоста:", err)
-		return err
-	}
-
 	serviceRegistration := &api.AgentServiceRegistration{
-		ID:      appName + "-" + hostname,
+		ID:      appName + "-" + GetHostname(),
 		Name:    appName,
 		Port:    port,
 		Address: ip, // Change to your actual service address
@@ -145,4 +139,12 @@ func GetLocalIP() string {
 		}
 	}
 	return ""
+}
+
+func GetHostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return ""
+	}
+	return hostname
 }

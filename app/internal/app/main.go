@@ -92,7 +92,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 
 	n := consul.NewNotify(appName, logger)
-	check := "service:" + appName + ":1"
+	check := "service:" + appName + "-" + consul.GetHostname() + ":1"
 	key := "service/" + appName + "/leader"
 
 	// Put the leader information in the Consul KV store
