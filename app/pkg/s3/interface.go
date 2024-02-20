@@ -2,9 +2,12 @@ package s3
 
 import (
 	"context"
-	"github.com/minio/minio-go/v7"
 	"io"
 	"os"
+	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/logging"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type HandlerS3 interface {
@@ -16,4 +19,11 @@ type HandlerS3 interface {
 	DownloadFilesS3Stream(ctx context.Context, name string, callback func(io.Reader) error) error
 	CleanTemplateFile(fileName string) error
 	OpenTemplateFile(fileName string) (*os.File, error)
+	Ping(ctx context.Context) error
+}
+
+type HandlerFromS3 struct {
+	cfg       *config.Config
+	logger    *logging.Logger
+	s3Handler *minio.Client
 }

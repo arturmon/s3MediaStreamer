@@ -139,6 +139,13 @@ services:
       - "8600:8600/tcp"
       - "8600:8600/udp"
 
+  consul-exporter:
+    image: prom/consul-exporter:v0.11.0
+    command: --consul.server=consul:8500
+    restart: unless-stopped
+    ports:
+      - "9107:9107"
+
 volumes:
   postgresql_data:
     driver: local

@@ -34,20 +34,22 @@ func (e OpenAIJob) Run() {
 
 	var titleAndArtist string
 	for _, track := range radDBdata {
-		titleAndArtist += fmt.Sprintf("Title: %s, Artist: %s,", track.Title, track.Artist)
+		titleAndArtist += fmt.Sprintf("Title: %s, Artist: %s", track.Title, track.Artist)
 	}
 
 	res, errSend := client.Send(ctx, &chatgpt.ChatCompletionRequest{
-		Model: chatgpt.GPT35Turbo,
+		Model: chatgpt.GPT35Turbo16k,
 		Messages: []chatgpt.ChatMessage{
 			{
-				Role:    chatgpt.ChatGPTModelRoleAssistant,
-				Content: "suggest 10 songs based on this selection, output format: Title: %s, Artist: %s, Description: %s" + titleAndArtist,
+				Role: chatgpt.ChatGPTModelRoleAssistant,
+				//Content: "suggest 10 songs based on this selection, output format: Title: %s, Artist: %s, Description: %s" + titleAndArtist,
+				Content: "%s Skipper 10 similar songs in format: Title: %s, Artist: %s, Description: %s" + titleAndArtist,
 			},
 		},
 	})
 	if errSend != nil {
-		e.app.Logger.Fatal(err)
+		e.app.Logger.Error(errSend)
+		return
 	}
 	a, _ := json.MarshalIndent(res, "", "  ")
 

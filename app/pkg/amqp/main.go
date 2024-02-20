@@ -8,33 +8,21 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/s3"
 	"sync"
+	"time"
 
+	"github.com/AsidStorm/go-amqp-reconnect/rabbitmq"
 	"github.com/streadway/amqp"
 )
 
 // MessageClient represents an AMQP message client.
 type MessageClient struct {
-	conn      *amqp.Connection
-	channel   *amqp.Channel
+	Conn      *rabbitmq.Connection
+	channel   *rabbitmq.Channel
 	queue     amqp.Queue
 	cfg       *config.Config
-	s3Handler s3.HandlerS3
+	s3Handler *s3.Handler
 	logger    *logging.Logger
 	storage   *model.DBConfig
-}
-
-// Worker represents a worker that processes AMQP messages.
-type Worker struct {
-	MessageClient *MessageClient
-	workerDone    chan struct{}
-}
-
-// NewWorker creates a new Worker instance.
-func NewWorker(messageClient *MessageClient, workerDone chan struct{}) *Worker {
-	return &Worker{
-		MessageClient: messageClient,
-		workerDone:    workerDone,
-	}
 }
 
 // NewAMQPClient creates a new instance of the MessageClient.
@@ -48,8 +36,10 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 	}
 
 	amqpURLpriv := fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
-
-	conn, err := amqp.Dial(amqpURLpriv)
+	if cfg.AppConfig.LogLevel == "debug" {
+		rabbitmq.Debug = true
+	}
+	conn, err := rabbitmq.Dial(amqpURLpriv)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +74,7 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 	logger.Infof("Connect AMQP Client: amqp://%s:***@%s", cfg.MessageQueue.User, amqpURL)
 
 	return &MessageClient{
-		conn:      conn,
+		Conn:      conn,
 		channel:   channel,
 		queue:     queue,
 		cfg:       cfg,
@@ -114,6 +104,20 @@ func (c *MessageClient) Consume(ctx context.Context) (<-chan amqp.Delivery, erro
 
 	c.logger.Infof("AMQP Consume Queue: %s", c.queue.Name)
 	return messages, nil
+}
+
+// Worker represents a worker that processes AMQP messages.
+type Worker struct {
+	MessageClient *MessageClient
+	workerDone    chan struct{}
+}
+
+// NewWorker creates a new Worker instance.
+func NewWorker(messageClient *MessageClient, workerDone chan struct{}) *Worker {
+	return &Worker{
+		MessageClient: messageClient,
+		workerDone:    workerDone,
+	}
 }
 
 // StartProcessing starts processing messages using a worker pool.
@@ -164,15 +168,31 @@ func ConsumeMessagesWithPool(ctx context.Context, logger logging.Logger, message
 	go func() {
 		defer wg.Done()
 
-		notificationChannel, err := messageClient.Consume(ctx)
-		if err != nil {
-			logger.Printf("Error getting objectInfo: %v\n", err)
-			return
-		}
+		for {
+			if messageClient == nil {
+				return
+			}
 
-		// Start processing messages using a worker pool
-		worker := NewWorker(messageClient, workerDone)
-		worker.StartProcessing(ctx, notificationChannel, &wg, numWorkers, workerDone)
+			notificationChannel, err := messageClient.Consume(ctx)
+			if err != nil {
+				logger.Printf("Error getting objectInfo: %v\n", err)
+				time.Sleep(reconnectSleepSeconds * time.Second)
+				continue
+			}
+
+			// Start processing messages using a worker pool
+			worker := NewWorker(messageClient, workerDone)
+			worker.StartProcessing(ctx, notificationChannel, &wg, numWorkers, workerDone)
+
+			// Block here until the connection is closed, then attempt to reconnect
+			select {
+			case <-ctx.Done():
+				return
+			case <-messageClient.Conn.NotifyClose(make(chan *amqp.Error)):
+				logger.Warn("RabbitMQ connection closed, attempting to reconnect...")
+				time.Sleep(reconnectSleepSeconds * time.Second)
+			}
+		}
 	}()
 
 	// Wait for the goroutine to finish

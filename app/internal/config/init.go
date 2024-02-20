@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"skeleton-golange-application/app/pkg/logging"
 	"sync"
 
@@ -31,7 +30,7 @@ func GetConfig() *Config {
 	})
 
 	if err := cleanenv.ReadEnv(cfgManager.instance); err != nil {
-		helpText := fmt.Sprintf("Stream Player S3")
+		helpText := "Stream Player S3"
 		help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
 		log.Debug(help)
 		log.Errorf("Error reading environment variables: %v", err)
@@ -43,7 +42,7 @@ func GetConfig() *Config {
 // PrintAllDefaultEnvs prints the help text containing all the default environment variables.
 func PrintAllDefaultEnvs(logger *logging.Logger) {
 	cfg := &Config{}
-	helpText := fmt.Sprintf("Stream Player S3")
+	helpText := "Stream Player S3"
 	help, _ := cleanenv.GetDescription(cfg, &helpText)
 	// Print the help text containing all the default environment variables
 	logger.Debug(help)

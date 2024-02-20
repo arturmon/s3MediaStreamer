@@ -83,9 +83,8 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 	c.Header("Content-Type", findObject.Metadata.Get("Content-Type"))
 	c.Header("Content-Disposition", "inline; filename="+findObject.Key)
 	c.Header("Content-Length", fmt.Sprintf("%d", findObject.Size))
-	// c.Header("Cache-Control", "public, max-age=3600")
-	// c.Header("Accept-Encoding", "*")
-	c.Header("Transfer-Encoding", "chunked")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Content-Duration", fmt.Sprintf("%d", track.Duration)) // second
 
 	// Open the file
 	f, err := a.S3.OpenTemplateFile(fileName)
@@ -111,11 +110,11 @@ func (a *WebApp) generateM3U8Playlist(filePaths *[]model.Track) []*model.Playlis
 	var playlist []*model.PlaylistM3U
 
 	var prefixURI = "stream/"
-	for i, track := range *filePaths {
+	for _, track := range *filePaths {
 		segment := &model.PlaylistM3U{
 			URI:      prefixURI + track.ID.String(),
-			Title:    filepath.Base(track.Title),
-			Duration: float64(i),
+			Title:    filepath.Base(track.Artist) + " - " + filepath.Base(track.Title),
+			Duration: track.Duration.Seconds(),
 		}
 		playlist = append(playlist, segment)
 	}

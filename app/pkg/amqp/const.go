@@ -7,8 +7,9 @@ const (
 	QueueExclusive  = false
 	QueueNoWait     = false
 
-	SubscribeAutoAck  = true
-	SubscribeExlusive = false
-	SubscribeNoLocal  = false
-	SubscribeNoWait   = false
+	SubscribeAutoAck      = true
+	SubscribeExlusive     = false
+	SubscribeNoLocal      = false
+	SubscribeNoWait       = false
+	reconnectSleepSeconds = 5
 )

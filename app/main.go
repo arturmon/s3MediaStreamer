@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "github.com/joho/godotenv/autoload"
 	"net/http"
 	_ "net/http/pprof"
 	_ "skeleton-golange-application/app/docs"
@@ -10,8 +9,13 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
 	"skeleton-golange-application/app/pkg/amqp"
+	"skeleton-golange-application/app/pkg/consul"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/app/pkg/monitoring"
 	_ "skeleton-golange-application/app/pkg/web/gin"
+	"time"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // @title			Sceleton Golang Application API
@@ -32,7 +36,7 @@ import (
 // @securityDefinitions.basic	BasicAuth
 // @authorizationurl http://localhost:10000/v1/users/login
 func main() {
-	//debug.SetMemoryLimit(2048)
+	// debug.SetMemoryLimit(2048)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -43,12 +47,18 @@ func main() {
 	logger.Info("logger initialize")
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
-		//http://localhost:6060/debug/pprof/
 		go func() {
-			logger.Println(http.ListenAndServe("localhost:6060", nil))
+			server := &http.Server{
+				Addr:              "localhost:6060",
+				Handler:           nil,
+				ReadHeaderTimeout: PPOFReadHeaderTimeout * time.Second,
+			}
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				logger.Fatal(err)
+			}
+			logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
 		}()
 	}
-	//myApp, err := app.NewAppInit(cfg, &logger, AppName)
 	myApp, err := app.NewAppInit(cfg, &logger)
 	if err != nil {
 		logger.Error("Failed to initialize the new my app:", err)
@@ -74,8 +84,32 @@ func main() {
 
 	go myApp.LeaderElection.Init()
 
+	// Start monitoring the database storage with a ticker
+	healthMetrics := monitoring.NewHealthMetrics()
+	// Call PingStorage in a goroutine
+
+	healthCheckWrapper := monitoring.NewHealthCheckWrapper(healthMetrics, myApp.Storage.Operations, myApp.AMQPClient, myApp.S3, &logger)
+	healthCheckWrapper.StartHealthChecks()
+
+	resultChan := make(chan bool)
+	healthCheckWrapper.CheckMonitoring(ctx, resultChan)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return // exit goroutine when context is canceled
+			case isHealthy := <-resultChan:
+				if !isHealthy && myApp.LeaderElection.IsLeader() {
+					// Trigger ReElection if components are not healthy
+					consul.ReElection(myApp.LeaderElection)
+				}
+			}
+		}
+	}()
+
 	logger.Info("🚀 Running Application...")
-	myApp.Gin.Run(ctx) // The app will run
+	myApp.Gin.Run(ctx, healthCheckWrapper) // The app will run
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -89,3 +123,5 @@ var (
 	Version   = "0.0.1"
 	BuildTime = "0000-00-00 UTC"
 )
+
+const PPOFReadHeaderTimeout = 10

@@ -12,9 +12,9 @@ import (
 func (c *PgClient) GetTracksForLearn() ([]model.Track, error) {
 	// Create a new instance of squirrel.SelectBuilder
 	selectBuilder := squirrel.Select("*").
-		From("track").
-		Where(squirrel.Eq{"likes": true}).
-		Limit(ChunkSize) // Adjust the limit based on your requirements
+		From("tracks").
+		Where("likes").
+		Limit(ChunkSize)
 
 	return c.executeSelectQuery(selectBuilder)
 }

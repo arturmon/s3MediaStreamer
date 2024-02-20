@@ -86,9 +86,9 @@
                 }
             }
         },
-        "/health": {
+        "/health/liveness": {
             "get": {
-                "description": "Checks and returns the current health status of the application",
+                "description": "Checks and returns the liveness status of the application",
                 "consumes": [
                     "*/*"
                 ],
@@ -98,18 +98,47 @@
                 "tags": [
                     "health-controller"
                 ],
-                "summary": "Get health status of the application",
+                "summary": "Get liveness status of the application",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/monitoring.HealthResponse"
+                            "$ref": "#/definitions/monitoring.LivenessResponse"
                         }
                     },
-                    "500": {
+                    "502": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/monitoring.HealthResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health/readiness": {
+            "get": {
+                "description": "Checks and returns the readiness status of the application",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health-controller"
+                ],
+                "summary": "Get readiness status of the application",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/monitoring.ReadinessResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1359,19 +1388,58 @@
         "model.Track": {
             "type": "object",
             "properties": {
+                "album": {
+                    "type": "string",
+                    "example": "Album name"
+                },
+                "album_artist": {
+                    "type": "string",
+                    "example": "Album artist name"
+                },
                 "artist": {
                     "type": "string",
                     "example": "Artist name"
                 },
-                "description": {
+                "bitrate": {
+                    "type": "integer",
+                    "example": 320
+                },
+                "comment": {
                     "type": "string",
-                    "example": "A short description of the application"
+                    "example": "Additional comments"
+                },
+                "composer": {
+                    "type": "string",
+                    "example": "Composer name"
+                },
+                "disc": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "disc_total": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "duration": {
+                    "$ref": "#/definitions/time.Duration"
+                },
+                "genre": {
+                    "type": "string",
+                    "example": "Genre name"
                 },
                 "likes": {
                     "type": "boolean"
                 },
+                "lyrics": {
+                    "type": "string",
+                    "example": "Lyrics of the track"
+                },
                 "s3Version": {
                     "type": "string"
+                },
+                "sample_rate": {
+                    "type": "integer",
+                    "example": 44100
                 },
                 "sender": {
                     "type": "string",
@@ -1380,6 +1448,18 @@
                 "title": {
                     "type": "string",
                     "example": "Title name"
+                },
+                "track": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "track_total": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2022
                 }
             }
         },
@@ -1423,13 +1503,52 @@
                 }
             }
         },
-        "monitoring.HealthResponse": {
+        "monitoring.LivenessResponse": {
             "type": "object",
             "properties": {
                 "status": {
                     "type": "string"
                 }
             }
+        },
+        "monitoring.ReadinessResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "time.Duration": {
+            "type": "integer",
+            "enum": [
+                -9223372036854775808,
+                9223372036854775807,
+                1,
+                1000,
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000,
+                1,
+                1000,
+                1000000,
+                1000000000
+            ],
+            "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second"
+            ]
         }
     },
     "securityDefinitions": {

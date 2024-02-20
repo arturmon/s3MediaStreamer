@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
 	"os"
 	"path/filepath"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 func NewClientS3(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*HandlerFromS3, error) {
@@ -131,18 +132,13 @@ func (h *HandlerFromS3) DownloadFilesS3Stream(ctx context.Context, name string, 
 	}
 	defer object.Close()
 
-	// Use the provided callback to stream the content without loading it entirely into memory
-	if err = callback(object); err != nil {
-		return err
-	}
-
-	return nil
+	return callback(object)
 }
 
 func (h *HandlerFromS3) CleanTemplateFile(fileName string) error {
 	err := os.Remove(fileName)
 	if err != nil {
-		return fmt.Errorf("error deleting file %s: %v", fileName, err)
+		return fmt.Errorf("error deleting file %s: %w", fileName, err)
 	}
 	h.logger.Debugf("File %s deleted successfully\n", fileName)
 	return nil
@@ -158,6 +154,11 @@ func (h *HandlerFromS3) OpenTemplateFile(fileName string) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	//defer f.Close()
+	// defer f.Close()
 	return f, nil
+}
+
+func (h *HandlerFromS3) Ping(ctx context.Context) error {
+	_, err := h.s3Handler.ListBuckets(ctx)
+	return err
 }

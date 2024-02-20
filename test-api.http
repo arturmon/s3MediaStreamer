@@ -181,23 +181,25 @@ Content-Type: application/json
 DELETE http://localhost:10000/v1/playlist/delete/8ba3a3ac-b804-4220-b08f-b1d9f3931a9f
 Content-Type: application/json
 ### SetFromPlaylist
-POST http://localhost:10000/v1/playlist/930b1542-7f1f-4755-8c91-f19fb7c9eef4/set
+POST http://localhost:10000/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf/set
 Content-Type: application/json
 
 {
   "track_order":
   [
-    "57c71f3e-8679-4eb6-a872-d8fdc2d77c07",
-    "168bcb74-0b35-4610-8fcc-e7ece596df5a",
-    "5b3cb510-222a-4668-9d1c-cd3e11875e50",
-    "725e3268-5e85-4d11-9258-ffb8fb26ab0f",
-    "9ba0e50a-4e48-4dee-94bd-c02b1592f473",
-    "5642df77-599c-4d3b-bdfd-7d3803d84be2",
-    "1be68e6b-e611-4cb2-8ebe-02924721d795",
-    "e254b39c-0aff-436c-9c73-69e85edb9210",
-    "3595e697-35d8-4aa5-ab2b-bfa200653f47",
-    "b0cd8732-b515-41c2-a22f-592e3646d89a",
-    "32474827-47ab-43a7-a4be-563639f5b17e"
+    "3773f656-95f6-4a20-89f8-a9b05384b6ce",
+    "6c47f7a4-fd91-44cb-a4a1-690c2e9f4381",
+    "e75564f4-a1e7-4f91-8c0b-78131fd33268",
+    "799712db-2784-438c-a29e-61820c46cebf",
+    "f4237f6a-5769-4e42-b1aa-f2898ca86b8f",
+    "76571608-f26d-4c5f-955d-f0d0a34b183f",
+    "c70c2a37-3c52-4d27-a0d0-233e500773ae",
+    "33521a1f-7cd3-4f00-932c-eecd3078d674",
+    "007694c3-83a0-4f7b-97e9-21c3b8411fc8",
+    "4a8988de-9d3a-4d5a-94e5-ac58d2e40cb1",
+    "dde313bb-8dd6-42ae-9abf-05cdf6fb2b7c",
+    "a807bbf0-43b9-4d3b-8f52-0afa0ab3a399",
+    "09c6e8ef-667f-4aec-8713-dc3e2a7de982"
 
   ]
 }

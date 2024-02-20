@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"skeleton-golange-application/app/internal/config"
+	conf "skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
@@ -25,17 +25,16 @@ type AppInterface interface {
 }
 
 type WebApp struct {
-	cfg           *config.Config
-	logger        *logging.Logger
-	router        *gin.Engine
-	storage       *model.DBConfig
-	healthMetrics *monitoring.HealthMetrics
-	metrics       *monitoring.Metrics
-	enforcer      *casbin.Enforcer
-	S3            s3.HandlerS3
+	cfg      *conf.Config
+	logger   *logging.Logger
+	router   *gin.Engine
+	storage  *model.DBConfig
+	metrics  *monitoring.Metrics
+	enforcer *casbin.Enforcer
+	S3       s3.HandlerS3
 }
 
-func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logger) (*WebApp, error) {
+func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger) (*WebApp, error) {
 	logger.Info("router initializing")
 	// Gin instance
 	switch cfg.AppConfig.GinMode {
@@ -82,9 +81,6 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	logger.Info("session initializing")
 	initSession(ctx, router, cfg, logger)
 
-	healthMetrics := monitoring.NewHealthMetrics()
-	go monitoring.PingStorage(context.Background(), storage.Operations, healthMetrics)
-
 	s3Handler, s3err := s3.NewClientS3(ctx, cfg, logger)
 	if s3err != nil {
 		logger.Error("Failed to initialize S3:", s3err)
@@ -93,27 +89,26 @@ func NewAppUseGin(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	}
 
 	return &WebApp{
-		cfg:           cfg,
-		logger:        logger,
-		router:        router,
-		storage:       storage,
-		healthMetrics: healthMetrics,
-		metrics:       metrics,
-		enforcer:      enforcer,
-		S3:            s3Handler,
+		cfg:      cfg,
+		logger:   logger,
+		router:   router,
+		storage:  storage,
+		metrics:  metrics,
+		enforcer: enforcer,
+		S3:       s3Handler,
 	}, nil
 }
 
-func (a *WebApp) Run(ctx context.Context) {
-	a.startHTTP(ctx)
+func (a *WebApp) Run(ctx context.Context, hcw *monitoring.HealthCheckWrapper) {
+	a.startHTTP(ctx, hcw)
 }
 
-func (a *WebApp) startHTTP(ctx context.Context) {
+func (a *WebApp) startHTTP(ctx context.Context, hcw *monitoring.HealthCheckWrapper) {
 	a.logger.Info("start HTTP")
 	a.setupStaticFiles()
 
 	// Routes
-	a.setupSystemRoutes()
+	a.setupSystemRoutes(hcw)
 	// Group: v1
 	a.setupAppRoutesV1()
 
@@ -142,11 +137,15 @@ func (a *WebApp) setupStaticFiles() {
 	a.router.StaticFile("/favicon.ico", "./favicon.ico")
 }
 
-func (a *WebApp) setupSystemRoutes() {
+func (a *WebApp) setupSystemRoutes(hcw *monitoring.HealthCheckWrapper) {
 	a.logger.Info("heartbeat metric initializing")
-	a.router.GET("/health", func(c *gin.Context) {
-		monitoring.HealthGET(c, a.healthMetrics) // Pass the healthMetrics to HealthGET.
+	a.router.GET("/health/liveness", func(c *gin.Context) {
+		monitoring.LivenessGET(c, hcw) // Pass the healthMetrics to HealthGET.
 	})
+	a.router.GET("/health/readiness", func(c *gin.Context) {
+		monitoring.ReadinessGET(c, hcw) // Pass the healthMetrics to HealthGET.
+	})
+
 	a.router.GET("/ping", Ping)
 	a.router.GET("/job/status", JobStatus)
 

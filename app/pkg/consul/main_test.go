@@ -1,13 +1,15 @@
-package consul
+package consul_test
 
 import (
-	"github.com/stretchr/testify/assert"
+	"skeleton-golange-application/app/pkg/consul"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestEventLeader(t *testing.T) {
-	notify := Notify{T: "Test"}
+func TestEventLeader(_ *testing.T) {
+	notify := consul.Notify{T: "Test"}
 	eventLeader := true
 
 	notify.EventLeader(eventLeader)
@@ -15,18 +17,18 @@ func TestEventLeader(t *testing.T) {
 
 func TestInitializeLeaderElection(t *testing.T) {
 	// You might need to set up a Consul client for testing.
-	config := &LeaderElectionConfig{
+	config := &consul.LeaderElectionConfig{
 		CheckTimeout: time.Second * 5,
 		// Add other necessary fields.
 	}
 
-	election := InitializeLeaderElection(config)
+	election := consul.InitializeLeaderElection(config)
 
 	assert.NotNil(t, election)
 }
 
 func TestGetLocalIP(t *testing.T) {
-	ip := GetLocalIP()
+	ip := consul.GetLocalIP()
 
 	assert.NotEmpty(t, ip)
 }

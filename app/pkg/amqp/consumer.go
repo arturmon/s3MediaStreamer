@@ -67,7 +67,6 @@ func (c *MessageClient) handleMessage(ctx context.Context, message amqp.Delivery
 	default:
 		c.logger.Debugf("Event: %s not processed", action)
 	}
-
 }
 
 func extractRecordsEvent(data map[string]interface{}) (*MessageBody, error) {
@@ -84,7 +83,7 @@ func extractRecordsEvent(data map[string]interface{}) (*MessageBody, error) {
 	}
 
 	// Check if Records array is not empty
-	if len(messageBody.Records) == 0 {
+	if messageBody.Records == nil || len(messageBody.Records) == 0 {
 		return &MessageBody{}, err
 	}
 

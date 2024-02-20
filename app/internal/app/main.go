@@ -2,18 +2,18 @@ package app
 
 import (
 	"context"
-	election "github.com/dmitriyGarden/consul-leader-election"
-	"github.com/hashicorp/consul/api"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/consul"
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
 	"time"
+
+	election "github.com/dmitriyGarden/consul-leader-election"
+	"github.com/hashicorp/consul/api"
 )
 
 // App represents the main application struct.
@@ -31,7 +31,7 @@ type App struct {
 // NewAppInit initializes a new App instance.
 func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	appName := "s3MediaStreamer"
-	healthMetrics := monitoring.NewHealthMetrics()
+
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
 	storage, err := model.NewDBConfig(cfg, logger)
@@ -48,11 +48,6 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 
 	ctx := context.Background()
-	// Start monitoring the database storage with a ticker
-	go func() {
-		// Call PingStorage in a goroutine
-		monitoring.PingStorage(ctx, storage.Operations, healthMetrics)
-	}()
 
 	logger.Info("Starting initialize the Gin...")
 	// Initialize the Gin web framework.
@@ -72,9 +67,14 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
 	logger.Info("Starting initialize the amqp...")
-	amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
-	if err != nil {
+	for {
+		amqpClient, err = amqp.NewAMQPClient(cfg.MessageQueue.SubQueueName, cfg, logger)
+		if err == nil {
+			break // If successful, break out of the loop
+		}
+
 		logger.Error("Failed to initialize MQ:", err)
+		time.Sleep(retryWaitTimeSeconds * time.Second) // Wait before retrying
 	}
 
 	logger.Info("Starting initialize the consul...")
@@ -91,11 +91,18 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		return nil, consulErr
 	}
 
-	n := &consul.Notify{T: appName}
-	check := "service:" + appName
+	n := consul.NewNotify(appName, logger)
+	check := "service:" + appName + ":1"
 	key := "service/" + appName + "/leader"
+
+	// Put the leader information in the Consul KV store
+	err = consul.CreateOrUpdateLeaderKey(consulClient, logger, key, "")
+	if err != nil {
+		logger.Error("Error consul create kv leader")
+	}
+
 	electionConfig := &consul.LeaderElectionConfig{
-		CheckTimeout: 5 * time.Second,
+		CheckTimeout: checkConsulLeaderTimeoutSeconds * time.Second,
 		Client:       consulClient,
 		Checks:       []string{check},
 		Key:          key,
@@ -104,6 +111,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 	leaderElection := consul.InitializeLeaderElection(electionConfig)
 	// Return a new App instance with all initialized components.
+
 	return &App{
 		Cfg:            cfg,
 		Logger:         logger,

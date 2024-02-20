@@ -2,11 +2,12 @@
 package gin
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +33,7 @@ func TestHandleOptions(t *testing.T) {
 	router := SetupRouter()
 
 	// Perform an OPTIONS request to /test with the correct origin
-	req, err := http.NewRequest("OPTIONS", "/test", nil)
+	req, err := http.NewRequest(http.MethodOptions, "/test", nil)
 	req.Header.Set("Origin", "http://localhost:3000")
 	assert.NoError(t, err)
 

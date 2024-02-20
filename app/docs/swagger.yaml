@@ -69,22 +69,60 @@ definitions:
     type: object
   model.Track:
     properties:
+      album:
+        example: Album name
+        type: string
+      album_artist:
+        example: Album artist name
+        type: string
       artist:
         example: Artist name
         type: string
-      description:
-        example: A short description of the application
+      bitrate:
+        example: 320
+        type: integer
+      comment:
+        example: Additional comments
+        type: string
+      composer:
+        example: Composer name
+        type: string
+      disc:
+        example: 1
+        type: integer
+      disc_total:
+        example: 2
+        type: integer
+      duration:
+        $ref: '#/definitions/time.Duration'
+      genre:
+        example: Genre name
         type: string
       likes:
         type: boolean
+      lyrics:
+        example: Lyrics of the track
+        type: string
       s3Version:
         type: string
+      sample_rate:
+        example: 44100
+        type: integer
       sender:
         example: sender set
         type: string
       title:
         example: Title name
         type: string
+      track:
+        example: 3
+        type: integer
+      track_total:
+        example: 10
+        type: integer
+      year:
+        example: 2022
+        type: integer
     type: object
   model.User:
     description: 'User account information with: user _id, name, email, password'
@@ -113,11 +151,44 @@ definitions:
       refresh_token:
         type: string
     type: object
-  monitoring.HealthResponse:
+  monitoring.LivenessResponse:
     properties:
       status:
         type: string
     type: object
+  monitoring.ReadinessResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -176,23 +247,42 @@ paths:
       summary: Stream audio files.
       tags:
       - track-controller
-  /health:
+  /health/liveness:
     get:
       consumes:
       - '*/*'
-      description: Checks and returns the current health status of the application
+      description: Checks and returns the liveness status of the application
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/monitoring.HealthResponse'
-        "500":
+            $ref: '#/definitions/monitoring.LivenessResponse'
+        "502":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/monitoring.HealthResponse'
-      summary: Get health status of the application
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Get liveness status of the application
+      tags:
+      - health-controller
+  /health/readiness:
+    get:
+      consumes:
+      - '*/*'
+      description: Checks and returns the readiness status of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/monitoring.ReadinessResponse'
+        "502":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Get readiness status of the application
       tags:
       - health-controller
   /job/status:

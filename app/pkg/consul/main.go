@@ -2,23 +2,33 @@ package consul
 
 import (
 	"fmt"
-	election "github.com/dmitriyGarden/consul-leader-election"
-	"github.com/hashicorp/consul/api"
 	"net"
 	"skeleton-golange-application/app/internal/config"
+	"skeleton-golange-application/app/pkg/logging"
 	"strconv"
 	"time"
+
+	election "github.com/dmitriyGarden/consul-leader-election"
+	"github.com/hashicorp/consul/api"
 )
 
 type Notify struct {
-	T string
+	T      string
+	Logger *logging.Logger
+}
+
+func NewNotify(t string, logger *logging.Logger) *Notify {
+	return &Notify{
+		T:      t,
+		Logger: logger,
+	}
 }
 
 func (n *Notify) EventLeader(f bool) {
 	if f {
-		fmt.Println(n.T, "I'm the leader!")
+		n.Logger.Info(fmt.Sprintf("%s I'm the leader!", n.T))
 	} else {
-		fmt.Println(n.T, "I'm no longer the leader!")
+		n.Logger.Info(fmt.Sprintf("%s I'm no longer the leader!", n.T))
 	}
 }
 
@@ -44,7 +54,7 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 	return election.NewElection(electionConfig)
 }
 
-// RegisterService registers the service in Consul
+// RegisterService registers the service in Consul.
 func RegisterService(client *api.Client, appName string, cfg *config.Config) error {
 	port, err := strconv.Atoi(cfg.Listen.Port)
 	if err != nil {
@@ -58,28 +68,60 @@ func RegisterService(client *api.Client, appName string, cfg *config.Config) err
 		Port:    port,
 		Address: ip, // Change to your actual service address
 		Tags:    []string{"microservice", "golang"},
-		Check: &api.AgentServiceCheck{
-			HTTP:     fmt.Sprintf("http://%s:%v/health", ip, port), // Change to your actual health check endpoint
-			Interval: "10s",
-			Timeout:  "30s",
+		Checks: api.AgentServiceChecks{
+			&api.AgentServiceCheck{
+				HTTP:     fmt.Sprintf("http://%s:%v/health/readiness", ip, port),
+				Interval: "3s",
+				Timeout:  "30s",
+			},
+			&api.AgentServiceCheck{
+				HTTP:     fmt.Sprintf("http://%s:%v/health/liveness", ip, port),
+				Interval: "10s",
+				Timeout:  "30s",
+			},
 		},
 	}
 	return client.Agent().ServiceRegister(serviceRegistration)
 }
 
-// DeregisterService deregisters the service from Consul
+// DeregisterService deregisters the service from Consul.
 func DeregisterService(client *api.Client, serviceID string) error {
 	return client.Agent().ServiceDeregister(serviceID)
 }
 
 func ReElection(clien *election.Election) {
-	for {
-		time.Sleep(10 * time.Second)
-		err := clien.ReElection()
-		if err != nil {
-			return
-		}
+	err := clien.ReElection()
+	if err != nil {
+		return
 	}
+}
+
+func CreateOrUpdateLeaderKey(consulClient *api.Client, logger *logging.Logger, key, value string) error {
+	// Check if the leader key already exists.
+	existingPair, _, err := consulClient.KV().Get(key, nil)
+	if err != nil {
+		logger.Errorf("Failed to check if leader key exists in Consul: %v", err)
+		return err
+	}
+
+	if existingPair == nil {
+		// Leader key does not exist, create it
+		kvPair := &api.KVPair{
+			Key:   key,
+			Value: []byte(value),
+		}
+
+		_, err = consulClient.KV().Put(kvPair, nil)
+		if err != nil {
+			logger.Errorf("Failed to create leader key in Consul: %v", err)
+			return err
+		}
+	} else {
+		// Leader key already exists, handle accordingly (perhaps log a message or take other actions).
+		logger.Infof("Leader key '%s' already exists in Consul", key)
+	}
+
+	return nil
 }
 
 func GetLocalIP() string {
@@ -88,7 +130,7 @@ func GetLocalIP() string {
 		return ""
 	}
 	for _, address := range addrs {
-		// check the address type and if it is not a loopback the display it
+		// check the address type and if it is not a loopback the display it.
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
 				return ipnet.IP.String()

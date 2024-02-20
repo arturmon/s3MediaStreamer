@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v4"
-	log "github.com/sirupsen/logrus"
 	"math"
 	"net/http"
 	"skeleton-golange-application/app/model"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 type Handler interface {
