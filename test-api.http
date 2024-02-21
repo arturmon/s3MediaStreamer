@@ -30,46 +30,9 @@ Content-Type: application/json
 ###
 GET http://localhost:10000/v1/tracks/0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
-###
-POST http://localhost:10000/v1/tracks/add
-Content-Type: application/json
-
-[
-  {
-    "Title": "Test Titl1e",
-    "Artist": "Test Artis22t1",
-    "Description": "Description Test1",
-    "Likes": false,
-    "Path": "C:/music"
-  },
-  {
-    "Title": "Test Tidsfsdftl1e",
-    "Artist": "Test Artsdfdsfis22t1",
-    "Description": "Descrsdasdiption Test1",
-    "Likes": false,
-    "Path": "C:/music"
-  }
-]
-
-###
-PATCH http://localhost:10000/v1/tracks/update
-Content-Type: application/json
-
-{
-  "Title": "Marco Polo",
-  "Artist": "Test Update",
-  "Description": "Description Update",
-  "Likes": false
-}
-###
-DELETE http://localhost:10000/v1/tracks/delete/0127b619-be74-499c-97f8-c8748194d7fd
-Content-Type: application/json
-###
-DELETE http://localhost:10000/v1/tracks/deleteAll
-Content-Type: application/json
 
 ###--------------------------------------------------------USERS------------------------------------------------
-POST http://localhost:10000/v1/users/register
+POST http://localhost:8080/v1/users/register
 Content-Type: application/json
 
 {
@@ -79,7 +42,7 @@ Content-Type: application/json
   "role":"member"
 }
 ###
-POST http://localhost:10000/v1/users/login
+POST http://localhost:8080/v1/users/login
 Content-Type: application/json
 
 {
@@ -87,7 +50,7 @@ Content-Type: application/json
   "password":"1"
 }
 ###
-POST http://localhost:10000/v1/users/login
+POST http://localhost:8080/v1/users/login
 Content-Type: application/json
 
 {
@@ -95,7 +58,7 @@ Content-Type: application/json
   "password":"admin"
 }
 ###
-POST http://localhost:10000/v1/users/logout
+POST http://localhost:8080/v1/users/logout
 Content-Type: application/json
 ###
 GET http://localhost:10000/v1/users/me
@@ -106,13 +69,6 @@ Content-Type: application/json
 
 {
   "email":"a@a.com"
-}
-###
-POST http://localhost:10000/v1/users/delete
-Content-Type: application/json
-
-{
-  "email":"admin@admin.com"
 }
 ###
 POST http://localhost:10000/v1/users/refresh
@@ -152,10 +108,6 @@ Content-Type: application/json
   "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
 
-###-------------------------------------------------------AUDIO------------------------------------------------
-GET http://localhost:10000/v1/audio
-Content-Type: application/json
-
 ###-------------------------------------------------------PLAY LIST--------------------------------------------
 ### AddToPlaylist
 POST http://localhost:10000/v1/playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/add/track/679fcd2d-3eee-4f94-8989-06765b3b5426
@@ -191,13 +143,13 @@ Content-Type: application/json
     "6c47f7a4-fd91-44cb-a4a1-690c2e9f4381",
     "e75564f4-a1e7-4f91-8c0b-78131fd33268",
     "799712db-2784-438c-a29e-61820c46cebf",
+    "dde313bb-8dd6-42ae-9abf-05cdf6fb2b7c",
     "f4237f6a-5769-4e42-b1aa-f2898ca86b8f",
     "76571608-f26d-4c5f-955d-f0d0a34b183f",
     "c70c2a37-3c52-4d27-a0d0-233e500773ae",
     "33521a1f-7cd3-4f00-932c-eecd3078d674",
     "007694c3-83a0-4f7b-97e9-21c3b8411fc8",
     "4a8988de-9d3a-4d5a-94e5-ac58d2e40cb1",
-    "dde313bb-8dd6-42ae-9abf-05cdf6fb2b7c",
     "a807bbf0-43b9-4d3b-8f52-0afa0ab3a399",
     "09c6e8ef-667f-4aec-8713-dc3e2a7de982"
 
