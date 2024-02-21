@@ -62,8 +62,9 @@ type Config struct {
 	Session struct {
 		SessionStorageType string `env:"SESSION_STORAGE_TYPE" env-default:"postgres"` // cookie, memory, memcached,
 		// mongo, postgres
-		SessionName string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
-		Cookies     struct {
+		SessionName        string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
+		SessionPeriodClean string `env:"SESSION_COOKIES_SESSION_PERIOD_CLEAN" env-default:"@midnight"`
+		Cookies            struct {
 			SessionSecretKey string `env:"SESSION_COOKIES_SESSION_SECRET_KEY" env-default:"sdfgerfsd3543g"`
 		}
 		Memcached struct {
