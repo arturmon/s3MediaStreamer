@@ -40,6 +40,7 @@ type MongoCollectionQuery interface {
 	ClearPlayList(playlistID string) error
 	UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest []string) error
 	GetAllTracksByPositions(playlistID string) ([]model.Track, error)
+	CleanSessions() error
 }
 
 type MongoOperations interface {

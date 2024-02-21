@@ -338,3 +338,8 @@ S3_USE_SSL" env-default:"false"
 S3_BUCKET_NAME" env-default:"music-bucket"
 S3_LOCATION" env-default:"us-east-1"
 ```
+
+### DEBUG
+```
+http://localhost:6060/debug/pprof/
+```
