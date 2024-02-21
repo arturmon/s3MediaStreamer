@@ -116,6 +116,10 @@ func main() {
 	// Wait for the context to be cancelled before exiting
 	<-ctx.Done()
 	myApp.LeaderElection.Stop()
+	err = consul.DeregisterService(myApp.Consul, myApp.AppName+"-"+consul.GetHostname())
+	if err != nil {
+		logger.Errorf("Error deregistering service: %v", err)
+	}
 	logger.Info("Application stopped")
 }
 

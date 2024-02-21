@@ -25,6 +25,7 @@ type App struct {
 	AMQPClient     *amqp.MessageClient
 	S3             s3.HandlerS3
 	LeaderElection *election.Election
+	Consul         *api.Client
 	AppName        string
 }
 
@@ -120,6 +121,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		AMQPClient:     amqpClient,
 		S3:             s3client,
 		LeaderElection: leaderElection,
+		Consul:         consulClient,
 		AppName:        appName,
 	}, nil
 }
