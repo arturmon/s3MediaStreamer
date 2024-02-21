@@ -15,5 +15,5 @@ func (j *CleanOldSessionJob) Run() {
 	if err != nil {
 		j.app.Logger.Fatal(err)
 	}
-	j.app.Logger.Printf("complete Clean old session storage, delete session: %v")
+	j.app.Logger.Printf("complete Clean old session storage.")
 }
