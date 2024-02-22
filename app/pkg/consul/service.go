@@ -13,7 +13,6 @@ import (
 const (
 	ttl          = time.Second * 8
 	healthTicket = time.Second * 5
-	checkID      = "check_health"
 )
 
 type Service struct {
@@ -46,8 +45,9 @@ func (s *Service) Start() {
 
 func (s *Service) updateHealthCheck() {
 	ticker := time.NewTicker(healthTicket)
+	check := "service:" + s.AppName + "-" + GetHostname() + ":3"
 	for {
-		err := s.ConsulClient.Agent().UpdateTTL(checkID, "online", api.HealthPassing)
+		err := s.ConsulClient.Agent().UpdateTTL(check, "online", api.HealthPassing)
 		if err != nil {
 			s.logger.Fatal(err)
 		}
@@ -77,7 +77,7 @@ func (s *Service) registerService() {
 			DeregisterCriticalServiceAfter: ttl.String(),
 			TLSSkipVerify:                  true,
 			TTL:                            ttl.String(),
-			CheckID:                        checkID,
+			//CheckID:                        checkID,
 		},
 	}
 
