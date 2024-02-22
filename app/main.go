@@ -82,7 +82,7 @@ func main() {
 		}
 	}()
 
-	go myApp.LeaderElection.Init()
+	go myApp.LeaderElection.Election.Init()
 
 	// Start monitoring the database storage with a ticker
 	healthMetrics := monitoring.NewHealthMetrics()
@@ -100,9 +100,9 @@ func main() {
 			case <-ctx.Done():
 				return // exit goroutine when context is canceled
 			case isHealthy := <-resultChan:
-				if !isHealthy && myApp.LeaderElection.IsLeader() {
+				if !isHealthy && myApp.LeaderElection.Election.IsLeader() {
 					// Trigger ReElection if components are not healthy
-					consul.ReElection(myApp.LeaderElection)
+					consul.ReElection(myApp.LeaderElection.Election)
 				}
 			}
 		}
@@ -115,11 +115,7 @@ func main() {
 	}
 	// Wait for the context to be cancelled before exiting
 	<-ctx.Done()
-	myApp.LeaderElection.Stop()
-	err = consul.DeregisterService(myApp.Consul, myApp.AppName+"-"+consul.GetHostname())
-	if err != nil {
-		logger.Errorf("Error deregistering service: %v", err)
-	}
+	myApp.LeaderElection.Election.Stop()
 	logger.Info("Application stopped")
 }
 

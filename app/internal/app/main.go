@@ -11,9 +11,6 @@ import (
 	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
 	"time"
-
-	election "github.com/dmitriyGarden/consul-leader-election"
-	"github.com/hashicorp/consul/api"
 )
 
 // App represents the main application struct.
@@ -24,8 +21,8 @@ type App struct {
 	Gin            *gin.WebApp
 	AMQPClient     *amqp.MessageClient
 	S3             s3.HandlerS3
-	LeaderElection *election.Election
-	Consul         *api.Client
+	LeaderElection *consul.Election
+	ConsulService  *consul.Service
 	AppName        string
 }
 
@@ -79,38 +76,12 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 
 	logger.Info("Starting initialize the consul...")
-	consulConfig := api.DefaultConfig()
-	consulConfig.Address = cfg.Consul.URL                                    // Specify your Consul server address
-	consulConfig.WaitTime = time.Duration(cfg.Consul.WaitTime) * time.Second // Specify your WaitTime
-
-	consulClient, _ := api.NewClient(consulConfig)
+	s := consul.NewService(appName, cfg, logger)
 	logger.Info("Register service consul...")
+	s.Start()
+	logger.Info("Start register consul lieder election ...")
 
-	consulErr := consul.RegisterService(consulClient, appName, cfg)
-	if consulErr != nil {
-		logger.Infof("Failed to register service: %s\n", appName)
-		return nil, consulErr
-	}
-
-	n := consul.NewNotify(appName, logger)
-	check := "service:" + appName + "-" + consul.GetHostname() + ":1"
-	key := "service/" + appName + "/leader"
-
-	// Put the leader information in the Consul KV store
-	err = consul.CreateOrUpdateLeaderKey(consulClient, logger, key, "")
-	if err != nil {
-		logger.Error("Error consul create kv leader")
-	}
-
-	electionConfig := &consul.LeaderElectionConfig{
-		CheckTimeout: checkConsulLeaderTimeoutSeconds * time.Second,
-		Client:       consulClient,
-		Checks:       []string{check},
-		Key:          key,
-		LogLevel:     election.LogDebug,
-		Event:        n,
-	}
-	leaderElection := consul.InitializeLeaderElection(electionConfig)
+	leaderElection := consul.NewElection(appName, logger, s)
 	// Return a new App instance with all initialized components.
 
 	return &App{
@@ -121,7 +92,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 		AMQPClient:     amqpClient,
 		S3:             s3client,
 		LeaderElection: leaderElection,
-		Consul:         consulClient,
+		ConsulService:  s,
 		AppName:        appName,
 	}, nil
 }

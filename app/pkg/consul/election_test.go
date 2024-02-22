@@ -1,11 +1,11 @@
 package consul_test
 
 import (
+	"github.com/stretchr/testify/assert"
 	"skeleton-golange-application/app/pkg/consul"
+
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestInitializeLeaderElection(t *testing.T) {
@@ -18,10 +18,4 @@ func TestInitializeLeaderElection(t *testing.T) {
 	election := consul.InitializeLeaderElection(config)
 
 	assert.NotNil(t, election)
-}
-
-func TestGetLocalIP(t *testing.T) {
-	ip := consul.GetLocalIP()
-
-	assert.NotEmpty(t, ip)
 }

@@ -2,16 +2,18 @@ package consul
 
 import (
 	"fmt"
-	"net"
-	"os"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/logging"
-	"strconv"
-	"time"
-
 	election "github.com/dmitriyGarden/consul-leader-election"
 	"github.com/hashicorp/consul/api"
+	"skeleton-golange-application/app/pkg/logging"
+	"time"
 )
+
+const checkConsulLeaderTimeoutSeconds = 5
+
+type Election struct {
+	Notify   *Notify
+	Election *election.Election
+}
 
 type Notify struct {
 	T      string
@@ -55,39 +57,31 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 	return election.NewElection(electionConfig)
 }
 
-// RegisterService registers the service in Consul.
-func RegisterService(client *api.Client, appName string, cfg *config.Config) error {
-	port, err := strconv.Atoi(cfg.Listen.Port)
+func NewElection(appName string, logger *logging.Logger, client *Service) *Election {
+	n := NewNotify(appName, logger)
+	check := "service:" + appName + "-" + GetHostname() + ":1"
+	key := "service/" + appName + "/leader"
+
+	err := CreateOrUpdateLeaderKey(client.ConsulClient, logger, key, "")
 	if err != nil {
-		return err // handle error appropriately
+		logger.Error("Error consul create kv leader")
 	}
-	ip := GetLocalIP()
 
-	serviceRegistration := &api.AgentServiceRegistration{
-		ID:      appName + "-" + GetHostname(),
-		Name:    appName,
-		Port:    port,
-		Address: ip, // Change to your actual service address
-		Tags:    []string{"microservice", "golang"},
-		Checks: api.AgentServiceChecks{
-			&api.AgentServiceCheck{
-				HTTP:     fmt.Sprintf("http://%s:%v/health/readiness", ip, port),
-				Interval: "3s",
-				Timeout:  "30s",
-			},
-			&api.AgentServiceCheck{
-				HTTP:     fmt.Sprintf("http://%s:%v/health/liveness", ip, port),
-				Interval: "10s",
-				Timeout:  "30s",
-			},
-		},
+	electionConfig := &LeaderElectionConfig{
+		CheckTimeout: checkConsulLeaderTimeoutSeconds * time.Second,
+		Client:       client.ConsulClient,
+		Checks:       []string{check},
+		Key:          key,
+		LogLevel:     election.LogDebug,
+		Event:        n,
 	}
-	return client.Agent().ServiceRegister(serviceRegistration)
-}
 
-// DeregisterService deregisters the service from Consul.
-func DeregisterService(client *api.Client, serviceID string) error {
-	return client.Agent().ServiceDeregister(serviceID)
+	leaderElection := InitializeLeaderElection(electionConfig)
+
+	return &Election{
+		Notify:   n,
+		Election: leaderElection,
+	}
 }
 
 func ReElection(clien *election.Election) {
@@ -123,28 +117,4 @@ func CreateOrUpdateLeaderKey(consulClient *api.Client, logger *logging.Logger, k
 	}
 
 	return nil
-}
-
-func GetLocalIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return ""
-	}
-	for _, address := range addrs {
-		// check the address type and if it is not a loopback the display it.
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
-			}
-		}
-	}
-	return ""
-}
-
-func GetHostname() string {
-	hostname, err := os.Hostname()
-	if err != nil {
-		return ""
-	}
-	return hostname
 }
