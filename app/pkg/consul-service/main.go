@@ -1,4 +1,4 @@
-package consul
+package consul_service
 
 import (
 	"fmt"
@@ -45,7 +45,7 @@ func (s *Service) Start() {
 
 func (s *Service) updateHealthCheck() {
 	ticker := time.NewTicker(healthTicket)
-	check := "service:" + s.AppName + "-" + GetHostname() + ":3"
+	check := "service:" + s.AppName + "-" + s.GetHostname() + ":3"
 	for {
 		err := s.ConsulClient.Agent().UpdateTTL(check, "online", api.HealthPassing)
 		if err != nil {
@@ -60,9 +60,9 @@ func (s *Service) registerService() {
 	if err != nil {
 		s.logger.Fatal(err) // handle error appropriately
 	}
-	ip := GetLocalIP()
+	ip := s.GetLocalIP()
 
-	check := []*api.AgentServiceCheck{
+	checks := []*api.AgentServiceCheck{
 		{
 			HTTP:     fmt.Sprintf("http://%s:%v/health/readiness", ip, port),
 			Interval: "3s",
@@ -80,17 +80,16 @@ func (s *Service) registerService() {
 			TLSSkipVerify:                  true,
 			TTL:                            ttl.String(),
 			Notes:                          "TTL probe",
-			//CheckID:                        checkID,
 		},
 	}
 
 	register := &api.AgentServiceRegistration{
-		ID:      s.AppName + "-" + GetHostname(),
+		ID:      s.AppName + "-" + s.GetHostname(),
 		Name:    s.AppName,
 		Tags:    []string{"microservice", "golang"},
 		Address: ip,
 		Port:    port,
-		Checks:  check,
+		Checks:  checks,
 	}
 
 	query := map[string]any{

@@ -5,7 +5,8 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/amqp"
 	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/consul"
+	consul_election "skeleton-golange-application/app/pkg/consul-election"
+	consul_service "skeleton-golange-application/app/pkg/consul-service"
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/s3"
@@ -21,8 +22,8 @@ type App struct {
 	Gin            *gin.WebApp
 	AMQPClient     *amqp.MessageClient
 	S3             s3.HandlerS3
-	LeaderElection *consul.Election
-	ConsulService  *consul.Service
+	LeaderElection *consul_election.Election
+	ConsulService  *consul_service.Service
 	AppName        string
 }
 
@@ -76,12 +77,12 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
 	}
 
 	logger.Info("Starting initialize the consul...")
-	s := consul.NewService(appName, cfg, logger)
+	s := consul_service.NewService(appName, cfg, logger)
 	logger.Info("Register service consul...")
 	s.Start()
 	logger.Info("Start register consul lieder election ...")
 
-	leaderElection := consul.NewElection(appName, logger, s)
+	leaderElection := consul_election.NewElection(appName, logger, s)
 	// Return a new App instance with all initialized components.
 
 	return &App{

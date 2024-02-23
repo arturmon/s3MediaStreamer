@@ -1,9 +1,10 @@
-package consul
+package consul_election
 
 import (
 	"fmt"
 	election "github.com/dmitriyGarden/consul-leader-election"
 	"github.com/hashicorp/consul/api"
+	consul_service "skeleton-golange-application/app/pkg/consul-service"
 	"skeleton-golange-application/app/pkg/logging"
 	"time"
 )
@@ -57,9 +58,9 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 	return election.NewElection(electionConfig)
 }
 
-func NewElection(appName string, logger *logging.Logger, client *Service) *Election {
+func NewElection(appName string, logger *logging.Logger, client *consul_service.Service) *Election {
 	n := NewNotify(appName, logger)
-	check := "service:" + appName + "-" + GetHostname() + ":1"
+	check := "service:" + appName + "-" + client.GetHostname() + ":1"
 	key := "service/" + appName + "/leader"
 
 	err := CreateOrUpdateLeaderKey(client.ConsulClient, logger, key, "")

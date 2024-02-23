@@ -9,7 +9,7 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
 	"skeleton-golange-application/app/pkg/amqp"
-	"skeleton-golange-application/app/pkg/consul"
+	consul_election "skeleton-golange-application/app/pkg/consul-election"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	_ "skeleton-golange-application/app/pkg/web/gin"
@@ -102,7 +102,7 @@ func main() {
 			case isHealthy := <-resultChan:
 				if !isHealthy && myApp.LeaderElection.Election.IsLeader() {
 					// Trigger ReElection if components are not healthy
-					consul.ReElection(myApp.LeaderElection.Election)
+					consul_election.ReElection(myApp.LeaderElection.Election)
 				}
 			}
 		}

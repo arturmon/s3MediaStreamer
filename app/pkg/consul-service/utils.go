@@ -1,11 +1,11 @@
-package consul
+package consul_service
 
 import (
 	"net"
 	"os"
 )
 
-func GetLocalIP() string {
+func (s *Service) GetLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return ""
@@ -21,7 +21,7 @@ func GetLocalIP() string {
 	return ""
 }
 
-func GetHostname() string {
+func (s *Service) GetHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return ""
