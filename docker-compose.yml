@@ -155,11 +155,6 @@ services:
       - "8080:8080"
     volumes:
       - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
-    depends_on:
-      - test-app-1
-      - test-app-2
-      - test-app-3
-
 
 volumes:
   postgresql_data:
