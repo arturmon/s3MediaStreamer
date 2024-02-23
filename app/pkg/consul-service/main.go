@@ -41,6 +41,7 @@ func NewService(appName string, cfg *config.Config, logger *logging.Logger) *Ser
 func (s *Service) Start() {
 	s.registerService()
 	go s.updateHealthCheck()
+	s.setupConsulWatch()
 }
 
 func (s *Service) updateHealthCheck() {
@@ -92,17 +93,28 @@ func (s *Service) registerService() {
 		Checks:  checks,
 	}
 
+	err = s.ConsulClient.Agent().ServiceRegister(register)
+	if err != nil {
+		s.logger.Fatal(err)
+	}
+
+}
+
+func (s *Service) setupConsulWatch() {
 	query := map[string]any{
 		"type":        "service",
 		"service":     s.AppName,
 		"passingonly": true,
 	}
 
+	consulConfig := api.DefaultConfig()
+	consulConfig.Address = s.cfg.Consul.URL
+	consulConfig.WaitTime = time.Duration(s.cfg.Consul.WaitTime) * time.Second
+
 	plan, err := watch.Parse(query)
 	if err != nil {
 		s.logger.Fatal(err)
 	}
-
 	plan.HybridHandler = func(index watch.BlockingParamVal, result any) {
 		switch msg := result.(type) {
 		case []*api.ServiceEntry:
@@ -110,16 +122,12 @@ func (s *Service) registerService() {
 				s.logger.Debugln("new member joined", entry.Service)
 			}
 		}
-
 	}
 
 	go func() {
-		plan.RunWithConfig("", &api.Config{})
+		err = plan.RunWithConfig("", consulConfig)
+		if err != nil {
+			return
+		}
 	}()
-
-	err = s.ConsulClient.Agent().ServiceRegister(register)
-	if err != nil {
-		s.logger.Fatal(err)
-	}
-
 }
