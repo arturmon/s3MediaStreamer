@@ -146,6 +146,21 @@ services:
     ports:
       - "9107:9107"
 
+
+  haproxy:
+    image: haproxytech/haproxy-alpine:2.9.5
+    restart: unless-stopped
+    ports:
+      - "8404:8404"
+      - "8080:8080"
+    volumes:
+      - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - test-app-1
+      - test-app-2
+      - test-app-3
+
+
 volumes:
   postgresql_data:
     driver: local
