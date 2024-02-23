@@ -19,7 +19,7 @@ type Config struct {
 	}
 	AppConfig struct {
 		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // trace, debug, info, warn, error, fatal, panic
-		LogType  string `env:"LOG_TYPE" env-default:"text"`    // text, json
+		LogType  string `env:"LOG_TYPE" env-default:"json"`    // text, json
 		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
 		Jobs     struct {
 			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
