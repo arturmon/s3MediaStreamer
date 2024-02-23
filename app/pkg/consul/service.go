@@ -67,16 +67,19 @@ func (s *Service) registerService() {
 			HTTP:     fmt.Sprintf("http://%s:%v/health/readiness", ip, port),
 			Interval: "3s",
 			Timeout:  "30s",
+			Notes:    "readiness probe",
 		},
 		{
 			HTTP:     fmt.Sprintf("http://%s:%v/health/liveness", ip, port),
 			Interval: "10s",
 			Timeout:  "30s",
+			Notes:    "liveness probe",
 		},
 		{
 			DeregisterCriticalServiceAfter: ttl.String(),
 			TLSSkipVerify:                  true,
 			TTL:                            ttl.String(),
+			Notes:                          "TTL probe",
 			//CheckID:                        checkID,
 		},
 	}
