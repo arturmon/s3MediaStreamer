@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
+	"github.com/hashicorp/go-hclog"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 	"strconv"
@@ -101,21 +102,17 @@ func (s *Service) registerService() {
 }
 
 func (s *Service) setupConsulWatch() {
-	query := map[string]any{
+	query := map[string]interface{}{
 		"type":        "service",
 		"service":     s.AppName,
 		"passingonly": true,
 	}
 
-	consulConfig := api.DefaultConfig()
-	consulConfig.Address = s.cfg.Consul.URL
-	consulConfig.WaitTime = time.Duration(s.cfg.Consul.WaitTime) * time.Second
-
 	plan, err := watch.Parse(query)
 	if err != nil {
 		s.logger.Fatal(err)
 	}
-	plan.HybridHandler = func(index watch.BlockingParamVal, result any) {
+	plan.HybridHandler = func(index watch.BlockingParamVal, result interface{}) {
 		switch msg := result.(type) {
 		case []*api.ServiceEntry:
 			for _, entry := range msg {
@@ -124,8 +121,10 @@ func (s *Service) setupConsulWatch() {
 		}
 	}
 
+	var watchLogger hclog.Logger
 	go func() {
-		err = plan.RunWithConfig("", consulConfig)
+		//err = plan.RunWithConfig("", consulConfig)
+		err = plan.RunWithClientAndHclog(s.ConsulClient, watchLogger)
 		if err != nil {
 			return
 		}
