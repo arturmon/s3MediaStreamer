@@ -146,7 +146,6 @@ func (a *WebApp) setupSystemRoutes(hcw *monitoring.HealthCheckWrapper) {
 		monitoring.ReadinessGET(c, hcw) // Pass the healthMetrics to HealthGET.
 	})
 
-	a.router.GET("/ping", Ping)
 	a.router.GET("/job/status", JobStatus)
 
 	a.router.Use(ExtractUserRole(a.logger))

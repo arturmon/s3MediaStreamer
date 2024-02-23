@@ -426,29 +426,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/ping": {
-            "get": {
-                "description": "Check if the application server is running",
-                "consumes": [
-                    "*/*"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "health-controller"
-                ],
-                "summary": "Application liveness check function",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.UserResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/play/{playlist_id}": {
             "get": {
                 "security": [
@@ -1534,8 +1511,7 @@ const docTemplate = `{
                 3600000000000,
                 1,
                 1000,
-                1000000,
-                1000000000
+                1000000
             ],
             "x-enum-varnames": [
                 "minDuration",
@@ -1548,8 +1524,7 @@ const docTemplate = `{
                 "Hour",
                 "Nanosecond",
                 "Microsecond",
-                "Millisecond",
-                "Second"
+                "Millisecond"
             ]
         }
     },

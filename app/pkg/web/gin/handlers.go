@@ -25,18 +25,6 @@ type Handler interface {
 	checkAuthorization(c *gin.Context) (string, error)
 }
 
-// Ping godoc
-// @Summary Application liveness check function
-// @Description Check if the application server is running
-// @Tags health-controller
-// @Accept */*
-// @Produce json
-// @Success 200 {object} model.UserResponse "OK"
-// @Router /ping [get]
-func Ping(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, model.OkResponse{Message: "pong"})
-}
-
 // GetAllTracks	godoc
 // @Summary		Show the list of all tracks.
 // @Description responds with the list of all tracks as JSON.

@@ -174,7 +174,6 @@ definitions:
     - 1
     - 1000
     - 1000000
-    - 1000000000
     type: integer
     x-enum-varnames:
     - minDuration
@@ -188,7 +187,6 @@ definitions:
     - Nanosecond
     - Microsecond
     - Millisecond
-    - Second
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -466,21 +464,6 @@ paths:
       summary: Verify OTP for a user.
       tags:
       - OTP
-  /ping:
-    get:
-      consumes:
-      - '*/*'
-      description: Check if the application server is running
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.UserResponse'
-      summary: Application liveness check function
-      tags:
-      - health-controller
   /play/{playlist_id}:
     get:
       consumes:

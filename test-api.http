@@ -1,8 +1,5 @@
 ###-------------------------------------------------------SYSTEM------------------------------------------------
 ###
-GET http://localhost:10000/ping
-Content-Type: application/json
-###
 GET http://localhost:10000/metrics
 Content-Type: application/json
 ###

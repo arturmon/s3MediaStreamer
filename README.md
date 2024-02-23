@@ -260,7 +260,6 @@ playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/set
 | url          | code        | method | status             |
 |--------------|-------------|--------|--------------------|
 | /metrics     | 200         | GET    | prometheus metrics |
-| /ping        | 200/400/500 | GET    | Pong               |
 | /health      | 200         | GET    | Health             |
 | /swagger     | 200         | GET    |                    |
 | /job/status  | 200         | GET    | Status Jobs        |
@@ -293,16 +292,16 @@ playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/set
 }
 ```
 
-/health
+/health/liveness
 ```json
 {
   "status": "UP"
 }
 ```
-/v1/ping
-```json
+/health/readiness
+```
 {
-  "message": "pong"
+  [{"status":true,"name":"db"},{"status":true,"name":"rabbit"},{"status":true,"name":"s3"}]
 }
 ```
 /metrics
