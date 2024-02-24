@@ -58,6 +58,15 @@ definitions:
         example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
         type: string
     type: object
+  model.PlaylistTracksResponse:
+    properties:
+      playlist:
+        $ref: '#/definitions/model.PLayList'
+      tracks:
+        items:
+          $ref: '#/definitions/model.Track'
+        type: array
+    type: object
   model.ResponceRefreshTocken:
     properties:
       access_token:
@@ -174,6 +183,13 @@ definitions:
     - 1
     - 1000
     - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
     type: integer
     x-enum-varnames:
     - minDuration
@@ -187,6 +203,13 @@ definitions:
     - Nanosecond
     - Microsecond
     - Millisecond
+    - Second
+    - Minute
+    - Hour
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -204,6 +227,38 @@ info:
   version: 0.0.1
 paths:
   /audio/{playlist_id}:
+    get:
+      consumes:
+      - '*/*'
+      description: Streams audio files in the specified directory as MP3 or FLAC.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        type: string
+      - description: Control operation playlist play
+        in: path
+        name: control
+        type: string
+      produces:
+      - application/x-mpegURL
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Stream audio files.
+      tags:
+      - track-controller
+  /audio/stream/{segment}:
     get:
       consumes:
       - '*/*'
@@ -618,6 +673,41 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Remove a track from the playlist.
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/tracks:
+    get:
+      consumes:
+      - application/json
+      description: Get tracks from a playlist by providing the playlist ID.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks retrieved successfully
+          schema:
+            $ref: '#/definitions/model.PlaylistTracksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tracks from a playlist.
       tags:
       - playlist-controller
   /playlist/create:

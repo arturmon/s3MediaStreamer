@@ -294,3 +294,69 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 type SetPlaylistTrackOrderRequest struct {
 	TrackOrder []string `json:"track_order"`
 }
+
+// ListTracksFromPlaylist godoc
+// @Summary Get tracks from a playlist.
+// @Description Get tracks from a playlist by providing the playlist ID.
+// @Tags playlist-controller
+// @Accept json
+// @Produce json
+// @Param playlist_id path string true "Playlist ID"
+// @Success 200 {object} model.PlaylistTracksResponse "Tracks retrieved successfully"
+// @Failure 400 {object} model.ErrorResponse "Bad Request"
+// @Failure 401 {object} model.ErrorResponse "Unauthorized"
+// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
+// @Security ApiKeyAuth
+// @Router /playlist/{playlist_id}/tracks [get]
+func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
+	// Extract playlist ID from path parameter
+	playlistID := c.Param("playlist_id")
+
+	// Check if the playlist exists (you should implement this logic)
+	if !a.storage.Operations.PlaylistExists(playlistID) {
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
+		return
+	}
+
+	// Get playlist and tracks
+	playlist, tracks, err := a.storage.Operations.GetPlayListByID(playlistID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
+		return
+	}
+
+	response := model.PlaylistTracksResponse{
+		Playlist: playlist,
+		Tracks:   make([]model.Track, len(tracks)),
+	}
+
+	// Iterate over tracks and create response objects
+	for i, track := range tracks {
+		response.Tracks[i] = model.Track{
+			ID:          track.ID,
+			CreatedAt:   track.CreatedAt,
+			UpdatedAt:   track.UpdatedAt,
+			Album:       track.Album,
+			AlbumArtist: track.AlbumArtist,
+			Composer:    track.Composer,
+			Genre:       track.Genre,
+			Lyrics:      track.Lyrics,
+			Title:       track.Title,
+			Artist:      track.Artist,
+			Year:        track.Year,
+			Comment:     track.Comment,
+			Disc:        track.Disc,
+			DiscTotal:   track.DiscTotal,
+			Duration:    track.Duration,
+			SampleRate:  track.SampleRate,
+			Bitrate:     track.Bitrate,
+			Sender:      track.Sender,
+			CreatorUser: track.CreatorUser,
+			Likes:       track.Likes,
+			S3Version:   track.S3Version,
+		}
+	}
+
+	// Return the response in JSON format
+	c.JSON(http.StatusOK, response)
+}

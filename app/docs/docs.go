@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/audio/{playlist_id}": {
+        "/audio/stream/{segment}": {
             "get": {
                 "security": [
                     {
@@ -77,6 +77,57 @@ const docTemplate = `{
                         "description": "Segment not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/audio/{playlist_id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/x-mpegURL"
+                ],
+                "tags": [
+                    "track-controller"
+                ],
+                "summary": "Stream audio files.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Playlist ID",
+                        "name": "playlist_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Control operation playlist play",
+                        "name": "control",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Track"
+                            }
                         }
                     },
                     "500": {
@@ -784,6 +835,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/playlist/{playlist_id}/tracks": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get tracks from a playlist by providing the playlist ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist-controller"
+                ],
+                "summary": "Get tracks from a playlist.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Playlist ID",
+                        "name": "playlist_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tracks retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.PlaylistTracksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/playlists/{playlist_id}/clear": {
             "delete": {
                 "security": [
@@ -1351,6 +1457,20 @@ const docTemplate = `{
                 }
             }
         },
+        "model.PlaylistTracksResponse": {
+            "type": "object",
+            "properties": {
+                "playlist": {
+                    "$ref": "#/definitions/model.PLayList"
+                },
+                "tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Track"
+                    }
+                }
+            }
+        },
         "model.ResponceRefreshTocken": {
             "type": "object",
             "properties": {
@@ -1511,7 +1631,14 @@ const docTemplate = `{
                 3600000000000,
                 1,
                 1000,
-                1000000
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000,
+                1,
+                1000,
+                1000000,
+                1000000000
             ],
             "x-enum-varnames": [
                 "minDuration",
@@ -1524,7 +1651,14 @@ const docTemplate = `{
                 "Hour",
                 "Nanosecond",
                 "Microsecond",
-                "Millisecond"
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second"
             ]
         }
     },

@@ -54,6 +54,7 @@ func (a *WebApp) setupAppRoutesV1() {
 			playlist.POST("/create", a.CreatePlaylist)
 			playlist.DELETE("/delete/:id", a.DeletePlaylist)
 			playlist.POST("/:playlist_id/set", a.SetFromPlaylist)
+			playlist.GET(":playlist_id/get", a.ListTracksFromPlaylist)
 		}
 
 		player := v1.Group("/player")

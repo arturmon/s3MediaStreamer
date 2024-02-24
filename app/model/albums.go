@@ -43,3 +43,8 @@ type Tops struct {
 	Sender      string    `json:"sender" bson:"sender" example:"open_ai"`
 	CreatorUser uuid.UUID `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 }
+
+type PlaylistTracksResponse struct {
+	Playlist PLayList `json:"playlist"`
+	Tracks   []Track  `json:"tracks"`
+}

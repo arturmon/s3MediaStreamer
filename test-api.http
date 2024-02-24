@@ -129,6 +129,8 @@ Content-Type: application/json
 ### DeletePlaylist
 DELETE http://localhost:10000/v1/playlist/delete/8ba3a3ac-b804-4220-b08f-b1d9f3931a9f
 Content-Type: application/json
+### ListPleylist
+GET http://localhost:10000/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf/get
 ### SetFromPlaylist
 POST http://localhost:10000/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf/set
 Content-Type: application/json
