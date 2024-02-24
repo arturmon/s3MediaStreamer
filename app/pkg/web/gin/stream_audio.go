@@ -57,7 +57,7 @@ func (a *WebApp) Audio(c *gin.Context) {
 // @Failure 406 {object} model.ErrorResponse "Segment not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /audio/{playlist_id} [get]
+// @Router /audio/stream/{segment} [get]
 func (a *WebApp) StreamM3U(c *gin.Context) {
 	segmentPath := c.Param("segment")
 	var track *model.Track
