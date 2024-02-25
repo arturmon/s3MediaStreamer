@@ -3,12 +3,10 @@ package mongodb
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/logging"
-	"time"
-
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -29,9 +27,6 @@ type MongoCollectionQuery interface {
 	UpdateTracks(track *model.Track) error
 	AddTrackToPlaylist(playlistID, trackID string) error
 	RemoveTrackFromPlaylist(playlistID, trackID string) error
-	GetTracksForLearn() ([]model.Track, error)
-	CreateTops(list []model.Tops) error
-	CleanupRecords(retentionPeriod time.Duration) error
 	GetAllTracks() ([]model.Track, error)
 	CreatePlayListName(newPlaylist model.PLayList) error
 	GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error)

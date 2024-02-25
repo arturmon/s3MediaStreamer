@@ -25,14 +25,10 @@ type Config struct {
 		GinMode           string `env:"GIN_MODE" env-default:"release"`         // debug, test, release
 		Jobs              struct {
 			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
-			JonRun          string `env:"JOB_RUN" env-default:"@midnight"`
-			JobCleanChart   string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
 			JobCleanTrackS3 string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
 			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
-			OpenAiKey       string `env:"JOB_OPENAI_KEY" env-default:""`
 		}
-		MusicPath string `env:"MUSIC_PATH" env-default:"music"`
-		S3        struct {
+		S3 struct {
 			Endpoint        string `env:"S3_ENDPOINT" env-default:"localhost:9000"`
 			AccessKeyID     string `env:"S3_ACCESS_KEY_ID" env-default:""`
 			SecretAccessKey string `env:"S3_SECRET_ACCESS_KEY" env-default:""`
@@ -92,5 +88,4 @@ type Config struct {
 		Issuer     string `env:"OTP_ISSUER" env-default:"example.com"`
 		SecretSize uint   `env:"OTP_SECRET_SIZE" env-default:"15"`
 	}
-	RESTSystemUser string `env:"REST_SYSTEM_USER" env-default:"rest@system"`
 }

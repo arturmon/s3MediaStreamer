@@ -28,9 +28,6 @@ type PostgresCollectionQuery interface {
 	UpdateTracks(track *model.Track) error
 	AddTrackToPlaylist(playlistID, trackID string) error
 	RemoveTrackFromPlaylist(playlistID, trackID string) error
-	GetTracksForLearn() ([]model.Track, error)
-	CreateTops(list []model.Tops) error
-	CleanupRecords(retentionPeriod time.Duration) error
 	GetAllTracks() ([]model.Track, error)
 	CreatePlayListName(newPlaylist model.PLayList) error
 	GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error)
