@@ -28,8 +28,7 @@ type App struct {
 }
 
 // NewAppInit initializes a new App instance.
-func NewAppInit(cfg *config.Config, logger *logging.Logger) (*App, error) {
-	appName := "s3MediaStreamer"
+func NewAppInit(cfg *config.Config, logger *logging.Logger, appName string) (*App, error) {
 
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")

@@ -20,7 +20,7 @@ type TCPWriter struct {
 	ReconnectDelay time.Duration
 }
 
-func NewTCPWriter(addr string) (*TCPWriter, error) {
+func NewTCPWriter(addr string, appName string) (*TCPWriter, error) {
 	var err error
 	w := new(TCPWriter)
 	w.MaxReconnect = DefaultMaxReconnect
@@ -34,6 +34,7 @@ func NewTCPWriter(addr string) (*TCPWriter, error) {
 	if w.hostname, err = os.Hostname(); err != nil {
 		return nil, err
 	}
+	w.hostname = appName + "-" + w.hostname
 
 	return w, nil
 }

@@ -89,7 +89,7 @@ func (w *gelfWriterWrapper) Write(p []byte) (n int, err error) {
 	return w.writer.Write(modifiedP)
 }
 
-func GetLogger(level, format, graylogAddr, graylogType string) Logger {
+func GetLogger(level, format, graylogAddr, graylogType, appName string) Logger {
 	var loggerInit loggerInitializer
 
 	loggerInit.once.Do(func() {
@@ -102,11 +102,11 @@ func GetLogger(level, format, graylogAddr, graylogType string) Logger {
 
 				// If using UDP
 				if graylogType == "udp" {
-					gelfWriter, err = NewUDPWriter(graylogAddr)
+					gelfWriter, err = NewUDPWriter(graylogAddr, appName)
 				}
 				// If using TCP
 				if graylogType == "tcp" {
-					gelfWriter, err = NewTCPWriter(graylogAddr)
+					gelfWriter, err = NewTCPWriter(graylogAddr, appName)
 				}
 
 				if err != nil {
@@ -134,54 +134,3 @@ func GetLogger(level, format, graylogAddr, graylogType string) Logger {
 
 	return loggerInit.instance
 }
-
-/*
-func GetLogger(level, format, graylogAddr, graylogType string) Logger {
-	var loggerInit loggerInitializer
-
-	loggerInit.once.Do(func() {
-		var logrusWriter io.Writer
-
-		if format == "gelf" {
-			if graylogAddr != "" {
-				var gelfWriter io.Writer
-				var err error
-
-				// If using UDP
-				if graylogType == "udp" {
-					gelfWriter, err = NewUDPWriter(graylogAddr)
-				}
-				// If using TCP
-				if graylogType == "tcp" {
-					gelfWriter, err = NewTCPWriter(graylogAddr)
-				}
-
-				if err != nil {
-					log.Fatalf("gelf.NewWriter: %s", err)
-				}
-				logrusWriter = gelfWriter
-				log.SetOutput(io.MultiWriter(os.Stderr, gelfWriter))
-				//log.Printf("logging to stderr & graylog2@'%s'", graylogAddr)
-
-				// Customize the GELF message based on your needs
-				// Directly use constructMessage function where needed
-				gelfWrapper := &gelfWrapper{writer: gelfWriter}
-
-				loggerInit.instance = Logger{logrus.NewEntry(logrus.New())}
-				loggerInit.instance.Entry.Logger.SetOutput(gelfWrapper)
-				loggerInit.instance.Entry.Logger.SetFormatter(&logrus.JSONFormatter{}) // Use a JSON formatter for consistency
-
-			}
-		}
-
-		if format != "gelf" {
-			// For other formats, use the default logger initialization logic
-			loggerInit.instance = newLogger(level, format, logrusWriter)
-		}
-	})
-
-	return loggerInit.instance
-}
-
-
-*/

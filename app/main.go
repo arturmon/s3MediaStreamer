@@ -37,11 +37,12 @@ import (
 // @authorizationurl http://localhost:10000/v1/users/login
 func main() {
 	// debug.SetMemoryLimit(2048)
+	appName := "s3MediaStreamer"
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := config.GetConfig()
-	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType, cfg.AppConfig.LogGelfServer, cfg.AppConfig.LogGelfServerType)
+	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType, cfg.AppConfig.LogGelfServer, cfg.AppConfig.LogGelfServerType, appName)
 	logger.Printf("App Version: %s Build Time: %s\n", Version, BuildTime)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
@@ -59,7 +60,7 @@ func main() {
 			logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
 		}()
 	}
-	myApp, err := app.NewAppInit(cfg, &logger)
+	myApp, err := app.NewAppInit(cfg, &logger, appName)
 	if err != nil {
 		logger.Error("Failed to initialize the new my app:", err)
 	}
