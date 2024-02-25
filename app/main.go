@@ -41,7 +41,7 @@ func main() {
 	defer cancel()
 
 	cfg := config.GetConfig()
-	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
+	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType, cfg.AppConfig.LogGelfServer, cfg.AppConfig.LogGelfServerType)
 	logger.Printf("App Version: %s Build Time: %s\n", Version, BuildTime)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")

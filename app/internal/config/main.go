@@ -18,10 +18,12 @@ type Config struct {
 		WaitTime int    `env:"CONSUL_WAIT_TIME" env-default:"5"`
 	}
 	AppConfig struct {
-		LogLevel string `env:"LOG_LEVEL" env-default:"info"`   // trace, debug, info, warn, error, fatal, panic
-		LogType  string `env:"LOG_TYPE" env-default:"json"`    // text, json
-		GinMode  string `env:"GIN_MODE" env-default:"release"` // debug, test, release
-		Jobs     struct {
+		LogLevel          string `env:"LOG_LEVEL" env-default:"info"` // trace, debug, info, warn, error, fatal, panic
+		LogType           string `env:"LOG_TYPE" env-default:"gelf"`  // text, json, gelf
+		LogGelfServer     string `env:"LOG_GELF_SERVER_URL" env-default:"localhost:12201"`
+		LogGelfServerType string `env:"LOG_GELF_SERVER_TYPE" env-default:"udp"` // tcp, udp
+		GinMode           string `env:"GIN_MODE" env-default:"release"`         // debug, test, release
+		Jobs              struct {
 			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
 			JonRun          string `env:"JOB_RUN" env-default:"@midnight"`
 			JobCleanChart   string `env:"JOB_CLEAN_CHART" env-default:"@midnight"`
