@@ -706,6 +706,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/playlist/{playlist_id}/get": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get tracks from a playlist by providing the playlist ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist-controller"
+                ],
+                "summary": "Get tracks from a playlist.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Playlist ID",
+                        "name": "playlist_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tracks retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.PlaylistTracksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/playlist/{playlist_id}/set": {
             "post": {
                 "security": [
@@ -822,61 +877,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Playlist or track not found",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/playlist/{playlist_id}/tracks": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get tracks from a playlist by providing the playlist ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "playlist-controller"
-                ],
-                "summary": "Get tracks from a playlist.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Playlist ID",
-                        "name": "playlist_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tracks retrieved successfully",
-                        "schema": {
-                            "$ref": "#/definitions/model.PlaylistTracksResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }

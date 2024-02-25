@@ -592,6 +592,41 @@ paths:
       summary: Add a track to a playlist
       tags:
       - playlist-controller
+  /playlist/{playlist_id}/get:
+    get:
+      consumes:
+      - application/json
+      description: Get tracks from a playlist by providing the playlist ID.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks retrieved successfully
+          schema:
+            $ref: '#/definitions/model.PlaylistTracksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tracks from a playlist.
+      tags:
+      - playlist-controller
   /playlist/{playlist_id}/set:
     post:
       consumes:
@@ -673,41 +708,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Remove a track from the playlist.
-      tags:
-      - playlist-controller
-  /playlist/{playlist_id}/tracks:
-    get:
-      consumes:
-      - application/json
-      description: Get tracks from a playlist by providing the playlist ID.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: playlist_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tracks retrieved successfully
-          schema:
-            $ref: '#/definitions/model.PlaylistTracksResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Get tracks from a playlist.
       tags:
       - playlist-controller
   /playlist/create:

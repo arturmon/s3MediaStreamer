@@ -307,7 +307,7 @@ type SetPlaylistTrackOrderRequest struct {
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id}/tracks [get]
+// @Router /playlist/{playlist_id}/get [get]
 func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
