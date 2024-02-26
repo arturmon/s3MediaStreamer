@@ -9,6 +9,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/s3"
+	gin_rate_limit "skeleton-golange-application/app/pkg/web/gin-rate-limit"
 
 	"github.com/gin-contrib/cors"
 
@@ -53,6 +54,8 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 	router.Use(gin.Recovery())
 
 	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
+
+	gin_rate_limit.SetupRateLimiter(router)
 
 	logger.Info("prometheus initializing")
 	p := ginPrometheus.GetMonitor()
