@@ -58,10 +58,10 @@ Content-Type: application/json
 POST http://localhost:8080/v1/users/logout
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/users/me
+GET http://localhost:8080/v1/users/me
 Content-Type: application/json
 ###
-POST http://localhost:10000/v1/users/delete
+POST http://localhost:8080/v1/users/delete
 Content-Type: application/json
 
 {
