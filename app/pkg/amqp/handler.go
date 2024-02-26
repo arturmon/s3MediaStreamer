@@ -65,7 +65,7 @@ func checkIfTrackExists(track *model.Track, c *MessageClient) error {
 }
 
 func handleNonexistentTrack(track *model.Track, c *MessageClient) error {
-	c.logger.Printf("Track Artist: %s not found in the database. Continuing...\n", track.Title)
+	c.logger.Printf("Track Artist: %s not found in the database.\n", track.Title)
 
 	existingTracksSlice := []model.Track{*track}
 	if len(existingTracksSlice) == 1 {
@@ -75,7 +75,7 @@ func handleNonexistentTrack(track *model.Track, c *MessageClient) error {
 	} else {
 		c.logger.Printf("Track with Artist %s already exists\n", track.Artist)
 	}
-	c.logger.Printf("Track Artist: %s added\n", track.Artist)
+	c.logger.Printf("Track Artist: %s save to database.\n", track.Artist)
 	return nil
 }
 

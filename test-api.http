@@ -107,7 +107,7 @@ Content-Type: application/json
 
 ###-------------------------------------------------------PLAY LIST--------------------------------------------
 ### CreatePlaylist
-POST  http://localhost:10000/v1/playlist/create
+POST  http://localhost:8080/v1/playlist/create
 Content-Type: application/json
 
 {
@@ -116,15 +116,15 @@ Content-Type: application/json
   "description":"test Play list"
 }
 ### DeletePlaylist
-DELETE http://localhost:10000/v1/playlist/8ba3a3ac-b804-4220-b08f-b1d9f3931a9f
+DELETE http://localhost:8080/v1/playlist/8ba3a3ac-b804-4220-b08f-b1d9f3931a9f
 Content-Type: application/json
 ### AddToPlaylist
-POST http://localhost:10000/v1/playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/679fcd2d-3eee-4f94-8989-06765b3b5426
+POST http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf/38ec3ba6-85ee-4a47-ba73-c6656dfddfd2
 Content-Type: application/json
 ### ListPleylist
-GET http://localhost:10000/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
+GET http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
 ### SetFromPlaylist
-POST http://localhost:10000/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
+POST http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
 Content-Type: application/json
 
 {
@@ -147,13 +147,13 @@ Content-Type: application/json
   ]
 }
 ### RemoveFromPlaylist
-DELETE http://localhost:10000/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/89ffa57f-7186-4435-9604-cc21e9458489
+DELETE http://localhost:8080/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/89ffa57f-7186-4435-9604-cc21e9458489
 Content-Type: application/json
 ### ClearPlaylist
-DELETE http://localhost:10000/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
+DELETE http://localhost:8080/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
 Content-Type: application/json
 
 ###-------------------------------------------------------PLAYER--------------------------------------------
 ### Play playlist
-GET http://localhost:10000/v1/audio/930b1542-7f1f-4755-8c91-f19fb7c9eef4
+GET http://localhost:8080/v1/audio/930b1542-7f1f-4755-8c91-f19fb7c9eef4
 Content-Type: application/json

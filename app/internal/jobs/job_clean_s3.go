@@ -75,7 +75,7 @@ func (j *CleanS3Job) processS3ObjectContent(ctx context.Context, obj minio.Objec
 	// Create a Track from the file data
 	_, errReadTags := tags.ReadTags(fileName, j.app.Cfg)
 	if errReadTags != nil {
-		j.app.Logger.Printf("Find empty file: %s\n", obj.Key)
+		j.app.Logger.Printf("Find empty tags in file: %s\n", obj.Key)
 		err := j.app.S3.DeleteObjectS3(ctx, &obj)
 		if err != nil {
 			j.app.Logger.Printf("Error delete file %s from S3: %v\n", obj.Key, err)
