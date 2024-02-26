@@ -49,7 +49,7 @@ func (a *WebApp) setupAppRoutesV1() {
 		playlist := v1.Group("/playlist")
 		{
 			playlist.POST("/create", a.CreatePlaylist)
-			playlist.DELETE("/:id", a.DeletePlaylist)
+			playlist.DELETE("/:playlist_id", a.DeletePlaylist)
 			playlist.POST("/:playlist_id/:track_id", a.AddToPlaylist)
 			playlist.GET("/:playlist_id", a.ListTracksFromPlaylist)
 			playlist.POST("/:playlist_id", a.SetFromPlaylist)

@@ -93,10 +93,10 @@ func (a *WebApp) CreatePlaylist(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Not Found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{id} [delete]
+// @Router /playlist/{playlist_id} [delete]
 func (a *WebApp) DeletePlaylist(c *gin.Context) {
 	// Get the playlist ID from the URL path
-	playlistID := c.Param("id")
+	playlistID := c.Param("playlist_id")
 
 	// Check if the playlist exists in the database
 	if !a.storage.Operations.PlaylistExists(playlistID) {

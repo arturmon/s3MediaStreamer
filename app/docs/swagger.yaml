@@ -172,10 +172,24 @@ definitions:
     type: object
   time.Duration:
     enum:
+    - -9223372036854775808
+    - 9223372036854775807
     - 1
     - 1000
     - 1000000
     - 1000000000
+    - 60000000000
+    - 3600000000000
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    - -9223372036854775808
+    - 9223372036854775807
     - 1
     - 1000
     - 1000000
@@ -184,10 +198,24 @@ definitions:
     - 3600000000000
     type: integer
     x-enum-varnames:
+    - minDuration
+    - maxDuration
     - Nanosecond
     - Microsecond
     - Millisecond
     - Second
+    - Minute
+    - Hour
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+    - minDuration
+    - maxDuration
     - Nanosecond
     - Microsecond
     - Millisecond
@@ -461,7 +489,7 @@ paths:
       summary: Verify OTP for a user.
       tags:
       - OTP
-  /playlist/{id}:
+  /playlist/{playlist_id}:
     delete:
       consumes:
       - application/json
@@ -494,7 +522,6 @@ paths:
       summary: Delete a playlist by ID.
       tags:
       - playlist-controller
-  /playlist/{playlist_id}:
     get:
       consumes:
       - application/json
