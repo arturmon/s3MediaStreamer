@@ -258,48 +258,6 @@ paths:
       summary: Stream audio files.
       tags:
       - track-controller
-  /audio/stream/{segment}:
-    get:
-      consumes:
-      - '*/*'
-      description: Streams audio files in the specified directory as MP3 or FLAC.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: playlist_id
-        type: string
-      - description: Control operation playlist play
-        in: path
-        name: control
-        type: string
-      produces:
-      - audio/mpeg
-      - audio/flac
-      - application/octet-stream
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Track'
-            type: array
-        "404":
-          description: Segment not found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "406":
-          description: Segment not found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Stream audio files.
-      tags:
-      - track-controller
   /health/liveness:
     get:
       consumes:
@@ -519,39 +477,6 @@ paths:
       summary: Verify OTP for a user.
       tags:
       - OTP
-  /play/{playlist_id}:
-    get:
-      consumes:
-      - '*/*'
-      description: Streams and plays audio tracks from the specified playlist.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: playlist_id
-        required: true
-        type: string
-      produces:
-      - application/octet-stream
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Track'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Stream and play audio tracks from a playlist.
-      tags:
-      - track-controller
   /playlist/{playlist_id}/add/track/{track_id}:
     post:
       consumes:
