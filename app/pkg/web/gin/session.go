@@ -30,6 +30,8 @@ import (
 const (
 	sessionMaxAge      = 60 * 60 * 24
 	mongodriverMaxIdle = 3600 // Define a named constant for better readability
+	SetMaxOpenConns    = 10
+	SetMaxIdleConns    = 5
 )
 
 func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, logger *logging.Logger) {
@@ -69,6 +71,8 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 			logger.Errorf("Error creating Postgres store: %v", err)
 			return
 		}
+		db.SetMaxOpenConns(SetMaxOpenConns)
+		db.SetMaxIdleConns(SetMaxIdleConns)
 		store, err = postgres.NewStore(db, []byte(cfg.Session.Cookies.SessionSecretKey))
 		if err != nil {
 			logger.Errorf("Error creating Postres store: %v", err)
