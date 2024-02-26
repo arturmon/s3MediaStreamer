@@ -93,7 +93,7 @@ func (a *WebApp) CreatePlaylist(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Not Found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/delete/{id} [delete]
+// @Router /playlist/{id} [delete]
 func (a *WebApp) DeletePlaylist(c *gin.Context) {
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("id")
@@ -133,7 +133,7 @@ func (a *WebApp) DeletePlaylist(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Playlist or track not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id}/add/track/{track_id} [post]
+// @Router /playlist/{playlist_id}/{track_id} [post]
 func (a *WebApp) AddToPlaylist(c *gin.Context) {
 	// Extract playlist ID and track ID from path parameters
 	playlistID := c.Param("playlist_id")
@@ -175,7 +175,7 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Playlist or track not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id}/track/{track_id} [delete]
+// @Router /playlist/{playlist_id}/{track_id} [delete]
 func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
 	// Get the playlist ID and track ID from the request parameters
 	playlistID := c.Param("playlist_id")
@@ -217,7 +217,7 @@ func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Playlist not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlists/{playlist_id}/clear [delete]
+// @Router /playlist/{playlist_id}/clear [delete]
 func (a *WebApp) ClearPlaylist(c *gin.Context) {
 	// Get the playlist ID from the URL parameters
 	playlistID := c.Param("playlist_id")
@@ -251,7 +251,7 @@ func (a *WebApp) ClearPlaylist(c *gin.Context) {
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id}/set [post]
+// @Router /playlist/{playlist_id} [post]
 func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
@@ -307,7 +307,7 @@ type SetPlaylistTrackOrderRequest struct {
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id}/get [get]
+// @Router /playlist/{playlist_id} [get]
 func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")

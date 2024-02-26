@@ -48,13 +48,13 @@ func (a *WebApp) setupAppRoutesV1() {
 		}
 		playlist := v1.Group("/playlist")
 		{
-			playlist.POST("/:playlist_id/add/track/:track_id", a.AddToPlaylist)
-			playlist.DELETE("/:playlist_id/remove/track/:track_id", a.RemoveFromPlaylist)
-			playlist.DELETE("/:playlist_id/clear", a.ClearPlaylist)
 			playlist.POST("/create", a.CreatePlaylist)
-			playlist.DELETE("/delete/:id", a.DeletePlaylist)
-			playlist.POST("/:playlist_id/set", a.SetFromPlaylist)
-			playlist.GET(":playlist_id/get", a.ListTracksFromPlaylist)
+			playlist.DELETE("/:id", a.DeletePlaylist)
+			playlist.POST("/:playlist_id/:track_id", a.AddToPlaylist)
+			playlist.GET("/:playlist_id", a.ListTracksFromPlaylist)
+			playlist.POST("/:playlist_id", a.SetFromPlaylist)
+			playlist.DELETE("/:playlist_id/:track_id", a.RemoveFromPlaylist)
+			playlist.DELETE("/:playlist_id/clear", a.ClearPlaylist)
 		}
 	}
 }

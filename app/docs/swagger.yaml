@@ -172,44 +172,28 @@ definitions:
     type: object
   time.Duration:
     enum:
-    - -9223372036854775808
-    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
     - 1
     - 1000
     - 1000000
     - 1000000000
     - 60000000000
     - 3600000000000
-    - 1
-    - 1000
-    - 1000000
-    - 1000000000
-    - 60000000000
-    - 3600000000000
-    - 1
-    - 1000
-    - 1000000
-    - 1000000000
     type: integer
     x-enum-varnames:
-    - minDuration
-    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
     - Nanosecond
     - Microsecond
     - Millisecond
     - Second
     - Minute
     - Hour
-    - Nanosecond
-    - Microsecond
-    - Millisecond
-    - Second
-    - Minute
-    - Hour
-    - Nanosecond
-    - Microsecond
-    - Millisecond
-    - Second
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -477,35 +461,28 @@ paths:
       summary: Verify OTP for a user.
       tags:
       - OTP
-  /playlist/{playlist_id}/add/track/{track_id}:
-    post:
+  /playlist/{id}:
+    delete:
       consumes:
       - application/json
-      description: Add a track to an existing playlist.
+      description: Delete a playlist based on its unique ID.
       parameters:
       - description: Playlist ID
         in: path
-        name: playlist_id
-        required: true
-        type: string
-      - description: Track ID
-        in: path
-        name: track_id
+        name: id
         required: true
         type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Track added to the playlist successfully
-          schema:
-            type: string
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Playlist or track not found
+          description: Not Found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -514,10 +491,10 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Add a track to a playlist
+      summary: Delete a playlist by ID.
       tags:
       - playlist-controller
-  /playlist/{playlist_id}/get:
+  /playlist/{playlist_id}:
     get:
       consumes:
       - application/json
@@ -552,7 +529,6 @@ paths:
       summary: Get tracks from a playlist.
       tags:
       - playlist-controller
-  /playlist/{playlist_id}/set:
     post:
       consumes:
       - application/json
@@ -595,7 +571,7 @@ paths:
       summary: Set tracks in a playlist.
       tags:
       - playlist-controller
-  /playlist/{playlist_id}/track/{track_id}:
+  /playlist/{playlist_id}/{track_id}:
     delete:
       consumes:
       - application/json
@@ -633,6 +609,80 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Remove a track from the playlist.
+      tags:
+      - playlist-controller
+    post:
+      consumes:
+      - application/json
+      description: Add a track to an existing playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: Track ID
+        in: path
+        name: track_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Track added to the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist or track not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add a track to a playlist
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Removes all tracks from a playlist, effectively clearing it.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Playlist cleared successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear a playlist by removing all tracks from it.
       tags:
       - playlist-controller
   /playlist/create:
@@ -673,74 +723,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new playlist.
-      tags:
-      - playlist-controller
-  /playlist/delete/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a playlist based on its unique ID.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a playlist by ID.
-      tags:
-      - playlist-controller
-  /playlists/{playlist_id}/clear:
-    delete:
-      consumes:
-      - application/json
-      description: Removes all tracks from a playlist, effectively clearing it.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: playlist_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Playlist cleared successfully
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Playlist not found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Clear a playlist by removing all tracks from it.
       tags:
       - playlist-controller
   /tracks:
