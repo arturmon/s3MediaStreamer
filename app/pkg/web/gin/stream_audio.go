@@ -58,6 +58,7 @@ func (a *WebApp) Audio(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /audio/stream/{segment} [get]
+/*
 func (a *WebApp) StreamM3U(c *gin.Context) {
 	segmentPath := c.Param("segment")
 	var track *model.Track
@@ -102,6 +103,67 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 	}
 	err = a.S3.CleanTemplateFile(fileName)
 	if err != nil {
+		return
+	}
+}
+*/
+
+func (a *WebApp) StreamM3U(c *gin.Context) {
+	segmentPath := c.Param("segment")
+	var track *model.Track
+
+	track, err := a.storage.Operations.GetTracksByColumns(segmentPath, "_id")
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
+		return
+	}
+
+	findObject, err := a.S3.FindObjectFromVersion(context.Background(), track.S3Version)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
+		return
+	}
+
+	fileName, err := a.S3.DownloadFilesS3(context.Background(), findObject.Key)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotAcceptable, gin.H{"error": "Error downloading file"})
+		return
+	}
+
+	c.Header("Content-Type", findObject.Metadata.Get("Content-Type"))
+	c.Header("Content-Disposition", "inline; filename="+findObject.Key)
+	c.Header("Content-Length", fmt.Sprintf("%d", findObject.Size))
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Content-Duration", fmt.Sprintf("%d", track.Duration)) // second
+
+	// Open the file
+	f, err := a.S3.OpenTemplateFile(fileName)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error reading file data"})
+		return
+	}
+	defer f.Close()
+
+	// Use a goroutine to stream the file and check for client disconnection
+	go func() {
+		_, err := io.Copy(c.Writer, f)
+		if err != nil {
+			// Log the error, but don't treat it as a critical error
+			a.logger.Errorf("Error streaming audio: %v", err)
+		}
+
+		// Clean up only if the copy was successful
+		err = a.S3.CleanTemplateFile(fileName)
+		if err != nil {
+			a.logger.Errorf("Error cleaning up file: %v", err)
+		}
+	}()
+
+	// Wait for client disconnect notification
+	select {
+	case <-c.Writer.CloseNotify():
+		// Client disconnected, clean up and return
+		a.logger.Info("Client disconnected, stopping streaming.")
 		return
 	}
 }
