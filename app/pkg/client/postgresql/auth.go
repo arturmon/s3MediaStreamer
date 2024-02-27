@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 )
 
 // GetStoredRefreshToken retrieves the stored refresh token for a user by their email.
-func (c *PgClient) GetStoredRefreshToken(userEmail string) (string, error) {
+func (c *PgClient) GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetStoredRefreshToken")
+	defer span.End()
+
 	var refreshToken string
 
 	// Define the condition for the WHERE clause to select the user by email.
@@ -34,7 +38,9 @@ func (c *PgClient) GetStoredRefreshToken(userEmail string) (string, error) {
 }
 
 // SetStoredRefreshToken updates the stored refresh token for a user by their email.
-func (c *PgClient) SetStoredRefreshToken(userEmail, refreshToken string) error {
+func (c *PgClient) SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error {
+	_, span := otel.Tracer("").Start(ctx, "SetStoredRefreshToken")
+	defer span.End()
 	// Define the condition for the WHERE clause to update the user by email.
 	condition := squirrel.Eq{"email": userEmail}
 

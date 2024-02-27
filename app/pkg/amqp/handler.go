@@ -8,8 +8,8 @@ import (
 	"skeleton-golange-application/app/pkg/tags"
 )
 
-func (c *MessageClient) deleteEvent(_ context.Context, s3event *MessageBody) error {
-	err := c.storage.Operations.DeleteTracks(s3event.Records[0].S3.Object.VersionID, "s3Version")
+func (c *MessageClient) deleteEvent(ctx context.Context, s3event *MessageBody) error {
+	err := c.storage.Operations.DeleteTracks(ctx, s3event.Records[0].S3.Object.VersionID, "s3Version")
 	if err != nil {
 		c.logger.Printf("Error deleting filename: %v\n", err)
 		return err
@@ -46,30 +46,30 @@ func checkObjectS3(ctx context.Context, object *MessageBody, c *MessageClient) e
 	objectTags.S3Version = object.Records[0].S3.Object.VersionID
 	objectTags.Sender = "Event"
 
-	err = checkIfTrackExists(objectTags, c)
+	err = checkIfTrackExists(ctx, objectTags, c)
 	if err != nil {
 		c.logger.Printf("%v\n", err)
 	}
 	return nil
 }
 
-func checkIfTrackExists(track *model.Track, c *MessageClient) error {
-	_, err := c.storage.Operations.GetTracksByColumns(track.Title, "title")
+func checkIfTrackExists(ctx context.Context, track *model.Track, c *MessageClient) error {
+	_, err := c.storage.Operations.GetTracksByColumns(ctx, track.Title, "title")
 	if err != nil {
 		if isNoRecordsFound(err.Error()) {
-			return handleNonexistentTrack(track, c)
+			return handleNonexistentTrack(ctx, track, c)
 		}
 		return fmt.Errorf("error getting existing albums for Artist %s: %w", track.Title, err)
 	}
 	return nil
 }
 
-func handleNonexistentTrack(track *model.Track, c *MessageClient) error {
+func handleNonexistentTrack(ctx context.Context, track *model.Track, c *MessageClient) error {
 	c.logger.Printf("Track Artist: %s not found in the database.\n", track.Title)
 
 	existingTracksSlice := []model.Track{*track}
 	if len(existingTracksSlice) == 1 {
-		if err := c.storage.Operations.CreateTracks(existingTracksSlice); err != nil {
+		if err := c.storage.Operations.CreateTracks(ctx, existingTracksSlice); err != nil {
 			return fmt.Errorf("error creating track: %w", err)
 		}
 	} else {

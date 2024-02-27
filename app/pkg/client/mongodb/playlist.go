@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 	"strconv"
@@ -11,7 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *MongoClient) CreatePlayListName(newPlaylist model.PLayList) error {
+func (c *MongoClient) CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error {
+	_, span := otel.Tracer("").Start(ctx, "CreatePlayListName")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return err
@@ -28,7 +31,9 @@ func (c *MongoClient) CreatePlayListName(newPlaylist model.PLayList) error {
 	return nil
 }
 
-func (c *MongoClient) GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error) {
+func (c *MongoClient) GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetPlayListByID")
+	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return model.PLayList{}, nil, err
@@ -81,7 +86,9 @@ func (c *MongoClient) GetPlayListByID(playlistID string) (model.PLayList, []mode
 	return playlist, playlistTracks, nil
 }
 
-func (c *MongoClient) DeletePlaylist(playlistID string) error {
+func (c *MongoClient) DeletePlaylist(ctx context.Context, playlistID string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeletePlaylist")
+	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return err
@@ -118,7 +125,9 @@ func (c *MongoClient) DeletePlaylist(playlistID string) error {
 	return nil
 }
 
-func (c *MongoClient) PlaylistExists(title string) bool {
+func (c *MongoClient) PlaylistExists(ctx context.Context, title string) bool {
+	_, span := otel.Tracer("").Start(ctx, "PlaylistExists")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return false
@@ -139,7 +148,9 @@ func (c *MongoClient) PlaylistExists(title string) bool {
 	return count > 0
 }
 
-func (c *MongoClient) ClearPlayList(playlistTitle string) error {
+func (c *MongoClient) ClearPlayList(ctx context.Context, playlistTitle string) error {
+	_, span := otel.Tracer("").Start(ctx, "ClearPlayList")
+	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return err
@@ -172,7 +183,9 @@ func (c *MongoClient) ClearPlayList(playlistTitle string) error {
 }
 
 // UpdatePlaylistTrackOrder updates the order of tracks within a playlist based on the provided order in MongoDB.
-func (c *MongoClient) UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest []string) error {
+func (c *MongoClient) UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdatePlaylistTrackOrder")
+	defer span.End()
 	collectionTrack, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return err

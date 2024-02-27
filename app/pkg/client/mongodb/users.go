@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 
@@ -12,7 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (c *MongoClient) FindUser(value interface{}, columnType string) (model.User, error) {
+func (c *MongoClient) FindUser(ctx context.Context, value interface{}, columnType string) (model.User, error) {
+	_, span := otel.Tracer("").Start(ctx, "FindUser")
+	defer span.End()
 	result := model.User{}
 	// Define filter query for fetching a specific document from the collection.
 	filter := bson.D{{Key: columnType, Value: value}}
@@ -29,14 +32,16 @@ func (c *MongoClient) FindUser(value interface{}, columnType string) (model.User
 	return result, nil
 }
 
-func (c *MongoClient) CreateUser(user model.User) error {
+func (c *MongoClient) CreateUser(ctx context.Context, user model.User) error {
+	_, span := otel.Tracer("").Start(ctx, "CreateUser")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return err
 	}
 
 	// Поиск пользователя с помощью email.
-	existingUser, err := c.FindUser(user.Email, "email")
+	existingUser, err := c.FindUser(ctx, user.Email, "email")
 	if err != nil {
 		if !errors.Is(err, mongo.ErrNoDocuments) {
 			return err
@@ -55,11 +60,15 @@ func (c *MongoClient) CreateUser(user model.User) error {
 	return fmt.Errorf("user with email '%s' already exists", existingUser.Email)
 }
 
-func (c *MongoClient) DeleteUser(email string) error {
+func (c *MongoClient) DeleteUser(ctx context.Context, email string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteUser")
+	defer span.End()
 	return fmt.Errorf("DeleteUser is not supported for MongoDB, '%s' not deleted", email)
 }
 
-func (c *MongoClient) UpdateUser(email string, fields map[string]interface{}) error {
+func (c *MongoClient) UpdateUser(ctx context.Context, email string, fields map[string]interface{}) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdateUser")
+	defer span.End()
 	// Define the filter to find the user by email.
 	filter := bson.M{"email": email}
 

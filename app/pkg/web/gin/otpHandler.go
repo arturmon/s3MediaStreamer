@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"go.opentelemetry.io/otel"
 	"net/http"
 	"skeleton-golange-application/app/model"
 
@@ -23,6 +24,8 @@ import (
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP secret or URL"
 // @Router /otp/generate [post]
 func (a *WebApp) GenerateOTP(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "GenerateOTP")
+	defer span.End()
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -30,7 +33,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
+	result, err := a.storage.Operations.FindUser(c.Request.Context(), payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "Invalid email or Password"})
 		return
@@ -49,7 +52,7 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 		"otp_secret":   key.Secret(),
 		"otp_auth_url": key.URL(),
 	}
-	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(c.Request.Context(), result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update Secret or URL OTP"})
 		return
@@ -76,6 +79,8 @@ func (a *WebApp) GenerateOTP(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/verify [post]
 func (a *WebApp) VerifyOTP(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "VerifyOTP")
+	defer span.End()
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -84,7 +89,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 	}
 
 	message := "Token is invalid or user doesn't exist"
-	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
+	result, err := a.storage.Operations.FindUser(c.Request.Context(), payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: message})
 		return
@@ -101,7 +106,7 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 		"otp_verified": true,
 	}
 
-	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(c.Request.Context(), result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update enabled or verified OTP"})
 		return
@@ -132,6 +137,8 @@ func (a *WebApp) VerifyOTP(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Router /otp/validate [post]
 func (a *WebApp) ValidateOTP(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ValidateOTP")
+	defer span.End()
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -141,7 +148,7 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 
 	message := "Token is invalid or user doesn't exist"
 
-	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
+	result, err := a.storage.Operations.FindUser(c.Request.Context(), payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: message})
 		return
@@ -171,6 +178,8 @@ func (a *WebApp) ValidateOTP(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/disable [post]
 func (a *WebApp) DisableOTP(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "DisableOTP")
+	defer span.End()
 	var payload *model.OTPInput
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
@@ -178,7 +187,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		return
 	}
 
-	result, err := a.storage.Operations.FindUser(payload.UserID, "_id")
+	result, err := a.storage.Operations.FindUser(c.Request.Context(), payload.UserID, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: err.Error()})
 		return
@@ -188,7 +197,7 @@ func (a *WebApp) DisableOTP(c *gin.Context) {
 		"otp_enabled": false,
 	}
 
-	err = a.storage.Operations.UpdateUser(result.Email, updateFields)
+	err = a.storage.Operations.UpdateUser(c.Request.Context(), result.Email, updateFields)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Not update disabled OTP"})
 		return

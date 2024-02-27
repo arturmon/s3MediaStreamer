@@ -1,16 +1,20 @@
 package gin
 
 import (
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"context"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // GenerateAccessToken generates an access token for the given user.
-func generateAccessToken(user model.User) (string, error) {
+func generateAccessToken(ctx context.Context, user model.User) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "generateAccessToken")
+	defer span.End()
 	key := []byte(SecretKey)
 	claims := jwt.MapClaims{
 		"iss":  user.Email,
@@ -28,7 +32,9 @@ func generateAccessToken(user model.User) (string, error) {
 }
 
 // GenerateRefreshToken generates a refresh token for the given user.
-func generateRefreshToken(user model.User) (string, error) {
+func generateRefreshToken(ctx context.Context, user model.User) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "generateRefreshToken")
+	defer span.End()
 	key := []byte(RefreshTokenSecret)
 	claims := jwt.MapClaims{
 		"sub": user.Email,
@@ -46,18 +52,20 @@ func generateRefreshToken(user model.User) (string, error) {
 }
 
 func (a *WebApp) generateTokensAndCookies(c *gin.Context, user model.User) (string, string, error) {
-	accessToken, err := generateAccessToken(user)
+	_, span := otel.Tracer("").Start(c.Request.Context(), "generateTokensAndCookies")
+	defer span.End()
+	accessToken, err := generateAccessToken(c.Request.Context(), user)
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshToken, err := generateRefreshToken(user)
+	refreshToken, err := generateRefreshToken(c.Request.Context(), user)
 	if err != nil {
 		return "", "", err
 	}
 
 	// Store the refresh token along with user information (e.g., in a database)
-	err = a.storage.Operations.SetStoredRefreshToken(user.Email, refreshToken)
+	err = a.storage.Operations.SetStoredRefreshToken(c.Request.Context(), user.Email, refreshToken)
 	if err != nil {
 		return "", "", err
 	}

@@ -2,12 +2,15 @@ package postgresql
 
 import (
 	"context"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 
 	"github.com/Masterminds/squirrel"
 )
 
-func (c *PgClient) CreatePlayListName(playlist model.PLayList) error {
+func (c *PgClient) CreatePlayListName(ctx context.Context, playlist model.PLayList) error {
+	_, span := otel.Tracer("").Start(ctx, "CreatePlayListName")
+	defer span.End()
 	// Start a transaction
 	tx, err := c.Pool.Begin(context.TODO())
 	if err != nil {
@@ -54,7 +57,9 @@ func (c *PgClient) CreatePlayListName(playlist model.PLayList) error {
 	return nil
 }
 
-func (c *PgClient) GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error) {
+func (c *PgClient) GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetPlayListByID")
+	defer span.End()
 	// Initialize an empty playlist to store the result
 	var playlist model.PLayList
 	var tracks []model.Track
@@ -79,7 +84,7 @@ func (c *PgClient) GetPlayListByID(playlistID string) (model.PLayList, []model.T
 	}
 
 	// Retrieve the tracks associated with the playlist and add them to the playlist
-	tracks, err = c.GetTracksByPlaylist(playlistID)
+	tracks, err = c.GetTracksByPlaylist(ctx, playlistID)
 	if err != nil {
 		return playlist, tracks, err
 	}
@@ -87,7 +92,9 @@ func (c *PgClient) GetPlayListByID(playlistID string) (model.PLayList, []model.T
 	return playlist, tracks, nil
 }
 
-func (c *PgClient) DeletePlaylist(playlistID string) error {
+func (c *PgClient) DeletePlaylist(ctx context.Context, playlistID string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeletePlaylist")
+	defer span.End()
 	deleteBuilder := squirrel.Delete("playlists").PlaceholderFormat(squirrel.Dollar)
 
 	// Add a WHERE condition to specify the record to delete
@@ -109,7 +116,9 @@ func (c *PgClient) DeletePlaylist(playlistID string) error {
 	return nil
 }
 
-func (c *PgClient) PlaylistExists(playlistID string) bool {
+func (c *PgClient) PlaylistExists(ctx context.Context, playlistID string) bool {
+	_, span := otel.Tracer("").Start(ctx, "PlaylistExists")
+	defer span.End()
 	// Create a SELECT query using Squirrel to count rows in the playlists table
 	queryBuilder := squirrel.
 		Select("COUNT(*)").
@@ -133,7 +142,9 @@ func (c *PgClient) PlaylistExists(playlistID string) bool {
 	return false
 }
 
-func (c *PgClient) ClearPlayList(playlistID string) error {
+func (c *PgClient) ClearPlayList(ctx context.Context, playlistID string) error {
+	_, span := otel.Tracer("").Start(ctx, "ClearPlayList")
+	defer span.End()
 	// Start a transaction
 	tx, err := c.Pool.Begin(context.TODO())
 	if err != nil {
@@ -173,7 +184,9 @@ func (c *PgClient) ClearPlayList(playlistID string) error {
 }
 
 // UpdatePlaylistTrackOrder updates the order of tracks within a playlist based on the provided order.
-func (c *PgClient) UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest []string) error {
+func (c *PgClient) UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdatePlaylistTrackOrder")
+	defer span.End()
 	tx, err := c.Pool.Begin(context.Background())
 	if err != nil {
 		return err
@@ -227,7 +240,9 @@ func (c *PgClient) UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest
 }
 
 // GetTracksByPlaylist retrieves tracks associated with a playlist.
-func (c *PgClient) GetTracksByPlaylist(playlistID string) ([]model.Track, error) {
+func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetTracksByPlaylist")
+	defer span.End()
 	// Create a SQL query to fetch tracks associated with the given playlist
 	selectQuery := squirrel.Select("t.*").
 		From("tracks t").
@@ -247,7 +262,6 @@ func (c *PgClient) GetTracksByPlaylist(playlistID string) ([]model.Track, error)
 		return nil, err
 	}
 	defer rows.Close()
-
 	var tracks []model.Track
 	for rows.Next() {
 		var track model.Track
@@ -281,6 +295,5 @@ func (c *PgClient) GetTracksByPlaylist(playlistID string) ([]model.Track, error)
 		}
 		tracks = append(tracks, track)
 	}
-
 	return tracks, nil
 }

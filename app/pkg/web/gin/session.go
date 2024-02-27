@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/gob"
 	"errors"
+	"go.opentelemetry.io/otel"
 	"net"
 	"net/http"
 	"net/url"
@@ -93,6 +94,8 @@ func initSession(ctx context.Context, router *gin.Engine, cfg *config.Config, lo
 }
 
 func setSessionData(c *gin.Context, data map[string]interface{}) error {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "setSessionData")
+	defer span.End()
 	session := sessions.Default(c)
 
 	// Set the values in the session
@@ -110,6 +113,8 @@ func setSessionData(c *gin.Context, data map[string]interface{}) error {
 }
 
 func getSessionKey(c *gin.Context, key string) (interface{}, error) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "getSessionKey")
+	defer span.End()
 	session := sessions.Default(c)
 	value := session.Get(key)
 	if value == nil {
@@ -119,6 +124,8 @@ func getSessionKey(c *gin.Context, key string) (interface{}, error) {
 }
 
 func logoutSession(c *gin.Context) error {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "logoutSession")
+	defer span.End()
 	session := sessions.Default(c)
 	session.Clear()
 	session.Options(sessions.Options{Path: "/", MaxAge: -1}) // this sets the cookie with a MaxAge of 0

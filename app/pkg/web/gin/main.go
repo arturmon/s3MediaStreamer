@@ -3,6 +3,7 @@ package gin
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"net/http"
 	conf "skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
@@ -53,7 +54,7 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 	router.Use(cors.New(ConfigCORS()))
 	router.Use(gin.Recovery())
 
-	router.Use(otelgin.Middleware("todo-service"))
+	router.Use(otelgin.Middleware("s3MediaStreamer"))
 	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
 
 	logger.Info("prometheus initializing")
@@ -110,7 +111,7 @@ func (a *WebApp) startHTTP(ctx context.Context, hcw *monitoring.HealthCheckWrapp
 	a.setupStaticFiles()
 
 	// Routes
-	a.setupSystemRoutes(hcw)
+	a.setupSystemRoutes(ctx, hcw)
 	// Group: v1
 	a.setupAppRoutesV1()
 
@@ -139,7 +140,9 @@ func (a *WebApp) setupStaticFiles() {
 	a.router.StaticFile("/favicon.ico", "./favicon.ico")
 }
 
-func (a *WebApp) setupSystemRoutes(hcw *monitoring.HealthCheckWrapper) {
+func (a *WebApp) setupSystemRoutes(ctx context.Context, hcw *monitoring.HealthCheckWrapper) {
+	_, span := otel.Tracer("").Start(ctx, "setupSystemRoutes")
+	defer span.End()
 	a.logger.Info("heartbeat metric initializing")
 	a.router.GET("/health/liveness", func(c *gin.Context) {
 		monitoring.LivenessGET(c, hcw) // Pass the healthMetrics to HealthGET.
@@ -150,7 +153,7 @@ func (a *WebApp) setupSystemRoutes(hcw *monitoring.HealthCheckWrapper) {
 
 	a.router.GET("/job/status", JobStatus)
 
-	a.router.Use(ExtractUserRole(a.logger))
+	a.router.Use(ExtractUserRole(ctx, a.logger))
 	a.router.Use(NewAuthorizerWithRoleExtractor(a.enforcer, a.logger, func(c *gin.Context) string {
 		if role, ok := c.Get("userRole"); ok {
 			return role.(string)

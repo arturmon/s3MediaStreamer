@@ -3,6 +3,7 @@ package gin
 import (
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"net/http"
 	model_all "skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/client/model"
@@ -10,6 +11,7 @@ import (
 
 	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
+	"context"
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -28,6 +30,8 @@ func GetEnforcer(_ *model.DBConfig) (*casbin.Enforcer, error) {
 }
 
 func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "checkAuthorization")
+	defer span.End()
 	cookie, err := c.Cookie("jwt")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
@@ -55,8 +59,10 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 	return claims["iss"].(string), nil
 }
 
-func ExtractUserRole(logger *logging.Logger) gin.HandlerFunc {
+func ExtractUserRole(ctx context.Context, logger *logging.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		_, span := otel.Tracer("").Start(ctx, "ExtractUserRole")
+		defer span.End()
 		jwtToken, err := c.Cookie("jwt") // Extract the JWT token from the cookie
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) { // Use errors.Is to check for a specific error

@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"go.opentelemetry.io/otel"
 	"net/http"
 	"skeleton-golange-application/app/model"
 	"time"
@@ -25,6 +26,8 @@ import (
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/register [post]
 func (a *WebApp) Register(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "Register")
+	defer span.End()
 	// prometheus
 	a.metrics.RegisterAttemptCounter.Inc()
 
@@ -35,7 +38,7 @@ func (a *WebApp) Register(c *gin.Context) {
 	}
 
 	// Check if user already exists
-	_, err := a.storage.Operations.FindUser(data["email"], "email")
+	_, err := a.storage.Operations.FindUser(c.Request.Context(), data["email"], "email")
 	if err == nil {
 		a.metrics.RegisterErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "user with this email exists"})
@@ -57,7 +60,7 @@ func (a *WebApp) Register(c *gin.Context) {
 		Role:     data["role"],
 	}
 
-	err = a.storage.Operations.CreateUser(user)
+	err = a.storage.Operations.CreateUser(c.Request.Context(), user)
 	if err != nil {
 		a.metrics.RegisterErrorCounter.Inc()
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to create user"})
@@ -81,6 +84,8 @@ func (a *WebApp) Register(c *gin.Context) {
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/login [post]
 func (a *WebApp) Login(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "Login")
+	defer span.End()
 	a.metrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
@@ -89,7 +94,7 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := a.storage.Operations.FindUser(data["email"], "email")
+	user, err := a.storage.Operations.FindUser(c.Request.Context(), data["email"], "email")
 	if err != nil {
 		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
@@ -97,10 +102,10 @@ func (a *WebApp) Login(c *gin.Context) {
 	}
 
 	bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
+
 	if bcryptErr != nil {
 		a.metrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "incorrect password"})
-		a.metrics.ErrPasswordCounter.Inc() // Prometheus
 		return
 	}
 
@@ -146,6 +151,8 @@ func (a *WebApp) Login(c *gin.Context) {
 // @Failure     404 {object} model.ErrorResponse "Not Found - User not found"
 // @Router		/users/delete [delete]
 func (a *WebApp) DeleteUser(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "DeleteUser")
+	defer span.End()
 	a.metrics.DeleteUserAttemptCounter.Inc()
 
 	var data map[string]string
@@ -165,14 +172,14 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	user, err := a.storage.Operations.FindUser(email, "email")
+	user, err := a.storage.Operations.FindUser(c.Request.Context(), email, "email")
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
 	}
 
-	err = a.storage.Operations.DeleteUser(user.Email)
+	err = a.storage.Operations.DeleteUser(c.Request.Context(), user.Email)
 	if err != nil {
 		a.metrics.DeleteUserErrorCounter.Inc()
 		c.IndentedJSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
@@ -194,6 +201,8 @@ func (a *WebApp) DeleteUser(c *gin.Context) {
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/logout [post]
 func (a *WebApp) Logout(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "Logout")
+	defer span.End()
 	a.metrics.LogoutAttemptCounter.Inc()
 	expires := time.Now().Add(-time.Hour)
 	a.logger.Debugf("Expires: %s", expires)
@@ -221,6 +230,10 @@ func (a *WebApp) Logout(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "User not found"
 // @Router /users/me [get]
 func (a *WebApp) User(c *gin.Context) {
+	// Start a new span for the GetAllTracks operation
+	_, span := otel.Tracer("").Start(c.Request.Context(), "User")
+	defer span.End()
+
 	email, err := a.checkAuthorization(c)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, model.ErrorResponse{Message: "unauthenticated"})
@@ -228,7 +241,7 @@ func (a *WebApp) User(c *gin.Context) {
 	}
 
 	var user model.User
-	user, err = a.storage.Operations.FindUser(email, "email")
+	user, err = a.storage.Operations.FindUser(c.Request.Context(), email, "email")
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, model.ErrorResponse{Message: "user not found"})
 		return
@@ -257,6 +270,8 @@ func (a *WebApp) User(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Router /users/refresh [post]
 func (a *WebApp) refreshTokenHandler(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "refreshTokenHandler")
+	defer span.End()
 	var data map[string]string
 
 	// Parse the JSON request body into the data map
@@ -289,14 +304,14 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 	}
 
 	// Check if the refresh token is stored and valid
-	storedRefreshToken, err := a.storage.Operations.GetStoredRefreshToken(userEmail)
+	storedRefreshToken, err := a.storage.Operations.GetStoredRefreshToken(c.Request.Context(), userEmail)
 	if err != nil || refreshToken != storedRefreshToken {
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid refresh token"})
 		return
 	}
 
 	// Generate a new access token and refresh token
-	user, err := a.storage.Operations.FindUser(userEmail, "email")
+	user, err := a.storage.Operations.FindUser(c.Request.Context(), userEmail, "email")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "failed to get user"})
 		return
@@ -317,7 +332,7 @@ func (a *WebApp) refreshTokenHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, refreshResponse)
 
 	// Update the stored refresh token with the new one
-	err = a.storage.Operations.SetStoredRefreshToken(userEmail, newRefreshToken)
+	err = a.storage.Operations.SetStoredRefreshToken(c.Request.Context(), userEmail, newRefreshToken)
 	if err != nil {
 		a.logger.Errorf("Failed to update stored refresh token: %v", err)
 		// Handle the error as needed

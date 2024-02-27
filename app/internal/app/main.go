@@ -25,6 +25,7 @@ type App struct {
 	S3             s3.HandlerS3
 	LeaderElection *consul_election.Election
 	ConsulService  *consul_service.Service
+	tracer         *otel.Provider
 	AppName        string
 }
 
@@ -39,7 +40,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version str
 		Logger:         logger,
 		Disabled:       cfg.AppConfig.OpenTelemetry.TracingEnabled,
 	}
-	_, err := otel.InitProvider(config)
+	tracer, err := otel.InitProvider(config)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -106,6 +107,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version str
 		S3:             s3client,
 		LeaderElection: leaderElection,
 		ConsulService:  s,
+		tracer:         &tracer,
 		AppName:        appName,
 	}, nil
 }

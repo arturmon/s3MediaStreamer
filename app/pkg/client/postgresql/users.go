@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 
 	"github.com/Masterminds/squirrel"
@@ -11,7 +12,9 @@ import (
 )
 
 // FindUser retrieves a user by a specified column type and value.
-func (c *PgClient) FindUser(value interface{}, columnType string) (model.User, error) {
+func (c *PgClient) FindUser(ctx context.Context, value interface{}, columnType string) (model.User, error) {
+	_, span := otel.Tracer("").Start(ctx, "FindUser")
+	defer span.End()
 	var user model.User
 
 	// Define the condition for the WHERE clause based on the column type and value.
@@ -36,7 +39,9 @@ func (c *PgClient) FindUser(value interface{}, columnType string) (model.User, e
 }
 
 // CreateUser inserts a new user into the "users" table.
-func (c *PgClient) CreateUser(user model.User) error {
+func (c *PgClient) CreateUser(ctx context.Context, user model.User) error {
+	_, span := otel.Tracer("").Start(ctx, "CreateUser")
+	defer span.End()
 	// Define the data to be inserted into the "users" table.
 	userData := map[string]interface{}{
 		"_id":      user.ID,
@@ -60,7 +65,9 @@ func (c *PgClient) CreateUser(user model.User) error {
 }
 
 // DeleteUser deletes a user by their email from the "users" table.
-func (c *PgClient) DeleteUser(email string) error {
+func (c *PgClient) DeleteUser(ctx context.Context, email string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteUser")
+	defer span.End()
 	// Define the condition for the WHERE clause to delete the user by email.
 	condition := squirrel.Eq{"email": email}
 
@@ -82,7 +89,9 @@ func (c *PgClient) DeleteUser(email string) error {
 }
 
 // UpdateUser updates user fields in the "users" table based on the provided email.
-func (c *PgClient) UpdateUser(email string, fields map[string]interface{}) error {
+func (c *PgClient) UpdateUser(ctx context.Context, email string, fields map[string]interface{}) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdateUser")
+	defer span.End()
 	// Create a new instance of squirrel.UpdateBuilder
 	updateBuilder := squirrel.Update("users")
 

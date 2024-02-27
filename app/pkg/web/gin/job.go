@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"go.opentelemetry.io/otel"
 	"net/http"
 
 	"github.com/bamzi/jobrunner"
@@ -17,5 +18,7 @@ import (
 // @Failure 404 {object} map[string]string "Not Found"
 // @Router /job/status [get]
 func JobStatus(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "JobStatus")
+	defer span.End()
 	c.JSON(http.StatusOK, jobrunner.StatusJson())
 }

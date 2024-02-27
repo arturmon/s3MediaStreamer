@@ -13,28 +13,28 @@ import (
 )
 
 type MongoCollectionQuery interface {
-	FindUser(value interface{}, columnType string) (model.User, error)
-	CreateUser(user model.User) error
-	DeleteUser(email string) error
-	UpdateUser(email string, fields map[string]interface{}) error
-	GetStoredRefreshToken(userEmail string) (string, error)
-	SetStoredRefreshToken(userEmail, refreshToken string) error
-	CreateTracks(list []model.Track) error
-	GetTracks(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
-	GetTracksByColumns(code, columns string) (*model.Track, error)
-	DeleteTracks(code, columns string) error
-	DeleteTracksAll() error
-	UpdateTracks(track *model.Track) error
-	AddTrackToPlaylist(playlistID, trackID string) error
-	RemoveTrackFromPlaylist(playlistID, trackID string) error
-	GetAllTracks() ([]model.Track, error)
-	CreatePlayListName(newPlaylist model.PLayList) error
-	GetPlayListByID(playlistID string) (model.PLayList, []model.Track, error)
-	DeletePlaylist(playlistID string) error
-	PlaylistExists(playlistID string) bool
-	ClearPlayList(playlistID string) error
-	UpdatePlaylistTrackOrder(playlistID string, trackOrderRequest []string) error
-	GetAllTracksByPositions(playlistID string) ([]model.Track, error)
+	FindUser(ctx context.Context, value interface{}, columnType string) (model.User, error)
+	CreateUser(ctx context.Context, user model.User) error
+	DeleteUser(ctx context.Context, email string) error
+	UpdateUser(ctx context.Context, email string, fields map[string]interface{}) error
+	GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error)
+	SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error
+	CreateTracks(ctx context.Context, list []model.Track) error
+	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
+	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
+	DeleteTracks(ctx context.Context, code, columns string) error
+	DeleteTracksAll(ctx context.Context) error
+	UpdateTracks(ctx context.Context, track *model.Track) error
+	AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error
+	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
+	GetAllTracks(ctx context.Context) ([]model.Track, error)
+	CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error
+	GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error)
+	DeletePlaylist(ctx context.Context, playlistID string) error
+	PlaylistExists(ctx context.Context, playlistID string) bool
+	ClearPlayList(ctx context.Context, playlistID string) error
+	UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error
+	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
 }
 
 type MongoOperations interface {

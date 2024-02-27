@@ -2,12 +2,15 @@ package postgresql
 
 import (
 	"context"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 
 	"github.com/Masterminds/squirrel"
 )
 
-func (c *PgClient) executeSelectQuery(selectBuilder squirrel.SelectBuilder) ([]model.Track, error) {
+func (c *PgClient) executeSelectQuery(ctx context.Context, selectBuilder squirrel.SelectBuilder) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "executeSelectQuery")
+	defer span.End()
 	var tracks []model.Track
 
 	for {

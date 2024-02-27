@@ -3,6 +3,7 @@ package postgresql
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 	"strings"
 
@@ -11,7 +12,9 @@ import (
 )
 
 // CreateTracks inserts multiple track records into the "track" table.
-func (c *PgClient) CreateTracks(list []model.Track) error {
+func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
+	_, span := otel.Tracer("").Start(ctx, "CreateTracks")
+	defer span.End()
 	if len(list) == 0 {
 		return nil
 	}
@@ -84,7 +87,9 @@ func (c *PgClient) CreateTracks(list []model.Track) error {
 }
 
 // GetTracks retrieves a list of tracks with pagination and filtering.
-func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string) ([]model.Track, int, error) {
+func (c *PgClient) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter string) ([]model.Track, int, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetTracks")
+	defer span.End()
 	// Create a new instance of squirrel.SelectBuilder
 	queryBuilder := squirrel.Select("*").From("tracks")
 
@@ -170,7 +175,9 @@ func (c *PgClient) GetTracks(offset, limit int, sortBy, sortOrder, filter string
 }
 
 // GetTracksByColumns retrieves an track record from the "track" table based on the provided code.
-func (c *PgClient) GetTracksByColumns(code, columns string) (*model.Track, error) {
+func (c *PgClient) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetTracksByColumns")
+	defer span.End()
 	getTrackByColumns := squirrel.Select("*").From("tracks")
 	getTrackByColumns = getTrackByColumns.Where(squirrel.Eq{columns: code})
 	getTrackByColumns = getTrackByColumns.PlaceholderFormat(squirrel.Dollar)
@@ -209,7 +216,9 @@ func (c *PgClient) GetTracksByColumns(code, columns string) (*model.Track, error
 }
 
 // DeleteTracks deletes a single record from the "track" table based on the provided code.
-func (c *PgClient) DeleteTracks(code, columns string) error {
+func (c *PgClient) DeleteTracks(ctx context.Context, code, columns string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteTracks")
+	defer span.End()
 	// Create a new instance of squirrel.DeleteBuilder and specify the table name
 	deleteBuilder := squirrel.Delete("tracks").PlaceholderFormat(squirrel.Dollar)
 
@@ -233,7 +242,9 @@ func (c *PgClient) DeleteTracks(code, columns string) error {
 }
 
 // DeleteTracksAll deletes all records from the "track" table.
-func (c *PgClient) DeleteTracksAll() error {
+func (c *PgClient) DeleteTracksAll(ctx context.Context) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteTracksAll")
+	defer span.End()
 	// Create a new instance of squirrel.DeleteBuilder
 	deleteBuilder := squirrel.Delete("").From("tracks")
 
@@ -253,7 +264,9 @@ func (c *PgClient) DeleteTracksAll() error {
 }
 
 // UpdateTracks updates an track record in the "track" table based on the provided code.
-func (c *PgClient) UpdateTracks(track *model.Track) error {
+func (c *PgClient) UpdateTracks(ctx context.Context, track *model.Track) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdateTracks")
+	defer span.End()
 	// Create a new instance of squirrel.UpdateBuilder
 	updateBuilder := squirrel.Update("tracks")
 
@@ -300,15 +313,19 @@ func (c *PgClient) UpdateTracks(track *model.Track) error {
 	return nil
 }
 
-func (c *PgClient) GetAllTracks() ([]model.Track, error) {
+func (c *PgClient) GetAllTracks(ctx context.Context) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllTracks")
+	defer span.End()
 	selectBuilder := squirrel.Select("*").
 		From("tracks").
 		Limit(ChunkSize) // Adjust the limit based on your requirements
 
-	return c.executeSelectQuery(selectBuilder)
+	return c.executeSelectQuery(ctx, selectBuilder)
 }
 
-func (c *PgClient) AddTrackToPlaylist(playlistID, trackID string) error {
+func (c *PgClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error {
+	_, span := otel.Tracer("").Start(ctx, "AddTrackToPlaylist")
+	defer span.End()
 	// Start a transaction
 	tx, err := c.Pool.Begin(context.TODO())
 	if err != nil {
@@ -348,7 +365,9 @@ func (c *PgClient) AddTrackToPlaylist(playlistID, trackID string) error {
 	return nil
 }
 
-func (c *PgClient) RemoveTrackFromPlaylist(playlistID, trackID string) error {
+func (c *PgClient) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
+	_, span := otel.Tracer("").Start(ctx, "RemoveTrackFromPlaylist")
+	defer span.End()
 	// Start a transaction
 	tx, err := c.Pool.Begin(context.TODO())
 	if err != nil {
@@ -387,7 +406,9 @@ func (c *PgClient) RemoveTrackFromPlaylist(playlistID, trackID string) error {
 	return nil
 }
 
-func (c *PgClient) GetAllTracksByPositions(playlistID string) ([]model.Track, error) {
+func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllTracksByPositions")
+	defer span.End()
 	tx, err := c.Pool.Begin(context.TODO())
 	if err != nil {
 		return nil, err

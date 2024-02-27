@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"go.opentelemetry.io/otel"
 	"net/http"
 	"skeleton-golange-application/app/model"
 	"strconv"
@@ -24,6 +25,8 @@ import (
 // @Security ApiKeyAuth
 // @Router /playlist/create [post]
 func (a *WebApp) CreatePlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "CreatePlaylist")
+	defer span.End()
 	// Define a struct to parse the request body
 	var playlistRequest struct {
 		Title       string `json:"title"`
@@ -72,7 +75,7 @@ func (a *WebApp) CreatePlaylist(c *gin.Context) {
 	}
 
 	// Save the new playlist in the database
-	if err = a.storage.Operations.CreatePlayListName(newPlaylist); err != nil {
+	if err = a.storage.Operations.CreatePlayListName(c.Request.Context(), newPlaylist); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create playlist"})
 		return
 	}
@@ -95,23 +98,25 @@ func (a *WebApp) CreatePlaylist(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [delete]
 func (a *WebApp) DeletePlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "DeletePlaylist")
+	defer span.End()
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("playlist_id")
 
 	// Check if the playlist exists in the database
-	if !a.storage.Operations.PlaylistExists(playlistID) {
+	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
 
 	// Check if the playlist is not empty
-	if err := a.storage.Operations.ClearPlayList(playlistID); err != nil {
+	if err := a.storage.Operations.ClearPlayList(c.Request.Context(), playlistID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to clear playlist"})
 		return
 	}
 
 	// Delete the playlist from the database
-	if err := a.storage.Operations.DeletePlaylist(playlistID); err != nil {
+	if err := a.storage.Operations.DeletePlaylist(c.Request.Context(), playlistID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to delete playlist"})
 		return
 	}
@@ -135,17 +140,19 @@ func (a *WebApp) DeletePlaylist(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [post]
 func (a *WebApp) AddToPlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "AddToPlaylist")
+	defer span.End()
 	// Extract playlist ID and track ID from path parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
 
 	// Check if the playlist and track exist (you should implement this)
-	if !a.storage.Operations.PlaylistExists(playlistID) {
+	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
 
-	_, err := a.storage.Operations.GetTracksByColumns(trackID, "_id")
+	_, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Track not found"})
@@ -153,7 +160,7 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 	}
 
 	// Add the track to the playlist (you should implement this)
-	if err = a.storage.Operations.AddTrackToPlaylist(playlistID, trackID); err != nil {
+	if err = a.storage.Operations.AddTrackToPlaylist(c.Request.Context(), playlistID, trackID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to add track to playlist"})
 		return
 	}
@@ -177,26 +184,28 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [delete]
 func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "RemoveFromPlaylist")
+	defer span.End()
 	// Get the playlist ID and track ID from the request parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
 
 	// Check if the playlist exists
-	_, _, err := a.storage.Operations.GetPlayListByID(playlistID)
+	_, _, err := a.storage.Operations.GetPlayListByID(c.Request.Context(), playlistID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
 
 	// Check if the track exists
-	_, err = a.storage.Operations.GetTracksByColumns(trackID, "_id")
+	_, err = a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Track not found"})
 		return
 	}
 
 	// Remove the track from the playlist
-	if err = a.storage.Operations.RemoveTrackFromPlaylist(playlistID, trackID); err != nil {
+	if err = a.storage.Operations.RemoveTrackFromPlaylist(c.Request.Context(), playlistID, trackID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to remove track from playlist"})
 		return
 	}
@@ -219,17 +228,19 @@ func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/clear [delete]
 func (a *WebApp) ClearPlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ClearPlaylist")
+	defer span.End()
 	// Get the playlist ID from the URL parameters
 	playlistID := c.Param("playlist_id")
 
 	// Check if the playlist exists
-	if !a.storage.Operations.PlaylistExists(playlistID) {
+	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
 
 	// Clear the playlist by removing all tracks (you should implement this logic)
-	if err := a.storage.Operations.ClearPlayList(playlistID); err != nil {
+	if err := a.storage.Operations.ClearPlayList(c.Request.Context(), playlistID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to clear playlist"})
 		return
 	}
@@ -253,11 +264,13 @@ func (a *WebApp) ClearPlaylist(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [post]
 func (a *WebApp) SetFromPlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "SetFromPlaylist")
+	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
 
 	// Check if the playlist exists (you should implement this logic)
-	if !a.storage.Operations.PlaylistExists(playlistID) {
+	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
@@ -273,7 +286,7 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 
 	// Check if the provided track order contains valid track IDs (you should implement this logic)
 	for _, trackID := range request.TrackOrder {
-		_, err := a.storage.Operations.GetTracksByColumns(trackID, "_id")
+		_, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
 		if err != nil {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Track not found"})
 			return
@@ -281,7 +294,7 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 	}
 
 	// Update the track order in the playlist (you should implement this logic)
-	if err := a.storage.Operations.UpdatePlaylistTrackOrder(playlistID, request.TrackOrder); err != nil {
+	if err := a.storage.Operations.UpdatePlaylistTrackOrder(c.Request.Context(), playlistID, request.TrackOrder); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to update track order"})
 		return
 	}
@@ -309,17 +322,19 @@ type SetPlaylistTrackOrderRequest struct {
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [get]
 func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
+	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
 
 	// Check if the playlist exists (you should implement this logic)
-	if !a.storage.Operations.PlaylistExists(playlistID) {
+	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
 
 	// Get playlist and tracks
-	playlist, tracks, err := a.storage.Operations.GetPlayListByID(playlistID)
+	playlist, tracks, err := a.storage.Operations.GetPlayListByID(c.Request.Context(), playlistID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return

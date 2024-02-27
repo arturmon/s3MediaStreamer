@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"math"
 	"net/http"
 	"skeleton-golange-application/app/model"
@@ -43,6 +44,8 @@ type Handler interface {
 // @Security    ApiKeyAuth
 // @Router		/tracks [get]
 func (a *WebApp) GetAllTracks(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "GetAllTracks")
+	defer span.End()
 	a.metrics.GetAllTracksCounter.Inc()
 	page := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("page_size", "10")
@@ -74,7 +77,7 @@ func (a *WebApp) GetAllTracks(c *gin.Context) {
 	offset := (pageInt - 1) * pageSizeInt
 
 	// Retrieve paginated tracks from the storage
-	tracks, countTotal, err := a.storage.Operations.GetTracks(offset, pageSizeInt, sortBy, sortOrder, filter)
+	tracks, countTotal, err := a.storage.Operations.GetTracks(c.Request.Context(), offset, pageSizeInt, sortBy, sortOrder, filter)
 	if err != nil {
 		a.logger.Error(err)
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Internal Server Error"})
@@ -117,13 +120,15 @@ func (a *WebApp) GetAllTracks(c *gin.Context) {
 // @Security    ApiKeyAuth
 // @Router		/tracks/{code} [get]
 func (a *WebApp) GetTrackByID(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "GetTrackByID")
+	defer span.End()
 	// Increment the session-based counter
 
 	// If user is authorized, proceed with getting the track
 	a.metrics.GetTrackByIDCounter.Inc()
 
 	id := c.Param("code")
-	result, err := a.storage.Operations.GetTracksByColumns(id, "code")
+	result, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), id, "code")
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "track not found"})

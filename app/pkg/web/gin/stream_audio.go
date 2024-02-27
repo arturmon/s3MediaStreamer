@@ -3,6 +3,7 @@ package gin
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -24,9 +25,11 @@ import (
 // @Security ApiKeyAuth
 // @Router /audio/{playlist_id} [get]
 func (a *WebApp) Audio(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "Audio")
+	defer span.End()
 	// Assuming you have a function that retrieves or generates the M3U8 playlist
 	playlistID := c.Param("playlist_id")
-	tracks, err := a.playPlaylist(playlistID)
+	tracks, err := a.playPlaylist(c.Request.Context(), playlistID)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, model.ErrorResponse{Message: err.Error()})
@@ -59,10 +62,12 @@ func (a *WebApp) Audio(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /audio/stream/{segment} [get]
 func (a *WebApp) StreamM3U(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "StreamM3U")
+	defer span.End()
 	segmentPath := c.Param("segment")
 	var track *model.Track
 
-	track, err := a.storage.Operations.GetTracksByColumns(segmentPath, "_id")
+	track, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), segmentPath, "_id")
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
 		return
@@ -134,6 +139,8 @@ func (a *WebApp) generateM3U8Playlist(filePaths *[]model.Track) []*model.Playlis
 }
 
 func (a *WebApp) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "PlayM3UPlaylist")
+	defer span.End()
 	c.Header("Content-Type", "application/x-mpegURL")
 	// c.Header("Content-Type", "application/json")
 
@@ -153,15 +160,15 @@ func (a *WebApp) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) 
 	}
 }
 
-func (a *WebApp) playPlaylist(playlistID string) (*[]model.Track, error) {
+func (a *WebApp) playPlaylist(ctx context.Context, playlistID string) (*[]model.Track, error) {
 	// Get the playlist and its tracks
 
-	playlist, _, err := a.storage.Operations.GetPlayListByID(playlistID)
+	playlist, _, err := a.storage.Operations.GetPlayListByID(context.Background(), playlistID)
 	if err != nil {
 		return nil, err
 	}
 
-	sortTracks, err := a.storage.Operations.GetAllTracksByPositions(playlist.ID.String())
+	sortTracks, err := a.storage.Operations.GetAllTracksByPositions(ctx, playlist.ID.String())
 	if err != nil {
 		return nil, err
 	}

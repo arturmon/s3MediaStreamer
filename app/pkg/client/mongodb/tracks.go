@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 
@@ -13,7 +14,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (c *MongoClient) CreateTracks(list []model.Track) error {
+func (c *MongoClient) CreateTracks(ctx context.Context, list []model.Track) error {
+	_, span := otel.Tracer("").Start(ctx, "CreateTracks")
+	defer span.End()
 	insertableList := make([]interface{}, len(list))
 	for i := range list {
 		v := &list[i] // Use a pointer to the current issue.
@@ -39,7 +42,9 @@ func (c *MongoClient) CreateTracks(list []model.Track) error {
 	return nil
 }
 
-func (c *MongoClient) GetTracks(offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error) {
+func (c *MongoClient) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetTracks")
+	defer span.End()
 	if offset < 1 || limit < 1 {
 		return nil, 0, errors.New("invalid pagination parameters")
 	}
@@ -94,7 +99,9 @@ func (c *MongoClient) GetTracks(offset, limit int, sortBy, sortOrder, filterArti
 	return tracks, int(totalCount), nil
 }
 
-func (c *MongoClient) GetTracksByColumns(code, columns string) (*model.Track, error) {
+func (c *MongoClient) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetTracksByColumns")
+	defer span.End()
 	result := model.Track{}
 	filter := bson.D{{Key: columns, Value: code}} // Fix the linting issue here
 	collection, err := c.FindCollections(config.CollectionTrack)
@@ -108,7 +115,9 @@ func (c *MongoClient) GetTracksByColumns(code, columns string) (*model.Track, er
 	return &result, nil
 }
 
-func (c *MongoClient) DeleteTracks(code, columns string) error {
+func (c *MongoClient) DeleteTracks(ctx context.Context, code, columns string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteTracks")
+	defer span.End()
 	filter := bson.D{primitive.E{Key: columns, Value: code}}
 	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
@@ -121,7 +130,9 @@ func (c *MongoClient) DeleteTracks(code, columns string) error {
 	return nil
 }
 
-func (c *MongoClient) DeleteTracksAll() error {
+func (c *MongoClient) DeleteTracksAll(ctx context.Context) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteTracksAll")
+	defer span.End()
 	selector := bson.D{{}}
 	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
@@ -134,7 +145,9 @@ func (c *MongoClient) DeleteTracksAll() error {
 	return nil
 }
 
-func (c *MongoClient) UpdateTracks(track *model.Track) error {
+func (c *MongoClient) UpdateTracks(ctx context.Context, track *model.Track) error {
+	_, span := otel.Tracer("").Start(ctx, "UpdateTracks")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return err
@@ -173,7 +186,9 @@ func (c *MongoClient) UpdateTracks(track *model.Track) error {
 	return nil
 }
 
-func (c *MongoClient) GetAllTracks() ([]model.Track, error) {
+func (c *MongoClient) GetAllTracks(ctx context.Context) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllTracks")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return nil, err
@@ -207,7 +222,9 @@ func (c *MongoClient) GetAllTracks() ([]model.Track, error) {
 	return tracks, nil
 }
 
-func (c *MongoClient) AddTrackToPlaylist(playlistID, trackID string) error {
+func (c *MongoClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error {
+	_, span := otel.Tracer("").Start(ctx, "AddTrackToPlaylist")
+	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return err
@@ -238,7 +255,9 @@ func (c *MongoClient) AddTrackToPlaylist(playlistID, trackID string) error {
 	return nil
 }
 
-func (c *MongoClient) RemoveTrackFromPlaylist(playlistID, trackID string) error {
+func (c *MongoClient) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
+	_, span := otel.Tracer("").Start(ctx, "RemoveTrackFromPlaylist")
+	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
 	if err != nil {
 		return err
@@ -269,7 +288,9 @@ func (c *MongoClient) RemoveTrackFromPlaylist(playlistID, trackID string) error 
 	return nil
 }
 
-func (c *MongoClient) GetAllTracksByPositions(playlistID string) ([]model.Track, error) {
+func (c *MongoClient) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllTracksByPositions")
+	defer span.End()
 	collectionTrack, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return nil, err

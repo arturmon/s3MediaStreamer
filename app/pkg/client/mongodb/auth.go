@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 
@@ -12,7 +13,9 @@ import (
 )
 
 // GetStoredRefreshToken retrieves the refresh token for a user by email.
-func (c *MongoClient) GetStoredRefreshToken(userEmail string) (string, error) {
+func (c *MongoClient) GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetStoredRefreshToken")
+	defer span.End()
 	result := model.User{}
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
@@ -27,7 +30,9 @@ func (c *MongoClient) GetStoredRefreshToken(userEmail string) (string, error) {
 }
 
 // SetStoredRefreshToken sets or updates the refresh token for a user by email.
-func (c *MongoClient) SetStoredRefreshToken(userEmail, refreshToken string) error {
+func (c *MongoClient) SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error {
+	_, span := otel.Tracer("").Start(ctx, "SetStoredRefreshToken")
+	defer span.End()
 	collection, err := c.FindCollections(config.CollectionUser)
 	if err != nil {
 		return err
