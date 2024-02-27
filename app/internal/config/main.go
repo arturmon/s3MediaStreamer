@@ -28,6 +28,11 @@ type Config struct {
 			JobCleanTrackS3 string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
 			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
 		}
+		OpenTelemetry struct {
+			TracingEnabled bool   `env:"OPEN_TELEMETRY_TRACING_ENABLED" env-default:"false"`
+			Environment    string `env:"OPEN_TELEMETRY_ENV" env-default:"staging"` // 'staging', 'production'
+			JaegerEndpoint string `env:"OPEN_TELEMETRY_JAEGER_ENDPOINT" env-default:"http://localhost:14268"`
+		}
 		S3 struct {
 			Endpoint        string `env:"S3_ENDPOINT" env-default:"localhost:9000"`
 			AccessKeyID     string `env:"S3_ACCESS_KEY_ID" env-default:""`

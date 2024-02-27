@@ -9,6 +9,7 @@ import (
 	consul_service "skeleton-golange-application/app/pkg/consul-service"
 	"skeleton-golange-application/app/pkg/interfaces"
 	"skeleton-golange-application/app/pkg/logging"
+	"skeleton-golange-application/app/pkg/otel"
 	"skeleton-golange-application/app/pkg/s3"
 	"skeleton-golange-application/app/pkg/web/gin"
 	"time"
@@ -28,8 +29,20 @@ type App struct {
 }
 
 // NewAppInit initializes a new App instance.
-func NewAppInit(cfg *config.Config, logger *logging.Logger, appName string) (*App, error) {
-
+func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version string) (*App, error) {
+	config := otel.ProviderConfig{
+		JaegerEndpoint: cfg.AppConfig.OpenTelemetry.JaegerEndpoint + "/api/traces",
+		ServiceName:    appName,
+		ServiceVersion: version,
+		Environment:    cfg.AppConfig.OpenTelemetry.Environment,
+		Cfg:            cfg,
+		Logger:         logger,
+		Disabled:       cfg.AppConfig.OpenTelemetry.TracingEnabled,
+	}
+	_, err := otel.InitProvider(config)
+	if err != nil {
+		logger.Fatal(err)
+	}
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
 	storage, err := model.NewDBConfig(cfg, logger)

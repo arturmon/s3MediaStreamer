@@ -3,6 +3,8 @@ package model
 import (
 	"context"
 	"fmt"
+	"github.com/exaring/otelpgx"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"net"
 	"net/url"
 	"skeleton-golange-application/app/internal/config"
@@ -98,6 +100,7 @@ func (s *StorageConfig) Connect(logger *logging.Logger) error {
 	startTime := time.Now()
 	metrics := NewDBPrometheusMetrics()
 	metrics.DatabaseConnectionAttemptCounter.Inc()
+
 	switch DBType(s.Type) {
 	case MongoDBType:
 		client, err := GetMongoClient(s, logger)
@@ -131,6 +134,8 @@ func GetMongoClient(cfg *StorageConfig, logger *logging.Logger) (*mongo.Client, 
 		Password: cfg.Password,
 	}
 	clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
+	// otel
+	clientOptions.Monitor = otelmongo.NewMonitor()
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return nil, err
@@ -164,7 +169,7 @@ func NewClient(ctx context.Context, maxAttempts int,
 			logger.Fatalf("Unable to parse config: %v\n", err)
 		}
 		// otel
-		//pgxCfg.ConnConfig.Tracer = otelpgx.NewTracer()
+		pgxCfg.ConnConfig.Tracer = otelpgx.NewTracer()
 
 		pool, err = pgxpool.NewWithConfig(ctxWithTimeout, pgxCfg)
 		if err != nil {

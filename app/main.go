@@ -60,7 +60,7 @@ func main() {
 			logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
 		}()
 	}
-	myApp, err := app.NewAppInit(cfg, &logger, appName)
+	myApp, err := app.NewAppInit(cfg, &logger, appName, Version)
 	if err != nil {
 		logger.Error("Failed to initialize the new my app:", err)
 	}

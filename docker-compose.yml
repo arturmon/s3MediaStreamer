@@ -129,6 +129,13 @@ services:
       - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+      - "14268:14268"
 
   consul:
     image: hashicorp/consul:1.16.5

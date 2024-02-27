@@ -18,6 +18,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 type AppInterface interface {
@@ -52,6 +53,7 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 	router.Use(cors.New(ConfigCORS()))
 	router.Use(gin.Recovery())
 
+	router.Use(otelgin.Middleware("todo-service"))
 	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
 
 	logger.Info("prometheus initializing")
