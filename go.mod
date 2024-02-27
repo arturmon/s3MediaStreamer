@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20210919084342-5aec9a9708ef
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/ayush6624/go-chatgpt v0.3.0
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/casbin/casbin/v2 v2.82.0
@@ -19,7 +18,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.27.0
-	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/go-hclog v1.6.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
