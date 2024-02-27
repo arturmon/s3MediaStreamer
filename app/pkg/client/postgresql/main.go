@@ -7,10 +7,10 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PostgresCollectionQuery interface {

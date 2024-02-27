@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // CreateTracks inserts multiple track records into the "track" table.

@@ -7,7 +7,7 @@ import (
 	"skeleton-golange-application/app/model"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // FindUser retrieves a user by a specified column type and value.

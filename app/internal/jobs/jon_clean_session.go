@@ -3,7 +3,7 @@ package jobs
 import (
 	"context"
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"net"
 	"net/url"
 )
@@ -32,7 +32,7 @@ func (j *CleanOldSessionJob) Run() {
 		if err != nil {
 			j.app.Logger.Fatalf("Error parsing PostgreSQL config: %v", err)
 		}
-		dbPool, err = pgxpool.ConnectConfig(context.Background(), config)
+		dbPool, err = pgxpool.NewWithConfig(context.Background(), config)
 		if err != nil {
 			j.app.Logger.Fatalf("Error creating PostgreSQL pool: %v", err)
 		}

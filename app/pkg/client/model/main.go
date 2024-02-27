@@ -11,7 +11,7 @@ import (
 	"skeleton-golange-application/app/pkg/logging"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -163,8 +163,10 @@ func NewClient(ctx context.Context, maxAttempts int,
 		if err != nil {
 			logger.Fatalf("Unable to parse config: %v\n", err)
 		}
+		// otel
+		//pgxCfg.ConnConfig.Tracer = otelpgx.NewTracer()
 
-		pool, err = pgxpool.ConnectConfig(ctxWithTimeout, pgxCfg)
+		pool, err = pgxpool.NewWithConfig(ctxWithTimeout, pgxCfg)
 		if err != nil {
 			logger.Println("Failed to connect to postgres... Going to do the next attempt")
 			return err

@@ -123,7 +123,6 @@ func (s *Service) setupConsulWatch() {
 
 	var watchLogger hclog.Logger
 	go func() {
-		//err = plan.RunWithConfig("", consulConfig)
 		err = plan.RunWithClientAndHclog(s.ConsulClient, watchLogger)
 		if err != nil {
 			return

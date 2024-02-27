@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // GetStoredRefreshToken retrieves the stored refresh token for a user by their email.
