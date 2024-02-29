@@ -129,13 +129,20 @@ services:
       - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     restart: unless-stopped
-    ports:
-      - "6831:6831/udp"
-      - "16686:16686"
-      - "14268:14268"
+    volumes:
+      - /infra/jaeger/jaeger-ui.json:/etc/jaeger/jaeger-ui.json
+    environment:
+      - METRICS_STORAGE_TYPE=prometheus
+      - PROMETHEUS_SERVER_URL=http://prometheus:9090
+      - PROMETHEUS_QUERY_NORMALIZE_CALLS=true
+      - PROMETHEUS_QUERY_NORMALIZE_DURATION=true
+      - PROMETHEUS_QUERY_SUPPORT_SPANMETRICS_CONNECTOR=true
+      - PROMETHEUS_QUERY_NAMESPACE=spanmetrics
+      - PROMETHEUS_QUERY_DURATION_UNIT=s
 
   consul:
     image: hashicorp/consul:1.16.5
@@ -160,6 +167,7 @@ services:
     ports:
       - "8404:8404"
       - "8080:8080"
+      - "8081:8081"
     volumes:
       - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
 
