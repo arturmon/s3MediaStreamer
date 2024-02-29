@@ -4,6 +4,7 @@ RUN adduser -D -g '' appuser
 RUN mkdir -p /app
 LABEL author="Artur Mudrykh"
 WORKDIR /app
+COPY conf/ conf/
 COPY /migrations/psql/ ./migrations/psql/
 COPY s3stream .
 COPY acl/ acl/
