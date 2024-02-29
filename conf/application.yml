@@ -1,0 +1,78 @@
+app_health: false
+
+listen:
+  bind_ip: "0.0.0.0"
+  port: "10000"
+
+consul:
+  url: "localhost:8500"
+  wait_time: 5
+
+app_config:
+  log_level: "info"
+  log_type: "gelf"
+  log_gelf_server: "localhost:12201"
+  log_gelf_server_type: "udp"
+  gin_mode: "release"
+
+  jobs:
+    job_id_user_run: "6f14edc0-54b1-11ee-8c99-0242ac120002"
+    job_clean_track_s3: "@every 10m"
+    system_write_user: "Jobs"
+
+  open_telemetry:
+    tracing_enabled: false
+    environment: "staging"
+    jaeger_endpoint: "http://localhost:14268"
+
+  s3:
+    endpoint: "localhost:9000"
+    access_key_id: ""
+    secret_access_key: ""
+    use_ssl: false
+    bucket_name: "music-bucket"
+    location: "us-east-1"
+
+storage:
+  type: "postgresql"
+  username: "root"
+  password: "1qazxsw2"
+  host: "localhost"
+  port: "5432"
+  database: "db_issue_album"
+  collections: "col_issues"
+  collections_users: "col_users"
+
+message_queue:
+  sub_queue_name: "s3_queue"
+  user: "guest"
+  pass: "guest"
+  broker: "localhost"
+  broker_port: 5672
+  system_write_user: "amqp@system"
+
+session:
+  session_storage_type: "postgres"
+  session_name: "gin-session"
+  session_period_clean: "@midnight"
+  cookies:
+    session_secret_key: "sdfgerfsd3543g"
+  memcached:
+    memcached_host: "localhost"
+    memcached_port: "11211"
+  mongodb:
+    mongo_host: "localhost"
+    mongo_port: "27017"
+    mongo_database: "session"
+    mongo_user: "root"
+    mongo_pass: "1qazxsw2"
+  postgresql:
+    postgresql_host: "localhost"
+    postgresql_port: "5432"
+    postgresql_database: "session"
+    postgresql_user: "root"
+    postgresql_pass: "1qazxsw2"
+
+otp:
+  issuer: "example.com"
+  secret_size: 15

@@ -3,6 +3,7 @@ package config
 import (
 	"skeleton-golange-application/app/pkg/logging"
 	"sync"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
@@ -29,13 +30,19 @@ func GetConfig() *Config {
 		cfgManager.instance = &Config{}
 	})
 
-	if err := cleanenv.ReadEnv(cfgManager.instance); err != nil {
+	if err := cleanenv.ReadConfig("conf/application.yml", cfgManager.instance); err != nil {
 		helpText := "Stream Player S3"
 		help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
 		log.Debug(help)
 		log.Errorf("Error reading environment variables: %v", err)
 	}
-
+	go func() {
+		time.Sleep(5 * time.Second) // sleep for 5 seconds
+		err := cleanenv.UpdateEnv(cfgManager.instance)
+		if err != nil {
+			log.Errorf("Error update environment variables: %v", err)
+		}
+	}()
 	return cfgManager.instance
 }
 

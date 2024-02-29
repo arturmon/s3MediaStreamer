@@ -3,6 +3,8 @@ package gin
 import (
 	"context"
 	"fmt"
+	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel"
 	"net/http"
 	conf "skeleton-golange-application/app/internal/config"
@@ -15,10 +17,7 @@ import (
 
 	"github.com/casbin/casbin/v2"
 
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/gin-gonic/gin"
-	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
@@ -58,6 +57,7 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
 
 	logger.Info("prometheus initializing")
+
 	p := ginPrometheus.GetMonitor()
 	p.SetMetricPath("/metrics")
 	p.Use(router)
