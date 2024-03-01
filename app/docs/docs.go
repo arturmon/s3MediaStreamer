@@ -23,6 +23,71 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/audio/stream/{segment}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "audio/mpeg",
+                    "audio/flac",
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "track-controller"
+                ],
+                "summary": "Stream audio files.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Playlist ID",
+                        "name": "playlist_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Control operation playlist play",
+                        "name": "control",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Track"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Segment not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "406": {
+                        "description": "Segment not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/audio/{playlist_id}": {
             "get": {
                 "security": [
