@@ -1,8 +1,9 @@
 package gin
 
 import (
-	"go.opentelemetry.io/otel"
 	"net/http"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/bamzi/jobrunner"
 	"github.com/gin-gonic/gin"

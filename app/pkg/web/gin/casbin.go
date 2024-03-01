@@ -3,15 +3,17 @@ package gin
 import (
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/otel"
 	"net/http"
 	model_all "skeleton-golange-application/app/model"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 
+	"go.opentelemetry.io/otel"
+
 	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
 	"context"
+
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

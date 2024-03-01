@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"encoding/gob"
 	"errors"
-	"go.opentelemetry.io/otel"
 	"net"
 	"net/http"
 	"net/url"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-contrib/sessions/cookie"
 

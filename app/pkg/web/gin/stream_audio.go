@@ -3,11 +3,12 @@ package gin
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/otel"
 	"io"
 	"net/http"
 	"path/filepath"
 	"skeleton-golange-application/app/model"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-gonic/gin"
 )

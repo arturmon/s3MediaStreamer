@@ -3,15 +3,16 @@ package gin
 import (
 	"context"
 	"fmt"
-	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.opentelemetry.io/otel"
 	"net/http"
 	conf "skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/client/model"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	"skeleton-golange-application/app/pkg/s3"
+
+	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-contrib/cors"
 

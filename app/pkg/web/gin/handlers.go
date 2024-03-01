@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/otel"
 	"math"
 	"net/http"
 	"skeleton-golange-application/app/model"
 	"strconv"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"

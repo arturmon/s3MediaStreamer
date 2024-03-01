@@ -1,13 +1,15 @@
 package gin
 
 import (
-	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
 	"time"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-gonic/gin"
 
 	"context"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 

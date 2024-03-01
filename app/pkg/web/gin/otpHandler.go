@@ -1,9 +1,10 @@
 package gin
 
 import (
-	"go.opentelemetry.io/otel"
 	"net/http"
 	"skeleton-golange-application/app/model"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/gin-gonic/gin"
 
