@@ -8,8 +8,7 @@
 
 ## Generate specification Swager
 ```shell
-cd skeleton-golange-application
-swag init
+cd app && swag init --parseDependency --parseDepth=1
 ```
 create add db
 ```sql
