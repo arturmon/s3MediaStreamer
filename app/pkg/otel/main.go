@@ -3,7 +3,7 @@ package otel
 import (
 	"context"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -27,12 +27,12 @@ type Provider struct {
 	provider trace.TracerProvider
 }
 
-func InitProvider(config ProviderConfig) (Provider, error) {
+func InitProvider(ctx context.Context, config ProviderConfig) (Provider, error) {
 	if config.Disabled {
 		return Provider{provider: trace.NewNoopTracerProvider()}, nil
 	}
 
-	tp, tpErr := JaegerTraceProvider(config)
+	tp, tpErr := JaegerTraceProvider(ctx, config)
 	if tpErr != nil {
 		config.Logger.Fatal(tpErr)
 	}
@@ -44,12 +44,17 @@ func InitProvider(config ProviderConfig) (Provider, error) {
 	return Provider{provider: tp}, nil
 }
 
-func JaegerTraceProvider(config ProviderConfig) (*sdktrace.TracerProvider, error) {
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(config.JaegerEndpoint)))
-	serviceName := config.ServiceName + "-" + GetHostname()
+func JaegerTraceProvider(ctx context.Context, config ProviderConfig) (*sdktrace.TracerProvider, error) {
+	exp, err := otlptracehttp.New(
+		ctx,
+		otlptracehttp.WithEndpointURL(config.JaegerEndpoint),
+		otlptracehttp.WithURLPath("/v1/traces"),
+	)
 	if err != nil {
 		return nil, err
 	}
+
+	serviceName := config.ServiceName + "-" + GetHostname()
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource.NewWithAttributes(

@@ -30,7 +30,7 @@ type App struct {
 }
 
 // NewAppInit initializes a new App instance.
-func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version string) (*App, error) {
+func NewAppInit(ctx context.Context, cfg *config.Config, logger *logging.Logger, appName, version string) (*App, error) {
 	config := otel.ProviderConfig{
 		JaegerEndpoint: cfg.AppConfig.OpenTelemetry.JaegerEndpoint + "/api/traces",
 		ServiceName:    appName,
@@ -40,7 +40,7 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version str
 		Logger:         logger,
 		Disabled:       cfg.AppConfig.OpenTelemetry.TracingEnabled,
 	}
-	tracer, err := otel.InitProvider(config)
+	tracer, err := otel.InitProvider(ctx, config)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -58,8 +58,6 @@ func NewAppInit(cfg *config.Config, logger *logging.Logger, appName, version str
 		logger.Error("Failed to connect to the database:", err)
 		return nil, err
 	}
-
-	ctx := context.Background()
 
 	logger.Info("Starting initialize the Gin...")
 	// Initialize the Gin web framework.
