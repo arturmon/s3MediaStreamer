@@ -12,9 +12,11 @@ import (
 // parent function, and so on.  Any suffixes passed to getCaller are
 // path fragments like "/pkg/log/log.go", and functions in the call
 // stack from that file are ignored.
-func getCaller(callDepth int, suffixesToIgnore ...string) (file string, line int) {
+func getCaller(callDepth int, suffixesToIgnore ...string) (string, int) {
 	// bump by 1 to ignore the getCaller (this) stackframe
 	callDepth++
+	var file string
+	var line int
 outer:
 	for {
 		var ok bool
@@ -33,7 +35,7 @@ outer:
 		}
 		break
 	}
-	return
+	return file, line
 }
 
 func getCallerIgnoringLogMulti(callDepth int) (string, int) {

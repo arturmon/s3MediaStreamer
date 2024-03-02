@@ -39,11 +39,7 @@ func NewTCPWriter(addr string, appName string) (*TCPWriter, error) {
 	return w, nil
 }
 
-// WriteMessage sends the specified message to the GELF server
-// specified in the call to New().  It assumes all the fields are
-// filled out appropriately.  In general, clients will want to use
-// Write, rather than WriteMessage.
-func (w *TCPWriter) WriteMessage(m *Message) (err error) {
+func (w *TCPWriter) WriteMessage(m *Message) error {
 	buf := newBuffer()
 	defer bufPool.Put(buf)
 	messageBytes, err := m.toBytes(buf)
@@ -64,18 +60,20 @@ func (w *TCPWriter) WriteMessage(m *Message) (err error) {
 	return nil
 }
 
-func (w *TCPWriter) writeToSocketWithReconnectAttempts(zBytes []byte) (n int, err error) {
+func (w *TCPWriter) writeToSocketWithReconnectAttempts(zBytes []byte) (int, error) {
 	var errConn error
 	var i int
+	var n int
+	var err error // Declare err outside the loop
 
 	w.mu.Lock()
 	for i = 0; i <= w.MaxReconnect; i++ {
 		errConn = nil
 
 		if w.conn != nil {
-			n, err = w.conn.Write(zBytes)
+			n, err = w.conn.Write(zBytes) // Use the existing 'err' variable
 		} else {
-			err = fmt.Errorf("Connection was nil, will attempt reconnect")
+			err = fmt.Errorf("connection was nil, will attempt reconnect") // Use the existing 'err' variable
 		}
 		if err != nil {
 			time.Sleep(w.ReconnectDelay * time.Second)
@@ -87,7 +85,7 @@ func (w *TCPWriter) writeToSocketWithReconnectAttempts(zBytes []byte) (n int, er
 	w.mu.Unlock()
 
 	if i > w.MaxReconnect {
-		return 0, fmt.Errorf("Maximum reconnection attempts was reached; giving up")
+		return 0, fmt.Errorf("maximum reconnection attempts was reached; giving up")
 	}
 	if errConn != nil {
 		return 0, fmt.Errorf("Write Failed: %s\nReconnection failed: %s", err, errConn)
@@ -95,7 +93,7 @@ func (w *TCPWriter) writeToSocketWithReconnectAttempts(zBytes []byte) (n int, er
 	return n, nil
 }
 
-func (w *TCPWriter) Write(p []byte) (n int, err error) {
+func (w *TCPWriter) Write(p []byte) (int, error) {
 	file, line := getCallerIgnoringLogMulti(1)
 
 	jsonData, err := decodeJSONData(p)

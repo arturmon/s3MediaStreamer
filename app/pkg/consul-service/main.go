@@ -1,10 +1,10 @@
 package consul_service
 
 import (
-	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
 	"github.com/hashicorp/go-hclog"
+	"net"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 	"strconv"
@@ -66,13 +66,13 @@ func (s *Service) registerService() {
 
 	checks := []*api.AgentServiceCheck{
 		{
-			HTTP:     fmt.Sprintf("http://%s:%v/health/readiness", ip, port),
+			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health/readiness",
 			Interval: "3s",
 			Timeout:  "30s",
 			Notes:    "readiness probe",
 		},
 		{
-			HTTP:     fmt.Sprintf("http://%s:%v/health/liveness", ip, port),
+			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health/liveness",
 			Interval: "10s",
 			Timeout:  "30s",
 			Notes:    "liveness probe",

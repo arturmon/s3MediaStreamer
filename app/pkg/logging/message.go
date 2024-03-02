@@ -114,15 +114,15 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *Message) toBytes(buf *bytes.Buffer) (messageBytes []byte, err error) {
-	if err = m.MarshalJSONBuf(buf); err != nil {
+func (m *Message) toBytes(buf *bytes.Buffer) ([]byte, error) {
+	if err := m.MarshalJSONBuf(buf); err != nil {
 		return nil, err
 	}
-	messageBytes = buf.Bytes()
+	messageBytes := buf.Bytes()
 	return messageBytes, nil
 }
 
-func constructMessage(p []byte, hostname string, facility string, file string, line int) (m *Message) {
+func constructMessage(p []byte, hostname string, facility string, file string, line int) *Message {
 	// remove trailing and leading whitespace
 	p = bytes.TrimSpace(p)
 
@@ -137,7 +137,7 @@ func constructMessage(p []byte, hostname string, facility string, file string, l
 		full = p
 	}
 
-	m = &Message{
+	m := &Message{
 		Version:  "1.1",
 		Host:     hostname,
 		Short:    string(short),

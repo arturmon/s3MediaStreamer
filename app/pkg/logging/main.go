@@ -60,10 +60,10 @@ type gelfWriterWrapper struct {
 	writer io.Writer
 }
 
-func (w *gelfWriterWrapper) Write(p []byte) (n int, err error) {
+func (w *gelfWriterWrapper) Write(p []byte) (int, error) {
 	// Parse the GELF message into a map
 	var data map[string]interface{}
-	err = json.Unmarshal(p, &data)
+	err := json.Unmarshal(p, &data)
 	if err != nil {
 		return 0, err
 	}

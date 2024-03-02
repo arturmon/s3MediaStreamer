@@ -82,7 +82,7 @@ func NewUDPWriter(addr string, appName string) (*UDPWriter, error) {
 //
 //	2-byte magic (0x1e 0x0f), 8 byte id, 1 byte sequence id, 1 byte
 //	total, chunk-data
-func (w *GelfWriter) writeChunked(zBytes []byte) (err error) {
+func (w *GelfWriter) writeChunked(zBytes []byte) error {
 	b := make([]byte, 0, ChunkSize)
 	buf := bytes.NewBuffer(b)
 	nChunksI := numChunks(zBytes)
@@ -156,10 +156,10 @@ func newBuffer() *bytes.Buffer {
 // specified in the call to New().  It assumes all the fields are
 // filled out appropriately.  In general, clients will want to use
 // Write, rather than WriteMessage.
-func (w *UDPWriter) WriteMessage(m *Message) (err error) {
+func (w *UDPWriter) WriteMessage(m *Message) error {
 	mBuf := newBuffer()
 	defer bufPool.Put(mBuf)
-	if err = m.MarshalJSONBuf(mBuf); err != nil {
+	if err := m.MarshalJSONBuf(mBuf); err != nil {
 		return err
 	}
 	mBytes := mBuf.Bytes()
@@ -167,9 +167,10 @@ func (w *UDPWriter) WriteMessage(m *Message) (err error) {
 	var (
 		zBuf   *bytes.Buffer
 		zBytes []byte
+		zw     io.WriteCloser
+		err    error // Declare err here to avoid shadowing
 	)
 
-	var zw io.WriteCloser
 	switch w.CompressionType {
 	case CompressGzip:
 		zBuf = newBuffer()
@@ -182,16 +183,17 @@ func (w *UDPWriter) WriteMessage(m *Message) (err error) {
 	case CompressNone:
 		zBytes = mBytes
 	default:
-		panic(fmt.Sprintf("unknown compression type %d",
-			w.CompressionType))
+		return fmt.Errorf("unknown compression type %d", w.CompressionType)
 	}
+
+	if err != nil {
+		return err
+	}
+
 	if zw != nil {
-		if err != nil {
-			return
-		}
 		if _, err = zw.Write(mBytes); err != nil {
 			zw.Close()
-			return
+			return err
 		}
 		zw.Close()
 		zBytes = zBuf.Bytes()
@@ -200,9 +202,10 @@ func (w *UDPWriter) WriteMessage(m *Message) (err error) {
 	if numChunks(zBytes) > 1 {
 		return w.writeChunked(zBytes)
 	}
+
 	n, err := w.conn.Write(zBytes)
 	if err != nil {
-		return
+		return err
 	}
 	if n != len(zBytes) {
 		return fmt.Errorf("bad write (%d/%d)", n, len(zBytes))
@@ -211,7 +214,7 @@ func (w *UDPWriter) WriteMessage(m *Message) (err error) {
 	return nil
 }
 
-func (w *UDPWriter) Write(p []byte) (n int, err error) {
+func (w *UDPWriter) Write(p []byte) (int, error) {
 	// 1 for the function that called us.
 	file, line := getCallerIgnoringLogMulti(1)
 
