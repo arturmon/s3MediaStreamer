@@ -2,8 +2,9 @@ package postgresql
 
 import (
 	"context"
-	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/Masterminds/squirrel"
 )

@@ -1,10 +1,11 @@
-package consul_election_test
+package consulelection_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	consul_election "skeleton-golange-application/app/pkg/consul-election"
+	consul_election "skeleton-golange-application/app/pkg/consulelection"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInitializeLeaderElection(t *testing.T) {

@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const maxMessageQueueSize = 100
+
 type TCPReader struct {
 	listener *net.TCPListener
 	conn     net.Conn
@@ -23,17 +25,17 @@ func newTCPReader(addr string) (*TCPReader, chan string, chan string, error) {
 	var err error
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("ResolveTCPAddr('%s'): %s", addr, err)
+		return nil, nil, nil, fmt.Errorf("ResolveTCPAddr('%s'): %w", addr, err)
 	}
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("ListenTCP: %s", err)
+		return nil, nil, nil, fmt.Errorf("ListenTCP: %w", err)
 	}
 
 	r := &TCPReader{
 		listener: listener,
-		messages: make(chan []byte, 100), // Make a buffered channel with at most 100 messages
+		messages: make(chan []byte, maxMessageQueueSize), // Make a buffered channel with at most 100 messages
 	}
 
 	closeSignal := make(chan string, 1)
@@ -145,7 +147,7 @@ func (r *TCPReader) readMessage() (*Message, error) {
 
 	var msg Message
 	if err := json.Unmarshal(b[:len(b)-1], &msg); err != nil {
-		return nil, fmt.Errorf("json.Unmarshal: %s", err)
+		return nil, fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	return &msg, nil

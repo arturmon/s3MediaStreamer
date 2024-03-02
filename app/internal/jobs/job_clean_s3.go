@@ -50,6 +50,7 @@ func (j *CleanS3Job) processS3Objects(ctx context.Context, listObject []minio.Ob
 
 func (j *CleanS3Job) processS3Object(ctx context.Context, wg *sync.WaitGroup, obj minio.ObjectInfo) {
 	defer wg.Done()
+	var sem = make(chan struct{}, maxConcurrentOperations)
 
 	// Acquire a semaphore before starting the download
 	sem <- struct{}{}

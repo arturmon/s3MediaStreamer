@@ -3,10 +3,11 @@ package mongodb
 import (
 	"context"
 	"errors"
-	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
 	"strconv"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"

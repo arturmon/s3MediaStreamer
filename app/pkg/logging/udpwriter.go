@@ -35,15 +35,24 @@ const (
 //
 // TODO: generate dynamically using Path MTU Discovery?
 const (
-	ChunkSize        = 1420
-	chunkedHeaderLen = 12
-	chunkedDataLen   = ChunkSize - chunkedHeaderLen
+	ChunkSize         = 1420
+	chunkedHeaderLen  = 12
+	chunkedDataLen    = ChunkSize - chunkedHeaderLen
+	defaultBufferSize = 1024
+	maxChunks         = 128
+)
+const (
+	magicChunkedByte1 = 0x1e
+	magicChunkedByte2 = 0x0f
+	magicZlibByte     = 0x78
+	magicGzipByte1    = 0x1f
+	magicGzipByte2    = 0x8b
 )
 
 var (
-	magicChunked = []byte{0x1e, 0x0f}
-	magicZlib    = []byte{0x78}
-	magicGzip    = []byte{0x1f, 0x8b}
+	magicChunked = []byte{magicChunkedByte1, magicChunkedByte2}
+	magicZlib    = []byte{magicZlibByte}
+	magicGzip    = []byte{magicGzipByte1, magicGzipByte2}
 )
 
 // numChunks returns the number of GELF chunks necessary to transmit
@@ -83,31 +92,38 @@ func NewUDPWriter(addr string, appName string) (*UDPWriter, error) {
 //	2-byte magic (0x1e 0x0f), 8 byte id, 1 byte sequence id, 1 byte
 //	total, chunk-data
 func (w *GelfWriter) writeChunked(zBytes []byte) error {
+	const (
+		ChunkSize        = 1420
+		chunkedHeaderLen = 12
+		chunkedDataLen   = ChunkSize - chunkedHeaderLen
+		maxChunks        = 128
+	)
+
+	magicChunked := []byte{0x1e, 0x0f} // define magicChunked here
+
 	b := make([]byte, 0, ChunkSize)
 	buf := bytes.NewBuffer(b)
 	nChunksI := numChunks(zBytes)
-	if nChunksI > 128 {
+	if nChunksI > maxChunks {
 		return fmt.Errorf("msg too large, would need %d chunks", nChunksI)
 	}
 	nChunks := uint8(nChunksI)
-	// use urandom to get a unique message id
+
 	msgId := make([]byte, 8)
 	n, err := io.ReadFull(rand.Reader, msgId)
 	if err != nil || n != 8 {
-		return fmt.Errorf("rand.Reader: %d/%s", n, err)
+		return fmt.Errorf("rand.Reader: %d/%w", n, err)
 	}
 
 	bytesLeft := len(zBytes)
 	for i := uint8(0); i < nChunks; i++ {
 		buf.Reset()
-		// manually write header.  Don't care about
-		// host/network byte order, because the spec only
-		// deals in individual bytes.
-		buf.Write(magicChunked) //magic
+
+		buf.Write(magicChunked) // use the local variable here
 		buf.Write(msgId)
 		buf.WriteByte(i)
 		buf.WriteByte(nChunks)
-		// slice out our chunk from zBytes
+
 		chunkLen := chunkedDataLen
 		if chunkLen > bytesLeft {
 			chunkLen = bytesLeft
@@ -116,15 +132,12 @@ func (w *GelfWriter) writeChunked(zBytes []byte) error {
 		chunk := zBytes[off : off+chunkLen]
 		buf.Write(chunk)
 
-		// write this chunk, and make sure the write was good
-		n, err := w.conn.Write(buf.Bytes())
+		n, err = w.conn.Write(buf.Bytes())
 		if err != nil {
-			return fmt.Errorf("Write (chunk %d/%d): %s", i,
-				nChunks, err)
+			return fmt.Errorf("Write (chunk %d/%d): %w", i, nChunks, err)
 		}
 		if n != len(buf.Bytes()) {
-			return fmt.Errorf("Write len: (chunk %d/%d) (%d/%d)",
-				i, nChunks, n, len(buf.Bytes()))
+			return fmt.Errorf("Write len: (chunk %d/%d) (%d/%d)", i, nChunks, n, len(buf.Bytes()))
 		}
 
 		bytesLeft -= chunkLen
@@ -139,7 +152,7 @@ func (w *GelfWriter) writeChunked(zBytes []byte) error {
 // 1k bytes buffer by default
 var bufPool = sync.Pool{
 	New: func() interface{} {
-		return bytes.NewBuffer(make([]byte, 0, 1024))
+		return bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
 	},
 }
 
@@ -222,14 +235,14 @@ func (w *UDPWriter) Write(p []byte) (int, error) {
 	if err != nil {
 		// If decoding fails, construct message using the existing logic
 		m := constructMessage(p, w.hostname, w.Facility, file, line)
-		if err := w.WriteMessage(m); err != nil {
+		if err = w.WriteMessage(m); err != nil {
 			return 0, err
 		}
 	} else {
 		// If decoding succeeds, use extracted JSON fields for constructing the message
 		m := constructMessageFromJSON(w.hostname, w.Facility, jsonData)
 
-		if err := w.WriteMessage(m); err != nil {
+		if err = w.WriteMessage(m); err != nil {
 			return 0, err
 		}
 	}

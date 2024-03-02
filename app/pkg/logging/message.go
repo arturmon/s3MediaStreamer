@@ -24,14 +24,15 @@ type Message struct {
 
 // Syslog severity levels
 const (
-	LOG_EMERG   = 0
-	LOG_ALERT   = 1
-	LOG_CRIT    = 2
-	LOG_ERR     = 3
-	LOG_WARNING = 4
-	LOG_NOTICE  = 5
-	LOG_INFO    = 6
-	LOG_DEBUG   = 7
+	LOG_EMERG          = 0
+	LOG_ALERT          = 1
+	LOG_CRIT           = 2
+	LOG_ERR            = 3
+	LOG_WARNING        = 4
+	LOG_NOTICE         = 5
+	LOG_INFO           = 6
+	LOG_DEBUG          = 7
+	initialMapCapacity = 16
 )
 
 func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
@@ -44,22 +45,22 @@ func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
 		return err
 	}
 	if len(m.Extra) > 0 {
-		eb, err := json.Marshal(m.Extra)
-		if err != nil {
+		eb, extraErr := json.Marshal(m.Extra)
+		if extraErr != nil {
 			return err
 		}
 		// merge serialized message + serialized extra map
-		if err = buf.WriteByte(','); err != nil {
+		if extraErr = buf.WriteByte(','); extraErr != nil {
 			return err
 		}
 		// write serialized extra bytes, without enclosing quotes
-		if _, err = buf.Write(eb[1 : len(eb)-1]); err != nil {
+		if _, extraErr = buf.Write(eb[1 : len(eb)-1]); extraErr != nil {
 			return err
 		}
 	}
 
 	if len(m.RawExtra) > 0 {
-		if err := buf.WriteByte(','); err != nil {
+		if err = buf.WriteByte(','); err != nil {
 			return err
 		}
 
@@ -74,7 +75,7 @@ func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
 }
 
 func (m *Message) UnmarshalJSON(data []byte) error {
-	i := make(map[string]interface{}, 16)
+	i := make(map[string]interface{}, initialMapCapacity)
 	if err := json.Unmarshal(data, &i); err != nil {
 		return err
 	}
@@ -143,7 +144,7 @@ func constructMessage(p []byte, hostname string, facility string, file string, l
 		Short:    string(short),
 		Full:     string(full),
 		TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
-		Level:    6, // info
+		Level:    LOG_INFO, // info
 		Facility: facility,
 		Extra: map[string]interface{}{
 			"_file": file,
@@ -162,16 +163,17 @@ func constructMessageFromJSON(hostname, facility string, jsonData map[string]int
 
 	// Convert level to GELF level
 	gelfLevel := map[string]int{
-		"debug": 7,
-		"info":  6,
-		"warn":  4,
-		"error": 3,
-		"fatal": 2,
-		"panic": 1,
+		"debug":  LOG_DEBUG,
+		"info":   LOG_INFO,
+		"notice": LOG_NOTICE,
+		"warn":   LOG_WARNING,
+		"error":  LOG_ERR,
+		"fatal":  LOG_CRIT,
+		"panic":  LOG_ALERT,
 	}[strings.ToLower(level)]
 
 	var timeUnix float64
-	if jsonDataTime, ok := jsonData["time"].(float64); ok {
+	if jsonDataTime, timeOk := jsonData["time"].(float64); timeOk {
 		timeUnix = jsonDataTime
 	} else {
 		// Handle the case when jsonData["time"] is not a float64

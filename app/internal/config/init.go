@@ -37,7 +37,7 @@ func GetConfig() *Config {
 		log.Errorf("Error reading environment variables: %v", err)
 	}
 	go func() {
-		time.Sleep(5 * time.Second) // sleep for 5 seconds
+		time.Sleep(sleepDurationSeconds * time.Second) // sleep for 5 seconds
 		err := cleanenv.UpdateEnv(cfgManager.instance)
 		if err != nil {
 			log.Errorf("Error update environment variables: %v", err)

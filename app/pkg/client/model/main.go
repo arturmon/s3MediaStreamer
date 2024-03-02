@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"net"
 	"net/url"
 	"skeleton-golange-application/app/internal/config"
@@ -11,6 +10,8 @@ import (
 	"skeleton-golange-application/app/pkg/client/postgresql"
 	"skeleton-golange-application/app/pkg/logging"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"

@@ -100,28 +100,31 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 	}
 	defer f.Close()
 
+	// Use a channel to signal completion
+	done := make(chan struct{})
+	defer close(done)
+
 	// Use a goroutine to stream the file and check for client disconnection
 	go func() {
-		_, err := io.Copy(c.Writer, f)
+		defer func() {
+			// Clean up after streaming is done
+			err = a.S3.CleanTemplateFile(fileName)
+			if err != nil {
+				a.logger.Errorf("Error cleaning up file: %v", err)
+			}
+		}()
+
+		_, err = io.Copy(c.Writer, f)
 		if err != nil {
 			// Log the error, but don't treat it as a critical error
 			a.logger.Errorf("Error streaming audio: %v", err)
 		}
-
-		// Clean up only if the copy was successful
-		err = a.S3.CleanTemplateFile(fileName)
-		if err != nil {
-			a.logger.Errorf("Error cleaning up file: %v", err)
-		}
 	}()
 
 	// Wait for client disconnect notification
-	select {
-	case <-c.Writer.CloseNotify():
-		// Client disconnected, clean up and return
-		a.logger.Info("Client disconnected, stopping streaming.")
-		return
-	}
+	<-c.Writer.CloseNotify()
+	// Client disconnected, clean up and return
+	a.logger.Info("Client disconnected, stopping streaming.")
 }
 
 func (a *WebApp) generateM3U8Playlist(filePaths *[]model.Track) []*model.PlaylistM3U {

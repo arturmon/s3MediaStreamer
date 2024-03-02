@@ -21,12 +21,12 @@ func NewReader(addr string) (*Reader, error) {
 	var err error
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		return nil, fmt.Errorf("ResolveUDPAddr('%s'): %s", addr, err)
+		return nil, fmt.Errorf("ResolveUDPAddr('%s'): %w", addr, err)
 	}
 
 	conn, err := net.ListenUDP("udp", udpAddr)
 	if err != nil {
-		return nil, fmt.Errorf("ListenUDP: %s", err)
+		return nil, fmt.Errorf("ListenUDP: %w", err)
 	}
 
 	r := new(Reader)
@@ -71,12 +71,12 @@ func (r *Reader) ReadMessage() (*Message, error) {
 
 	for got := 0; got < 128 && (total == 0 || got < int(total)); got++ {
 		if n, err = r.conn.Read(cBuf); err != nil {
-			return nil, fmt.Errorf("Read: %s", err)
+			return nil, fmt.Errorf("Read: %w", err)
 		}
 		cHead, cBuf = cBuf[:2], cBuf[:n]
 
 		if bytes.Equal(cHead, magicChunked) {
-			//fmt.Printf("chunked %v\n", cBuf[:14])
+			// fmt.Printf("chunked %v\n", cBuf[:14])
 			cid, seq, total = cBuf[2:2+8], cBuf[2+8], cBuf[2+8+1]
 			if ocid != nil && !bytes.Equal(cid, ocid) {
 				return nil, fmt.Errorf("out-of-band message %v (awaited %v)", cid, ocid)
@@ -85,17 +85,17 @@ func (r *Reader) ReadMessage() (*Message, error) {
 				chunks = make([][]byte, total)
 			}
 			n = len(cBuf) - chunkedHeaderLen
-			//fmt.Printf("setting chunks[%d]: %d\n", seq, n)
+			// fmt.Printf("setting chunks[%d]: %d\n", seq, n)
 			chunks[seq] = append(make([]byte, 0, n), cBuf[chunkedHeaderLen:]...)
 			length += n
-		} else { //not chunked
+		} else { // not chunked
 			if total > 0 {
 				return nil, fmt.Errorf("out-of-band message (not chunked)")
 			}
 			break
 		}
 	}
-	//fmt.Printf("\nchunks: %v\n", chunks)
+	// fmt.Printf("\nchunks: %v\n", chunks)
 
 	if length > 0 {
 		if cap(cBuf) < length {
@@ -103,7 +103,7 @@ func (r *Reader) ReadMessage() (*Message, error) {
 		}
 		cBuf = cBuf[:0]
 		for i := range chunks {
-			//fmt.Printf("appending %d %v\n", i, chunks[i])
+			// fmt.Printf("appending %d %v\n", i, chunks[i])
 			cBuf = append(cBuf, chunks[i]...)
 		}
 		cHead = cBuf[:2]
@@ -124,12 +124,12 @@ func (r *Reader) ReadMessage() (*Message, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("NewReader: %s", err)
+		return nil, fmt.Errorf("NewReader: %w", err)
 	}
 
 	msg := new(Message)
-	if err := json.NewDecoder(cReader).Decode(&msg); err != nil {
-		return nil, fmt.Errorf("json.Unmarshal: %s", err)
+	if err = json.NewDecoder(cReader).Decode(&msg); err != nil {
+		return nil, fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	return msg, nil

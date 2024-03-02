@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io"
 	"log"
 	"path"
 	"runtime"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
+
+const callerDepth = 5
 
 type loggerInitializer struct {
 	instance Logger
@@ -69,7 +72,7 @@ func (w *gelfWriterWrapper) Write(p []byte) (int, error) {
 	}
 
 	// Get the runtime frame to retrieve filename, line number, and function name
-	pc, file, line, ok := runtime.Caller(5) // Adjust the frame depth as needed
+	pc, file, line, ok := runtime.Caller(callerDepth) // Adjust the frame depth as needed
 	if !ok {
 		return 0, errors.New("failed to get runtime caller information")
 	}

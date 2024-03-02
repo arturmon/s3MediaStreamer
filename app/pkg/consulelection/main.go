@@ -1,12 +1,13 @@
-package consul_election
+package consulelection
 
 import (
 	"fmt"
-	election "github.com/dmitriyGarden/consul-leader-election"
-	"github.com/hashicorp/consul/api"
-	consul_service "skeleton-golange-application/app/pkg/consul-service"
+	consul_service "skeleton-golange-application/app/pkg/consulservice"
 	"skeleton-golange-application/app/pkg/logging"
 	"time"
+
+	election "github.com/dmitriyGarden/consul-leader-election"
+	"github.com/hashicorp/consul/api"
 )
 
 const checkConsulLeaderTimeoutSeconds = 5

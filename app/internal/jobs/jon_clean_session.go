@@ -2,10 +2,11 @@ package jobs
 
 import (
 	"context"
-	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"net"
 	"net/url"
+
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func (j *CleanOldSessionJob) Run() {

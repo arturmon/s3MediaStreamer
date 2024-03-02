@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/model"
+
+	"go.opentelemetry.io/otel"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"

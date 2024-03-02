@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"go.opentelemetry.io/otel"
 
 	"github.com/Masterminds/squirrel"

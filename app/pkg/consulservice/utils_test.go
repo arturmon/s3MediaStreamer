@@ -1,9 +1,10 @@
-package consul_service_test
+package consulservice_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	consul_service "skeleton-golange-application/app/pkg/consul-service"
+	consul_service "skeleton-golange-application/app/pkg/consulservice"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetLocalIP(t *testing.T) {

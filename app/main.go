@@ -9,7 +9,7 @@ import (
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
 	"skeleton-golange-application/app/pkg/amqp"
-	consul_election "skeleton-golange-application/app/pkg/consul-election"
+	consul_election "skeleton-golange-application/app/pkg/consulelection"
 	"skeleton-golange-application/app/pkg/logging"
 	"skeleton-golange-application/app/pkg/monitoring"
 	_ "skeleton-golange-application/app/pkg/web/gin"

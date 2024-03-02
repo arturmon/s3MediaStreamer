@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.opentelemetry.io/otel"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/model"
+
+	"go.opentelemetry.io/otel"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
