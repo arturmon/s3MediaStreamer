@@ -7,90 +7,100 @@ package config
 
 // Config represents the application's configuration.
 type Config struct {
-	// AppHealth stores the status of the application's health.
-	AppHealth bool
-	Listen    struct {
-		BindIP string `env:"BIND_IP" env-default:"0.0.0.0"`
-		Port   string `env:"PORT" env-default:"10000"`
-	}
+	AppHealth bool `yaml:"app_health" env:"APP_HEALTH"`
+
+	Listen struct {
+		BindIP string `yaml:"bind_ip" env:"BIND_IP"`
+		Port   string `yaml:"port" env:"PORT"`
+	} `yaml:"listen"`
+
 	Consul struct {
-		URL      string `env:"CONSUL_URL" env-default:"localhost:8500"`
-		WaitTime int    `env:"CONSUL_WAIT_TIME" env-default:"5"`
-	}
+		URL      string `yaml:"url" env:"CONSUL_URL"`
+		WaitTime int    `yaml:"wait_time" env:"CONSUL_WAIT_TIME"`
+	} `yaml:"consul"`
+
 	AppConfig struct {
-		LogLevel          string `env:"LOG_LEVEL" env-default:"info"` // trace, debug, info, warn, error, fatal, panic
-		LogType           string `env:"LOG_TYPE" env-default:"gelf"`  // text, json, gelf
-		LogGelfServer     string `env:"LOG_GELF_SERVER_URL" env-default:"localhost:12201"`
-		LogGelfServerType string `env:"LOG_GELF_SERVER_TYPE" env-default:"udp"` // tcp, udp
-		GinMode           string `env:"GIN_MODE" env-default:"release"`         // debug, test, release
-		Jobs              struct {
-			JobIDUserRun    string `env:"JOB_IDENTIFY_USER" env-default:"6f14edc0-54b1-11ee-8c99-0242ac120002"`
-			JobCleanTrackS3 string `env:"JOB_CLEAN_ALBUM_PATH_NULL" env-default:"@every 10m"`
-			SystemWriteUser string `env:"JOB_SYSTEM_WRITE_USER" env-default:"Jobs"`
-		}
+		LogLevel          string `yaml:"log_level" env:"LOG_LEVEL"`
+		LogType           string `yaml:"log_type" env:"LOG_TYPE"`
+		LogGelfServer     string `yaml:"log_gelf_server" env:"LOG_GELF_SERVER_URL"`
+		LogGelfServerType string `yaml:"log_gelf_server_type" env:"LOG_GELF_SERVER_TYPE"`
+		GinMode           string `yaml:"gin_mode" env:"GIN_MODE"`
+
+		Jobs struct {
+			JobIDUserRun    string `yaml:"job_id_user_run" env:"JOB_IDENTIFY_USER"`
+			JobCleanTrackS3 string `yaml:"job_clean_track_s3" env:"JOB_CLEAN_ALBUM_PATH_NULL"`
+			SystemWriteUser string `yaml:"system_write_user" env:"JOB_SYSTEM_WRITE_USER"`
+		} `yaml:"jobs"`
+
 		OpenTelemetry struct {
-			TracingEnabled bool   `env:"OPEN_TELEMETRY_TRACING_ENABLED" env-default:"false"`
-			Environment    string `env:"OPEN_TELEMETRY_ENV" env-default:"staging"` // 'staging', 'production'
-			JaegerEndpoint string `env:"OPEN_TELEMETRY_JAEGER_ENDPOINT" env-default:"http://localhost:14268"`
-		}
+			TracingEnabled bool   `yaml:"tracing_enabled" env:"OPEN_TELEMETRY_TRACING_ENABLED"`
+			Environment    string `yaml:"environment" env:"OPEN_TELEMETRY_ENV"`
+			JaegerEndpoint string `yaml:"jaeger_endpoint" env:"OPEN_TELEMETRY_JAEGER_ENDPOINT"`
+		} `yaml:"open_telemetry"`
+
 		S3 struct {
-			Endpoint        string `env:"S3_ENDPOINT" env-default:"localhost:9000"`
-			AccessKeyID     string `env:"S3_ACCESS_KEY_ID" env-default:""`
-			SecretAccessKey string `env:"S3_SECRET_ACCESS_KEY" env-default:""`
-			UseSSL          bool   `env:"S3_USE_SSL" env-default:"false"`
-			BucketName      string `env:"S3_BUCKET_NAME" env-default:"music-bucket"`
-			Location        string `env:"S3_LOCATION" env-default:"us-east-1"`
-		}
-	}
+			Endpoint        string `yaml:"endpoint" env:"S3_ENDPOINT"`
+			AccessKeyID     string `yaml:"access_key_id" env:"S3_ACCESS_KEY_ID"`
+			SecretAccessKey string `yaml:"secret_access_key" env:"S3_SECRET_ACCESS_KEY"`
+			UseSSL          bool   `yaml:"use_ssl" env:"S3_USE_SSL"`
+			BucketName      string `yaml:"bucket_name" env:"S3_BUCKET_NAME"`
+			Location        string `yaml:"location" env:"S3_LOCATION"`
+		} `yaml:"s3"`
+	} `yaml:"app_config"`
+
 	Storage struct {
-		Type     string `env:"STORAGE_TYPE" env-default:"postgresql"` // mongodb, postgresql
-		Username string `env:"STORAGE_USERNAME" env-default:"root"`
-		Password string `env:"STORAGE_PASSWORD" env-default:"1qazxsw2"`
-		Host     string `env:"STORAGE_HOST" env-default:"localhost"`
-		Port     string `env:"STORAGE_PORT" env-default:"5432"` // 5432 postgresql, 27017 mongodb
-		Database string `env:"STORAGE_DATABASE" env-default:"db_issue_album"`
-		// Mongo use
-		Collections      string `env:"STORAGE_COLLECTIONS" env-default:"col_issues"`
-		CollectionsUsers string `env:"STORAGE_COLLECTIONS_USERS" env-default:"col_users"`
-	}
-	// MessageQueue
+		Type             string `yaml:"type" env:"STORAGE_TYPE"`
+		Username         string `yaml:"username" env:"STORAGE_USERNAME"`
+		Password         string `yaml:"password" env:"STORAGE_PASSWORD"`
+		Host             string `yaml:"host" env:"STORAGE_HOST"`
+		Port             string `yaml:"port" env:"STORAGE_PORT"`
+		Database         string `yaml:"database" env:"STORAGE_DATABASE"`
+		Collections      string `yaml:"collections" env:"STORAGE_COLLECTIONS"`
+		CollectionsUsers string `yaml:"collections_users" env:"STORAGE_COLLECTIONS_USERS"`
+	} `yaml:"storage"`
+
 	MessageQueue struct {
-		SubQueueName    string `env:"MQ_QUEUE_NAME" env-default:"s3_queue"`
-		User            string `env:"MQ_USER" env-default:"guest"`
-		Pass            string `env:"MQ_PASS" env-default:"guest"`
-		Broker          string `env:"MQ_BROKER" env-default:"localhost"`
-		BrokerPort      int    `env:"MQ_BROKER_PORT" env-default:"5672"`
-		SystemWriteUser string `env:"MQ_SYSTEM_WRITER_USER" env-default:"amqp@system"`
-	}
+		SubQueueName    string `yaml:"sub_queue_name" env:"MQ_QUEUE_NAME"`
+		User            string `yaml:"user" env:"MQ_USER"`
+		Pass            string `yaml:"pass" env:"MQ_PASS"`
+		Broker          string `yaml:"broker" env:"MQ_BROKER"`
+		BrokerPort      int    `yaml:"broker_port" env:"MQ_BROKER_PORT"`
+		SystemWriteUser string `yaml:"system_write_user" env:"MQ_SYSTEM_WRITER_USER"`
+	} `yaml:"message_queue"`
+
 	Session struct {
-		SessionStorageType string `env:"SESSION_STORAGE_TYPE" env-default:"postgres"` // cookie, memory, memcached,
-		// mongo, postgres
-		SessionName        string `env:"SESSION_COOKIES_SESSION_NAME" env-default:"gin-session"`
-		SessionPeriodClean string `env:"SESSION_COOKIES_SESSION_PERIOD_CLEAN" env-default:"@midnight"`
-		Cookies            struct {
-			SessionSecretKey string `env:"SESSION_COOKIES_SESSION_SECRET_KEY" env-default:"sdfgerfsd3543g"`
-		}
+		SessionStorageType string `yaml:"session_storage_type" env:"SESSION_STORAGE_TYPE"`
+		SessionName        string `yaml:"session_name" env:"SESSION_COOKIES_SESSION_NAME"`
+		SessionPeriodClean string `yaml:"session_period_clean" env:"SESSION_COOKIES_SESSION_PERIOD_CLEAN"`
+
+		Cookies struct {
+			SessionSecretKey string `yaml:"session_secret_key" env:"SESSION_COOKIES_SESSION_SECRET_KEY"`
+		} `yaml:"cookies"`
+
 		Memcached struct {
-			MemcachedHost string `env:"SESSION_MEMCACHED_HOST" env-default:"localhost"`
-			MemcachedPort string `env:"SESSION_MEMCACHED_PORT" env-default:"11211"`
-		}
+			MemcachedHost string `yaml:"memcached_host" env:"SESSION_MEMCACHED_HOST"`
+			MemcachedPort string `yaml:"memcached_port" env:"SESSION_MEMCACHED_PORT"`
+		} `yaml:"memcached"`
+
 		Mongodb struct {
-			MongoHost     string `env:"SESSION_MONGO_HOST" env-default:"localhost"`
-			MongoPort     string `env:"SESSION_MONGO_PORT" env-default:"27017"`
-			MongoDatabase string `env:"SESSION_MONGO_DATABASE" env-default:"session"`
-			MongoUser     string `env:"SESSION_MONGO_USERNAME" env-default:"root"`
-			MongoPass     string `env:"SESSION_MONGO_PASSWORD" env-default:"1qazxsw2"`
-		}
+			MongoHost     string `yaml:"mongo_host" env:"SESSION_MONGO_HOST"`
+			MongoPort     string `yaml:"mongo_port" env:"SESSION_MONGO_PORT"`
+			MongoDatabase string `yaml:"mongo_database" env:"SESSION_MONGO_DATABASE"`
+			MongoUser     string `yaml:"mongo_user" env:"SESSION_MONGO_USERNAME"`
+			MongoPass     string `yaml:"mongo_pass" env:"SESSION_MONGO_PASSWORD"`
+		} `yaml:"mongodb"`
+
 		Postgresql struct {
-			PostgresqlHost     string `env:"SESSION_POSTGRESQL_HOST" env-default:"localhost"`
-			PostgresqlPort     string `env:"SESSION_POSTGRESQL_PORT" env-default:"5432"`
-			PostgresqlDatabase string `env:"SESSION_POSTGRESQL_DATABASE" env-default:"session"`
-			PostgresqlUser     string `env:"SESSION_POSTGRESQL_USER" env-default:"root"`
-			PostgresqlPass     string `env:"SESSION_POSTGRESQL_PASS" env-default:"1qazxsw2"`
-		}
-	}
+			PostgresqlHost     string `yaml:"postgresql_host" env:"SESSION_POSTGRESQL_HOST"`
+			PostgresqlPort     string `yaml:"postgresql_port" env:"SESSION_POSTGRESQL_PORT"`
+			PostgresqlDatabase string `yaml:"postgresql_database" env:"SESSION_POSTGRESQL_DATABASE"`
+			PostgresqlUser     string `yaml:"postgresql_user" env:"SESSION_POSTGRESQL_USER"`
+			PostgresqlPass     string `yaml:"postgresql_pass" env:"SESSION_POSTGRESQL_PASS"`
+		} `yaml:"postgresql"`
+	} `yaml:"session"`
+
 	OTP struct {
-		Issuer     string `env:"OTP_ISSUER" env-default:"example.com"`
-		SecretSize uint   `env:"OTP_SECRET_SIZE" env-default:"15"`
-	}
+		Issuer     string `yaml:"issuer" env:"OTP_ISSUER"`
+		SecretSize uint   `yaml:"secret_size" env:"OTP_SECRET_SIZE"`
+	} `yaml:"otp"`
 }
