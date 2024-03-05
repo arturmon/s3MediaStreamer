@@ -32,19 +32,22 @@ import (
 // @authorizationurl http://s3streammedia.com/v1/users/login
 func main() {
 	// debug.SetMemoryLimit(2048)
+	version := "0.0.1"
+	buildTime := "0000-00-00 UTC"
+	appName := "s3MediaStreamer"
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType, cfg.AppConfig.LogGelfServer, cfg.AppConfig.LogGelfServerType, appName)
-	logger.Printf("App Version: %s Build Time: %s\n", Version, BuildTime)
+	logger.Printf("App Version: %s Build Time: %s\n", version, buildTime)
 	logger.Info("config initialize")
 	logger.Info("logger initialize")
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
 		go app.StartPprofServer(&logger)
 	}
-	myApp, err := app.NewAppInit(ctx, cfg, &logger, appName, Version)
+	myApp, err := app.NewAppInit(ctx, cfg, &logger, appName, version)
 	if err != nil {
 		logger.Error("Failed to initialize the new my app:", err)
 	}
@@ -59,9 +62,3 @@ func main() {
 
 	myApp.Start(ctx)
 }
-
-var (
-	Version   = "0.0.1"
-	BuildTime = "0000-00-00 UTC"
-	appName   = "s3MediaStreamer"
-)

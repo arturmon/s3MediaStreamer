@@ -30,7 +30,6 @@ type App struct {
 
 // NewAppInit initializes a new App instance.
 func NewAppInit(ctx context.Context, cfg *config.Config, logger *logging.Logger, appName, version string) (*App, error) {
-
 	tracer, err := initializeTracer(ctx, cfg, logger, appName, version)
 	if err != nil {
 		return nil, err
@@ -51,10 +50,7 @@ func NewAppInit(ctx context.Context, cfg *config.Config, logger *logging.Logger,
 		return nil, err
 	}
 
-	amqpClient, err := initializeAMQPClient(cfg, logger)
-	if err != nil {
-		return nil, err
-	}
+	amqpClient := initializeAMQPClient(cfg, logger)
 
 	logger.Info("Start register consul lieder election ...")
 

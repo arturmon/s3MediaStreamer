@@ -13,7 +13,8 @@ run:
   timeout: 3m
   skip-files:
     - app/model/swagger.go
-
+  skip-dirs:
+    - app/pkg/logging
 
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml

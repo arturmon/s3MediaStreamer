@@ -99,7 +99,6 @@ func (s *Service) registerService() {
 	if err != nil {
 		s.logger.Fatal(err)
 	}
-
 }
 
 func (s *Service) setupConsulWatch() {

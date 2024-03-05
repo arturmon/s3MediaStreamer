@@ -1,5 +1,5 @@
 // gin_test.go
-package gin
+package gin_test
 
 import (
 	"net/http"
@@ -7,13 +7,15 @@ import (
 	"testing"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	gin_ext "github.com/gin-gonic/gin"
 
 	"github.com/stretchr/testify/assert"
+
+	"skeleton-golange-application/app/pkg/web/gin"
 )
 
 func TestConfigCORS(t *testing.T) {
-	corsConfig := ConfigCORS()
+	corsConfig := gin.ConfigCORS()
 
 	assert.Equal(t, []string{"http://localhost:3000"}, corsConfig.AllowOrigins)
 	assert.Equal(t, []string{"POST", "OPTIONS", "GET", "PATCH", "DELETE"}, corsConfig.AllowMethods)
@@ -25,7 +27,7 @@ func TestConfigCORS(t *testing.T) {
 		"Transfer-Encoding",
 	}, corsConfig.AllowHeaders)
 	assert.True(t, corsConfig.AllowCredentials)
-	assert.Equal(t, maxAgeDuration, corsConfig.MaxAge)
+	assert.Equal(t, gin.MaxAgeDuration, corsConfig.MaxAge)
 }
 
 func TestHandleOptions(t *testing.T) {
@@ -44,17 +46,17 @@ func TestHandleOptions(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Check if the response status code is 204
-	assert.Equal(t, noContentStatus, w.Code)
+	assert.Equal(t, gin.NoContentStatus, w.Code)
 }
 
-func SetupRouter() *gin.Engine {
-	router := gin.New()
+func SetupRouter() *gin_ext.Engine {
+	router := gin_ext.New()
 
 	// Set up CORS middleware
-	router.Use(cors.New(ConfigCORS()))
+	router.Use(cors.New(gin.ConfigCORS()))
 
 	// Define the handleOptions route
-	router.GET("/test", handleOptions)
+	router.GET("/test", gin.HandleOptions)
 
 	return router
 }

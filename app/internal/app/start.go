@@ -18,12 +18,7 @@ func (a *App) Start(ctx context.Context) {
 	a.handleHealthCheckResults(ctx, healthCheckWrapper)
 
 	a.Logger.Info("🚀 Running Application...")
-	var err error
 	a.Gin.Run(ctx, healthCheckWrapper)
-	if err != nil {
-		a.Logger.Fatal(err)
-	}
-
 	a.Logger.Info("Application stopped")
 }
 

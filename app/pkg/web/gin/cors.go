@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	maxAgeDuration  = 12 * time.Hour
-	noContentStatus = 204 // Define a constant for HTTP status code 204.
+	MaxAgeDuration  = 12 * time.Hour
+	NoContentStatus = 204 // Define a constant for HTTP status code 204.
 )
 
 func ConfigCORS() cors.Config {
@@ -25,10 +25,10 @@ func ConfigCORS() cors.Config {
 			"Transfer-Encoding",
 		},
 		AllowCredentials: true,
-		MaxAge:           maxAgeDuration,
+		MaxAge:           MaxAgeDuration,
 	}
 }
 
-func handleOptions(c *gin.Context) {
-	c.AbortWithStatus(noContentStatus)
+func HandleOptions(c *gin.Context) {
+	c.AbortWithStatus(NoContentStatus)
 }

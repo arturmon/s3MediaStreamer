@@ -14,7 +14,7 @@ func (a *WebApp) setupAppRoutesV1() {
 		users := v1.Group("/users")
 		{
 			users.POST("/register", a.Register)
-			users.OPTIONS("/login", handleOptions)
+			users.OPTIONS("/login", HandleOptions)
 			users.POST("/login", a.Login)
 			users.GET("/me", a.User)
 			users.POST("/delete", a.DeleteUser)

@@ -14,7 +14,7 @@ USER appuser
 
 # Add Health Check
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget -qO- http://localhost:10000/health/liveness || exit 1
+  CMD wget -qO- http://$(hostname -i):10000/health/liveness || exit 1
 
 ENTRYPOINT [ "/app/s3stream" ]
 

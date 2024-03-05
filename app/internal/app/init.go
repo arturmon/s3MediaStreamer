@@ -27,7 +27,7 @@ func initializeTracer(ctx context.Context, cfg *config.Config, logger *logging.L
 	}
 	tracer, err := otel.InitProvider(ctx, config)
 	if err != nil {
-		logger.Fatal(err)
+		return otel.Provider{}, err
 	}
 	return tracer, nil
 }
@@ -72,7 +72,7 @@ func initializeS3(ctx context.Context, cfg *config.Config, logger *logging.Logge
 	return s3client, nil
 }
 
-func initializeAMQPClient(cfg *config.Config, logger *logging.Logger) (*amqp.MessageClient, error) {
+func initializeAMQPClient(cfg *config.Config, logger *logging.Logger) *amqp.MessageClient {
 	// Create an AMQP client if it's enabled in the configuration.
 	var amqpClient *amqp.MessageClient
 	var err error
@@ -86,7 +86,7 @@ func initializeAMQPClient(cfg *config.Config, logger *logging.Logger) (*amqp.Mes
 		logger.Error("Failed to initialize MQ:", err)
 		time.Sleep(retryWaitTimeSeconds * time.Second) // Wait before retrying
 	}
-	return amqpClient, nil
+	return amqpClient
 }
 
 func initializeConsulService(appName string, cfg *config.Config, logger *logging.Logger) *consulservice.Service {
