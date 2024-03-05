@@ -2,10 +2,10 @@ package app
 
 import (
 	"net/http"
-	"skeleton-golange-application/app/pkg/amqp"
-	consul_election "skeleton-golange-application/app/pkg/consulelection"
-	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/monitoring"
+	"s3MediaStreamer/app/pkg/amqp"
+	consul_election "s3MediaStreamer/app/pkg/consulelection"
+	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/monitoring"
 	"time"
 
 	"context"

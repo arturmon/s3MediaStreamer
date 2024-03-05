@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	model_all "skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/logging"
+	model_all "s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/logging"
 
 	"go.opentelemetry.io/otel"
 

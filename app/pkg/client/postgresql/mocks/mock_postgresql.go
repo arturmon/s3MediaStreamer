@@ -6,7 +6,7 @@ package mocks
 
 import (
 	reflect "reflect"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 
 	gomock "github.com/golang/mock/gomock"
 )

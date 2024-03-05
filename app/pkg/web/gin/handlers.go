@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 	"strconv"
 
 	"go.opentelemetry.io/otel"

@@ -3,8 +3,8 @@ package mongodb
 import (
 	"context"
 	"errors"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/model"
 
 	"go.opentelemetry.io/otel"
 

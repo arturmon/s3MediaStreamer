@@ -2,7 +2,7 @@ package gin
 
 import (
 	"fmt"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/logging"
 	"time"
 
 	"github.com/gin-gonic/gin"

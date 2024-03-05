@@ -8,8 +8,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/logging"
 
 	"go.opentelemetry.io/otel"
 

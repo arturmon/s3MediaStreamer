@@ -1,7 +1,7 @@
 package consulelection_test
 
 import (
-	consul_election "skeleton-golange-application/app/pkg/consulelection"
+	consul_election "s3MediaStreamer/app/pkg/consulelection"
 	"testing"
 	"time"
 

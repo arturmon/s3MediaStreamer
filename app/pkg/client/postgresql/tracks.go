@@ -3,7 +3,7 @@ package postgresql
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 	"strings"
 
 	"go.opentelemetry.io/otel"

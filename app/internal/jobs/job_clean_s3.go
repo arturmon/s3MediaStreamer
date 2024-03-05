@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"context"
-	"skeleton-golange-application/app/pkg/tags"
+	"s3MediaStreamer/app/pkg/tags"
 	"sync"
 
 	"github.com/minio/minio-go/v7"

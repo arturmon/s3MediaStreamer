@@ -1,7 +1,7 @@
 package config
 
 import (
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/logging"
 	"sync"
 	"time"
 

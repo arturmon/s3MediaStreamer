@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/tags"
+	"s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/pkg/tags"
 )
 
 func (c *MessageClient) deleteEvent(ctx context.Context, s3event *MessageBody) error {

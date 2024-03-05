@@ -1,7 +1,7 @@
 package consulservice_test
 
 import (
-	consul_service "skeleton-golange-application/app/pkg/consulservice"
+	consul_service "s3MediaStreamer/app/pkg/consulservice"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

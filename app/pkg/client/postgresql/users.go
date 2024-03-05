@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 
 	"go.opentelemetry.io/otel"
 

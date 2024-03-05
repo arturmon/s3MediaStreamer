@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/model"
 	"time"
 
 	"github.com/dhowden/tag"

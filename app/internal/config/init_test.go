@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	"skeleton-golange-application/app/internal/config"
+	"s3MediaStreamer/app/internal/config"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

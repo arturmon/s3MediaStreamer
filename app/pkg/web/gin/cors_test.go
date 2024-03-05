@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"skeleton-golange-application/app/pkg/web/gin"
+	"s3MediaStreamer/app/pkg/web/gin"
 )
 
 func TestConfigCORS(t *testing.T) {

@@ -2,8 +2,8 @@ package consulservice
 
 import (
 	"net"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/logging"
 	"strconv"
 	"time"
 

@@ -1,6 +1,6 @@
-module skeleton-golange-application
+module s3MediaStreamer
 
-go 1.18
+go 1.20
 
 require (
 	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20210919084342-5aec9a9708ef

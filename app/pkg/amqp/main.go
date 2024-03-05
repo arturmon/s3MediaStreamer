@@ -3,10 +3,10 @@ package amqp
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/s3"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/s3"
 	"sync"
 	"time"
 

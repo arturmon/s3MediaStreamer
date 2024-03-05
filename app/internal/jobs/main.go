@@ -1,7 +1,7 @@
 package jobs
 
 import (
-	"skeleton-golange-application/app/internal/app"
+	"s3MediaStreamer/app/internal/app"
 
 	"github.com/bamzi/jobrunner"
 )

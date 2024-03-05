@@ -4,8 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/logging"
 
 	"github.com/minio/minio-go/v7"
 )

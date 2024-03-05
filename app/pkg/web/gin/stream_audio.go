@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 	"path/filepath"
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 
 	"go.opentelemetry.io/otel"
 

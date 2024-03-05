@@ -1,12 +1,12 @@
 package interfaces
 
 import (
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/amqp"
-	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/s3"
-	"skeleton-golange-application/app/pkg/web/gin"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/amqp"
+	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/s3"
+	"s3MediaStreamer/app/pkg/web/gin"
 )
 
 type AppInterface interface {

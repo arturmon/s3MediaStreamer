@@ -2,16 +2,16 @@ package app
 
 import (
 	"context"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/amqp"
-	"skeleton-golange-application/app/pkg/client/model"
-	consulelection "skeleton-golange-application/app/pkg/consulelection"
-	consulservice "skeleton-golange-application/app/pkg/consulservice"
-	"skeleton-golange-application/app/pkg/interfaces"
-	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/otel"
-	"skeleton-golange-application/app/pkg/s3"
-	"skeleton-golange-application/app/pkg/web/gin"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/amqp"
+	"s3MediaStreamer/app/pkg/client/model"
+	consulelection "s3MediaStreamer/app/pkg/consulelection"
+	consulservice "s3MediaStreamer/app/pkg/consulservice"
+	"s3MediaStreamer/app/pkg/interfaces"
+	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/otel"
+	"s3MediaStreamer/app/pkg/s3"
+	"s3MediaStreamer/app/pkg/web/gin"
 )
 
 // App represents the main application struct.

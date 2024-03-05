@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/logging"
 	"syscall"
 )
 

@@ -2,8 +2,8 @@ package consulelection
 
 import (
 	"fmt"
-	consul_service "skeleton-golange-application/app/pkg/consulservice"
-	"skeleton-golange-application/app/pkg/logging"
+	consul_service "s3MediaStreamer/app/pkg/consulservice"
+	"s3MediaStreamer/app/pkg/logging"
 	"time"
 
 	election "github.com/dmitriyGarden/consul-leader-election"

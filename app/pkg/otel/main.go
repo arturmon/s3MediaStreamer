@@ -2,8 +2,8 @@ package otel
 
 import (
 	"context"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/logging"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"

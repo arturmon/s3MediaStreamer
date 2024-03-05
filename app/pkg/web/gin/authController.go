@@ -1,7 +1,7 @@
 package gin
 
 import (
-	"skeleton-golange-application/app/model"
+	"s3MediaStreamer/app/model"
 	"time"
 
 	"go.opentelemetry.io/otel"

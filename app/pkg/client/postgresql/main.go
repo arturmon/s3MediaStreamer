@@ -3,8 +3,8 @@ package postgresql
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/pkg/logging"
 	"time"
 
 	"github.com/jackc/pgx/v5"

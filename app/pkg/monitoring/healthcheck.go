@@ -3,10 +3,10 @@ package monitoring
 import (
 	"context"
 	"net/http"
-	"skeleton-golange-application/app/pkg/amqp"
-	"skeleton-golange-application/app/pkg/client/model"
-	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/s3"
+	"s3MediaStreamer/app/pkg/amqp"
+	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/pkg/s3"
 	"sync"
 	"time"
 

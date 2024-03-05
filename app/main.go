@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	_ "net/http/pprof"
-	_ "skeleton-golange-application/app/docs"
-	"skeleton-golange-application/app/internal/app"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/internal/jobs"
-	"skeleton-golange-application/app/pkg/logging"
-	_ "skeleton-golange-application/app/pkg/web/gin"
+	_ "s3MediaStreamer/app/docs"
+	"s3MediaStreamer/app/internal/app"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/internal/jobs"
+	"s3MediaStreamer/app/pkg/logging"
+	_ "s3MediaStreamer/app/pkg/web/gin"
 
 	_ "github.com/joho/godotenv/autoload"
 )

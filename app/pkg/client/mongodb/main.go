@@ -3,9 +3,9 @@ package mongodb
 import (
 	"context"
 	"fmt"
-	"skeleton-golange-application/app/internal/config"
-	"skeleton-golange-application/app/model"
-	"skeleton-golange-application/app/pkg/logging"
+	"s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/pkg/logging"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
