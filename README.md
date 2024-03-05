@@ -16,8 +16,6 @@ create database db_issue_album
     with owner root;
 create database session
     with owner root;
-create database casbin
-    with owner root;
 ```
 ## Environment
 
