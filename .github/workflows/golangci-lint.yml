@@ -25,7 +25,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - shell: bash
+        run: |
+          ls -la
+
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: ./app
