@@ -110,15 +110,14 @@ func (r *Reader) ReadMessage() (*Message, error) {
 	}
 
 	// the data we get from the wire is compressed
-	if bytes.Equal(cHead, magicGzip) {
+	switch {
+	case bytes.Equal(cHead, magicGzip):
 		cReader, err = gzip.NewReader(bytes.NewReader(cBuf))
-	} else if cHead[0] == magicZlib[0] &&
-		(int(cHead[0])*256+int(cHead[1]))%31 == 0 {
-		// zlib is slightly more complicated, but correct
+	case cHead[0] == magicZlib[0] && (int(cHead[0])*256+int(cHead[1]))%31 == 0:
 		cReader, err = zlib.NewReader(bytes.NewReader(cBuf))
-	} else {
-		// compliance with https://github.com/Graylog2/graylog2-server
-		// treating all messages as uncompressed if  they are not gzip, zlib or
+	default:
+		// Compliance with https://github.com/Graylog2/graylog2-server
+		// treating all messages as uncompressed if they are not gzip, zlib, or
 		// chunked
 		cReader = bytes.NewReader(cBuf)
 	}

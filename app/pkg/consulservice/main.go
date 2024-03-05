@@ -1,14 +1,15 @@
 package consulservice
 
 import (
-	"github.com/hashicorp/consul/api"
-	"github.com/hashicorp/consul/api/watch"
-	"github.com/hashicorp/go-hclog"
 	"net"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/pkg/logging"
 	"strconv"
 	"time"
+
+	"github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul/api/watch"
+	"github.com/hashicorp/go-hclog"
 )
 
 const (
@@ -112,9 +113,9 @@ func (s *Service) setupConsulWatch() {
 	if err != nil {
 		s.logger.Fatal(err)
 	}
+
 	plan.HybridHandler = func(index watch.BlockingParamVal, result interface{}) {
-		switch msg := result.(type) {
-		case []*api.ServiceEntry:
+		if msg, ok := result.([]*api.ServiceEntry); ok {
 			for _, entry := range msg {
 				s.logger.Debugln("new member joined", entry.Service)
 			}

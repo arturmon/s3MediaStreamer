@@ -59,42 +59,53 @@ func (r *TCPReader) accepter(connections chan net.Conn) {
 func (r *TCPReader) listenUntilCloseSignal(closeSignal chan string, doneSignal chan string) {
 	defer func() { doneSignal <- "done" }()
 	defer r.listener.Close()
-	var conns []connChannels
+
 	connectionsChannel := make(chan net.Conn, 1)
 	go r.accepter(connectionsChannel)
+
+	var conns []connChannels
+
 	for {
 		select {
 		case conn := <-connectionsChannel:
-			dropSignal := make(chan string, 1)
-			dropConfirm := make(chan string, 1)
-			channels := connChannels{drop: dropSignal, confirm: dropConfirm}
-			go handleConnection(conn, r.messages, dropSignal, dropConfirm)
-			conns = append(conns, channels)
-		default:
-		}
-
-		select {
+			r.handleNewConnection(conn, &conns)
 		case sig := <-closeSignal:
 			if sig == "stop" || sig == "drop" {
-				if len(conns) >= 1 {
-					for _, s := range conns {
-						if s.drop != nil {
-							s.drop <- "drop"
-							<-s.confirm
-							conns = append(conns[:0], conns[1:]...)
-						}
-					}
-					if sig == "stop" {
-						return
-					}
-				} else if sig == "stop" {
-					closeSignal <- "stop"
-				}
-				if sig == "drop" {
-					doneSignal <- "done"
-				}
+				r.handleStopOrDrop(sig, &conns, closeSignal, doneSignal)
 			}
 		default:
+		}
+	}
+}
+
+func (r *TCPReader) handleNewConnection(conn net.Conn, conns *[]connChannels) {
+	dropSignal := make(chan string, 1)
+	dropConfirm := make(chan string, 1)
+	channels := connChannels{drop: dropSignal, confirm: dropConfirm}
+	go handleConnection(conn, r.messages, dropSignal, dropConfirm)
+	*conns = append(*conns, channels)
+}
+
+func (r *TCPReader) handleStopOrDrop(sig string, conns *[]connChannels, closeSignal chan string, doneSignal chan string) {
+	if len(*conns) >= 1 {
+		r.handleStopOrDropWithConnections(sig, conns)
+		if sig == "stop" {
+			return
+		}
+	} else if sig == "stop" {
+		closeSignal <- "stop"
+	}
+	if sig == "drop" {
+		doneSignal <- "done"
+	}
+}
+
+func (r *TCPReader) handleStopOrDropWithConnections(sig string, conns *[]connChannels) {
+	for _, s := range *conns {
+		if s.drop != nil {
+			s.drop <- "drop"
+			<-s.confirm
+			*conns = append((*conns)[:0], (*conns)[1:]...)
 		}
 	}
 }
@@ -114,7 +125,11 @@ func handleConnection(conn net.Conn, messages chan<- []byte, dropSignal chan str
 	canDrop := false
 
 	for {
-		conn.SetDeadline(time.Now().Add(2 * time.Second))
+		if err = conn.SetDeadline(time.Now().Add(2 * time.Second)); err != nil {
+			// handle error appropriately
+			return
+		}
+
 		if b, err = reader.ReadBytes(0); err != nil {
 			if drop {
 				return

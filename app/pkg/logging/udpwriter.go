@@ -21,7 +21,7 @@ type UDPWriter struct {
 }
 
 // What compression type the writer should use when sending messages
-// to the graylog2 server
+// to the graylog2 server.
 type CompressType int
 
 const (
@@ -67,7 +67,7 @@ func numChunks(b []byte) int {
 
 // New returns a new GELF Writer.  This writer can be used to send the
 // output of the standard Go log functions to a central GELF server by
-// passing it to log.SetOutput()
+// passing it to log.SetOutput().
 func NewUDPWriter(addr string, appName string) (*UDPWriter, error) {
 	var err error
 	w := new(UDPWriter)
@@ -119,7 +119,7 @@ func (w *GelfWriter) writeChunked(zBytes []byte) error {
 	for i := uint8(0); i < nChunks; i++ {
 		buf.Reset()
 
-		buf.Write(magicChunked) // use the local variable here
+		buf.Write(magicChunked) // use the local variable here.
 		buf.Write(msgId)
 		buf.WriteByte(i)
 		buf.WriteByte(nChunks)
@@ -149,7 +149,7 @@ func (w *GelfWriter) writeChunked(zBytes []byte) error {
 	return nil
 }
 
-// 1k bytes buffer by default
+// 1k bytes buffer by default.
 var bufPool = sync.Pool{
 	New: func() interface{} {
 		return bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
@@ -157,11 +157,12 @@ var bufPool = sync.Pool{
 }
 
 func newBuffer() *bytes.Buffer {
-	b := bufPool.Get().(*bytes.Buffer)
-	if b != nil {
-		b.Reset()
-		return b
+	b, ok := bufPool.Get().(*bytes.Buffer)
+	if !ok {
+		// Handle the case where the pool is empty or the type assertion fails
+		b = newBuffer()
 	}
+	b.Reset() // Reset the buffer for reuse
 	return bytes.NewBuffer(nil)
 }
 

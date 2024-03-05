@@ -1630,11 +1630,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
-	Host:             "localhost:10000",
+	Host:             "s3streammedia.com",
 	BasePath:         "/v1",
 	Schemes:          []string{"http", "https"},
-	Title:            "Sceleton Golang Application API",
-	Description:      "This is a sample server Petstore server.",
+	Title:            "S3 Media Streamer Application API",
+	Description:      "This is a s3 media streamer server.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

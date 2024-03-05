@@ -22,7 +22,7 @@ type Message struct {
 	RawExtra json.RawMessage        `json:"-"`
 }
 
-// Syslog severity levels
+// Syslog severity levels.
 const (
 	LOG_EMERG          = 0
 	LOG_ALERT          = 1
@@ -40,7 +40,7 @@ func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
 	if err != nil {
 		return err
 	}
-	// write up until the final }
+	// write up until the final.
 	if _, err = buf.Write(b[:len(b)-1]); err != nil {
 		return err
 	}
@@ -49,11 +49,11 @@ func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
 		if extraErr != nil {
 			return err
 		}
-		// merge serialized message + serialized extra map
+		// merge serialized message + serialized extra map.
 		if extraErr = buf.WriteByte(','); extraErr != nil {
 			return err
 		}
-		// write serialized extra bytes, without enclosing quotes
+		// write serialized extra bytes, without enclosing quotes.
 		if _, extraErr = buf.Write(eb[1 : len(eb)-1]); extraErr != nil {
 			return err
 		}
@@ -64,13 +64,13 @@ func (m *Message) MarshalJSONBuf(buf *bytes.Buffer) error {
 			return err
 		}
 
-		// write serialized extra bytes, without enclosing quotes
+		// write serialized extra bytes, without enclosing quotes.
 		if _, err = buf.Write(m.RawExtra[1 : len(m.RawExtra)-1]); err != nil {
 			return err
 		}
 	}
 
-	// write final closing quotes
+	// write final closing quotes.
 	return buf.WriteByte('}')
 }
 
@@ -124,7 +124,7 @@ func (m *Message) toBytes(buf *bytes.Buffer) ([]byte, error) {
 }
 
 func constructMessage(p []byte, hostname string, facility string, file string, line int) *Message {
-	// remove trailing and leading whitespace
+	// remove trailing and leading whitespace.
 	p = bytes.TrimSpace(p)
 
 	// If there are newlines in the message, use the first line
@@ -144,7 +144,7 @@ func constructMessage(p []byte, hostname string, facility string, file string, l
 		Short:    string(short),
 		Full:     string(full),
 		TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
-		Level:    LOG_INFO, // info
+		Level:    LOG_INFO, // info.
 		Facility: facility,
 		Extra: map[string]interface{}{
 			"_file": file,
@@ -158,10 +158,10 @@ func constructMessage(p []byte, hostname string, facility string, file string, l
 func constructMessageFromJSON(hostname, facility string, jsonData map[string]interface{}) *Message {
 	level, ok := jsonData["level"].(string)
 	if !ok {
-		level = "info" // default to info if level is not present
+		level = "info" // default to info if level is not present.
 	}
 
-	// Convert level to GELF level
+	// Convert level to GELF level.
 	gelfLevel := map[string]int{
 		"debug":  LOG_DEBUG,
 		"info":   LOG_INFO,
@@ -176,15 +176,15 @@ func constructMessageFromJSON(hostname, facility string, jsonData map[string]int
 	if jsonDataTime, timeOk := jsonData["time"].(float64); timeOk {
 		timeUnix = jsonDataTime
 	} else {
-		// Handle the case when jsonData["time"] is not a float64
-		// You may want to log a warning or handle it based on your requirements
+		// Handle the case when jsonData["time"] is not a float64.
+		// You may want to log a warning or handle it based on your requirements.
 		timeUnix = float64(time.Now().UnixNano()) / float64(time.Second)
 	}
 
 	m := &Message{
 		Version:  "1.1",
 		Host:     hostname,
-		Short:    fmt.Sprintf("%v", jsonData["msg"]), // assuming the message key exists in the JSON
+		Short:    fmt.Sprintf("%v", jsonData["msg"]), // assuming the message key exists in the JSON.
 		TimeUnix: timeUnix,
 		Level:    int32(gelfLevel),
 		Facility: facility,
@@ -192,7 +192,7 @@ func constructMessageFromJSON(hostname, facility string, jsonData map[string]int
 			"_file": jsonData["_file"],
 			"_line": jsonData["_line"],
 			"_func": jsonData["_func"],
-			// Add other fields from jsonData as needed
+			// Add other fields from jsonData as needed.
 		},
 	}
 

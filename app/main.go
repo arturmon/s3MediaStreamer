@@ -2,25 +2,20 @@ package main
 
 import (
 	"context"
-	"net/http"
 	_ "net/http/pprof"
 	_ "skeleton-golange-application/app/docs"
 	"skeleton-golange-application/app/internal/app"
 	"skeleton-golange-application/app/internal/config"
 	"skeleton-golange-application/app/internal/jobs"
-	"skeleton-golange-application/app/pkg/amqp"
-	consul_election "skeleton-golange-application/app/pkg/consulelection"
 	"skeleton-golange-application/app/pkg/logging"
-	"skeleton-golange-application/app/pkg/monitoring"
 	_ "skeleton-golange-application/app/pkg/web/gin"
-	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// @title			Sceleton Golang Application API
+// @title			S3 Media Streamer Application API
 // @version		0.0.1
-// @description	This is a sample server Petstore server.
+// @description	This is a s3 media streamer server.
 // @contact.name API Support
 // @contact.url http://www.swagger.io/support
 // @contact.email support@swagger.io
@@ -29,15 +24,14 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @schemes http https
-// @host      localhost:10000
+// @host      s3streammedia.com
 // @BasePath	/v1
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 // @securityDefinitions.basic	BasicAuth
-// @authorizationurl http://localhost:10000/v1/users/login
+// @authorizationurl http://s3streammedia.com/v1/users/login
 func main() {
 	// debug.SetMemoryLimit(2048)
-	appName := "s3MediaStreamer"
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -48,17 +42,7 @@ func main() {
 	logger.Info("logger initialize")
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(&logger)
-		go func() {
-			server := &http.Server{
-				Addr:              "localhost:6060",
-				Handler:           nil,
-				ReadHeaderTimeout: PPOFReadHeaderTimeout * time.Second,
-			}
-			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				logger.Fatal(err)
-			}
-			logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
-		}()
+		go app.StartPprofServer(&logger)
 	}
 	myApp, err := app.NewAppInit(ctx, cfg, &logger, appName, Version)
 	if err != nil {
@@ -73,56 +57,11 @@ func main() {
 
 	app.HandleSignals(ctx, logger, cancel)
 
-	// Specify the number of workers in the pool
-	numWorkers := 5
-	workerDone := make(chan struct{})
-	go func() {
-		if err = amqp.ConsumeMessagesWithPool(ctx, logger, myApp.GetMessageClient(), numWorkers, workerDone); err != nil {
-			// Handle error
-			logger.Fatal(err)
-		}
-	}()
-
-	go myApp.LeaderElection.Election.Init()
-
-	// Start monitoring the database storage with a ticker
-	healthMetrics := monitoring.NewHealthMetrics()
-	// Call PingStorage in a goroutine
-
-	healthCheckWrapper := monitoring.NewHealthCheckWrapper(healthMetrics, myApp.Storage.Operations, myApp.AMQPClient, myApp.S3, &logger)
-	healthCheckWrapper.StartHealthChecks()
-
-	resultChan := make(chan bool)
-	healthCheckWrapper.CheckMonitoring(ctx, resultChan)
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return // exit goroutine when context is canceled
-			case isHealthy := <-resultChan:
-				if !isHealthy && myApp.LeaderElection.Election.IsLeader() {
-					// Trigger ReElection if components are not healthy
-					consul_election.ReElection(myApp.LeaderElection.Election)
-				}
-			}
-		}
-	}()
-
-	logger.Info("🚀 Running Application...")
-	myApp.Gin.Run(ctx, healthCheckWrapper) // The app will run
-	if err != nil {
-		logger.Fatal(err)
-	}
-	// Wait for the context to be cancelled before exiting
-	<-ctx.Done()
-	myApp.LeaderElection.Election.Stop()
-	logger.Info("Application stopped")
+	myApp.Start(ctx)
 }
 
 var (
 	Version   = "0.0.1"
 	BuildTime = "0000-00-00 UTC"
+	appName   = "s3MediaStreamer"
 )
-
-const PPOFReadHeaderTimeout = 10
