@@ -3,18 +3,18 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
 
 jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +30,8 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_GO: true
+          VALIDATE_MARKDOWN: true
+
         # uses: reviewdog/action-golangci-lint@v2
         #with:
         #  golangci_lint_flags: "--timeout 5m"
