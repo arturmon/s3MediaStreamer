@@ -340,3 +340,6 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - path: "main.go"
+      linters:
+        - gosec

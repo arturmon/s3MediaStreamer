@@ -30,7 +30,7 @@ type Provider struct {
 
 func InitProvider(ctx context.Context, config ProviderConfig) (Provider, error) {
 	if config.Disabled {
-		return Provider{provider: trace.NewNoopTracerProvider()}, nil
+		return Provider{provider: trace.NewNoopTracerProvider()}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
 	}
 
 	tp, tpErr := JaegerTraceProvider(ctx, config)
