@@ -26,9 +26,9 @@ jobs:
       - name: golangci-lint
         uses: super-linter/super-linter/slim@v6.3.0
         env:
+          VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_GO: true
-          LINTER_RULES_PATH: /
         # uses: reviewdog/action-golangci-lint@v2
         #with:
         #  golangci_lint_flags: "--timeout 5m"
