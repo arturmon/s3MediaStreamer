@@ -27,7 +27,7 @@ jobs:
         uses: super-linter/super-linter@v6.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_GO: false
+          VALIDATE_GO: true
         # uses: reviewdog/action-golangci-lint@v2
         #with:
         #  golangci_lint_flags: "--timeout 5m"
