@@ -22,4 +22,4 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           workdir: app/
-          level: error
+          golangci_lint_flags: "--timeout 5m"
