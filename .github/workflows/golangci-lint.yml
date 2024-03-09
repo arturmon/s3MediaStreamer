@@ -23,3 +23,7 @@ jobs:
         with:
           cache: false
           golangci_lint_flags: "--timeout 5m"
+      - shell: bash
+        run: |
+          ls -la
+          golangci-lint run --timeout 5m
