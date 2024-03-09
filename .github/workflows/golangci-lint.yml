@@ -18,12 +18,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          ls -la
+          golangci-lint run --timeout 5m
       - name: golangci-lint
         uses: reviewdog/action-golangci-lint@v2
         with:
           cache: false
           golangci_lint_flags: "--timeout 5m"
-      - shell: bash
-        run: |
-          ls -la
-          golangci-lint run --timeout 5m
