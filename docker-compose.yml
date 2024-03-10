@@ -149,13 +149,15 @@ services:
       - "14268:14268"
 
   consul:
-    image: hashicorp/consul:1.16.5
-    command: consul agent -client=0.0.0.0
+    image: hashicorp/consul:1.18.0
     restart: unless-stopped
+    volumes:
+      - ./infra/consul/server.json:/consul/config/server.json:ro
     ports:
       - "8500:8500"
       - "8600:8600/tcp"
       - "8600:8600/udp"
+    command: "agent"
 
   consul-exporter:
     image: prom/consul-exporter:v0.11.0

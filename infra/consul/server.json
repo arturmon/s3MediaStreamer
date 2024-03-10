@@ -1,0 +1,40 @@
+{
+  "node_name": "consul-server",
+  "server": true,
+  "bootstrap" : true,
+  "ui_config": {
+    "enabled" : true
+  },
+  "dns_config": {
+    "enable_truncate": true,
+    "udp_answer_limit": 100
+  },
+  "datacenter": "dc1",
+  "data_dir": "/consul/data",
+  "bind_addr": "0.0.0.0",
+  "client_addr": "0.0.0.0",
+  "log_level":"INFO",
+  "addresses": {
+    "http" : "0.0.0.0"
+  },
+  "connect": {
+    "enabled": true
+  },
+  "service": {
+    "name": "haproxy",
+    "tags": ["primary"],
+    "address": "haproxy",
+    "port": 80,
+    "check": {
+      "id": "haproxy",
+      "name": "Consul haproxy TCP on port 80",
+      "tcp": "haproxy:8404",
+      "interval": "10s",
+      "timeout": "1s"
+    },
+    "proxy": {
+      "destination_service_name": "s3MediaStreamer",
+      "local_service_port": 10000
+    }
+  }
+}
