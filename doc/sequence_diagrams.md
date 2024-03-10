@@ -1,0 +1,1 @@
+![MarineGEO circle logo](image/sequence_diagrams.jpg "Core infrastructure")
