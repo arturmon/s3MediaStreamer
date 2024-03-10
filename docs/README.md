@@ -42,7 +42,7 @@ use docker-compose.yaml to run all the necessary components
 
 * [Api Functions v1](api_functions_v1.md 'Api Functions')\
 \
-  Example endpoints in file  [test-api.http](../test-api.http 'Tests api')
+  Example endpoints in file  [test-api.http](https://raw.githubusercontent.com/arturmon/s3MediaStreamer/main/test-api.http 'Tests api')
 
 
 ## Generate SWAGGER
