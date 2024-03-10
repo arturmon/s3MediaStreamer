@@ -12,4 +12,4 @@
 
 ## Docs
 
-[README.md](doc/README.md 'README.md')
+[README.md](docs/README.md 'README.md')
