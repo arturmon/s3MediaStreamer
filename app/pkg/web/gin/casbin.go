@@ -136,7 +136,7 @@ func NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logging.Logger,
 		if allowed {
 			c.Next()
 		} else {
-			logger.Errorf("Forbidden: %v", err)
+			logger.Errorf("Forbidden !!!")
 			logger.Errorf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
 			c.AbortWithStatusJSON(http.StatusForbidden, model_all.ErrorResponse{Message: "forbidden"})
 		}

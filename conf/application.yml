@@ -19,7 +19,7 @@ app_config:
     job_clean_track_s3: "@every 10m"
     system_write_user: "Jobs"
   open_telemetry:
-    tracing_enabled: false
+    tracing_enabled: true
     environment: "staging" # 'staging', 'production'
     jaeger_endpoint: "http://localhost:4318"
   s3:
