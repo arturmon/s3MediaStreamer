@@ -148,6 +148,22 @@ services:
       - "4318:4318"
       - "14268:14268"
 
+  weavescope:
+    image: weaveworks/scope:latest
+    container_name: weavescope
+    hostname: weavescope
+    pid: "host"
+    privileged: true
+    ports:
+      - "4040:4040"
+    labels:
+      - "works.weave.role=system"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+    command:
+      - "--probe.docker=true"
+      - "--weave=false"
+
   consul:
     image: hashicorp/consul:1.18.0
     restart: unless-stopped
@@ -166,6 +182,66 @@ services:
     ports:
       - "9107:9107"
 
+  test-app-1:
+    environment:
+      - S3_ACCESS_KEY_ID=
+      - S3_SECRET_ACCESS_KEY=
+      - STORAGE_HOST=postgres
+      - SESSION_POSTGRESQL_HOST=postgres
+      - S3_ENDPOINT=minio-server:9000
+      - MQ_BROKER=rabbit
+      - CONSUL_URL=consul:8500
+      - LOG_TYPE=gelf
+      - LOG_GELF_SERVER_URL=graylog:12201
+      - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
+    image: arturmon/s3stream:latest
+    restart: unless-stopped
+
+
+  test-app-2:
+    environment:
+      - S3_ACCESS_KEY_ID=
+      - S3_SECRET_ACCESS_KEY=
+      - STORAGE_HOST=postgres
+      - SESSION_POSTGRESQL_HOST=postgres
+      - S3_ENDPOINT=minio-server:9000
+      - MQ_BROKER=rabbit
+      - CONSUL_URL=consul:8500
+      - LOG_TYPE=gelf
+      - LOG_GELF_SERVER_URL=graylog:12201
+      - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
+    image: arturmon/s3stream:latest
+    restart: unless-stopped
+
+  test-app-3:
+    environment:
+      - S3_ACCESS_KEY_ID=
+      - S3_SECRET_ACCESS_KEY=
+      - STORAGE_HOST=postgres
+      - SESSION_POSTGRESQL_HOST=postgres
+      - S3_ENDPOINT=minio-server:9000
+      - MQ_BROKER=rabbit
+      - CONSUL_URL=consul:8500
+      - LOG_TYPE=gelf
+      - LOG_GELF_SERVER_URL=graylog:12201
+      - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
+    image: arturmon/s3stream:latest
+    restart: unless-stopped
+
+  test-app-4:
+    environment:
+      - S3_ACCESS_KEY_ID=p1UGO4W34W1hOXyyggt8
+      - S3_SECRET_ACCESS_KEY=HGqNfFtIZgUFefclsnDoIGxcTJG6OvycPCGlUEXl
+      - STORAGE_HOST=postgres
+      - SESSION_POSTGRESQL_HOST=postgres
+      - S3_ENDPOINT=minio-server:9000
+      - MQ_BROKER=rabbit
+      - CONSUL_URL=consul:8500
+      - LOG_TYPE=gelf
+      - LOG_GELF_SERVER_URL=graylog:12201
+      - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
+    image: arturmon/s3stream:latest
+    restart: unless-stopped
 
   haproxy:
     image: haproxytech/haproxy-alpine:2.9.5
