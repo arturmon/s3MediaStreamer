@@ -74,8 +74,8 @@ func (a *WebApp) generateTokensAndCookies(c *gin.Context, user model.User) (stri
 
 	// Set both tokens as cookies
 	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
-	c.SetCookie("jwt", accessToken, maxAge, "/", "localhost", false, true)
-	c.SetCookie("refresh_token", refreshToken, maxAge, "/", "localhost", false, true)
+	c.SetCookie("jwt", accessToken, maxAge, "/", c.Request.Host, false, true)
+	c.SetCookie("refresh_token", refreshToken, maxAge, "/", c.Request.Host, false, true)
 
 	return accessToken, refreshToken, nil
 }
