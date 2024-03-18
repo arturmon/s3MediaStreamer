@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
-	github.com/casbin/casbin/v2 v2.84.1
+	github.com/casbin/casbin/v2 v2.85.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/dmitriyGarden/consul-leader-election v1.2.3
 	github.com/exaring/otelpgx v0.5.4
