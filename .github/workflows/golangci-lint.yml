@@ -26,7 +26,8 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_GO: true
+          VALIDATE_GO: false
+          VALIDATE_GO_MODULES: true
           VALIDATE_MARKDOWN: true
 
         # uses: reviewdog/action-golangci-lint@v2
