@@ -8,7 +8,7 @@
 
 ## Intro
 
-
+[Docs Pages](https://arturmon.github.io/s3MediaStreamer/)
 
 ## Docs
 
