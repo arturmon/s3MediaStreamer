@@ -24,12 +24,12 @@ services:
       - postgresql
 
   redis:
-    container_name: redis
+    container_name: caching
     image: bitnami/redis:latest
     ports:
       - "6379:6379"
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_PASSWORD=redis
 
   memcache:
     container_name: memcache
