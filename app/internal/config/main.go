@@ -58,10 +58,10 @@ type Config struct {
 		Collections      string `yaml:"collections" env:"STORAGE_COLLECTIONS"`
 		CollectionsUsers string `yaml:"collections_users" env:"STORAGE_COLLECTIONS_USERS"`
 		Caching          struct {
-			Enabled    bool   `yaml:"enabled"`
-			Address    string `yaml:"address"`
-			Password   string `yaml:"password"`
-			Expiration int    `yaml:"expiration"`
+			Enabled    bool   `yaml:"enabled" env:"CACHING_ENABLED"`
+			Address    string `yaml:"address" env:"CACHING_ADDRESS"`
+			Password   string `yaml:"password" env:"CACHING_PASSWORD"`
+			Expiration int    `yaml:"expiration" env:"CACHING_EXPIRATION"`
 		} `yaml:"caching"`
 	} `yaml:"storage"`
 
