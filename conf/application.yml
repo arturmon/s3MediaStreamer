@@ -24,7 +24,7 @@ app_config:
     jaeger_endpoint: "http://localhost:4318"
   s3:
     endpoint: "localhost:9000"
-    access_key_id: ""
+    access_key_id: "app"
     secret_access_key: ""
     use_ssl: false
     bucket_name: "music-bucket"
