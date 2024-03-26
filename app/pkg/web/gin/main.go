@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	conf "s3MediaStreamer/app/internal/config"
+	"s3MediaStreamer/app/pkg/caching"
 	"s3MediaStreamer/app/pkg/client/model"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/monitoring"
@@ -27,13 +28,14 @@ type AppInterface interface {
 }
 
 type WebApp struct {
-	cfg      *conf.Config
-	logger   *logging.Logger
-	router   *gin.Engine
-	storage  *model.DBConfig
-	metrics  *monitoring.Metrics
-	enforcer *casbin.Enforcer
-	S3       s3.HandlerS3
+	cfg         *conf.Config
+	logger      *logging.Logger
+	router      *gin.Engine
+	storage     *model.DBConfig
+	metrics     *monitoring.Metrics
+	enforcer    *casbin.Enforcer
+	S3          s3.HandlerS3
+	redisClient *caching.CachingStruct
 }
 
 func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger) (*WebApp, error) {
@@ -92,14 +94,25 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 		return nil, s3err
 	}
 
+	// Init caching
+	logger.Info("redis initializing")
+	redisClient := caching.InitRedis(
+		ctx,
+		cfg.Storage.Caching.Address,
+		cfg.Storage.Caching.Password)
+	if redisClient == nil && !cfg.Storage.Caching.Enabled {
+		logger.Info("redis is NOT initializing or disabled !!!")
+	}
+
 	return &WebApp{
-		cfg:      cfg,
-		logger:   logger,
-		router:   router,
-		storage:  storage,
-		metrics:  metrics,
-		enforcer: enforcer,
-		S3:       s3Handler,
+		cfg:         cfg,
+		logger:      logger,
+		router:      router,
+		storage:     storage,
+		metrics:     metrics,
+		enforcer:    enforcer,
+		S3:          s3Handler,
+		redisClient: redisClient,
 	}, nil
 }
 

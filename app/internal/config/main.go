@@ -57,6 +57,12 @@ type Config struct {
 		Database         string `yaml:"database" env:"STORAGE_DATABASE"`
 		Collections      string `yaml:"collections" env:"STORAGE_COLLECTIONS"`
 		CollectionsUsers string `yaml:"collections_users" env:"STORAGE_COLLECTIONS_USERS"`
+		Caching          struct {
+			Enabled    bool   `yaml:"enabled"`
+			Address    string `yaml:"address"`
+			Password   string `yaml:"password"`
+			Expiration int    `yaml:"expiration"`
+		} `yaml:"caching"`
 	} `yaml:"storage"`
 
 	MessageQueue struct {

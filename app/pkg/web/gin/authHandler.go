@@ -102,12 +102,34 @@ func (a *WebApp) Login(c *gin.Context) {
 		return
 	}
 
-	bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
-
-	if bcryptErr != nil {
-		a.metrics.LoginErrorCounter.Inc()
-		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "incorrect password"})
-		return
+	// Check if the result of the password verification is cached in Redis.
+	if a.cfg.Storage.Caching.Enabled {
+		found, verificationSuccess, err := a.redisClient.CheckPasswordVerificationInRedis(c.Request.Context(), user.ID.String())
+		if err != nil {
+			// Handle the error, for example, logging or returning an error to the client.
+		} else if found && verificationSuccess {
+			// If the result was found in the cache and it's successful, skip the bcrypt check.
+		} else {
+			// Otherwise, perform the bcrypt check.
+			bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
+			if bcryptErr != nil {
+				a.metrics.LoginErrorCounter.Inc()
+				c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Incorrect password"})
+				return
+			}
+			// Cache the successful verification result in Redis.
+			err = a.redisClient.CachePasswordVerificationInRedis(c.Request.Context(), user.ID.String(), true, a.cfg.Storage.Caching.Expiration)
+			if err != nil {
+				// Handle caching error, this is optional.
+			}
+		}
+	} else {
+		bcryptErr := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"]))
+		if bcryptErr != nil {
+			a.metrics.LoginErrorCounter.Inc()
+			c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "Incorrect password"})
+			return
+		}
 	}
 
 	dataSession := map[string]interface{}{
