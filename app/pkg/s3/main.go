@@ -34,7 +34,7 @@ func NewClientS3(ctx context.Context, cfg *config.Config, logger *logging.Logger
 
 	_, err = minioClient.ListBuckets(ctx)
 	if err != nil {
-		logger.Fatalln(err)
+		logger.Fatalln("Failed to list buckets:", err)
 	}
 
 	logger.Printf("S3 %v connected.\n", cfg.AppConfig.S3.Endpoint)
