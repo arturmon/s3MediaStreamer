@@ -248,6 +248,8 @@ services:
   haproxy:
     image: haproxytech/haproxy-alpine:2.9.5
     restart: unless-stopped
+    depends_on:
+      - jaeger
     ports:
       - "8404:8404"
       - "80:80"
