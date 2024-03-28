@@ -26,6 +26,7 @@ services:
   redis:
     container_name: caching
     image: bitnami/redis:latest
+    restart: unless-stopped
     ports:
       - "6379:6379"
     environment:
