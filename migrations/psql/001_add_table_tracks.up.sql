@@ -23,8 +23,20 @@ CREATE TABLE IF NOT EXISTS tracks (
                                       likes             BOOLEAN DEFAULT FALSE,
                                       s3Version         TEXT DEFAULT ''
 );
+
+-- Creating an index
 CREATE INDEX idx_album_code ON tracks (_id);
-alter table tracks owner to root;
 
+-- Changing the table owner
+ALTER TABLE tracks OWNER TO root;
 
+-- Adding comments to the table and its columns
+COMMENT ON TABLE tracks IS 'A table storing information about musical tracks.';
 
+COMMENT ON COLUMN tracks._id IS 'The unique identifier for each track.';
+COMMENT ON COLUMN tracks.created_at IS 'The timestamp when the track was created.';
+COMMENT ON COLUMN tracks.album IS 'The album name to which the track belongs.';
+COMMENT ON COLUMN tracks.artist IS 'The name of the artist who performed the track.';
+COMMENT ON COLUMN tracks.duration IS 'The length of the track.';
+COMMENT ON COLUMN tracks.likes IS 'A boolean indicating whether the track is liked.';
+COMMENT ON COLUMN tracks.sender IS 'The source system from which the track information was sent.';
