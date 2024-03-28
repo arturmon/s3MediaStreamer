@@ -67,6 +67,13 @@ definitions:
           $ref: '#/definitions/model.Track'
         type: array
     type: object
+  model.PlaylistsResponse:
+    properties:
+      playlists:
+        items:
+          $ref: '#/definitions/model.PLayList'
+        type: array
+    type: object
   model.ResponceRefreshTocken:
     properties:
       access_token:
@@ -792,6 +799,31 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new playlist.
+      tags:
+      - playlist-controller
+  /playlist/get:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all playlists available in the storage.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Playlists retrieved successfully
+          schema:
+            $ref: '#/definitions/model.PlaylistsResponse'
+        "404":
+          description: Playlists not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all playlists
       tags:
       - playlist-controller
   /tracks:

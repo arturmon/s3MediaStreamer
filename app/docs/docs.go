@@ -540,6 +540,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/playlist/get": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves all playlists available in the storage.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist-controller"
+                ],
+                "summary": "Get all playlists",
+                "responses": {
+                    "200": {
+                        "description": "Playlists retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/model.PlaylistsResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Playlists not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/playlist/{playlist_id}": {
             "get": {
                 "security": [
@@ -1409,6 +1449,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Track"
+                    }
+                }
+            }
+        },
+        "model.PlaylistsResponse": {
+            "type": "object",
+            "properties": {
+                "playlists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PLayList"
                     }
                 }
             }
