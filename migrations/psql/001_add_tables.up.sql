@@ -42,19 +42,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX idx_user_email ON users (email);
 alter table users owner to root;
 
-CREATE TABLE IF NOT EXISTS chart (
-                                     _id               TEXT,
-                                     created_at        TIMESTAMPTZ NOT NULL,
-                                     updated_at        TIMESTAMPTZ,
-                                     title             TEXT,
-                                     artist            TEXT,
-                                     description       TEXT,
-                                     sender            TEXT CHECK (sender IN ('open_ai')),
-                                     _creator_user     TEXT
-);
-CREATE INDEX idx_album_id ON chart (_id);
-alter table chart owner to root;
-
 CREATE TABLE IF NOT EXISTS playlists (
                                         _id               TEXT NOT NULL PRIMARY KEY,
                                         created_at        TIMESTAMPTZ NOT NULL,
