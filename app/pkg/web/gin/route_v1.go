@@ -55,6 +55,7 @@ func (a *WebApp) setupAppRoutesV1() {
 			playlist.POST("/:playlist_id", a.SetFromPlaylist)
 			playlist.DELETE("/:playlist_id/:track_id", a.RemoveFromPlaylist)
 			playlist.DELETE("/:playlist_id/clear", a.ClearPlaylist)
+			playlist.GET("/get", a.ListPlaylists)
 		}
 	}
 }

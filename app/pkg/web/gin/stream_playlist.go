@@ -376,3 +376,43 @@ func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 	// Return the response in JSON format
 	c.JSON(http.StatusOK, response)
 }
+
+// ListPlaylists godoc
+// @Summary Get all playlists
+// @Description Retrieves all playlists available in the storage.
+// @Tags playlist-controller
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.PlaylistsResponse "Playlists retrieved successfully"
+// @Failure 404 {object} model.ErrorResponse "Playlists not found"
+// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
+// @Security ApiKeyAuth
+// @Router /playlist/get [get]
+func (a *WebApp) ListPlaylists(c *gin.Context) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
+	defer span.End()
+
+	// Get playlists
+	playlists, err := a.storage.Operations.GetAllPlayList(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlists not found"})
+		return
+	}
+
+	response := model.PlaylistsResponse{
+		PLayLists: make([]model.PLayList, len(playlists)),
+	}
+
+	for i, playlist := range playlists {
+		response.PLayLists[i] = model.PLayList{
+			ID:          playlist.ID,
+			CreatedAt:   playlist.CreatedAt,
+			Level:       playlist.Level,
+			Title:       playlist.Title,
+			Description: playlist.Description,
+			CreatorUser: playlist.CreatorUser,
+		}
+	}
+	// Return the response in JSON format
+	c.JSON(http.StatusOK, response)
+}

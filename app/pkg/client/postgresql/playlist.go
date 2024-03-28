@@ -298,3 +298,45 @@ func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) (
 	}
 	return tracks, nil
 }
+
+// GetAllPlayList retrieves tracks associated with a playlist.
+func (c *PgClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllPlayList")
+	defer span.End()
+	// Initialize an empty playlists to store the result
+	var playlists []model.PLayList
+
+	// Create a SQL query to fetch the playlist by its ID
+	selectQuery := squirrel.Select("*").From("playlists").
+		PlaceholderFormat(squirrel.Dollar)
+
+	// Convert the SQL query to SQL and arguments
+	sql, args, err := selectQuery.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	// Execute the query
+	rows, err := c.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Iterate over the result set
+	for rows.Next() {
+		var playlist model.PLayList
+		err = rows.Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Level, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
+		if err != nil {
+			return nil, err
+		}
+		playlists = append(playlists, playlist)
+	}
+
+	// Check for any error that were encountered during iteration
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return playlists, nil
+}

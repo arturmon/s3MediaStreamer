@@ -251,3 +251,29 @@ func (c *MongoClient) UpdatePlaylistTrackOrder(ctx context.Context, playlistID s
 
 	return nil
 }
+
+func (c *MongoClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllPlayList")
+	defer span.End()
+	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), mongoTimeout)
+	defer cancel()
+
+	var playlists []model.PLayList
+	filter := bson.D{}
+	cursor, err := collectionPlaylist.Find(ctx, filter)
+
+	for cursor.Next(ctx) {
+		var playlist model.PLayList
+		err = cursor.Decode(&playlist)
+		if err != nil {
+			return nil, err
+		}
+		playlists = append(playlists, playlist)
+	}
+
+	return playlists, nil
+}

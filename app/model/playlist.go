@@ -14,3 +14,7 @@ type PLayList struct {
 	Description string    `json:"description" bson:"description" example:"A short description of the application"`
 	CreatorUser uuid.UUID `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
 }
+
+type PlaylistsResponse struct {
+	PLayLists []PLayList `json:"playlists"`
+}
