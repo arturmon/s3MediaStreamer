@@ -1,0 +1,3 @@
+DELETE FROM "users" WHERE _id = 'cac22f72-1fa2-4a81-876d-39fcf1cc9159';
+DELETE FROM "users" WHERE _id = '687d570e-54b1-11ee-8c99-0242ac120002';
+DELETE FROM "users" WHERE _id = '1f88a182-8e21-4984-b927-2faea2bd7891';

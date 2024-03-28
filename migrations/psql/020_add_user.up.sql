@@ -38,26 +38,10 @@ INSERT INTO users (
     role,
     refreshtoken
 ) VALUES (
-             '6f14edc0-54b1-11ee-8c99-0242ac120002',
+             '1f88a182-8e21-4984-b927-2faea2bd7891',
              'Jobs',
              'jobs@system',
              '$2a$04$A3TacosfYl0sgsuvkc0VYO2ryL01Y5atl19DR.gLmXuc43BnvDT7a',
-             'admin',
-             ''
-         );
-
-INSERT INTO users (
-    _id,
-    name,
-    email,
-    password,
-    role,
-    refreshtoken
-) VALUES (
-             '81584b50-6305-11ee-8c99-0242ac120002',
-             'Rest',
-             'rest@system',
-             '$2a$14$5QbZV6I7oLTbDfmUgG2vteVKcYWVHX5o9pT0jMD4B6UhMrziku82G',
              'admin',
              ''
          );
