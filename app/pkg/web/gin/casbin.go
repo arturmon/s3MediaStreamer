@@ -58,7 +58,7 @@ func (a *WebApp) checkAuthorization(c *gin.Context) (string, error) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 		return "", fmt.Errorf("invalid JWT token")
 	}
-	return claims["iss"].(string), nil
+	return claims["sub"].(string), nil
 }
 
 func ExtractUserRole(ctx context.Context, logger *logging.Logger) gin.HandlerFunc {

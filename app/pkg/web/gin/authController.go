@@ -19,7 +19,7 @@ func generateAccessToken(ctx context.Context, user model.User) (string, error) {
 	defer span.End()
 	key := []byte(SecretKey)
 	claims := jwt.MapClaims{
-		"iss":  user.Email,
+		"sub":  user.Email,
 		"exp":  time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
 		"role": user.Role,                                             // Include the user's role as a claim
 	}
