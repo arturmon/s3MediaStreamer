@@ -252,7 +252,7 @@ func (c *MongoClient) UpdatePlaylistTrackOrder(ctx context.Context, playlistID s
 	return nil
 }
 
-func (c *MongoClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error) {
+func (c *MongoClient) GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error) {
 	_, span := otel.Tracer("").Start(ctx, "GetAllPlayList")
 	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
@@ -263,7 +263,7 @@ func (c *MongoClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, err
 	defer cancel()
 
 	var playlists []model.PLayList
-	filter := bson.D{}
+	filter := bson.M{"_creator_user": creatorUserID}
 	cursor, err := collectionPlaylist.Find(ctx, filter)
 
 	for cursor.Next(ctx) {

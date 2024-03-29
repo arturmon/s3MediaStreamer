@@ -392,8 +392,22 @@ func (a *WebApp) ListPlaylists(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
 	defer span.End()
 
+	userIDInterface, ok := c.Get("user_id")
+	if !ok {
+		// Handle error: user_id not found in context
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id not found in context"})
+		return
+	}
+
+	userIDString, ok := userIDInterface.(string)
+	if !ok {
+		// Handle error: user_id in context is not a string
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id in context is not a string"})
+		return
+	}
+
 	// Get playlists
-	playlists, err := a.storage.Operations.GetAllPlayList(c.Request.Context())
+	playlists, err := a.storage.Operations.GetAllPlayList(c.Request.Context(), userIDString)
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlists not found"})
 		return

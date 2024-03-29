@@ -109,6 +109,12 @@ func ExtractUserRole(ctx context.Context, logger *logging.Logger) gin.HandlerFun
 			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
+		if userID, exists := claims["user-id"].(string); exists {
+			c.Set("user_id", userID)
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, model_all.ErrorResponse{Message: "user not set user id"})
+			return
+		}
 
 		c.Next() // Indicate that the middleware execution is completed
 	}

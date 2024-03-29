@@ -300,7 +300,7 @@ func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) (
 }
 
 // GetAllPlayList retrieves tracks associated with a playlist.
-func (c *PgClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error) {
+func (c *PgClient) GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error) {
 	_, span := otel.Tracer("").Start(ctx, "GetAllPlayList")
 	defer span.End()
 	// Initialize an empty playlists to store the result
@@ -308,6 +308,7 @@ func (c *PgClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error)
 
 	// Create a SQL query to fetch the playlist by its ID
 	selectQuery := squirrel.Select("*").From("playlists").
+		Where(squirrel.Eq{"_creator_user": creatorUserID}).
 		PlaceholderFormat(squirrel.Dollar)
 
 	// Convert the SQL query to SQL and arguments
@@ -330,7 +331,9 @@ func (c *PgClient) GetAllPlayList(ctx context.Context) ([]model.PLayList, error)
 		if err != nil {
 			return nil, err
 		}
+		//if playlist.CreatorUser == con_user_id {
 		playlists = append(playlists, playlist)
+		//}
 	}
 
 	// Check for any error that were encountered during iteration

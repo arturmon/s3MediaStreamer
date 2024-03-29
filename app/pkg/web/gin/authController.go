@@ -19,9 +19,10 @@ func generateAccessToken(ctx context.Context, user model.User) (string, error) {
 	defer span.End()
 	key := []byte(SecretKey)
 	claims := jwt.MapClaims{
-		"sub":  user.Email,
-		"exp":  time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
-		"role": user.Role,                                             // Include the user's role as a claim
+		"sub":     user.Email,
+		"exp":     time.Now().Add(time.Hour * jwtExpirationHours).Unix(), // 1 day
+		"role":    user.Role,                                             // Include the user's role as a claim
+		"user-id": user.ID.String(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

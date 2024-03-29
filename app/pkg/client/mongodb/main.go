@@ -36,7 +36,7 @@ type MongoCollectionQuery interface {
 	ClearPlayList(ctx context.Context, playlistID string) error
 	UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
-	GetAllPlayList(ctx context.Context) ([]model.PLayList, error)
+	GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error)
 }
 
 type MongoOperations interface {
