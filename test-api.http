@@ -1,35 +1,35 @@
 ###-------------------------------------------------------SYSTEM------------------------------------------------
 ###
-GET http://localhost:10000/metrics
+GET http://{{host}}/metrics
 Content-Type: application/json
 ###
-GET http://localhost:10000/health
+GET http://{{host}}/health
 Content-Type: application/json
 ###---------------------------------------------------------JOB-------------------------------------------------
-GET http://localhost:10000/job/status
+GET http://{{host}}/job/status
 Content-Type: application/json
 ###-------------------------------------------------------ALBUMS------------------------------------------------
 ###
-GET http://localhost:10000/v1/tracks
+GET http://{{host}}/v1/tracks
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/tracks?page=1&page_size=10
+GET http://{{host}}v1/tracks?page=1&page_size=10
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=desc
+GET http://{{host}}/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=desc
 Content-Type: application/json
 ###
 ### Postgresql LIKE filters (use _, %, \% )
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter=0127b619-be74-499c-97f8-c8748194d7fd
+GET http://{{host}}/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter=0127b619-be74-499c-97f8-c8748194d7fd
 ###
-GET http://localhost:10000/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter==0127b619-be74-499c-97f8-c8748194d7fd
+GET http://{{host}}/v1/tracks?page=1&page_size=10&sort_by=_id&sort_order=asc&filter==0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
 ###
-GET http://localhost:10000/v1/tracks/0127b619-be74-499c-97f8-c8748194d7fd
+GET http://{{host}}/v1/tracks/0127b619-be74-499c-97f8-c8748194d7fd
 Content-Type: application/json
 
 ###--------------------------------------------------------USERS------------------------------------------------
-POST http://localhost:8080/v1/users/register
+POST http://{{host}}/v1/users/register
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
   "role":"member"
 }
 ###
-POST http://localhost:8080/v1/users/login
+POST http://{{host}}/v1/users/login
 Content-Type: application/json
 
 {
@@ -47,7 +47,7 @@ Content-Type: application/json
   "password":"1"
 }
 ###
-POST http://localhost:8080/v1/users/login
+POST http://{{host}}/v1/users/login
 Content-Type: application/json
 
 {
@@ -55,34 +55,34 @@ Content-Type: application/json
   "password":"admin"
 }
 ###
-POST http://localhost:8080/v1/users/logout
+POST http://{{host}}/v1/users/logout
 Content-Type: application/json
 ###
-GET http://localhost:8080/v1/users/me
+GET http://{{host}}/v1/users/me
 Content-Type: application/json
 ###
-POST http://localhost:8080/v1/users/delete
+POST http://{{host}}/v1/users/delete
 Content-Type: application/json
 
 {
   "email":"a@a.com"
 }
 ###
-POST http://localhost:10000/v1/users/refresh
+POST http://{{host}}/v1/users/refresh
 Content-Type: application/json
 
 {
   "refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTYzMzA0NTksInN1YiI6ImFAYS5jb20ifQ.5wejb-XaOpUvMPDP-JZRQET-HBcpJ5hDQVNN5A3A7y4"
 }
 ###-------------------------------------------------------OTP------------------------------------------------
-POST http://localhost:10000/v1/users/otp/generate
+POST http://{{host}}/v1/users/otp/generate
 Content-Type: application/json
 
 {
   "user_id":"cac22f72-1fa2-4a81-876d-39fcf1cc9159"
 }
 ###
-POST http://localhost:10000/v1/users/otp/verify
+POST http://{{host}}/v1/users/otp/verify
 Content-Type: application/json
 
 {
@@ -90,7 +90,7 @@ Content-Type: application/json
   "token": "946767"
 }
 ###
-POST http://localhost:10000/v1/users/otp/validate
+POST http://{{host}}/v1/users/otp/validate
 Content-Type: application/json
 
 {
@@ -98,7 +98,7 @@ Content-Type: application/json
   "token": "946767"
 }
 ###
-POST http://localhost:10000/v1/users/otp/disable
+POST http://{{host}}/v1/users/otp/disable
 Content-Type: application/json
 
 {
@@ -107,7 +107,7 @@ Content-Type: application/json
 
 ###-------------------------------------------------------PLAY LIST--------------------------------------------
 ### CreatePlaylist
-POST  http://localhost:8080/v1/playlist/create
+POST  http://{{host}}/v1/playlist/create
 Content-Type: application/json
 
 {
@@ -116,44 +116,35 @@ Content-Type: application/json
   "description":"test Play list"
 }
 ### DeletePlaylist
-DELETE http://localhost:8080/v1/playlist/8ba3a3ac-b804-4220-b08f-b1d9f3931a9f
+DELETE http://{{host}}/v1/playlist/e816469a-1eb7-4f84-b63a-257b13d7ad53
 Content-Type: application/json
 ### AddToPlaylist
-POST http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf/38ec3ba6-85ee-4a47-ba73-c6656dfddfd2
+POST http://{{host}}/v1/playlist/14c82429-069a-4fe5-897b-44776b102e3a/cfbaf598-50df-4cf3-a16c-aa94aff9222d
 Content-Type: application/json
-### ListPleylist
-GET http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
+### ListPlaylist
+GET http://{{host}}/v1/playlist/f7d86b17-f6d9-47f1-b3d5-86f229c3704c
 ### SetFromPlaylist
-POST http://localhost:8080/v1/playlist/8fe5434e-dc03-47f1-b358-2f83e7c7f4cf
+POST http://{{host}}/v1/playlist/14c82429-069a-4fe5-897b-44776b102e3a
 Content-Type: application/json
 
 {
   "track_order":
   [
-    "3773f656-95f6-4a20-89f8-a9b05384b6ce",
-    "6c47f7a4-fd91-44cb-a4a1-690c2e9f4381",
-    "e75564f4-a1e7-4f91-8c0b-78131fd33268",
-    "799712db-2784-438c-a29e-61820c46cebf",
-    "dde313bb-8dd6-42ae-9abf-05cdf6fb2b7c",
-    "f4237f6a-5769-4e42-b1aa-f2898ca86b8f",
-    "76571608-f26d-4c5f-955d-f0d0a34b183f",
-    "c70c2a37-3c52-4d27-a0d0-233e500773ae",
-    "33521a1f-7cd3-4f00-932c-eecd3078d674",
-    "007694c3-83a0-4f7b-97e9-21c3b8411fc8",
-    "4a8988de-9d3a-4d5a-94e5-ac58d2e40cb1",
-    "a807bbf0-43b9-4d3b-8f52-0afa0ab3a399",
-    "09c6e8ef-667f-4aec-8713-dc3e2a7de982"
-
+    "ae80ced6-5989-4330-a763-e9d7159022d9",
+    "cfbaf598-50df-4cf3-a16c-aa94aff9222d",
+    "41331e3f-6b1a-433a-b418-b46cf141251f"
   ]
 }
 ### RemoveFromPlaylist
-DELETE http://localhost:8080/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/89ffa57f-7186-4435-9604-cc21e9458489
+DELETE http://{{host}}/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/89ffa57f-7186-4435-9604-cc21e9458489
 Content-Type: application/json
 ### ClearPlaylist
-DELETE http://localhost:8080/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
+DELETE http://{{host}}/v1/playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
 Content-Type: application/json
+### ListAllPlaylist
+GET http://{{host}}/v1/playlist/get
 
 ###-------------------------------------------------------PLAYER--------------------------------------------
 ### Play playlist
-GET http://localhost:8080/v1/audio/930b1542-7f1f-4755-8c91-f19fb7c9eef4
+GET http://{{host}}/v1/audio/930b1542-7f1f-4755-8c91-f19fb7c9eef4
 Content-Type: application/json
