@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"errors"
 	"s3MediaStreamer/app/model"
 
 	"go.opentelemetry.io/otel"
@@ -308,8 +309,12 @@ func (c *PgClient) GetAllPlayList(ctx context.Context, creatorUserID string) ([]
 
 	// Create a SQL query to fetch the playlist by its ID
 	selectQuery := squirrel.Select("*").From("playlists").
-		Where(squirrel.Eq{"_creator_user": creatorUserID}).
 		PlaceholderFormat(squirrel.Dollar)
+
+	// directive
+	if creatorUserID != "admin" {
+		selectQuery = selectQuery.Where(squirrel.Eq{"_creator_user": creatorUserID})
+	}
 
 	// Convert the SQL query to SQL and arguments
 	sql, args, err := selectQuery.ToSql()
@@ -342,4 +347,42 @@ func (c *PgClient) GetAllPlayList(ctx context.Context, creatorUserID string) ([]
 	}
 
 	return playlists, nil
+}
+
+func (c *PgClient) GetUserAtPlayList(ctx context.Context, playlistID string) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetUserAtPlayList")
+	defer span.End()
+
+	// Create a SQL query to fetch the playlist by its ID
+	selectQuery := squirrel.Select("_creator_user").From("playlists").
+		Where(squirrel.Eq{"_id": playlistID}).
+		PlaceholderFormat(squirrel.Dollar)
+
+	// Convert the SQL query to SQL and arguments
+	sql, args, err := selectQuery.ToSql()
+	if err != nil {
+		return "", err
+	}
+
+	// Execute the query and scan the result into the playlist struct
+	rows, err := c.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	if err != nil {
+		return "", err
+	}
+
+	var creatorUser string
+	if !rows.Next() {
+		return "", errors.New("playlist not found")
+	}
+	// Scan the _creator_user value from the row into the creatorUser variable
+	if err := rows.Scan(&creatorUser); err != nil {
+		return "", err
+	}
+
+	return creatorUser, nil
 }

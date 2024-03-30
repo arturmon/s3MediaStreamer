@@ -7,6 +7,8 @@ import (
 	"s3MediaStreamer/app/model"
 	"strconv"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"go.opentelemetry.io/otel"
 
 	"github.com/google/uuid"
@@ -276,4 +278,28 @@ func (c *MongoClient) GetAllPlayList(ctx context.Context, creatorUserID string) 
 	}
 
 	return playlists, nil
+}
+
+func (c *MongoClient) GetUserAtPlayList(ctx context.Context, playlistID string) (string, error) {
+	_, span := otel.Tracer("").Start(ctx, "GetUserAtPlayList")
+	defer span.End()
+	collection, err := c.FindCollections(config.CollectionPlaylist)
+	if err != nil {
+		return "", err
+	}
+
+	// Find the playlist document with the given playlistID
+	filter := bson.M{"_id": playlistID}
+	var playlist model.PLayList // Assuming you have a Playlist struct defined somewhere
+
+	err = collection.FindOne(ctx, filter).Decode(&playlist)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", errors.New("playlist not found")
+		}
+		return "", err
+	}
+
+	// Return the _creator_user from the playlist document
+	return playlist.CreatorUser.String(), nil
 }

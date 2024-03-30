@@ -110,6 +110,17 @@ func (a *WebApp) DeletePlaylist(c *gin.Context) {
 		return
 	}
 
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
+
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
+		return
+	}
+
 	// Check if the playlist is not empty
 	if err := a.storage.Operations.ClearPlayList(c.Request.Context(), playlistID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to clear playlist"})
@@ -152,8 +163,18 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
 		return
 	}
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
 
-	_, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
+		return
+	}
+
+	_, err = a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Track not found"})
@@ -195,6 +216,17 @@ func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
 	_, _, err := a.storage.Operations.GetPlayListByID(c.Request.Context(), playlistID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
+		return
+	}
+
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
+
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
 
@@ -240,6 +272,17 @@ func (a *WebApp) ClearPlaylist(c *gin.Context) {
 		return
 	}
 
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
+
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
+		return
+	}
+
 	// Clear the playlist by removing all tracks (you should implement this logic)
 	if err := a.storage.Operations.ClearPlayList(c.Request.Context(), playlistID); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to clear playlist"})
@@ -273,6 +316,17 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 	// Check if the playlist exists (you should implement this logic)
 	if !a.storage.Operations.PlaylistExists(c.Request.Context(), playlistID) {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlist not found"})
+		return
+	}
+
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
+
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
 
@@ -334,6 +388,17 @@ func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 		return
 	}
 
+	userRole, userID, err := a.readUserIdAndRole(c)
+	playlistCreateUser, err := a.storage.Operations.GetUserAtPlayList(c, playlistID)
+	if err != nil {
+		return
+	}
+
+	if userRole != "admin" || userID != playlistCreateUser {
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
+		return
+	}
+
 	// Get playlist and tracks
 	playlist, tracks, err := a.storage.Operations.GetPlayListByID(c.Request.Context(), playlistID)
 	if err != nil {
@@ -392,22 +457,15 @@ func (a *WebApp) ListPlaylists(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
 	defer span.End()
 
-	userIDInterface, ok := c.Get("user_id")
-	if !ok {
-		// Handle error: user_id not found in context
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id not found in context"})
-		return
-	}
+	userRole, userID, err := a.readUserIdAndRole(c)
 
-	userIDString, ok := userIDInterface.(string)
-	if !ok {
-		// Handle error: user_id in context is not a string
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id in context is not a string"})
-		return
-	}
+	var playlists []model.PLayList
 
-	// Get playlists
-	playlists, err := a.storage.Operations.GetAllPlayList(c.Request.Context(), userIDString)
+	if userRole == "admin" {
+		playlists, err = a.storage.Operations.GetAllPlayList(c.Request.Context(), "admin")
+	} else {
+		playlists, err = a.storage.Operations.GetAllPlayList(c.Request.Context(), userID)
+	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Playlists not found"})
 		return
