@@ -248,8 +248,8 @@ func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) (
 	// Create a SQL query to fetch tracks associated with the given playlist
 	selectQuery := squirrel.Select("t.*").
 		From("tracks t").
-		Join("playlist_tracks pt ON t._id = pt.track_id").
-		Where(squirrel.Eq{"pt.playlist_id": playlistID}).
+		Join("playlist_tracks pt ON t._id = pt.reference_id").                                                     // Changed "pt.track_id" to "pt.reference_id"
+		Where(squirrel.And{squirrel.Eq{"pt.playlist_id": playlistID}, squirrel.Eq{"pt.reference_type": "track"}}). // Added condition for reference_type
 		PlaceholderFormat(squirrel.Dollar)
 
 	// Convert the SQL query to SQL and arguments

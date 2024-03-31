@@ -26,7 +26,7 @@ type MongoCollectionQuery interface {
 	DeleteTracks(ctx context.Context, code, columns string) error
 	DeleteTracksAll(ctx context.Context) error
 	UpdateTracks(ctx context.Context, track *model.Track) error
-	AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error
+	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
 	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
 	GetAllTracks(ctx context.Context) ([]model.Track, error)
 	CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error

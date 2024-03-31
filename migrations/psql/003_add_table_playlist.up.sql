@@ -24,9 +24,11 @@ COMMENT ON COLUMN playlists._creator_user IS 'User who created the playlist';
 -- Intermediate Table for Many-to-Many Relationship
 CREATE TABLE IF NOT EXISTS playlist_tracks (
                                                playlist_id TEXT NOT NULL REFERENCES playlists(_id),
-                                               track_id TEXT NOT NULL REFERENCES tracks(_id),
+                                               reference_type TEXT CHECK (reference_type IN ('track', 'playlist')),
+                                               reference_id TEXT,
                                                position BIGINT NOT NULL,
-                                               PRIMARY KEY (playlist_id, track_id)
+                                               PRIMARY KEY (playlist_id, reference_type, reference_id), -- Change the primary key
+                                               FOREIGN KEY (playlist_id) REFERENCES playlists(_id) ON DELETE CASCADE
 );
 
 -- Alter table owner
@@ -34,5 +36,6 @@ ALTER TABLE playlist_tracks OWNER TO root;
 
 -- Add comments on columns of the playlist_tracks table
 COMMENT ON COLUMN playlist_tracks.playlist_id IS 'The ID of the playlist.';
-COMMENT ON COLUMN playlist_tracks.track_id IS 'The ID of the track.';
+COMMENT ON COLUMN playlist_tracks.reference_id IS 'The ID of the track or playlist.';
 COMMENT ON COLUMN playlist_tracks.position IS 'The position of the track within the playlist.';
+COMMENT ON COLUMN playlist_tracks.reference_type IS 'Indicates whether the reference is a track or a playlist.';

@@ -223,7 +223,7 @@ func (c *MongoClient) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return tracks, nil
 }
 
-func (c *MongoClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error {
+func (c *MongoClient) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
 	_, span := otel.Tracer("").Start(ctx, "AddTrackToPlaylist")
 	defer span.End()
 	collectionPlaylist, err := c.FindCollections(config.CollectionPlaylist)
@@ -240,7 +240,7 @@ func (c *MongoClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackI
 		return err
 	}
 
-	trackUUID, err := uuid.Parse(trackID)
+	trackUUID, err := uuid.Parse(referenceID)
 	if err != nil {
 		return err
 	}

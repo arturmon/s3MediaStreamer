@@ -169,7 +169,7 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
@@ -182,7 +182,8 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 	}
 
 	// Add the track to the playlist (you should implement this)
-	if err = a.storage.Operations.AddTrackToPlaylist(c.Request.Context(), playlistID, trackID); err != nil {
+	//TODO track
+	if err = a.storage.Operations.AddTrackToPlaylist(c.Request.Context(), playlistID, trackID, "track"); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to add track to playlist"})
 		return
 	}

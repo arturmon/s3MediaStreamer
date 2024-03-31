@@ -324,17 +324,18 @@ func (c *PgClient) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return c.executeSelectQuery(ctx, selectBuilder)
 }
 
-func (c *PgClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID string) error {
+func (c *PgClient) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
 	_, span := otel.Tracer("").Start(ctx, "AddTrackToPlaylist")
 	defer span.End()
+
 	// Start a transaction
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -342,8 +343,8 @@ func (c *PgClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID s
 	// Create a new squirrel.InsertBuilder for the playlist_tracks table
 	insertBuilder := squirrel.
 		Insert("playlist_tracks").
-		Columns("playlist_id", "track_id", "position").
-		Values(playlistID, trackID, squirrel.Expr("COALESCE((SELECT MAX(position) FROM playlist_tracks WHERE playlist_id = ?), 0) + 1", playlistID))
+		Columns("playlist_id", "reference_type", "reference_id", "position").
+		Values(playlistID, referenceType, referenceID, squirrel.Expr("COALESCE((SELECT MAX(position) FROM playlist_tracks WHERE playlist_id = ?), 0) + 1", playlistID))
 
 	// Generate the SQL query
 	query, args, err := insertBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
@@ -352,13 +353,13 @@ func (c *PgClient) AddTrackToPlaylist(ctx context.Context, playlistID, trackID s
 	}
 
 	// Execute the query
-	_, err = c.Pool.Exec(context.TODO(), query, args...)
+	_, err = c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
 	// Commit the transaction
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -422,9 +423,9 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 	}()
 
 	// Create a query to fetch tracks and their positions
-	trackQuery := squirrel.Select("pt.track_id, pt.position, t.*").
+	trackQuery := squirrel.Select("pt.reference_id as track_id, pt.position, t.*").
 		From("playlist_tracks pt").
-		Join("tracks t ON pt.track_id = t._id").
+		Join("tracks t ON pt.reference_id = t._id").
 		Where(squirrel.Eq{"pt.playlist_id": playlistID}).
 		OrderBy("pt.position ASC")
 
@@ -448,11 +449,6 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 		var position int64
 		var trackPlaylistID string
 		if err = rows.Scan(
-			//			&trackPlaylistID, &position, &track.ID, &track.CreatedAt,
-			//			&track.UpdatedAt, &track.Title, &track.Artist,
-			//			&track.Description, &track.Sender, &track.CreatorUser,
-			//			&track.Likes, &track.S3Version,
-
 			&trackPlaylistID, &position, &track.ID,
 			&track.CreatedAt, &track.UpdatedAt,
 			&track.Album, &track.AlbumArtist, &track.Composer,
@@ -467,6 +463,9 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 		}
 
 		playlistTracks = append(playlistTracks, track)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return playlistTracks, nil
