@@ -109,6 +109,8 @@ func (h *HandlerFromS3) DeleteObjectS3(ctx context.Context, object *minio.Object
 func (h *HandlerFromS3) FindObjectFromVersion(ctx context.Context, s3tag string) (minio.ObjectInfo, error) {
 	objects, err := h.ListObjectS3(ctx)
 	if err != nil {
+		h.logger.Errorf("Error listing objects from S3: %s", err.Error())
+
 		return minio.ObjectInfo{}, err
 	}
 
@@ -119,6 +121,7 @@ func (h *HandlerFromS3) FindObjectFromVersion(ctx context.Context, s3tag string)
 	}
 
 	// Object not found, return an error
+	h.logger.Errorf("Object with version %s not found", s3tag)
 	return minio.ObjectInfo{}, fmt.Errorf("object not found")
 }
 
