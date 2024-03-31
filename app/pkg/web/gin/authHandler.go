@@ -272,6 +272,7 @@ func (a *WebApp) User(c *gin.Context) {
 
 	loginResponse := model.OkLoginResponce{
 		Email:        user.Email,
+		UserID:       user.ID.String(),
 		Role:         user.Role,
 		RefreshToken: user.RefreshToken,
 		OtpEnabled:   user.OtpEnabled,
