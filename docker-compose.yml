@@ -99,8 +99,11 @@ services:
       mc version enable myminio/music-bucket;
       mc event add myminio/music-bucket arn:minio:sqs:us-east-1:_:amqp;
       mc admin user add myminio app E7ct9Zr1rOu0ZJZLxTqv;
-      mc admin policy attach myminio readonly --user app;
+      mc admin policy create myminio MusicPolicy /tmp/listMusicBucket.json;
+      mc admin policy attach myminio MusicPolicy --user app;
       "
+    volumes:
+      - ./infra/minio/listMusicBucket.json:/tmp/listMusicBucket.json:ro
     depends_on:
       - minio
 
