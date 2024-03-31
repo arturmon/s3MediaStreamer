@@ -24,6 +24,7 @@ type LoginInput struct {
 
 type OkLoginResponce struct {
 	Email        string `json:"email"`
+	UserID       string `json:"user_id"`
 	Role         string `json:"role"`
 	RefreshToken string `json:"refresh_token"`
 	OtpEnabled   bool   `json:"otp_enabled"`
