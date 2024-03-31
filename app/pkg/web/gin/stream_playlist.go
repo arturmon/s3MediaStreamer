@@ -116,7 +116,7 @@ func (a *WebApp) DeletePlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
@@ -225,7 +225,7 @@ func (a *WebApp) RemoveFromPlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
@@ -278,7 +278,7 @@ func (a *WebApp) ClearPlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
@@ -325,7 +325,7 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
@@ -394,7 +394,7 @@ func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 		return
 	}
 
-	if userRole != "admin" || userID != playlistCreateUser {
+	if userRole != "admin" && userID != playlistCreateUser {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "you are not an administrator or this is not your playlist"})
 		return
 	}
