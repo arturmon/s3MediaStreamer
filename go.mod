@@ -20,7 +20,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/consul/api v1.28.2
-	github.com/hashicorp/go-hclog v1.6.2
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/joho/godotenv v1.5.1
