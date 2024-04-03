@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+postgresql_data
 
 # Test binary, built with `go test -c`
 *.test
