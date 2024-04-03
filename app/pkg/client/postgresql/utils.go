@@ -51,9 +51,6 @@ func (c *PgClient) executeSelectQuery(ctx context.Context, selectBuilder squirre
 				&track.Duration,
 				&track.SampleRate,
 				&track.Bitrate,
-				&track.Sender,
-				&track.CreatorUser,
-				&track.Likes,
 				&track.S3Version,
 			)
 			if err != nil {

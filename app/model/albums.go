@@ -27,9 +27,6 @@ type Track struct {
 	Duration    time.Duration `json:"duration" bson:"duration"`
 	SampleRate  uint32        `json:"sample_rate" bson:"sample_rate" example:"44100"`
 	Bitrate     uint32        `json:"bitrate" bson:"bitrate" example:"320"`
-	Sender      string        `json:"sender" bson:"sender" example:"sender set"`
-	CreatorUser uuid.UUID     `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
-	Likes       bool          `json:"likes" bson:"likes"`
 	S3Version   string        `json:"s3Version" bson:"s3Version"`
 }
 

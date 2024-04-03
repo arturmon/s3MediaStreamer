@@ -171,7 +171,6 @@ func (c *MongoClient) UpdateTracks(ctx context.Context, track *model.Track) erro
 			{Key: "comment", Value: track.Comment},          // Adding comment field
 			{Key: "disc", Value: track.Disc},                // Adding disc field
 			{Key: "track", Value: track.Track},              // Adding track field
-			{Key: "sender", Value: track.Sender},
 		}},
 		{Key: "$currentDate", Value: bson.D{
 			{Key: "updatedat", Value: true}, // Set the "updatedat" field to the current date.

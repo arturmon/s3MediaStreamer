@@ -432,9 +432,6 @@ func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 			Duration:    track.Duration,
 			SampleRate:  track.SampleRate,
 			Bitrate:     track.Bitrate,
-			Sender:      track.Sender,
-			CreatorUser: track.CreatorUser,
-			Likes:       track.Likes,
 			S3Version:   track.S3Version,
 		}
 	}

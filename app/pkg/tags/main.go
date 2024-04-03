@@ -54,11 +54,6 @@ func ReadTags(filename string, cfg *config.Config) (*model.Track, error) {
 		return nil, fmt.Errorf("unsupported audio format")
 	}
 
-	creatorUserUUID, err := uuid.Parse(cfg.AppConfig.Jobs.JobIDUserRun)
-	if err != nil {
-		return nil, err
-	}
-
 	// Convert the year to a time.Time value
 	createdAt := time.Date(tags.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
 
@@ -89,9 +84,6 @@ func ReadTags(filename string, cfg *config.Config) (*model.Track, error) {
 		Duration:    duration,
 		SampleRate:  sampleRate,
 		Bitrate:     bitrate,
-		Sender:      "",
-		CreatorUser: creatorUserUUID,
-		Likes:       false,
 		S3Version:   "",
 	}, nil
 }

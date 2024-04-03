@@ -44,7 +44,6 @@ func checkObjectS3(ctx context.Context, object *MessageBody, c *MessageClient) e
 		return err
 	}
 	objectTags.S3Version = object.Records[0].S3.Object.VersionID
-	objectTags.Sender = "Event"
 
 	err = checkIfTrackExists(ctx, objectTags, c)
 	if err != nil {

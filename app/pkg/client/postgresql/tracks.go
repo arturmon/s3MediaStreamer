@@ -38,7 +38,7 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
 		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, duration, sample_rate, bitrate, sender, _creator_user, likes, s3Version)
+			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, duration, sample_rate, bitrate, s3Version)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
 		`
 		args := []interface{}{
@@ -61,9 +61,6 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 			track.Duration,
 			track.SampleRate,
 			track.Bitrate,
-			track.Sender,
-			track.CreatorUser,
-			track.Likes,
 			track.S3Version,
 		}
 
@@ -157,8 +154,7 @@ func (c *PgClient) GetTracks(ctx context.Context, offset, limit int, sortBy, sor
 			&track.Artist, &track.Year, &track.Comment,
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
-			&track.Bitrate, &track.Sender, &track.CreatorUser,
-			&track.Likes, &track.S3Version,
+			&track.Bitrate, &track.S3Version,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -206,8 +202,7 @@ func (c *PgClient) GetTracksByColumns(ctx context.Context, code, columns string)
 		&track.Artist, &track.Year, &track.Comment,
 		&track.Disc, &track.DiscTotal, &track.Track,
 		&track.TrackTotal, &track.Duration, &track.SampleRate,
-		&track.Bitrate, &track.Sender, &track.CreatorUser,
-		&track.Likes, &track.S3Version,
+		&track.Bitrate, &track.S3Version,
 	)
 	if err != nil {
 		return nil, err
@@ -291,8 +286,6 @@ func (c *PgClient) UpdateTracks(ctx context.Context, track *model.Track) error {
 		"duration":     track.Duration,
 		"sample_rate":  track.SampleRate,
 		"bitrate":      track.Bitrate,
-		"sender":       track.Sender,
-		"likes":        track.Likes,
 		"s3Version":    track.S3Version,
 	})
 
@@ -456,8 +449,7 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 			&track.Artist, &track.Year, &track.Comment,
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
-			&track.Bitrate, &track.Sender, &track.CreatorUser,
-			&track.Likes, &track.S3Version,
+			&track.Bitrate, &track.S3Version,
 		); err != nil {
 			return nil, err
 		}
