@@ -97,10 +97,6 @@ func TestCreateIssue(t *testing.T) {
 		DiscTotal:   1,
 		Track:       2,
 		TrackTotal:  1,
-		Sender:      "amqp",
-		CreatorUser: uuid.New(),
-		Likes:       true,
-		S3Version:   "S3Version",
 	}
 
 	mockCollectionQuery.EXPECT().CreateIssue(gomock.AssignableToTypeOf(&expectedTrack)).Return(nil)
@@ -136,10 +132,6 @@ func TestCreateMany(t *testing.T) {
 			DiscTotal:   1,
 			Track:       1,
 			TrackTotal:  2,
-			Sender:      "amqp",
-			CreatorUser: uuid.New(),
-			Likes:       true,
-			S3Version:   "S3Version",
 		},
 		{
 			ID:          uuid.New(),
@@ -158,10 +150,6 @@ func TestCreateMany(t *testing.T) {
 			DiscTotal:   1,
 			Track:       2,
 			TrackTotal:  2,
-			Sender:      "amqp",
-			CreatorUser: uuid.New(),
-			Likes:       true,
-			S3Version:   "Second S3Version",
 		},
 	}
 
@@ -198,10 +186,6 @@ func TestGetAllIssues(t *testing.T) {
 			DiscTotal:   1,
 			Track:       1,
 			TrackTotal:  2,
-			Sender:      "amqp",
-			CreatorUser: uuid.New(),
-			Likes:       true,
-			S3Version:   "S3Version",
 		},
 		{
 			ID:          uuid.New(),
@@ -220,10 +204,6 @@ func TestGetAllIssues(t *testing.T) {
 			DiscTotal:   1,
 			Track:       2,
 			TrackTotal:  2,
-			Sender:      "amqp",
-			CreatorUser: uuid.New(),
-			Likes:       true,
-			S3Version:   "Second S3Version",
 		},
 	}
 
@@ -260,10 +240,6 @@ func TestGetIssuesByCode(t *testing.T) {
 		DiscTotal:   1,
 		Track:       2,
 		TrackTotal:  1,
-		Sender:      "amqp",
-		CreatorUser: uuid.New(),
-		Likes:       true,
-		S3Version:   "S3Version",
 	}
 
 	mockCollectionQuery.EXPECT().GetIssuesByCode("ALBUM123").Return(expectedTrack, nil)
@@ -331,10 +307,6 @@ func TestUpdateIssue(t *testing.T) {
 		DiscTotal:   1,
 		Track:       2,
 		TrackTotal:  1,
-		Sender:      "amqp",
-		CreatorUser: uuid.New(),
-		Likes:       true,
-		S3Version:   "S3Version",
 	}
 
 	err := mockCollectionQuery.UpdateIssue(&albumToUpdate)
