@@ -154,6 +154,7 @@ func (a *WebApp) Login(c *gin.Context) {
 
 	loginResponse := model.OkLoginResponce{
 		Email:        user.Email,
+		UserID:       user.ID.String(),
 		Role:         user.Role,
 		RefreshToken: refreshToken,
 		OtpEnabled:   user.OtpEnabled,
