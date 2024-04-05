@@ -38,6 +38,9 @@ type MongoCollectionQuery interface {
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
 	GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error)
 	GetUserAtPlayList(ctx context.Context, playlistID string) (string, error)
+	GetS3VersionByTrackID(ctx context.Context, trackID string) (string, error)
+	AddS3Version(ctx context.Context, trackID, version string) error
+	DeleteS3VersionByTrackID(ctx context.Context, trackID string) error
 }
 
 type MongoOperations interface {

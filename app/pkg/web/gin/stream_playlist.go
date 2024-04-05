@@ -342,7 +342,7 @@ func (a *WebApp) SetFromPlaylist(c *gin.Context) {
 
 	// Check if the provided track order contains valid track IDs (you should implement this logic)
 	for _, trackID := range request.TrackOrder {
-		_, err := a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
+		_, err = a.storage.Operations.GetTracksByColumns(c.Request.Context(), trackID, "_id")
 		if err != nil {
 			c.JSON(http.StatusNotFound, model.ErrorResponse{Message: "Track not found"})
 			return
@@ -432,7 +432,6 @@ func (a *WebApp) ListTracksFromPlaylist(c *gin.Context) {
 			Duration:    track.Duration,
 			SampleRate:  track.SampleRate,
 			Bitrate:     track.Bitrate,
-			S3Version:   track.S3Version,
 		}
 	}
 

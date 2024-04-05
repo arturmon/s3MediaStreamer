@@ -14,13 +14,13 @@ func (c *PgClient) CreatePlayListName(ctx context.Context, playlist model.PLayLi
 	_, span := otel.Tracer("").Start(ctx, "CreatePlayListName")
 	defer span.End()
 	// Start a transaction
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -45,13 +45,13 @@ func (c *PgClient) CreatePlayListName(ctx context.Context, playlist model.PLayLi
 	}
 
 	// Execute the query
-	_, err = c.Pool.Exec(context.TODO(), query, args...)
+	_, err = c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
 	// Commit the transaction
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (c *PgClient) GetPlayListByID(ctx context.Context, playlistID string) (mode
 	}
 
 	// Execute the query and scan the result into the playlist struct
-	err = c.Pool.QueryRow(context.TODO(), sql, args...).
+	err = c.Pool.QueryRow(ctx, sql, args...).
 		Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Level, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
 
 	if err != nil {
@@ -110,7 +110,7 @@ func (c *PgClient) DeletePlaylist(ctx context.Context, playlistID string) error 
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(context.TODO(), sql, args...)
+	_, err = c.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (c *PgClient) PlaylistExists(ctx context.Context, playlistID string) bool {
 
 	// Execute the query to count rows
 	var count int
-	err := c.Pool.QueryRow(context.TODO(), query, args...).Scan(&count)
+	err := c.Pool.QueryRow(ctx, query, args...).Scan(&count)
 	if err != nil {
 		return false // An error occurred or playlist does not exist
 	}
@@ -148,13 +148,13 @@ func (c *PgClient) ClearPlayList(ctx context.Context, playlistID string) error {
 	_, span := otel.Tracer("").Start(ctx, "ClearPlayList")
 	defer span.End()
 	// Start a transaction
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -171,13 +171,13 @@ func (c *PgClient) ClearPlayList(ctx context.Context, playlistID string) error {
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(context.TODO(), query, args...)
+	_, err = c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
 	// Commit the transaction
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -189,51 +189,57 @@ func (c *PgClient) ClearPlayList(ctx context.Context, playlistID string) error {
 func (c *PgClient) UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error {
 	_, span := otel.Tracer("").Start(ctx, "UpdatePlaylistTrackOrder")
 	defer span.End()
-	tx, err := c.Pool.Begin(context.Background())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		if rErr := tx.Rollback(context.Background()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
 
-	// Create a map to store the new positions for each track
-	newPositions := make(map[string]int)
-	positionCounter := 1
+	// Fetch existing tracks in the playlist and their positions
+	existingTracks := make(map[string]int)
+	rows, err := tx.Query(ctx, "SELECT reference_id, position FROM playlist_tracks WHERE playlist_id = $1", playlistID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
 
-	// Assign positions to tracks based on the provided order
-	for _, trackID := range trackOrderRequest {
-		newPositions[trackID] = positionCounter
-		positionCounter++
+	for rows.Next() {
+		var trackID string
+		var position int
+		if err = rows.Scan(&trackID, &position); err != nil {
+			return err
+		}
+		existingTracks[trackID] = position
+	}
+
+	// Determine the last position in the playlist
+	lastPosition := 0
+	for _, pos := range existingTracks {
+		if pos > lastPosition {
+			lastPosition = pos
+		}
 	}
 
 	// Start updating the track positions based on the provided order
 	for _, trackID := range trackOrderRequest {
-		// Check if the track exists in the new order
-		newPosition, exists := newPositions[trackID]
-		if exists {
-			// Use the ON CONFLICT clause to handle conflicts by inserting the track
-			updateQuery := squirrel.Insert("playlist_tracks").
-				Columns("playlist_id", "track_id", "position").
-				Values(playlistID, trackID, newPosition).
-				Suffix("ON CONFLICT (playlist_id, track_id) DO UPDATE SET position = EXCLUDED.position")
-
-			sql, args, errInsertQuery := updateQuery.PlaceholderFormat(squirrel.Dollar).ToSql()
-			if errInsertQuery != nil {
+		// Check if the track is already in the playlist
+		if _, exists := existingTracks[trackID]; !exists {
+			// Track is not in the playlist, so insert it with the next position
+			lastPosition++
+			_, err = tx.Exec(ctx, "INSERT INTO playlist_tracks (playlist_id, reference_type, reference_id, position) VALUES ($1, $2, $3, $4)",
+				playlistID, "track", trackID, lastPosition)
+			if err != nil {
 				return err
-			}
-
-			_, errQuery := c.Pool.Exec(context.TODO(), sql, args...)
-			if errQuery != nil {
-				return errQuery
 			}
 		}
 	}
 
 	// Commit the transaction.
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -259,7 +265,7 @@ func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) (
 	}
 
 	// Execute the query and scan the result into a slice of tracks
-	rows, err := c.Pool.Query(context.TODO(), sql, args...)
+	rows, err := c.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +293,6 @@ func (c *PgClient) GetTracksByPlaylist(ctx context.Context, playlistID string) (
 			&track.Duration,
 			&track.SampleRate,
 			&track.Bitrate,
-			&track.S3Version,
 		)
 		if err != nil {
 			return nil, err
@@ -377,7 +382,7 @@ func (c *PgClient) GetUserAtPlayList(ctx context.Context, playlistID string) (st
 		return "", errors.New("playlist not found")
 	}
 	// Scan the _creator_user value from the row into the creatorUser variable
-	if err := rows.Scan(&creatorUser); err != nil {
+	if err = rows.Scan(&creatorUser); err != nil {
 		return "", err
 	}
 

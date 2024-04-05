@@ -17,8 +17,7 @@ CREATE TABLE IF NOT EXISTS tracks (
                                       track_total       SMALLINT DEFAULT 0,
                                       duration          INTERVAL DEFAULT '0 seconds',
                                       sample_rate       INT DEFAULT 0,
-                                      bitrate           INT DEFAULT 0,
-                                      s3Version         TEXT DEFAULT ''
+                                      bitrate           INT DEFAULT 0
 );
 
 
@@ -36,5 +35,3 @@ COMMENT ON COLUMN tracks.created_at IS 'The timestamp when the track was created
 COMMENT ON COLUMN tracks.album IS 'The album name to which the track belongs.';
 COMMENT ON COLUMN tracks.artist IS 'The name of the artist who performed the track.';
 COMMENT ON COLUMN tracks.duration IS 'The length of the track.';
-COMMENT ON COLUMN tracks.likes IS 'A boolean indicating whether the track is liked.';
-COMMENT ON COLUMN tracks.sender IS 'The source system from which the track information was sent.';

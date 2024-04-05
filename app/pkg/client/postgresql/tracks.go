@@ -21,13 +21,13 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 	}
 
 	// Start a transaction
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -38,8 +38,8 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
 		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, duration, sample_rate, bitrate, s3Version)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, duration, sample_rate, bitrate)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 		`
 		args := []interface{}{
 			track.ID,
@@ -61,14 +61,13 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 			track.Duration,
 			track.SampleRate,
 			track.Bitrate,
-			track.S3Version,
 		}
 
 		batch.Queue(query, args...)
 	}
 
 	// Execute the batch
-	results := c.Pool.SendBatch(context.TODO(), batch)
+	results := c.Pool.SendBatch(ctx, batch)
 
 	// Check for errors in the batch execution
 	if err = results.Close(); err != nil {
@@ -154,7 +153,7 @@ func (c *PgClient) GetTracks(ctx context.Context, offset, limit int, sortBy, sor
 			&track.Artist, &track.Year, &track.Comment,
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
-			&track.Bitrate, &track.S3Version,
+			&track.Bitrate,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -202,7 +201,7 @@ func (c *PgClient) GetTracksByColumns(ctx context.Context, code, columns string)
 		&track.Artist, &track.Year, &track.Comment,
 		&track.Disc, &track.DiscTotal, &track.Track,
 		&track.TrackTotal, &track.Duration, &track.SampleRate,
-		&track.Bitrate, &track.S3Version,
+		&track.Bitrate,
 	)
 	if err != nil {
 		return nil, err
@@ -286,7 +285,6 @@ func (c *PgClient) UpdateTracks(ctx context.Context, track *model.Track) error {
 		"duration":     track.Duration,
 		"sample_rate":  track.SampleRate,
 		"bitrate":      track.Bitrate,
-		"s3Version":    track.S3Version,
 	})
 
 	// Add a WHERE condition to identify the record to update based on the provided code
@@ -404,13 +402,13 @@ func (c *PgClient) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trac
 func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
 	_, span := otel.Tracer("").Start(ctx, "GetAllTracksByPositions")
 	defer span.End()
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -428,7 +426,7 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 	}
 
 	// Execute the query within the transaction
-	rows, err := tx.Query(context.TODO(), query, args...)
+	rows, err := tx.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -449,7 +447,7 @@ func (c *PgClient) GetAllTracksByPositions(ctx context.Context, playlistID strin
 			&track.Artist, &track.Year, &track.Comment,
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
-			&track.Bitrate, &track.S3Version,
+			&track.Bitrate,
 		); err != nil {
 			return nil, err
 		}

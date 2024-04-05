@@ -27,7 +27,6 @@ type Track struct {
 	Duration    time.Duration `json:"duration" bson:"duration"`
 	SampleRate  uint32        `json:"sample_rate" bson:"sample_rate" example:"44100"`
 	Bitrate     uint32        `json:"bitrate" bson:"bitrate" example:"320"`
-	S3Version   string        `json:"s3Version" bson:"s3Version"`
 }
 
 type Tops struct {

@@ -14,6 +14,10 @@ func (c *MessageClient) deleteEvent(ctx context.Context, s3event *MessageBody) e
 		c.logger.Printf("Error deleting filename: %v\n", err)
 		return err
 	}
+	err = c.storage.Operations.DeleteS3VersionByTrackID(ctx, s3event.Records[0].S3.Object.VersionID)
+	if err != nil {
+		return fmt.Errorf("error add s3 track: %w", err)
+	}
 	return nil
 }
 
@@ -43,27 +47,28 @@ func checkObjectS3(ctx context.Context, object *MessageBody, c *MessageClient) e
 		c.logger.Printf("Error processing file: %s Error: %v\n", object.Records[0].S3.Object.Key, errReadTags)
 		return err
 	}
-	objectTags.S3Version = object.Records[0].S3.Object.VersionID
+	//TODO
+	//objectTags.S3Version = object.Records[0].S3.Object.VersionID
 
-	err = checkIfTrackExists(ctx, objectTags, c)
+	err = checkIfTrackExists(ctx, objectTags, object.Records[0].S3.Object.VersionID, c)
 	if err != nil {
 		c.logger.Printf("%v\n", err)
 	}
 	return nil
 }
 
-func checkIfTrackExists(ctx context.Context, track *model.Track, c *MessageClient) error {
+func checkIfTrackExists(ctx context.Context, track *model.Track, s3id string, c *MessageClient) error {
 	_, err := c.storage.Operations.GetTracksByColumns(ctx, track.Title, "title")
 	if err != nil {
 		if isNoRecordsFound(err.Error()) {
-			return handleNonexistentTrack(ctx, track, c)
+			return handleNonexistentTrack(ctx, track, s3id, c)
 		}
 		return fmt.Errorf("error getting existing albums for Artist %s: %w", track.Title, err)
 	}
 	return nil
 }
 
-func handleNonexistentTrack(ctx context.Context, track *model.Track, c *MessageClient) error {
+func handleNonexistentTrack(ctx context.Context, track *model.Track, s3id string, c *MessageClient) error {
 	c.logger.Printf("Track Artist: %s not found in the database.\n", track.Title)
 
 	existingTracksSlice := []model.Track{*track}
@@ -73,6 +78,11 @@ func handleNonexistentTrack(ctx context.Context, track *model.Track, c *MessageC
 		}
 	} else {
 		c.logger.Printf("Track with Artist %s already exists\n", track.Artist)
+	}
+
+	err := c.storage.Operations.AddS3Version(ctx, existingTracksSlice[0].ID.String(), s3id)
+	if err != nil {
+		return fmt.Errorf("error add s3 track: %w", err)
 	}
 	c.logger.Printf("Track Artist: %s save to database.\n", track.Artist)
 	return nil

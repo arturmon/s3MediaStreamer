@@ -84,7 +84,6 @@ func ReadTags(filename string, cfg *config.Config) (*model.Track, error) {
 		Duration:    duration,
 		SampleRate:  sampleRate,
 		Bitrate:     bitrate,
-		S3Version:   "",
 	}, nil
 }
 

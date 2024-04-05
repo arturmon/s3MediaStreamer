@@ -22,7 +22,7 @@ func (c *PgClient) executeSelectQuery(ctx context.Context, selectBuilder squirre
 		}
 
 		// Execute the SELECT query
-		rows, err := c.Pool.Query(context.TODO(), sql, args...)
+		rows, err := c.Pool.Query(ctx, sql, args...)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +51,6 @@ func (c *PgClient) executeSelectQuery(ctx context.Context, selectBuilder squirre
 				&track.Duration,
 				&track.SampleRate,
 				&track.Bitrate,
-				&track.S3Version,
 			)
 			if err != nil {
 				return nil, err

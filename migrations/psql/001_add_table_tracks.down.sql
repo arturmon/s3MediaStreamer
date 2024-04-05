@@ -1,6 +1,6 @@
--- Dropping the index before dropping the table to ensure a clean slate
+-- Drop the index
 DROP INDEX IF EXISTS idx_album_code;
 
--- Dropping the tracks table if it exists to avoid errors in case of re-creation
-DROP TABLE IF EXISTS tracks;
+-- Drop the main table and all its children
+DROP TABLE IF EXISTS tracks CASCADE;
 

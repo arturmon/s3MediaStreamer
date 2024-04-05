@@ -74,7 +74,12 @@ func (a *WebApp) StreamM3U(c *gin.Context) {
 		return
 	}
 
-	findObject, err := a.S3.FindObjectFromVersion(context.Background(), track.S3Version)
+	trackID, err := a.storage.Operations.GetS3VersionByTrackID(c, track.ID.String())
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
+		return
+	}
+	findObject, err := a.S3.FindObjectFromVersion(context.Background(), trackID)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Segment not found"})
 		return
