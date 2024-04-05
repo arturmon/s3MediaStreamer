@@ -7,11 +7,13 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgresql_data:/bitnami/postgresql
+      - ./postgresql_data:/bitnami/postgresql
     environment:
       - POSTGRESQL_USERNAME=root
       - POSTGRESQL_PASSWORD=1qazxsw2
+      - POSTGRESQL_POSTGRES_PASSWORD=postgres
       - POSTGRESQL_DATABASE=db_issue_album
+      - POSTGRESQL_CLIENT_MIN_MESSAGES=notice
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter
