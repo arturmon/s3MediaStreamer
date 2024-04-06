@@ -15,7 +15,12 @@ func RunMigrations(_ context.Context, connectionString string) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize migrations: %w", err)
 	}
-	defer m.Close()
+	defer func(m *migrate.Migrate) {
+		err, _ = m.Close()
+		if err != nil {
+
+		}
+	}(m)
 
 	// Apply pending migrations
 	migrateErr := m.Up()
