@@ -35,13 +35,18 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 	// Create a batch to batch insert queries
 	batch := &pgx.Batch{}
 
+	// Prepare the squirrel insert builder
+	ib := squirrel.Insert("tracks").Columns(
+		"_id", "created_at", "updated_at", "album", "album_artist",
+		"composer", "genre", "lyrics", "title", "artist", "year",
+		"comment", "disc", "disc_total", "track", "track_total",
+		"duration", "sample_rate", "bitrate",
+	)
+
 	// Add INSERT queries to the batch for each track
 	for _, track := range list {
-		query := `
-			INSERT INTO tracks (_id, created_at, updated_at, album, album_artist, composer, genre, lyrics, title, artist, year, comment, disc, disc_total, track, track_total, duration, sample_rate, bitrate)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
-		`
-		args := []interface{}{
+		// Build the insert query for each track
+		ib = ib.Values(
 			track.ID,
 			track.CreatedAt,
 			track.UpdatedAt,
@@ -61,10 +66,18 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 			track.Duration,
 			track.SampleRate,
 			track.Bitrate,
-		}
-
-		batch.Queue(query, args...)
+		)
 	}
+	ib = ib.PlaceholderFormat(squirrel.Dollar)
+
+	// Get the SQL query and arguments from the squirrel builder
+	sql, args, err := ib.ToSql()
+	if err != nil {
+		return err
+	}
+
+	// Queue the SQL query and arguments to the batch
+	batch.Queue(sql, args...)
 
 	// Execute the batch
 	results := c.Pool.SendBatch(ctx, batch)
@@ -75,7 +88,7 @@ func (c *PgClient) CreateTracks(ctx context.Context, list []model.Track) error {
 	}
 
 	// Commit the transaction
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -136,7 +149,7 @@ func (c *PgClient) GetTracks(ctx context.Context, offset, limit int, sortBy, sor
 	}
 
 	// Execute the query and retrieve the results
-	rows, err := c.Pool.Query(context.TODO(), sql, args...)
+	rows, err := c.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -184,7 +197,7 @@ func (c *PgClient) GetTracksByColumns(ctx context.Context, code, columns string)
 	}
 
 	// Execute the query and retrieve the results
-	rows, errQuery := c.Pool.Query(context.TODO(), sql, args...)
+	rows, errQuery := c.Pool.Query(ctx, sql, args...)
 	if errQuery != nil {
 		return nil, errQuery
 	}
@@ -228,7 +241,7 @@ func (c *PgClient) DeleteTracks(ctx context.Context, code, columns string) error
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(context.TODO(), sql, args...)
+	_, err = c.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}
@@ -250,7 +263,7 @@ func (c *PgClient) DeleteTracksAll(ctx context.Context) error {
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(context.TODO(), sql, args...)
+	_, err = c.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}
@@ -297,7 +310,7 @@ func (c *PgClient) UpdateTracks(ctx context.Context, track *model.Track) error {
 	}
 
 	// Execute the UPDATE query
-	_, err = c.Pool.Exec(context.TODO(), sql, args...)
+	_, err = c.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}
@@ -362,13 +375,13 @@ func (c *PgClient) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trac
 	_, span := otel.Tracer("").Start(ctx, "RemoveTrackFromPlaylist")
 	defer span.End()
 	// Start a transaction
-	tx, err := c.Pool.Begin(context.TODO())
+	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		// Defer the rollback and check for errors
-		if rErr := tx.Rollback(context.TODO()); rErr != nil && err == nil {
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
@@ -385,13 +398,13 @@ func (c *PgClient) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trac
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(context.TODO(), query, args...)
+	_, err = c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
 
 	// Commit the transaction
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 	if err != nil {
 		return err
 	}
