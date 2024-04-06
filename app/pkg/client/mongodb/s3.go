@@ -9,6 +9,6 @@ func (c *MongoClient) AddS3Version(ctx context.Context, trackID, version string)
 	return nil
 }
 
-func (c *MongoClient) DeleteS3VersionByTrackID(ctx context.Context, trackID string) error {
+func (c *MongoClient) DeleteS3Version(ctx context.Context, trackID string) error {
 	return nil
 }

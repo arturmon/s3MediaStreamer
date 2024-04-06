@@ -116,10 +116,10 @@ func (c *MongoClient) GetTracksByColumns(ctx context.Context, code, columns stri
 	return &result, nil
 }
 
-func (c *MongoClient) DeleteTracks(ctx context.Context, code, columns string) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteTracks")
+func (c *MongoClient) CleanTracks(ctx context.Context) error {
+	_, span := otel.Tracer("").Start(ctx, "CleanTracks")
 	defer span.End()
-	filter := bson.D{primitive.E{Key: columns, Value: code}}
+	filter := bson.D{primitive.E{}}
 	collection, err := c.FindCollections(config.CollectionTrack)
 	if err != nil {
 		return err

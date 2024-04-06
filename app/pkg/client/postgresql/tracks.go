@@ -223,26 +223,25 @@ func (c *PgClient) GetTracksByColumns(ctx context.Context, code, columns string)
 	return &track, nil
 }
 
-// DeleteTracks deletes a single record from the "track" table based on the provided code.
-func (c *PgClient) DeleteTracks(ctx context.Context, code, columns string) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteTracks")
+// CleanTracks deletes a single record from the "track" table based on the provided code.
+func (c *PgClient) CleanTracks(ctx context.Context) error {
+	_, span := otel.Tracer("").Start(ctx, "CleanTracks")
 	defer span.End()
 	// Create a new instance of squirrel.DeleteBuilder and specify the table name
-	deleteBuilder := squirrel.Delete("tracks").PlaceholderFormat(squirrel.Dollar)
+	generateSqlTrack := squirrel.Delete("tracks")
 
 	// Add a WHERE condition to specify the record to delete
-	deleteBuilder = deleteBuilder.Where(squirrel.Eq{columns: code})
-	deleteBuilder = deleteBuilder.PlaceholderFormat(squirrel.Dollar)
+	generateSqlTrack = generateSqlTrack.Where("_id NOT IN (SELECT track_id FROM s3Version)")
+	generateSqlTrack = generateSqlTrack.PlaceholderFormat(squirrel.Dollar)
 
 	// Generate the SQL query and arguments
-	sql, args, err := deleteBuilder.ToSql()
+	sql, args, err := generateSqlTrack.ToSql()
 	if err != nil {
 		return err
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(ctx, sql, args...)
-	if err != nil {
+	if err = c.ExecInTransaction(ctx, sql, args...); err != nil {
 		return err
 	}
 
@@ -253,18 +252,18 @@ func (c *PgClient) DeleteTracks(ctx context.Context, code, columns string) error
 func (c *PgClient) DeleteTracksAll(ctx context.Context) error {
 	_, span := otel.Tracer("").Start(ctx, "DeleteTracksAll")
 	defer span.End()
+
 	// Create a new instance of squirrel.DeleteBuilder
-	deleteBuilder := squirrel.Delete("").From("tracks")
+	generateSqlTracks := squirrel.Delete("").From("tracks")
 
 	// Generate the SQL query and arguments
-	sql, args, err := deleteBuilder.ToSql()
+	sql, args, err := generateSqlTracks.ToSql()
 	if err != nil {
 		return err
 	}
 
 	// Execute the DELETE query
-	_, err = c.Pool.Exec(ctx, sql, args...)
-	if err != nil {
+	if err = c.ExecInTransaction(ctx, sql, args...); err != nil {
 		return err
 	}
 

@@ -9,14 +9,14 @@ import (
 )
 
 func (c *MessageClient) deleteEvent(ctx context.Context, s3event *MessageBody) error {
-	err := c.storage.Operations.DeleteTracks(ctx, s3event.Records[0].S3.Object.VersionID, "s3Version")
+	err := c.storage.Operations.DeleteS3Version(ctx, s3event.Records[0].S3.Object.VersionID)
+	if err != nil {
+		return fmt.Errorf("error add s3 track: %w", err)
+	}
+	err = c.storage.Operations.CleanTracks(ctx)
 	if err != nil {
 		c.logger.Printf("Error deleting filename: %v\n", err)
 		return err
-	}
-	err = c.storage.Operations.DeleteS3VersionByTrackID(ctx, s3event.Records[0].S3.Object.VersionID)
-	if err != nil {
-		return fmt.Errorf("error add s3 track: %w", err)
 	}
 	return nil
 }

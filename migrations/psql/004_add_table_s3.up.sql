@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS s3Version (
+CREATE TABLE IF NOT EXISTS s3version (
                                          track_id TEXT NOT NULL REFERENCES tracks(_id),
                                          version TEXT DEFAULT '',
                                          PRIMARY KEY (track_id)

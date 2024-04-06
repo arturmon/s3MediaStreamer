@@ -69,13 +69,13 @@ func (c *PgClient) AddS3Version(ctx context.Context, trackID, version string) er
 	return nil
 }
 
-func (c *PgClient) DeleteS3VersionByTrackID(ctx context.Context, trackID string) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteS3VersionByTrackID")
+func (c *PgClient) DeleteS3Version(ctx context.Context, version string) error {
+	_, span := otel.Tracer("").Start(ctx, "DeleteS3Version")
 	defer span.End()
 
 	// Create a delete query using Squirrel
 	deleteQuery := squirrel.Delete("s3Version").
-		Where(squirrel.Eq{"track_id": trackID}).
+		Where(squirrel.Eq{"version": version}).
 		PlaceholderFormat(squirrel.Dollar)
 
 	// Convert the delete query to SQL and arguments

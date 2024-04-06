@@ -23,7 +23,7 @@ type PostgresCollectionQuery interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
 	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
-	DeleteTracks(ctx context.Context, code, columns string) error
+	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
 	UpdateTracks(ctx context.Context, track *model.Track) error
 	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
@@ -40,7 +40,7 @@ type PostgresCollectionQuery interface {
 	GetUserAtPlayList(ctx context.Context, playlistID string) (string, error)
 	GetS3VersionByTrackID(ctx context.Context, trackID string) (string, error)
 	AddS3Version(ctx context.Context, trackID, version string) error
-	DeleteS3VersionByTrackID(ctx context.Context, trackID string) error
+	DeleteS3Version(ctx context.Context, trackID string) error
 }
 
 type PostgresOperations interface {
