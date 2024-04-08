@@ -49,15 +49,12 @@ type Config struct {
 	} `yaml:"app_config"`
 
 	Storage struct {
-		Type             string `yaml:"type" env:"STORAGE_TYPE"`
-		Username         string `yaml:"username" env:"STORAGE_USERNAME"`
-		Password         string `yaml:"password" env:"STORAGE_PASSWORD"`
-		Host             string `yaml:"host" env:"STORAGE_HOST"`
-		Port             string `yaml:"port" env:"STORAGE_PORT"`
-		Database         string `yaml:"database" env:"STORAGE_DATABASE"`
-		Collections      string `yaml:"collections" env:"STORAGE_COLLECTIONS"`
-		CollectionsUsers string `yaml:"collections_users" env:"STORAGE_COLLECTIONS_USERS"`
-		Caching          struct {
+		Username string `yaml:"username" env:"STORAGE_USERNAME"`
+		Password string `yaml:"password" env:"STORAGE_PASSWORD"`
+		Host     string `yaml:"host" env:"STORAGE_HOST"`
+		Port     string `yaml:"port" env:"STORAGE_PORT"`
+		Database string `yaml:"database" env:"STORAGE_DATABASE"`
+		Caching  struct {
 			Enabled    bool   `yaml:"enabled" env:"CACHING_ENABLED"`
 			Address    string `yaml:"address" env:"CACHING_ADDRESS"`
 			Password   string `yaml:"password" env:"CACHING_PASSWORD"`

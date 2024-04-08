@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -58,10 +56,6 @@ func (c *PgClient) GetConnectionString() string {
 
 func (c *PgClient) Begin(ctx context.Context) (pgx.Tx, error) {
 	return c.Pool.Begin(ctx)
-}
-
-func (c *PgClient) FindCollections(name string) (*mongo.Collection, error) {
-	return nil, fmt.Errorf("FindCollections is not supported for PostgreSQL, %s not finded", name)
 }
 
 func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error {

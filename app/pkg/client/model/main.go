@@ -6,40 +6,24 @@ import (
 	"net"
 	"net/url"
 	"s3MediaStreamer/app/internal/config"
-	"s3MediaStreamer/app/pkg/client/mongodb"
 	"s3MediaStreamer/app/pkg/client/postgresql"
 	"s3MediaStreamer/app/pkg/logging"
 	"time"
-
-	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type StorageConfig struct {
-	Type             string
-	Host             string
-	Port             string
-	Database         string
-	Collections      string
-	CollectionsUsers string
-	Username         string
-	Password         string
-	client           *mongo.Client
-	pool             *pgxpool.Pool
+	Host     string
+	Port     string
+	Database string
+	Username string
+	Password string
+	pool     *pgxpool.Pool
 }
-
-type DBType string
-
-const (
-	MongoDBType DBType = "mongodb"
-	PgSQLType   DBType = "postgresql"
-)
 
 type DBConfig struct {
 	Operations DBOperations
@@ -49,52 +33,26 @@ type DBOperations interface {
 	Connect(_ *logging.Logger) error
 	Close(ctx context.Context) error
 	Ping(ctx context.Context) error
-	mongodb.MongoOperations
 	postgresql.PostgresOperations
 }
 
 func NewDBConfig(cfg *config.Config, logger *logging.Logger) (*DBConfig, error) {
-	switch DBType(cfg.Storage.Type) {
-	case MongoDBType:
-		client, err := GetMongoClient(&StorageConfig{
-			Type:             cfg.Storage.Type,
-			Host:             cfg.Storage.Host,
-			Port:             cfg.Storage.Port,
-			Username:         cfg.Storage.Username,
-			Password:         cfg.Storage.Password,
-			Database:         cfg.Storage.Database,
-			Collections:      cfg.Storage.Collections,
-			CollectionsUsers: cfg.Storage.CollectionsUsers,
-		}, logger)
-		if err != nil {
-			return nil, err
-		}
-		return &DBConfig{
-			&mongodb.MongoClient{
-				Client: client,
-				Cfg:    cfg,
-			},
-		}, nil
-	case PgSQLType:
-		pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, &StorageConfig{
-			Type:     cfg.Storage.Type,
-			Host:     cfg.Storage.Host,
-			Port:     cfg.Storage.Port,
-			Username: cfg.Storage.Username,
-			Password: cfg.Storage.Password,
-			Database: cfg.Storage.Database,
-		}, logger)
-		if err != nil {
-			return nil, err
-		}
-		return &DBConfig{
-			&postgresql.PgClient{
-				Pool: pool,
-			},
-		}, nil
-	default:
-		return nil, fmt.Errorf("unsupported database type: %s", cfg.Storage.Type)
+	pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, &StorageConfig{
+		Host:     cfg.Storage.Host,
+		Port:     cfg.Storage.Port,
+		Username: cfg.Storage.Username,
+		Password: cfg.Storage.Password,
+		Database: cfg.Storage.Database,
+	}, logger)
+	if err != nil {
+		return nil, err
 	}
+	return &DBConfig{
+		&postgresql.PgClient{
+			Pool: pool,
+		},
+	}, nil
+
 }
 
 func (s *StorageConfig) Connect(logger *logging.Logger) error {
@@ -102,51 +60,18 @@ func (s *StorageConfig) Connect(logger *logging.Logger) error {
 	metrics := NewDBPrometheusMetrics()
 	metrics.DatabaseConnectionAttemptCounter.Inc()
 
-	switch DBType(s.Type) {
-	case MongoDBType:
-		client, err := GetMongoClient(s, logger)
-		if err != nil {
-			metrics.DatabaseConnectionFailureCounter.Inc()
-			return fmt.Errorf("failed to connect to MongoDB: %w", err)
-		}
-		// Save the client in the s structure for future use.
-		s.client = client
-	case PgSQLType:
-		pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, s, logger)
-		if err != nil {
-			metrics.DatabaseConnectionFailureCounter.Inc()
-			return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
-		}
-		// Save the pool in the s structure for future use.
-		s.pool = pool
-	default:
-		return fmt.Errorf("unsupported database type: %s", s.Type)
+	pool, err := NewClient(context.Background(), postgresql.MaxAttempts, postgresql.MaxDelay, s, logger)
+	if err != nil {
+		metrics.DatabaseConnectionFailureCounter.Inc()
+		return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
 	}
+	// Save the pool in the s structure for future use.
+	s.pool = pool
+
 	duration := time.Since(startTime)
 	metrics.ResponseTimeDBConnect.Observe(duration.Seconds())
 	metrics.DatabaseConnectionSuccessCounter.Inc()
 	return nil
-}
-
-func GetMongoClient(cfg *StorageConfig, logger *logging.Logger) (*mongo.Client, error) {
-	connectionString := net.JoinHostPort(cfg.Host, cfg.Port)
-	credential := options.Credential{
-		Username: cfg.Username,
-		Password: cfg.Password,
-	}
-	clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
-	// otel
-	clientOptions.Monitor = otelmongo.NewMonitor()
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		return nil, err
-	}
-	err = client.Ping(context.TODO(), nil)
-	logger.Println("Connect MongoDB")
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
 }
 
 func NewClient(ctx context.Context, maxAttempts int,

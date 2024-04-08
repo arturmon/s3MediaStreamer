@@ -36,14 +36,11 @@ storage:
     address: "localhost:6379"
     password: "redis"
     expiration: 24 #Hours
-  type: "postgresql" # mongodb, postgresql
   username: "root"
   password: "1qazxsw2"
   host: "localhost"
   port: "5432" # 5432 postgresql, 27017 mongodb
   database: "db_issue_album"
-  collections: "col_issues"
-  collections_users: "col_users"
 
 message_queue:
   sub_queue_name: "s3_queue"
