@@ -40,7 +40,7 @@ type PostgresCollectionQuery interface {
 	GetUserAtPlayList(ctx context.Context, playlistID string) (string, error)
 	GetS3VersionByTrackID(ctx context.Context, trackID string) (string, error)
 	AddS3Version(ctx context.Context, trackID, version string) error
-	DeleteS3Version(ctx context.Context, trackID string) error
+	DeleteS3Version(ctx context.Context, version string) error
 }
 
 type PostgresOperations interface {

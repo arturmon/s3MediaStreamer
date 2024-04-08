@@ -25,7 +25,7 @@ func (c *PgClient) FindUser(ctx context.Context, value interface{}, columnType s
 	query, args := GenerateSelectQuery("users", []string{"_id", "name", "email", "password", "role", "refreshtoken", "Otp_enabled", "Otp_secret", "Otp_auth_url"}, condition)
 
 	// Execute the query and scan the result into the user model.
-	err := c.Pool.QueryRow(context.TODO(), query, args...).
+	err := c.Pool.QueryRow(ctx, query, args...).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role,
 			&user.RefreshToken, &user.OtpEnabled, &user.OtpSecret, &user.OtpAuthURL)
 
@@ -57,7 +57,7 @@ func (c *PgClient) CreateUser(ctx context.Context, user model.User) error {
 	query, args := GenerateInsertQuery("users", userData)
 
 	// Execute the query
-	_, err := c.Pool.Exec(context.TODO(), query, args...)
+	_, err := c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (c *PgClient) DeleteUser(ctx context.Context, email string) error {
 	query, args := GenerateDeleteQuery("users", condition)
 
 	// Execute the query
-	result, err := c.Pool.Exec(context.TODO(), query, args...)
+	result, err := c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (c *PgClient) UpdateUser(ctx context.Context, email string, fields map[stri
 	}
 
 	// Execute the UPDATE query
-	_, err = c.Pool.Exec(context.TODO(), sql, args...)
+	_, err = c.Pool.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}

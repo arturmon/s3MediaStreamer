@@ -25,7 +25,7 @@ func (c *PgClient) GetStoredRefreshToken(ctx context.Context, userEmail string) 
 	query, args := GenerateSelectQuery("users", []string{"refreshtoken"}, condition)
 
 	// Execute the query and scan the result into the refreshToken variable.
-	err := c.Pool.QueryRow(context.TODO(), query, args...).
+	err := c.Pool.QueryRow(ctx, query, args...).
 		Scan(&refreshToken)
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *PgClient) SetStoredRefreshToken(ctx context.Context, userEmail, refresh
 	query, args := GenerateUpdateQuery("users", updateData, condition)
 
 	// Execute the query
-	_, err := c.Pool.Exec(context.TODO(), query, args...)
+	_, err := c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
 	}
