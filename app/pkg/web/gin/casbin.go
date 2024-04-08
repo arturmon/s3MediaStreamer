@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	model_all "s3MediaStreamer/app/model"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/logging"
 
 	"go.opentelemetry.io/otel"
@@ -19,7 +19,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GetEnforcer(_ *model.DBConfig) (*casbin.Enforcer, error) {
+func GetEnforcer(_ *repository.DBConfig) (*casbin.Enforcer, error) {
 	var enforcer *casbin.Enforcer
 
 	adapter := fileadapter.NewAdapter("acl/policy.csv")

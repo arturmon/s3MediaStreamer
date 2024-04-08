@@ -6,7 +6,7 @@ import (
 	"net/http"
 	conf "s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/caching"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/monitoring"
 	"s3MediaStreamer/app/pkg/s3"
@@ -31,7 +31,7 @@ type WebApp struct {
 	cfg         *conf.Config
 	logger      *logging.Logger
 	router      *gin.Engine
-	storage     *model.DBConfig
+	storage     *repository.DBConfig
 	metrics     *monitoring.Metrics
 	enforcer    *casbin.Enforcer
 	S3          s3.HandlerS3
@@ -66,7 +66,7 @@ func NewAppUseGin(ctx context.Context, cfg *conf.Config, logger *logging.Logger)
 	p.Use(router)
 
 	logger.Info("storage initializing")
-	storage, err := model.NewDBConfig(cfg, logger)
+	storage, err := repository.NewDBConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}

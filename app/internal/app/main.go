@@ -4,7 +4,7 @@ import (
 	"context"
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/amqp"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	consulelection "s3MediaStreamer/app/pkg/consulelection"
 	consulservice "s3MediaStreamer/app/pkg/consulservice"
 	"s3MediaStreamer/app/pkg/interfaces"
@@ -18,7 +18,7 @@ import (
 type App struct {
 	Cfg            *config.Config
 	Logger         *logging.Logger
-	Storage        *model.DBConfig
+	Storage        *repository.DBConfig
 	Gin            *gin.WebApp
 	AMQPClient     *amqp.MessageClient
 	S3             s3.HandlerS3
@@ -73,7 +73,7 @@ func NewAppInit(ctx context.Context, cfg *config.Config, logger *logging.Logger,
 }
 
 // GetStorage returns the initialized database storage instance.
-func (a *App) GetStorage() (*model.DBConfig, error) {
+func (a *App) GetStorage() (*repository.DBConfig, error) {
 	return a.Storage, nil
 }
 

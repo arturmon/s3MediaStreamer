@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"s3MediaStreamer/app/internal/config"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/s3"
 	"sync"
@@ -22,7 +22,7 @@ type MessageClient struct {
 	cfg       *config.Config
 	s3Handler *s3.Handler
 	logger    *logging.Logger
-	storage   *model.DBConfig
+	storage   *repository.DBConfig
 }
 
 // NewAMQPClient creates a new instance of the MessageClient.
@@ -66,7 +66,7 @@ func NewAMQPClient(queueName string, cfg *config.Config, logger *logging.Logger)
 		return nil, err
 	}
 
-	storage, err := model.NewDBConfig(cfg, logger)
+	storage, err := repository.NewDBConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}

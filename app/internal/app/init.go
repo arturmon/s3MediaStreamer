@@ -3,7 +3,7 @@ package app
 import (
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/amqp"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/consulelection"
 	"s3MediaStreamer/app/pkg/consulservice"
 	"s3MediaStreamer/app/pkg/logging"
@@ -32,10 +32,10 @@ func initializeTracer(ctx context.Context, cfg *config.Config, logger *logging.L
 	return tracer, nil
 }
 
-func initializeStorage(cfg *config.Config, logger *logging.Logger) (*model.DBConfig, error) {
+func initializeStorage(cfg *config.Config, logger *logging.Logger) (*repository.DBConfig, error) {
 	// Initialize the database storage.
 	logger.Info("Starting initialize the storage...")
-	storage, err := model.NewDBConfig(cfg, logger)
+	storage, err := repository.NewDBConfig(cfg, logger)
 	if err != nil {
 		logger.Error("Failed to initialize the storage:", err)
 		return nil, err

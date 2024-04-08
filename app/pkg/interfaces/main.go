@@ -3,14 +3,14 @@ package interfaces
 import (
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/amqp"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/s3"
 	"s3MediaStreamer/app/pkg/web/gin"
 )
 
 type AppInterface interface {
-	GetStorage() (*model.DBConfig, error)
+	GetStorage() (*repository.DBConfig, error)
 	GetLogger() *logging.Logger
 	GetCfg() *config.Config
 	GetGin() (*gin.WebApp, error)

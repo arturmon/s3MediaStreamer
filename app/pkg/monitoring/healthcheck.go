@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"s3MediaStreamer/app/pkg/amqp"
-	"s3MediaStreamer/app/pkg/client/model"
+	"s3MediaStreamer/app/pkg/client/repository"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/s3"
 	"sync"
@@ -119,7 +119,7 @@ func UpdateHealthStatus(metrics *HealthMetric, status bool, component string) {
 // HealthCheckWrapper provides a wrapper for periodic health checks.
 type HealthCheckWrapper struct {
 	HealthMetrics *HealthMetric
-	DBOps         model.DBOperations
+	DBOps         repository.DBOperations
 	AMQPClient    *amqp.MessageClient
 	S3Handler     s3.HandlerS3
 	Logger        *logging.Logger
@@ -128,7 +128,7 @@ type HealthCheckWrapper struct {
 // NewHealthCheckWrapper initializes a new HealthCheckWrapper.
 func NewHealthCheckWrapper(
 	metrics *HealthMetric,
-	dbOps model.DBOperations,
+	dbOps repository.DBOperations,
 	amqpClient *amqp.MessageClient,
 	s3Handler s3.HandlerS3,
 	logger *logging.Logger) *HealthCheckWrapper {

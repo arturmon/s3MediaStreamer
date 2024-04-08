@@ -24,7 +24,7 @@ func (c *PgClient) FindUser(ctx context.Context, value interface{}, columnType s
 	// Generate the SELECT query using the GenerateSelectQuery function.
 	query, args := GenerateSelectQuery("users", []string{"_id", "name", "email", "password", "role", "refreshtoken", "Otp_enabled", "Otp_secret", "Otp_auth_url"}, condition)
 
-	// Execute the query and scan the result into the user model.
+	// Execute the query and scan the result into the user repository.
 	err := c.Pool.QueryRow(ctx, query, args...).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role,
 			&user.RefreshToken, &user.OtpEnabled, &user.OtpSecret, &user.OtpAuthURL)

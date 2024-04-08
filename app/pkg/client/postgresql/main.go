@@ -29,7 +29,7 @@ type tracksQueryCollection interface {
 	UpdateTracks(ctx context.Context, track *model.Track) error
 }
 
-type palylistQueryCollection interface {
+type playlistQueryCollection interface {
 	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
 	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
 	GetAllTracks(ctx context.Context) ([]model.Track, error)
@@ -53,7 +53,7 @@ type s3QueryCollection interface {
 type PostgresOperations interface {
 	userQueryCollection
 	tracksQueryCollection
-	palylistQueryCollection
+	playlistQueryCollection
 	s3QueryCollection
 }
 
