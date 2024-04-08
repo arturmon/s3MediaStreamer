@@ -11,19 +11,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PostgresCollectionQuery interface {
+type userQueryCollection interface {
 	FindUser(ctx context.Context, value interface{}, columnType string) (model.User, error)
 	CreateUser(ctx context.Context, user model.User) error
 	DeleteUser(ctx context.Context, email string) error
 	UpdateUser(ctx context.Context, email string, fields map[string]interface{}) error
 	GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error)
 	SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error
+}
+
+type tracksQueryCollection interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
 	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
 	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
 	UpdateTracks(ctx context.Context, track *model.Track) error
+}
+
+type palylistQueryCollection interface {
 	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
 	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
 	GetAllTracks(ctx context.Context) ([]model.Track, error)
@@ -36,13 +42,19 @@ type PostgresCollectionQuery interface {
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
 	GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error)
 	GetUserAtPlayList(ctx context.Context, playlistID string) (string, error)
+}
+
+type s3QueryCollection interface {
 	GetS3VersionByTrackID(ctx context.Context, trackID string) (string, error)
 	AddS3Version(ctx context.Context, trackID, version string) error
 	DeleteS3Version(ctx context.Context, version string) error
 }
 
 type PostgresOperations interface {
-	PostgresCollectionQuery
+	userQueryCollection
+	tracksQueryCollection
+	palylistQueryCollection
+	s3QueryCollection
 }
 
 type PgClient struct {
