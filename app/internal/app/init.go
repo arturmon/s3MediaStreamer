@@ -4,8 +4,6 @@ import (
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/amqp"
 	"s3MediaStreamer/app/pkg/client/repository"
-	"s3MediaStreamer/app/pkg/consulelection"
-	"s3MediaStreamer/app/pkg/consulservice"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/otel"
 	"s3MediaStreamer/app/pkg/s3"
@@ -87,17 +85,4 @@ func initializeAMQPClient(cfg *config.Config, logger *logging.Logger) *amqp.Mess
 		time.Sleep(retryWaitTimeSeconds * time.Second) // Wait before retrying
 	}
 	return amqpClient
-}
-
-func initializeConsulService(appName string, cfg *config.Config, logger *logging.Logger) *consulservice.Service {
-	logger.Info("Starting initialize the consul...")
-	s := consulservice.NewService(appName, cfg, logger)
-	logger.Info("Register service consul...")
-	s.Start()
-	return s
-}
-
-func initializeConsulElection(appName string, logger *logging.Logger, s *consulservice.Service) *consulelection.Election {
-	leaderElection := consulelection.NewElection(appName, logger, s)
-	return leaderElection
 }

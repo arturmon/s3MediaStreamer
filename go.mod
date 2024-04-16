@@ -5,11 +5,11 @@ go 1.20
 require (
 	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20210919084342-5aec9a9708ef
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/arturmon/consul-leader-election v1.2.6
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/casbin/casbin/v2 v2.86.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
-	github.com/dmitriyGarden/consul-leader-election v1.2.3
 	github.com/exaring/otelpgx v0.5.4
 	github.com/gin-contrib/cors v1.7.1
 	github.com/gin-contrib/sessions v1.0.0
@@ -38,7 +38,6 @@ require (
 	github.com/tcolgate/mp3 v0.0.0-20170426193717-e79c5a46d300
 	go.mongodb.org/mongo-driver v1.14.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.49.0
-	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.49.0
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.24.0
 	go.opentelemetry.io/otel/sdk v1.24.0

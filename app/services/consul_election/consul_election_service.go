@@ -1,16 +1,23 @@
-package consulelection
+package consul_election
 
 import (
 	"fmt"
-	consul_service "s3MediaStreamer/app/pkg/consulservice"
-	"s3MediaStreamer/app/pkg/logging"
+	loging "s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/services/consul_service"
 	"time"
 
-	election "github.com/dmitriyGarden/consul-leader-election"
+	election "github.com/arturmon/consul-leader-election"
 	"github.com/hashicorp/consul/api"
 )
 
 const checkConsulLeaderTimeoutSeconds = 5
+
+type ConsulElection interface {
+	ReElection(clien *election.Election) error
+	IsLeader() bool
+	GetElectionClient() *election.Election
+	Init()
+}
 
 type Election struct {
 	Notify   *Notify
@@ -19,10 +26,10 @@ type Election struct {
 
 type Notify struct {
 	T      string
-	Logger *logging.Logger
+	Logger *loging.Logger
 }
 
-func NewNotify(t string, logger *logging.Logger) *Notify {
+func NewNotify(t string, logger *loging.Logger) *Notify {
 	return &Notify{
 		T:      t,
 		Logger: logger,
@@ -41,6 +48,7 @@ type LeaderElectionConfig struct {
 	CheckTimeout time.Duration
 	Client       *api.Client
 	Checks       []string
+	Name         string
 	Key          string
 	LogLevel     uint8
 	Event        *Notify
@@ -51,6 +59,7 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 		CheckTimeout: config.CheckTimeout,
 		Client:       config.Client,
 		Checks:       config.Checks,
+		Name:         config.Name,
 		Key:          config.Key,
 		LogLevel:     config.LogLevel,
 		Event:        config.Event,
@@ -59,20 +68,21 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 	return election.NewElection(electionConfig)
 }
 
-func NewElection(appName string, logger *logging.Logger, client *consul_service.Service) *Election {
+func NewElection(appName string, logger *loging.Logger, client consul_service.ConsulService) *Election {
 	n := NewNotify(appName, logger)
 	check := "service:" + appName + "-" + client.GetHostname() + ":1"
 	key := "service/" + appName + "/leader"
 
-	err := CreateOrUpdateLeaderKey(client.ConsulClient, logger, key, "")
+	err := CreateOrUpdateLeaderKey(client.GetConsulClient(), logger, key, "")
 	if err != nil {
 		logger.Error("Error consul create kv leader")
 	}
 
 	electionConfig := &LeaderElectionConfig{
 		CheckTimeout: checkConsulLeaderTimeoutSeconds * time.Second,
-		Client:       client.ConsulClient,
+		Client:       client.GetConsulClient(),
 		Checks:       []string{check},
+		Name:         appName + "-" + client.GetHostname(),
 		Key:          key,
 		LogLevel:     election.LogDebug,
 		Event:        n,
@@ -80,20 +90,31 @@ func NewElection(appName string, logger *logging.Logger, client *consul_service.
 
 	leaderElection := InitializeLeaderElection(electionConfig)
 
+	err = ReadSessionInfoOnKey(logger, client.GetConsulClient())
+
 	return &Election{
 		Notify:   n,
 		Election: leaderElection,
 	}
 }
 
-func ReElection(clien *election.Election) {
+func (r *Election) ReElection(clien *election.Election) error {
 	err := clien.ReElection()
 	if err != nil {
-		return
+		return err
 	}
+	return nil
 }
 
-func CreateOrUpdateLeaderKey(consulClient *api.Client, logger *logging.Logger, key, value string) error {
+func (r *Election) IsLeader() bool {
+	return r.Election.IsLeader()
+}
+
+func (r *Election) Init() {
+	r.Election.Init()
+}
+
+func CreateOrUpdateLeaderKey(consulClient *api.Client, logger *loging.Logger, key, value string) error {
 	// Check if the leader key already exists.
 	existingPair, _, err := consulClient.KV().Get(key, nil)
 	if err != nil {
@@ -119,4 +140,20 @@ func CreateOrUpdateLeaderKey(consulClient *api.Client, logger *logging.Logger, k
 	}
 
 	return nil
+}
+
+func ReadSessionInfoOnKey(logger *loging.Logger, consulClient *api.Client) error {
+	listSession, _, err := consulClient.Session().List(nil)
+	if err != nil {
+		return err
+	}
+	for _, session := range listSession {
+		logger.Printf("Session ID: %s Node: %s Name: %s CreateIndex: %d", session.ID, session.Node, session.Name, session.CreateIndex)
+		// Print more session information if needed
+	}
+	return nil
+}
+
+func (r *Election) GetElectionClient() *election.Election {
+	return r.Election
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func (j *CleanOldSessionJob) Run() {
-	if !j.app.LeaderElection.Election.IsLeader() {
+	if !j.app.LeaderElection.IsLeader() {
 		j.app.Logger.Println("I'm not the leader.")
 		return
 	}

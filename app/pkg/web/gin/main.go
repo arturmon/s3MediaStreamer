@@ -137,7 +137,7 @@ func (a *WebApp) startHTTP(ctx context.Context, hcw *monitoring.HealthCheckWrapp
 	}
 	a.logger.Debugf(logMessage)
 	a.logger.Info("application completely initialized, ...started")
-	a.logger.Infof("The service is ready to listen and serve on %s:%s.", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
+	a.logger.Infof("The services is ready to listen and serve on %s:%s.", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
 	// Start server
 
 	server := a.startServer()

@@ -3,7 +3,6 @@ package app
 import (
 	"net/http"
 	"s3MediaStreamer/app/pkg/amqp"
-	consul_election "s3MediaStreamer/app/pkg/consulelection"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/monitoring"
 	"time"
@@ -13,7 +12,7 @@ import (
 
 func (a *App) Start(ctx context.Context) {
 	a.startAMQPConsumers(ctx)
-	go a.LeaderElection.Election.Init()
+	go a.LeaderElection.Init()
 	healthCheckWrapper := a.startHealthChecks()
 	a.handleHealthCheckResults(ctx, healthCheckWrapper)
 
@@ -58,16 +57,15 @@ func (a *App) startHealthChecks() *monitoring.HealthCheckWrapper {
 func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *monitoring.HealthCheckWrapper) {
 	resultChan := make(chan bool)
 	healthCheckWrapper.CheckMonitoring(ctx, resultChan)
-
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return // exit goroutine when context is canceled
 			case isHealthy := <-resultChan:
-				if !isHealthy && a.LeaderElection.Election.IsLeader() {
+				if !isHealthy && a.LeaderElection.IsLeader() {
 					// Trigger ReElection if components are not healthy
-					consul_election.ReElection(a.LeaderElection.Election)
+					a.LeaderElection.ReElection(a.LeaderElection.GetElectionClient())
 				}
 			}
 		}

@@ -5,13 +5,14 @@ import (
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/pkg/amqp"
 	"s3MediaStreamer/app/pkg/client/repository"
-	consulelection "s3MediaStreamer/app/pkg/consulelection"
-	consulservice "s3MediaStreamer/app/pkg/consulservice"
 	"s3MediaStreamer/app/pkg/interfaces"
 	"s3MediaStreamer/app/pkg/logging"
 	"s3MediaStreamer/app/pkg/otel"
 	"s3MediaStreamer/app/pkg/s3"
 	"s3MediaStreamer/app/pkg/web/gin"
+	"s3MediaStreamer/app/services"
+	"s3MediaStreamer/app/services/consul_election"
+	"s3MediaStreamer/app/services/consul_service"
 )
 
 // App represents the main application struct.
@@ -22,8 +23,8 @@ type App struct {
 	Gin            *gin.WebApp
 	AMQPClient     *amqp.MessageClient
 	S3             s3.HandlerS3
-	LeaderElection *consulelection.Election
-	ConsulService  *consulservice.Service
+	LeaderElection consul_election.ConsulElection
+	ConsulService  consul_service.ConsulService
 	tracer         *otel.Provider
 	AppName        string
 }
@@ -54,9 +55,10 @@ func NewAppInit(ctx context.Context, cfg *config.Config, logger *logging.Logger,
 
 	logger.Info("Start register consul lieder election ...")
 
-	s := initializeConsulService(appName, cfg, logger)
-	leaderElection := initializeConsulElection(appName, logger, s)
-	// Return a new App instance with all initialized components.
+	s, leaderElection, err := services.InitServices(appName, cfg, logger)
+	if err != nil {
+		return nil, err
+	}
 
 	return &App{
 		Cfg:            cfg,
