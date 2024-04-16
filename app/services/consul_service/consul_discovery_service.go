@@ -1,14 +1,15 @@
 package consul_service
 
 import (
-	"github.com/hashicorp/consul/api"
-	"github.com/hashicorp/consul/api/watch"
-	"github.com/hashicorp/go-hclog"
 	"net"
 	"s3MediaStreamer/app/internal/config"
 	logging "s3MediaStreamer/app/pkg/logging"
 	"strconv"
 	"time"
+
+	"github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul/api/watch"
+	"github.com/hashicorp/go-hclog"
 )
 
 const (

@@ -2,9 +2,11 @@ package postgresql
 
 import (
 	"errors"
+
 	"go.opentelemetry.io/otel"
 
 	"context"
+
 	"github.com/Masterminds/squirrel"
 )
 

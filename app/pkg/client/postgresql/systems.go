@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel"
 )
