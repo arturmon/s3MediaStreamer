@@ -53,7 +53,7 @@ message_queue:
 session:
   session_storage_type: "postgres" # cookie, memory, memcached, mongo, postgres
   session_name: "gin-session"
-  session_period_clean: "@midnight"
+  session_period_clean: "@midnight" # @midnight, */5 * * * *, @every 1h30m10s
   cookies:
     session_secret_key: "sdfgerfsd3543g"
   memcached:
