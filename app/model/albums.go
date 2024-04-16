@@ -29,17 +29,6 @@ type Track struct {
 	Bitrate     uint32        `json:"bitrate" bson:"bitrate" example:"320"`
 }
 
-type Tops struct {
-	ID          uuid.UUID `json:"_id" bson:"_id" pg:"type:uuid" swaggerignore:"true"`
-	CreatedAt   time.Time `json:"created_at" bson:"created_at" pg:"default:now()" swaggerignore:"true"`
-	UpdatedAt   time.Time `json:"updated_at" bson:"updated_at" pg:"default:now()" swaggerignore:"true"`
-	Title       string    `json:"title" bson:"title" example:"Title name"`
-	Artist      string    `json:"artist" bson:"artist" example:"Artist name"`
-	Description string    `json:"description" bson:"description" example:"A short description of the application"`
-	Sender      string    `json:"sender" bson:"sender" example:"open_ai"`
-	CreatorUser uuid.UUID `json:"_creator_user" bson:"_creator_user" pg:"type:uuid" swaggerignore:"true"`
-}
-
 type PlaylistTracksResponse struct {
 	Playlist PLayList `json:"playlist"`
 	Tracks   []Track  `json:"tracks"`
