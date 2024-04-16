@@ -1,4 +1,4 @@
-package consulservice
+package consul_service
 
 import (
 	"net"
