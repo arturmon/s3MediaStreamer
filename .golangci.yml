@@ -11,10 +11,6 @@ run:
   # Timeout for analysis, e.g. 30s, 5m.
   # Default: 1m
   timeout: 3m
-  skip-files:
-    - app/model/swagger.go
-  skip-dirs:
-    - app/pkg/logging
 
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
@@ -343,3 +339,8 @@ issues:
     - path: "main.go"
       linters:
         - gosec
+
+  exclude-files:
+    - app/model/swagger.go
+  exclude-dirs:
+    - app/pkg/logging
