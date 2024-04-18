@@ -100,6 +100,7 @@ func (s *Service) RegisterService() {
 	}
 
 	register := &api.AgentServiceRegistration{
+		Meta:    s.setMetadata(),
 		ID:      s.AppName + "-" + s.GetHostname(),
 		Name:    s.AppName,
 		Tags:    []string{"microservice", "golang"},
@@ -145,4 +146,41 @@ func (s *Service) SetupConsulWatch() {
 
 func (s *Service) GetConsulClient() *api.Client {
 	return s.ConsulClient
+}
+
+func (s *Service) setMetadata() map[string]string {
+	s3 := s.cfg.AppConfig.S3.Endpoint + "/" + s.cfg.AppConfig.S3.BucketName
+	caching := strconv.FormatBool(s.cfg.Storage.Caching.Enabled) +
+		", " + s.cfg.Storage.Caching.Address
+	openTelemetry := strconv.FormatBool(s.cfg.AppConfig.OpenTelemetry.TracingEnabled) +
+		", " + s.cfg.AppConfig.OpenTelemetry.JaegerEndpoint
+	storage := s.cfg.Storage.Host +
+		":" + s.cfg.Storage.Port +
+		"/" + s.cfg.Storage.Database
+	var sessionStorage string
+	switch s.cfg.Session.SessionStorageType {
+	case "postgres":
+		sessionStorage = s.cfg.Session.Postgresql.PostgresqlHost +
+			":" + s.cfg.Session.Postgresql.PostgresqlPort +
+			"/" + s.cfg.Session.Postgresql.PostgresqlDatabase
+	case "mongodb":
+		sessionStorage = s.cfg.Session.Mongodb.MongoHost +
+			":" + s.cfg.Session.Mongodb.MongoPort +
+			"/" + s.cfg.Session.Mongodb.MongoDatabase
+	case "cookies":
+		sessionStorage = "-"
+	case "memcached":
+		sessionStorage = s.cfg.Session.Memcached.MemcachedHost +
+			":" + s.cfg.Session.Memcached.MemcachedPort
+	}
+	return map[string]string{
+		"type":            "api",
+		"log-level":       s.cfg.AppConfig.GinMode,
+		"s3":              s3,
+		"caching":         caching,
+		"session-type":    s.cfg.Session.SessionStorageType,
+		"openTelemetry":   openTelemetry,
+		"Storage":         storage,
+		"Session-Storage": sessionStorage,
+	}
 }
