@@ -116,19 +116,12 @@ definitions:
       genre:
         example: Genre name
         type: string
-      likes:
-        type: boolean
       lyrics:
         example: Lyrics of the track
-        type: string
-      s3Version:
         type: string
       sample_rate:
         example: 44100
         type: integer
-      sender:
-        example: sender set
-        type: string
       title:
         example: Title name
         type: string

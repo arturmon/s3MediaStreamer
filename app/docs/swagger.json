@@ -1520,23 +1520,13 @@
                     "type": "string",
                     "example": "Genre name"
                 },
-                "likes": {
-                    "type": "boolean"
-                },
                 "lyrics": {
                     "type": "string",
                     "example": "Lyrics of the track"
                 },
-                "s3Version": {
-                    "type": "string"
-                },
                 "sample_rate": {
                     "type": "integer",
                     "example": 44100
-                },
-                "sender": {
-                    "type": "string",
-                    "example": "sender set"
                 },
                 "title": {
                     "type": "string",

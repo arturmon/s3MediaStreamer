@@ -63,26 +63,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repository.Track"
+                                "$ref": "#/definitions/model.Track"
                             }
                         }
                     },
                     "404": {
                         "description": "Segment not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "406": {
                         "description": "Segment not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -126,14 +126,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repository.Track"
+                                "$ref": "#/definitions/model.Track"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -162,7 +162,7 @@ const docTemplate = `{
                     "502": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -191,7 +191,7 @@ const docTemplate = `{
                     "502": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -255,7 +255,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.OTPInput"
+                            "$ref": "#/definitions/model.OTPInput"
                         }
                     }
                 ],
@@ -263,31 +263,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OTP disabled successfully",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkLoginResponce"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to update OTP status",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -318,7 +318,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.OTPInput"
+                            "$ref": "#/definitions/model.OTPInput"
                         }
                     }
                 ],
@@ -326,25 +326,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OTP generated successfully",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkGenerateOTP"
+                            "$ref": "#/definitions/model.OkGenerateOTP"
                         }
                     },
                     "400": {
                         "description": "Invalid refresh payload",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Failed to find user or invalid email/password",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to update OTP secret or URL",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -382,7 +382,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.OTPInput"
+                            "$ref": "#/definitions/model.OTPInput"
                         }
                     }
                 ],
@@ -390,31 +390,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OTP Valid",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkResponse"
+                            "$ref": "#/definitions/model.OkResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Invalid OTP",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -445,7 +445,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.OTPInput"
+                            "$ref": "#/definitions/model.OTPInput"
                         }
                     }
                 ],
@@ -453,25 +453,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OTP verified successfully",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkLoginResponce"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to update OTP status",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -504,7 +504,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repository.PLayList"
+                                "$ref": "#/definitions/model.PLayList"
                             }
                         }
                     }
@@ -515,26 +515,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repository.PLayList"
+                                "$ref": "#/definitions/model.PLayList"
                             }
                         }
                     },
                     "400": {
                         "description": "Invalid input",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -562,19 +562,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Playlists retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/repository.PlaylistsResponse"
+                            "$ref": "#/definitions/model.PlaylistsResponse"
                         }
                     },
                     "404": {
                         "description": "Playlists not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -611,25 +611,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Tracks retrieved successfully",
                         "schema": {
-                            "$ref": "#/definitions/repository.PlaylistTracksResponse"
+                            "$ref": "#/definitions/model.PlaylistTracksResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -682,19 +682,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -732,19 +732,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -787,19 +787,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Playlist not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -849,19 +849,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Playlist or track not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -909,19 +909,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Playlist or track not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -983,26 +983,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repository.Track"
+                                "$ref": "#/definitions/model.Track"
                             }
                         }
                     },
                     "400": {
                         "description": "Invalid page or page_size parameters",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1039,25 +1039,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repository.Track"
+                            "$ref": "#/definitions/model.Track"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1091,13 +1091,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1123,7 +1123,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.LoginInput"
+                            "$ref": "#/definitions/model.LoginInput"
                         }
                     }
                 ],
@@ -1131,25 +1131,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkLoginResponce"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Incorrect Password",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - User not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1177,19 +1177,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkResponse"
+                            "$ref": "#/definitions/model.OkResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1217,19 +1217,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/repository.OkLoginResponce"
+                            "$ref": "#/definitions/model.OkLoginResponce"
                         }
                     },
                     "401": {
                         "description": "Unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1260,7 +1260,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.ParamsRefreshTocken"
+                            "$ref": "#/definitions/model.ParamsRefreshTocken"
                         }
                     }
                 ],
@@ -1268,25 +1268,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully refreshed access token",
                         "schema": {
-                            "$ref": "#/definitions/repository.ResponceRefreshTocken"
+                            "$ref": "#/definitions/model.ResponceRefreshTocken"
                         }
                     },
                     "400": {
                         "description": "Bad Request - Invalid refresh token",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - Invalid refresh token",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1317,7 +1317,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/repository.User"
+                            "$ref": "#/definitions/model.User"
                         }
                     }
                 ],
@@ -1325,25 +1325,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/repository.UserResponse"
+                            "$ref": "#/definitions/model.UserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request - User with this email exists",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized - User unauthenticated",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/repository.ErrorResponse"
+                            "$ref": "#/definitions/model.ErrorResponse"
                         }
                     }
                 }
@@ -1351,7 +1351,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "repository.ErrorResponse": {
+        "model.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -1359,7 +1359,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.LoginInput": {
+        "model.LoginInput": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1370,7 +1370,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.OTPInput": {
+        "model.OTPInput": {
             "type": "object",
             "properties": {
                 "token": {
@@ -1381,14 +1381,14 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.OkGenerateOTP": {
+        "model.OkGenerateOTP": {
             "type": "object",
             "properties": {
                 "base32": {},
                 "otp-auth_url": {}
             }
         },
-        "repository.OkLoginResponce": {
+        "model.OkLoginResponce": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1408,7 +1408,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.OkResponse": {
+        "model.OkResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1416,7 +1416,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.PLayList": {
+        "model.PLayList": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1433,7 +1433,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.ParamsRefreshTocken": {
+        "model.ParamsRefreshTocken": {
             "type": "object",
             "properties": {
                 "refresh_token": {
@@ -1442,32 +1442,32 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.PlaylistTracksResponse": {
+        "model.PlaylistTracksResponse": {
             "type": "object",
             "properties": {
                 "playlist": {
-                    "$ref": "#/definitions/repository.PLayList"
+                    "$ref": "#/definitions/model.PLayList"
                 },
                 "tracks": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/repository.Track"
+                        "$ref": "#/definitions/model.Track"
                     }
                 }
             }
         },
-        "repository.PlaylistsResponse": {
+        "model.PlaylistsResponse": {
             "type": "object",
             "properties": {
                 "playlists": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/repository.PLayList"
+                        "$ref": "#/definitions/model.PLayList"
                     }
                 }
             }
         },
-        "repository.ResponceRefreshTocken": {
+        "model.ResponceRefreshTocken": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -1480,7 +1480,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.Track": {
+        "model.Track": {
             "type": "object",
             "properties": {
                 "album": {
@@ -1522,23 +1522,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Genre name"
                 },
-                "likes": {
-                    "type": "boolean"
-                },
                 "lyrics": {
                     "type": "string",
                     "example": "Lyrics of the track"
                 },
-                "s3Version": {
-                    "type": "string"
-                },
                 "sample_rate": {
                     "type": "integer",
                     "example": 44100
-                },
-                "sender": {
-                    "type": "string",
-                    "example": "sender set"
                 },
                 "title": {
                     "type": "string",
@@ -1558,7 +1548,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.User": {
+        "model.User": {
             "description": "User account information with: user _id, name, email, password",
             "type": "object",
             "properties": {
@@ -1584,7 +1574,7 @@ const docTemplate = `{
                 }
             }
         },
-        "repository.UserResponse": {
+        "model.UserResponse": {
             "type": "object",
             "properties": {
                 "email": {
