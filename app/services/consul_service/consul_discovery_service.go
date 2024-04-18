@@ -180,7 +180,7 @@ func (s *Service) setMetadata() map[string]string {
 		"caching":         caching,
 		"session-type":    s.cfg.Session.SessionStorageType,
 		"openTelemetry":   openTelemetry,
-		"Storage":         storage,
-		"Session-Storage": sessionStorage,
+		"storage":         storage,
+		"session-Storage": sessionStorage,
 	}
 }
