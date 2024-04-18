@@ -175,7 +175,7 @@ services:
       - "--weave=false"
 
   consul:
-    image: hashicorp/consul:1.18.0
+    image: hashicorp/consul:1.18.1
     restart: unless-stopped
     volumes:
       - ./infra/consul/server.json:/consul/config/server.json:ro
