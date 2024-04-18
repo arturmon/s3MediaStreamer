@@ -151,10 +151,12 @@ services:
       - PROMETHEUS_QUERY_SUPPORT_SPANMETRICS_CONNECTOR=true
       - PROMETHEUS_QUERY_NAMESPACE=spanmetrics
       - PROMETHEUS_QUERY_DURATION_UNIT=s
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
     ports:
       - "4317:4317"
       - "4318:4318"
       - "14268:14268"
+      - "9411:9411"
 
   weavescope:
     image: weaveworks/scope:latest
@@ -208,7 +210,6 @@ services:
       - CACHING_EXPIRATION=2
     image: arturmon/s3stream:latest
     restart: unless-stopped
-
 
   test-app-2:
     environment:
