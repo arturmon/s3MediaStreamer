@@ -1,21 +1,28 @@
-.PHONY: build
+BINARY_NAME=media-streamer
+.DEFAULT_GOAL := run
 build:
 	@$(MAKE) swagger
-	go build app
+	go build -o ./${BINARY_NAME} app/main.go
 
-.PHONY: run
-run:
-	@$(MAKE) swagger
-	go run app/main.go
+
+run: build
+	./${BINARY_NAME}
 
 swagger:
 	cd app && swag init --parseDependency --parseDepth=1
 
+clean:
+	go clean
+	rm ./${BINARY_NAME}
+
 lint:
-	golangci-lint run --timeout 5m
+	golangci-lint run --sort-results
 
 test:
-	go test -v ./...
+	go test ./...
+
+test_coverage:
+	go test ./... -coverprofile=coverage.out
 
 init: ##- Runs make modules, tools and tidy.
 	@$(MAKE) modules
