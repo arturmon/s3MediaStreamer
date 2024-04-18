@@ -8,7 +8,6 @@ import (
 )
 
 func InitServices(appName string, cfg *config.Config, logger *logging.Logger) (consul_service.ConsulService, *consul_election.Election, error) {
-
 	logger.Info("Starting initialize the consul...")
 	service := consul_service.NewService(appName, cfg, logger)
 	logger.Info("Register services consul...")

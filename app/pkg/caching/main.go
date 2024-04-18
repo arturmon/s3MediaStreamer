@@ -8,7 +8,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// Assuming you have a Redis client configured
+// Assuming you have a Redis client configured.
 var redisClient *redis.Client
 
 // InitRedis initializes the Redis client.

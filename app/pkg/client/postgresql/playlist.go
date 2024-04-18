@@ -338,7 +338,7 @@ func (c *PgClient) GetAllPlayList(ctx context.Context, creatorUserID string) ([]
 		if err != nil {
 			return nil, err
 		}
-		//if playlist.CreatorUser == con_user_id {
+		// if playlist.CreatorUser == con_user_id {
 		playlists = append(playlists, playlist)
 		//}
 	}

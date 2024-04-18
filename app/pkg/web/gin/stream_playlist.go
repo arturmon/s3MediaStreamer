@@ -182,7 +182,7 @@ func (a *WebApp) AddToPlaylist(c *gin.Context) {
 	}
 
 	// Add the track to the playlist (you should implement this)
-	//TODO track
+	// TODO track
 	if err = a.storage.Operations.AddTrackToPlaylist(c.Request.Context(), playlistID, trackID, "track"); err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to add track to playlist"})
 		return

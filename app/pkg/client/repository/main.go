@@ -52,7 +52,6 @@ func NewDBConfig(cfg *config.Config, logger *logging.Logger) (*DBConfig, error) 
 			Pool: pool,
 		},
 	}, nil
-
 }
 
 func (s *StorageConfig) Connect(logger *logging.Logger) error {

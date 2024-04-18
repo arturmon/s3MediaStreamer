@@ -47,9 +47,6 @@ func checkObjectS3(ctx context.Context, object *MessageBody, c *MessageClient) e
 		c.logger.Printf("Error processing file: %s Error: %v\n", object.Records[0].S3.Object.Key, errReadTags)
 		return err
 	}
-	//TODO
-	//objectTags.S3Version = object.Records[0].S3.Object.VersionID
-
 	err = checkIfTrackExists(ctx, objectTags, object.Records[0].S3.Object.VersionID, c)
 	if err != nil {
 		c.logger.Printf("%v\n", err)
