@@ -1,7 +1,8 @@
 package config
 
 import (
-	"s3MediaStreamer/app/pkg/logging"
+	"s3MediaStreamer/app/internal/logs"
+	"s3MediaStreamer/app/model"
 	"sync"
 	"time"
 
@@ -16,18 +17,18 @@ func getConfigManager() *Manager {
 
 // Manager is responsible for managing the application's configuration.
 type Manager struct {
-	instance *Config
+	instance *model.Config
 	once     sync.Once
 }
 
 // GetConfig returns the singleton instance of the configuration.
-func GetConfig() *Config {
+func GetConfig() *model.Config {
 	cfgManager := getConfigManager()
 
 	cfgManager.once.Do(func() {
 		log.Info("gathering config")
 
-		cfgManager.instance = &Config{}
+		cfgManager.instance = &model.Config{}
 	})
 
 	if err := cleanenv.ReadConfig("conf/application.yml", cfgManager.instance); err != nil {
@@ -47,8 +48,8 @@ func GetConfig() *Config {
 }
 
 // PrintAllDefaultEnvs prints the help text containing all the default environment variables.
-func PrintAllDefaultEnvs(logger *logging.Logger) {
-	cfg := &Config{}
+func PrintAllDefaultEnvs(logger *logs.Logger) {
+	cfg := &model.Config{}
 	helpText := "Stream Player S3"
 	help, _ := cleanenv.GetDescription(cfg, &helpText)
 	// Print the help text containing all the default environment variables

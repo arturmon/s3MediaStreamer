@@ -1,6 +1,6 @@
 ## Generate specification Swager
 ```shell
-cd app && swag init --parseDependency --parseDepth=1
+cd app && swag inits --parseDependency --parseDepth=1
 ```
 create add db
 ```sql

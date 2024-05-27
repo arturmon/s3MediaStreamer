@@ -29,3 +29,6 @@ app/internal/config/config.go
 
 # music
 music
+
+#ignore depences charts
+chart/charts

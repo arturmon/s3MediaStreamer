@@ -30,19 +30,19 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
+                "description": "Streams audio_handler files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
                 ],
                 "produces": [
-                    "audio/mpeg",
-                    "audio/flac",
+                    "audio_handler/mpeg",
+                    "audio_handler/flac",
                     "application/octet-stream"
                 ],
                 "tags": [
-                    "track-controller"
+                    "track_handler-controller"
                 ],
-                "summary": "Stream audio files.",
+                "summary": "Stream audio_handler files.",
                 "parameters": [
                     {
                         "type": "string",
@@ -52,7 +52,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Control operation playlist play",
+                        "description": "Control operation playlist_handler play",
                         "name": "control",
                         "in": "path"
                     }
@@ -95,7 +95,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
+                "description": "Streams audio_handler files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
                 ],
@@ -103,9 +103,9 @@ const docTemplate = `{
                     "application/x-mpegURL"
                 ],
                 "tags": [
-                    "track-controller"
+                    "track_handler-controller"
                 ],
-                "summary": "Stream audio files.",
+                "summary": "Stream audio_handler files.",
                 "parameters": [
                     {
                         "type": "string",
@@ -115,7 +115,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Control operation playlist play",
+                        "description": "Control operation playlist_handler play",
                         "name": "control",
                         "in": "path"
                     }
@@ -149,14 +149,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health-controller"
+                    "health_handler-controller"
                 ],
                 "summary": "Get liveness status of the application",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/monitoring.LivenessResponse"
+                            "$ref": "#/definitions/model.LivenessResponse"
                         }
                     },
                     "502": {
@@ -178,14 +178,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health-controller"
+                    "health_handler-controller"
                 ],
                 "summary": "Get readiness status of the application",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/monitoring.ReadinessResponse"
+                            "$ref": "#/definitions/model.ReadinessResponse"
                         }
                     },
                     "502": {
@@ -237,7 +237,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Disable OTP for a user by setting 'otp_enabled' to 'false' in the database.",
+                "description": "Disable OTP for a user_handler by setting 'otp_enabled' to 'false' in the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -247,7 +247,7 @@ const docTemplate = `{
                 "tags": [
                     "OTP"
                 ],
-                "summary": "Disable OTP for a user.",
+                "summary": "Disable OTP for a user_handler.",
                 "parameters": [
                     {
                         "description": "OTP input data",
@@ -300,7 +300,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Generate an OTP token for a user and store it in the database.",
+                "description": "Generate an OTP token for a user_handler and store it in the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -310,7 +310,7 @@ const docTemplate = `{
                 "tags": [
                     "OTP"
                 ],
-                "summary": "Generate OTP for a user.",
+                "summary": "Generate OTP for a user_handler.",
                 "parameters": [
                     {
                         "description": "OTP input data",
@@ -336,7 +336,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Failed to find user or invalid email/password",
+                        "description": "Failed to find user_handler or invalid email/password",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -357,7 +357,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Validates a One-Time Password (OTP) for a user.",
+                "description": "Validates a One-Time Password (OTP) for a user_handler.",
                 "consumes": [
                     "application/json"
                 ],
@@ -427,7 +427,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Verify the OTP token for a user and update 'otp_enabled' and 'otp_verified' fields in the database.",
+                "description": "Verify the OTP token for a user_handler and update 'otp_enabled' and 'otp_verified' fields in the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -437,7 +437,7 @@ const docTemplate = `{
                 "tags": [
                     "OTP"
                 ],
-                "summary": "Verify OTP for a user.",
+                "summary": "Verify OTP for a user_handler.",
                 "parameters": [
                     {
                         "description": "OTP input data",
@@ -640,7 +640,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Set tracks in a playlist by providing a list of track IDs.",
+                "description": "Set tracks in a playlist by providing a list of track_handler IDs.",
                 "consumes": [
                     "application/json"
                 ],
@@ -660,7 +660,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "List of track IDs to set in the playlist",
+                        "description": "List of track_handler IDs to set in the playlist",
                         "name": "track_ids",
                         "in": "body",
                         "required": true,
@@ -812,7 +812,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Add a track to an existing playlist.",
+                "description": "Add a track_handler to an existing playlist.",
                 "consumes": [
                     "application/json"
                 ],
@@ -822,7 +822,7 @@ const docTemplate = `{
                 "tags": [
                     "playlist-controller"
                 ],
-                "summary": "Add a track to a playlist",
+                "summary": "Add a track_handler to a playlist",
                 "parameters": [
                     {
                         "type": "string",
@@ -853,7 +853,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Playlist or track not found",
+                        "description": "Playlist or track_handler not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -872,7 +872,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Remove a track from the specified playlist.",
+                "description": "Remove a track_handler from the specified playlist.",
                 "consumes": [
                     "application/json"
                 ],
@@ -882,7 +882,7 @@ const docTemplate = `{
                 "tags": [
                     "playlist-controller"
                 ],
-                "summary": "Remove a track from the playlist.",
+                "summary": "Remove a track_handler from the playlist.",
                 "parameters": [
                     {
                         "type": "string",
@@ -913,7 +913,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Playlist or track not found",
+                        "description": "Playlist or track_handler not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -942,7 +942,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "track-controller"
+                    "track_handler-controller"
                 ],
                 "summary": "Show the list of all tracks.",
                 "parameters": [
@@ -1015,7 +1015,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "locates the track whose ID value matches the id parameter sent by the client,\nthen returns that track as a response.",
+                "description": "locates the track_handler whose ID value matches the id parameter sent by the client,\nthen returns that track_handler as a response.",
                 "consumes": [
                     "*/*"
                 ],
@@ -1023,13 +1023,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "track-controller"
+                    "track_handler-controller"
                 ],
                 "summary": "Track whose ID value matches the id.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Code track",
+                        "description": "Code track_handler",
                         "name": "code",
                         "in": "path",
                         "required": true
@@ -1070,7 +1070,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Deletes the authenticated user.",
+                "description": "Deletes the authenticated user_handler.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1078,9 +1078,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
-                "summary": "Deletes a user.",
+                "summary": "Deletes a user_handler.",
                 "responses": {
                     "200": {
                         "description": "Success - User deleted",
@@ -1105,7 +1105,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "Authenticates a user with provided email and password.",
+                "description": "Authenticates a user_handler with provided email and password.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1113,9 +1113,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
-                "summary": "Authenticates a user.",
+                "summary": "Authenticates a user_handler.",
                 "parameters": [
                     {
                         "description": "Login User",
@@ -1162,7 +1162,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Clears the authentication cookie, logging out the user.",
+                "description": "Clears the authentication cookie, logging out the user_handler.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1170,9 +1170,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
-                "summary": "Logs out a user.",
+                "summary": "Logs out a user_handler.",
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -1202,7 +1202,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieves user information based on JWT in the request's cookies",
+                "description": "Retrieves user_handler information based on JWT in the request's cookies",
                 "consumes": [
                     "*/*"
                 ],
@@ -1210,9 +1210,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
-                "summary": "Get user information",
+                "summary": "Get user_handler information",
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -1250,7 +1250,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
                 "summary": "Refreshes the access token using a valid refresh token.",
                 "parameters": [
@@ -1272,19 +1272,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request - Invalid refresh token",
+                        "description": "Bad Request - invalid refresh token",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized - Invalid refresh token",
+                        "description": "Unauthorized - invalid refresh token",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "failed to generate tokens and cookies",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -1299,7 +1299,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Register a new user with provided name, email, and password.",
+                "description": "Register a new user_handler with provided name, email, and password.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1307,13 +1307,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user-controller"
+                    "user_handler-controller"
                 ],
-                "summary": "Registers a new user.",
+                "summary": "Registers a new user_handler.",
                 "parameters": [
                     {
                         "description": "Register User",
-                        "name": "user",
+                        "name": "user_handler",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1355,6 +1355,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.LivenessResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
                     "type": "string"
                 }
             }
@@ -1464,6 +1472,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.PLayList"
                     }
+                }
+            }
+        },
+        "model.ReadinessResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -1588,22 +1604,6 @@ const docTemplate = `{
                 }
             }
         },
-        "monitoring.LivenessResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "monitoring.ReadinessResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
         "time.Duration": {
             "type": "integer",
             "enum": [
@@ -1625,10 +1625,7 @@ const docTemplate = `{
                 3600000000000,
                 1,
                 1000,
-                1000000,
-                1000000000,
-                60000000000,
-                3600000000000
+                1000000
             ],
             "x-enum-varnames": [
                 "minDuration",
@@ -1649,10 +1646,7 @@ const docTemplate = `{
                 "Hour",
                 "Nanosecond",
                 "Microsecond",
-                "Millisecond",
-                "Second",
-                "Minute",
-                "Hour"
+                "Millisecond"
             ]
         }
     },

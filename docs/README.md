@@ -48,7 +48,7 @@ use docker-compose.yaml to run all the necessary components
 
 ## Generate SWAGGER
 ```shell
-cd app && swag init --parseDependency --parseDepth=1
+cd app && swag inits --parseDependency --parseDepth=1
 ```
 
 

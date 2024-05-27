@@ -10,7 +10,15 @@
 run:
   # Timeout for analysis, e.g. 30s, 5m.
   # Default: 1m
-  timeout: 3m
+  timeout: 5m
+
+  skip-dirs:
+    - app/pkg/logging
+    - postgresql_dat
+
+  skip-files:
+    - app/model/swagger.go
+
 
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
@@ -204,7 +212,7 @@ linters:
     - funlen # tool for detection of long functions
     - gocheckcompilerdirectives # validates go compiler directive comments (//go:)
     - gochecknoglobals # checks that no global variables exist
-    - gochecknoinits # checks that no init functions are present in Go code
+    - gochecknoinits # checks that no inits functions are present in Go code
     - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
@@ -259,7 +267,7 @@ linters:
     #- tagalign # checks that struct tags are well aligned
     #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
     #- wrapcheck # checks that errors returned from external packages are wrapped
-    #- zerologlint # detects the wrong usage of zerolog that a user forgets to dispatch zerolog.Event
+    #- zerologlint # detects the wrong usage of zerolog that a user_handler forgets to dispatch zerolog.Event
 
     ## disabled
     #- containedctx # detects struct contained context.Context field
@@ -340,7 +348,4 @@ issues:
       linters:
         - gosec
 
-  exclude-files:
-    - app/model/swagger.go
-  exclude-dirs:
-    - app/pkg/logging
+  fix: true

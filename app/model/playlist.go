@@ -18,3 +18,15 @@ type PLayList struct {
 type PlaylistsResponse struct {
 	PLayLists []PLayList `json:"playlists"`
 }
+
+// Define a struct to parse the request body
+var PlaylistRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Level       string `json:"level"`
+}
+
+// SetPlaylistTrackOrderRequest Define a struct to match the expected JSON structure.
+type SetPlaylistTrackOrderRequest struct {
+	TrackOrder []string `json:"track_order"`
+}

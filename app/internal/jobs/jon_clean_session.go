@@ -10,13 +10,13 @@ import (
 )
 
 func (j *CleanOldSessionJob) Run() {
-	if !j.app.LeaderElection.IsLeader() {
+	if !j.app.Service.ConsulElection.IsLeader() {
 		j.app.Logger.Println("I'm not the leader.")
 		return
 	}
 
 	j.app.Logger.Println("I'm the leader!")
-	j.app.Logger.Println("init Clean old session storage...")
+	j.app.Logger.Println("inits Clean old session storage...")
 
 	var dbPool *pgxpool.Pool
 

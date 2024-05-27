@@ -2,27 +2,26 @@ package app
 
 import (
 	"net/http"
-	"s3MediaStreamer/app/pkg/amqp"
-	"s3MediaStreamer/app/pkg/logging"
-	"s3MediaStreamer/app/pkg/monitoring"
+	"s3MediaStreamer/app/internal/logs"
+	"s3MediaStreamer/app/services/health"
 	"time"
 
 	"context"
 )
 
 func (a *App) Start(ctx context.Context) {
-	a.startAMQPConsumers(ctx)
-	go a.LeaderElection.Init()
-	healthCheckWrapper := a.startHealthChecks()
-	a.handleHealthCheckResults(ctx, healthCheckWrapper)
+	go a.Service.ConsulElection.Init()
+	a.handleHealthCheckResults(ctx, a.Service.Health)
 
 	a.Logger.Info("🚀 Running Application...")
-	a.Gin.Run(ctx, healthCheckWrapper)
+	a.Run(ctx, a.Service.Health)
+
 	a.Logger.Info("Application stopped")
+	return
 }
 
 // StartPprofServer запускает сервер pprof для профилирования.
-func StartPprofServer(logger *logging.Logger) {
+func StartPprofServer(logger *logs.Logger) {
 	server := &http.Server{
 		Addr:              "localhost:6060",
 		Handler:           nil,
@@ -36,25 +35,11 @@ func StartPprofServer(logger *logging.Logger) {
 	logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
 }
 
-func (a *App) startAMQPConsumers(ctx context.Context) {
-	numWorkers := 5
-	workerDone := make(chan struct{})
-	go func() {
-		if err := amqp.ConsumeMessagesWithPool(ctx, *a.Logger, a.GetMessageClient(), numWorkers, workerDone); err != nil {
-			// Handle error
-			a.Logger.Fatal(err)
-		}
-	}()
+func (a *App) Run(ctx context.Context, hcw *health.HealthCheckService) {
+	a.startHTTP(ctx, hcw)
 }
 
-func (a *App) startHealthChecks() *monitoring.HealthCheckWrapper {
-	healthMetrics := monitoring.NewHealthMetrics()
-	healthCheckWrapper := monitoring.NewHealthCheckWrapper(healthMetrics, a.Storage.Operations, a.AMQPClient, a.S3, a.Logger)
-	healthCheckWrapper.StartHealthChecks()
-	return healthCheckWrapper
-}
-
-func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *monitoring.HealthCheckWrapper) {
+func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *health.HealthCheckService) {
 	resultChan := make(chan bool)
 	healthCheckWrapper.CheckMonitoring(ctx, resultChan)
 	go func() {
@@ -63,9 +48,12 @@ func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *
 			case <-ctx.Done():
 				return // exit goroutine when context is canceled
 			case isHealthy := <-resultChan:
-				if !isHealthy && a.LeaderElection.IsLeader() {
+				if !isHealthy && a.Service.ConsulElection.IsLeader() {
 					// Trigger ReElection if components are not healthy
-					a.LeaderElection.ReElection(a.LeaderElection.GetElectionClient())
+					err := a.Service.ConsulElection.ReElection(a.Service.ConsulElection.GetElectionClient())
+					if err != nil {
+						return
+					}
 				}
 			}
 		}

@@ -9,15 +9,13 @@ consul:
   wait_time: 5
 
 app_config:
-  log_level: "info" # trace, debug, info, warn, error, fatal, panic
-  log_type: "gelf" # text, json, gelf
+  log_level: "debug" # otel, debug, info, warn, error, fatal, panic
+  log_type: "text" # text, json, gelf
   log_gelf_server: "localhost:12201"
   log_gelf_server_type: "udp" # tcp, udp
   gin_mode: "release" # debug, test, release
   jobs:
-    job_id_user_run: "6f14edc0-54b1-11ee-8c99-0242ac120002"
     job_clean_track_s3: "@every 10m"
-    system_write_user: "Jobs"
   open_telemetry:
     tracing_enabled: true
     environment: "staging" # 'staging', 'production'
@@ -32,14 +30,14 @@ app_config:
 
 storage:
   caching:
-    enabled: false
+    enabled: true
     address: "localhost:6379"
     password: "redis"
     expiration: 24 #Hours
   username: "root"
   password: "1qazxsw2"
   host: "localhost"
-  port: "5432" # 5432 postgresql, 27017 mongodb
+  port: "5432"
   database: "db_issue_album"
 
 message_queue:
@@ -48,11 +46,11 @@ message_queue:
   pass: "guest"
   broker: "localhost"
   broker_port: 5672
-  system_write_user: "amqp@system"
+  retrying_connection: 5 # second
 
 session:
   session_storage_type: "postgres" # cookie, memory, memcached, mongo, postgres
-  session_name: "gin-session"
+  session_name: "session"
   session_period_clean: "@midnight" # @midnight, */5 * * * *, @every 1h30m10s
   cookies:
     session_secret_key: "sdfgerfsd3543g"

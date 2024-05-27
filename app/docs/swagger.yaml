@@ -5,6 +5,11 @@ definitions:
       error:
         type: string
     type: object
+  model.LivenessResponse:
+    properties:
+      status:
+        type: string
+    type: object
   model.LoginInput:
     properties:
       email:
@@ -75,6 +80,11 @@ definitions:
         items:
           $ref: '#/definitions/model.PLayList'
         type: array
+    type: object
+  model.ReadinessResponse:
+    properties:
+      status:
+        type: string
     type: object
   model.ResponceRefreshTocken:
     properties:
@@ -162,16 +172,6 @@ definitions:
       refresh_token:
         type: string
     type: object
-  monitoring.LivenessResponse:
-    properties:
-      status:
-        type: string
-    type: object
-  monitoring.ReadinessResponse:
-    properties:
-      status:
-        type: string
-    type: object
   time.Duration:
     enum:
     - -9223372036854775808
@@ -193,9 +193,6 @@ definitions:
     - 1
     - 1000
     - 1000000
-    - 1000000000
-    - 60000000000
-    - 3600000000000
     type: integer
     x-enum-varnames:
     - minDuration
@@ -217,9 +214,6 @@ definitions:
     - Nanosecond
     - Microsecond
     - Millisecond
-    - Second
-    - Minute
-    - Hour
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -240,13 +234,14 @@ paths:
     get:
       consumes:
       - '*/*'
-      description: Streams audio files in the specified directory as MP3 or FLAC.
+      description: Streams audio_handler files in the specified directory as MP3 or
+        FLAC.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         type: string
-      - description: Control operation playlist play
+      - description: Control operation playlist_handler play
         in: path
         name: control
         type: string
@@ -265,26 +260,27 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Stream audio files.
+      summary: Stream audio_handler files.
       tags:
-      - track-controller
+      - track_handler-controller
   /audio/stream/{segment}:
     get:
       consumes:
       - '*/*'
-      description: Streams audio files in the specified directory as MP3 or FLAC.
+      description: Streams audio_handler files in the specified directory as MP3 or
+        FLAC.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         type: string
-      - description: Control operation playlist play
+      - description: Control operation playlist_handler play
         in: path
         name: control
         type: string
       produces:
-      - audio/mpeg
-      - audio/flac
+      - audio_handler/mpeg
+      - audio_handler/flac
       - application/octet-stream
       responses:
         "200":
@@ -307,9 +303,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Stream audio files.
+      summary: Stream audio_handler files.
       tags:
-      - track-controller
+      - track_handler-controller
   /health/liveness:
     get:
       consumes:
@@ -321,14 +317,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/monitoring.LivenessResponse'
+            $ref: '#/definitions/model.LivenessResponse'
         "502":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       summary: Get liveness status of the application
       tags:
-      - health-controller
+      - health_handler-controller
   /health/readiness:
     get:
       consumes:
@@ -340,14 +336,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/monitoring.ReadinessResponse'
+            $ref: '#/definitions/model.ReadinessResponse'
         "502":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       summary: Get readiness status of the application
       tags:
-      - health-controller
+      - health_handler-controller
   /job/status:
     get:
       consumes:
@@ -374,8 +370,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Disable OTP for a user by setting 'otp_enabled' to 'false' in the
-        database.
+      description: Disable OTP for a user_handler by setting 'otp_enabled' to 'false'
+        in the database.
       parameters:
       - description: OTP input data
         in: body
@@ -408,14 +404,14 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Disable OTP for a user.
+      summary: Disable OTP for a user_handler.
       tags:
       - OTP
   /otp/generate:
     post:
       consumes:
       - application/json
-      description: Generate an OTP token for a user and store it in the database.
+      description: Generate an OTP token for a user_handler and store it in the database.
       parameters:
       - description: OTP input data
         in: body
@@ -435,7 +431,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "401":
-          description: Failed to find user or invalid email/password
+          description: Failed to find user_handler or invalid email/password
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -444,14 +440,14 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Generate OTP for a user.
+      summary: Generate OTP for a user_handler.
       tags:
       - OTP
   /otp/validate:
     post:
       consumes:
       - application/json
-      description: Validates a One-Time Password (OTP) for a user.
+      description: Validates a One-Time Password (OTP) for a user_handler.
       parameters:
       - description: User ID
         in: path
@@ -496,8 +492,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Verify the OTP token for a user and update 'otp_enabled' and 'otp_verified'
-        fields in the database.
+      description: Verify the OTP token for a user_handler and update 'otp_enabled'
+        and 'otp_verified' fields in the database.
       parameters:
       - description: OTP input data
         in: body
@@ -526,7 +522,7 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Verify OTP for a user.
+      summary: Verify OTP for a user_handler.
       tags:
       - OTP
   /playlist/{playlist_id}:
@@ -599,14 +595,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Set tracks in a playlist by providing a list of track IDs.
+      description: Set tracks in a playlist by providing a list of track_handler IDs.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         required: true
         type: string
-      - description: List of track IDs to set in the playlist
+      - description: List of track_handler IDs to set in the playlist
         in: body
         name: track_ids
         required: true
@@ -642,7 +638,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Remove a track from the specified playlist.
+      description: Remove a track_handler from the specified playlist.
       parameters:
       - description: Playlist ID
         in: path
@@ -666,7 +662,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Playlist or track not found
+          description: Playlist or track_handler not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -675,13 +671,13 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Remove a track from the playlist.
+      summary: Remove a track_handler from the playlist.
       tags:
       - playlist-controller
     post:
       consumes:
       - application/json
-      description: Add a track to an existing playlist.
+      description: Add a track_handler to an existing playlist.
       parameters:
       - description: Playlist ID
         in: path
@@ -705,7 +701,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Playlist or track not found
+          description: Playlist or track_handler not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -714,7 +710,7 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Add a track to a playlist
+      summary: Add a track_handler to a playlist
       tags:
       - playlist-controller
   /playlist/{playlist_id}/clear:
@@ -868,16 +864,16 @@ paths:
       - ApiKeyAuth: []
       summary: Show the list of all tracks.
       tags:
-      - track-controller
+      - track_handler-controller
   /tracks/{code}:
     get:
       consumes:
       - '*/*'
       description: |-
-        locates the track whose ID value matches the id parameter sent by the client,
-        then returns that track as a response.
+        locates the track_handler whose ID value matches the id parameter sent by the client,
+        then returns that track_handler as a response.
       parameters:
-      - description: Code track
+      - description: Code track_handler
         in: path
         name: code
         required: true
@@ -905,12 +901,12 @@ paths:
       - ApiKeyAuth: []
       summary: Track whose ID value matches the id.
       tags:
-      - track-controller
+      - track_handler-controller
   /users/delete:
     delete:
       consumes:
       - application/json
-      description: Deletes the authenticated user.
+      description: Deletes the authenticated user_handler.
       produces:
       - application/json
       responses:
@@ -928,14 +924,14 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Deletes a user.
+      summary: Deletes a user_handler.
       tags:
-      - user-controller
+      - user_handler-controller
   /users/login:
     post:
       consumes:
       - application/json
-      description: Authenticates a user with provided email and password.
+      description: Authenticates a user_handler with provided email and password.
       parameters:
       - description: Login User
         in: body
@@ -962,14 +958,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-      summary: Authenticates a user.
+      summary: Authenticates a user_handler.
       tags:
-      - user-controller
+      - user_handler-controller
   /users/logout:
     post:
       consumes:
       - application/json
-      description: Clears the authentication cookie, logging out the user.
+      description: Clears the authentication cookie, logging out the user_handler.
       produces:
       - application/json
       responses:
@@ -987,14 +983,15 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Logs out a user.
+      summary: Logs out a user_handler.
       tags:
-      - user-controller
+      - user_handler-controller
   /users/me:
     get:
       consumes:
       - '*/*'
-      description: Retrieves user information based on JWT in the request's cookies
+      description: Retrieves user_handler information based on JWT in the request's
+        cookies
       produces:
       - application/json
       responses:
@@ -1012,9 +1009,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Get user information
+      summary: Get user_handler information
       tags:
-      - user-controller
+      - user_handler-controller
   /users/refresh:
     post:
       consumes:
@@ -1036,31 +1033,31 @@ paths:
           schema:
             $ref: '#/definitions/model.ResponceRefreshTocken'
         "400":
-          description: Bad Request - Invalid refresh token
+          description: Bad Request - invalid refresh token
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "401":
-          description: Unauthorized - Invalid refresh token
+          description: Unauthorized - invalid refresh token
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: failed to generate tokens and cookies
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Refreshes the access token using a valid refresh token.
       tags:
-      - user-controller
+      - user_handler-controller
   /users/register:
     post:
       consumes:
       - application/json
-      description: Register a new user with provided name, email, and password.
+      description: Register a new user_handler with provided name, email, and password.
       parameters:
       - description: Register User
         in: body
-        name: user
+        name: user_handler
         required: true
         schema:
           $ref: '#/definitions/model.User'
@@ -1085,9 +1082,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Registers a new user.
+      summary: Registers a new user_handler.
       tags:
-      - user-controller
+      - user_handler-controller
 schemes:
 - http
 - https
