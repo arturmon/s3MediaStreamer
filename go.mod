@@ -3,7 +3,6 @@ module s3MediaStreamer
 go 1.20
 
 require (
-	github.com/AsidStorm/go-amqp-reconnect/rabbitmq v0.0.0-20210919084342-5aec9a9708ef
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/arturmon/consul-leader-election v1.2.6
 	github.com/bamzi/jobrunner v1.0.0
@@ -22,7 +21,7 @@ require (
 	github.com/hashicorp/consul/api v1.28.2
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/jackc/pgx/v5 v5.5.5
+	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mewkiz/flac v1.0.10
 	github.com/minio/minio-go/v7 v7.0.69
