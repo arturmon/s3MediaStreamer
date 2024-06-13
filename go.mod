@@ -10,7 +10,7 @@ require (
 	github.com/casbin/casbin/v2 v2.96.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/exaring/otelpgx v0.6.1
-	github.com/gin-contrib/cors v1.7.1
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-redis/redis/v8 v8.11.5
