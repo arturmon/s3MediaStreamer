@@ -184,7 +184,7 @@ func (s *Service) RefreshTocken(c *gin.Context, refreshToken string) (*model.Res
 	claims := jwt.MapClaims{}
 
 	// Validate and parse the refresh token
-	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(refreshToken, claims, func(_ *jwt.Token) (interface{}, error) {
 		return []byte(RefreshTokenSecret), nil
 	})
 	if err != nil || !token.Valid {
