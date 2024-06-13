@@ -18,7 +18,7 @@ const (
 	reconnectSleepSeconds = 5
 )
 
-func (c *AmqpHandler) ConsumeMessages(ctx context.Context, messages <-chan amqp.Delivery) {
+func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp.Delivery) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -44,7 +44,7 @@ func (c *AmqpHandler) ConsumeMessages(ctx context.Context, messages <-chan amqp.
 }
 
 // ConsumeMessagesWithPool starts consuming messages using a worker pool.
-func (c *AmqpHandler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logger, messageClient *AmqpHandler, numWorkers int, workerDone chan struct{}) error {
+func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logger, messageClient *Handler, numWorkers int, workerDone chan struct{}) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -90,7 +90,7 @@ func (c *AmqpHandler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.
 }
 
 // Consume starts consuming messages from the queue.
-func (c *AmqpHandler) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
+func (c *Handler) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
 		"",                // consumer

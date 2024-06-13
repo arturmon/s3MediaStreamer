@@ -11,14 +11,14 @@ import (
 
 const checkConsulLeaderTimeoutSeconds = 5
 
-type ConsulElection interface {
+type Elinterface interface {
 	ReElection(clien *election.Election) error
 	IsLeader() bool
 	GetElectionClient() *election.Election
 	Init()
 }
 
-type Election struct {
+type ElService struct {
 	Notify   *Notify
 	Election *election.Election
 }
@@ -67,7 +67,7 @@ func InitializeLeaderElection(config *LeaderElectionConfig) *election.Election {
 	return election.NewElection(electionConfig)
 }
 
-func NewElection(appName string, logger *logs.Logger, client ConsulService) *Election {
+func NewElection(appName string, logger *logs.Logger, client Service) *ElService {
 	n := NewNotify(appName, logger)
 	check := "service:" + appName + "-" + client.GetHostname() + ":1"
 	key := "service/" + appName + "/leader"
@@ -90,14 +90,17 @@ func NewElection(appName string, logger *logs.Logger, client ConsulService) *Ele
 	leaderElection := InitializeLeaderElection(electionConfig)
 
 	err = ReadSessionInfoOnKey(logger, client.GetConsulClient())
+	if err != nil {
+		return nil
+	}
 
-	return &Election{
+	return &ElService{
 		Notify:   n,
 		Election: leaderElection,
 	}
 }
 
-func (r *Election) ReElection(clien *election.Election) error {
+func (r *ElService) ReElection(clien *election.Election) error {
 	err := clien.ReElection()
 	if err != nil {
 		return err
@@ -105,11 +108,11 @@ func (r *Election) ReElection(clien *election.Election) error {
 	return nil
 }
 
-func (r *Election) IsLeader() bool {
+func (r *ElService) IsLeader() bool {
 	return r.Election.IsLeader()
 }
 
-func (r *Election) Init() {
+func (r *ElService) Init() {
 	r.Election.Init()
 }
 
@@ -153,6 +156,6 @@ func ReadSessionInfoOnKey(logger *logs.Logger, consulClient *api.Client) error {
 	return nil
 }
 
-func (r *Election) GetElectionClient() *election.Election {
+func (r *ElService) GetElectionClient() *election.Election {
 	return r.Election
 }

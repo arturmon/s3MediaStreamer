@@ -130,7 +130,7 @@ func (c *Client) Close(_ context.Context) error {
 }
 
 // ExecInTransaction executes a SQL query within a transaction.
-func (c *Client) ExecInTransaction(ctx context.Context, sql string, args ...interface{}) error {
+func (c *Client) ExecInTransaction(ctx context.Context, sql string, args []interface{}) error {
 	_, span := otel.Tracer("").Start(ctx, "ExecInTransaction")
 	defer span.End()
 
@@ -139,7 +139,12 @@ func (c *Client) ExecInTransaction(ctx context.Context, sql string, args ...inte
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		// Check and handle the error from Rollback
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
+			err = rErr // Only update err if it's nil, prioritizing the original error
+		}
+	}()
 
 	// Execute the SQL query within the transaction
 	_, err = tx.Exec(ctx, sql, args...)
@@ -148,15 +153,11 @@ func (c *Client) ExecInTransaction(ctx context.Context, sql string, args ...inte
 	}
 
 	// Commit the transaction
-	if err = tx.Commit(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(ctx)
 }
 
 // QueryInTransaction executes a SQL query within a transaction and returns the result.
-func (c *Client) QueryInTransaction(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+func (c *Client) QueryInTransaction(ctx context.Context, sql string, args []interface{}) (pgx.Rows, error) {
 	_, span := otel.Tracer("").Start(ctx, "QueryInTransaction")
 	defer span.End()
 
@@ -165,7 +166,12 @@ func (c *Client) QueryInTransaction(ctx context.Context, sql string, args ...int
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		// Check and handle the error from Rollback
+		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
+			err = rErr // Only update err if it's nil, prioritizing the original error
+		}
+	}()
 
 	// Execute the SQL query within the transaction
 	rows, err := tx.Query(ctx, sql, args...)

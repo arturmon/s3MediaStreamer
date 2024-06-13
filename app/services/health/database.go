@@ -4,19 +4,7 @@ import (
 	"context"
 )
 
-/*
-func (wrapper *HealthCheckWrapper) pingDatabase(ctx context.Context, logger *logs.Logger) bool {
-	err := wrapper.dbRepository.Ping(ctx)
-	if err != nil {
-		logger.Errorf("Error pinging database: %v", err)
-		return false
-	}
-	return true
-}
-
-*/
-
-func (wrapper *HealthCheckService) pingDatabase(ctx context.Context) {
+func (wrapper *Service) pingDatabase(ctx context.Context) {
 	err := wrapper.DBRepository.Ping(ctx)
 	if err != nil {
 		wrapper.UpdateHealthStatus(wrapper.HealthMetrics, false, "db")

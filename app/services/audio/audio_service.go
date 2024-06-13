@@ -18,21 +18,21 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-type AudioRepository interface {
+type Repository interface {
 }
 
-type AudioService struct {
-	track    track.TrackService
-	s3       s3.S3Service
-	playlist playlist.PlaylistService
+type Service struct {
+	track    track.Service
+	s3       s3.Service
+	playlist playlist.Service
 	logger   *logs.Logger
 }
 
-func NewAudioService(track track.TrackService, s3 s3.S3Service, playlist playlist.PlaylistService, logger *logs.Logger) *AudioService {
-	return &AudioService{track, s3, playlist, logger}
+func NewAudioService(track track.Service, s3 s3.Service, playlist playlist.Service, logger *logs.Logger) *Service {
+	return &Service{track, s3, playlist, logger}
 }
 
-func (h AudioService) StreamFileService(c *gin.Context, fileName string, f *os.File) {
+func (h Service) StreamFileService(c *gin.Context, fileName string, f *os.File) {
 	// Use a channel to signal completion
 	done := make(chan struct{})
 	defer close(done)
@@ -57,7 +57,7 @@ func (h AudioService) StreamFileService(c *gin.Context, fileName string, f *os.F
 	}()
 }
 
-func (h AudioService) StreamM3UReadFileService(ctx context.Context, segmentPath string) (*minio.ObjectInfo, string, *os.File, *model.Track, *model.RestError) {
+func (h Service) StreamM3UReadFileService(ctx context.Context, segmentPath string) (*minio.ObjectInfo, string, *os.File, *model.Track, *model.RestError) {
 	track, err := h.track.GetTracksByColumns(ctx, segmentPath, "_id")
 	if err != nil {
 		return nil, "", nil, nil, &model.RestError{Code: http.StatusNotFound, Err: "Segment not found"}
@@ -84,7 +84,7 @@ func (h AudioService) StreamM3UReadFileService(ctx context.Context, segmentPath 
 	return &findObject, fileName, f, track, nil
 }
 
-func (h *AudioService) GenerateM3U8Playlist(filePaths *[]model.Track) []*model.PlaylistM3U {
+func (h *Service) GenerateM3U8Playlist(filePaths *[]model.Track) []*model.PlaylistM3U {
 	var playlist []*model.PlaylistM3U
 
 	var prefixURI = "stream/"
@@ -99,7 +99,7 @@ func (h *AudioService) GenerateM3U8Playlist(filePaths *[]model.Track) []*model.P
 	return playlist
 }
 
-func (h *AudioService) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
+func (h *Service) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "PlayM3UPlaylist")
 	defer span.End()
 	c.Header("Content-Type", "application/x-mpegURL")
@@ -119,10 +119,9 @@ func (h *AudioService) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Con
 			return
 		}
 	}
-
 }
 
-func (h *AudioService) PlayPlaylist(ctx context.Context, playlistID string) (*[]model.Track, error) {
+func (h *Service) PlayPlaylist(ctx context.Context, playlistID string) (*[]model.Track, error) {
 	// Get the playlist_handler and its tracks
 	playlist, _, err := h.playlist.GetPlayListByID(context.Background(), playlistID)
 	if err != nil {

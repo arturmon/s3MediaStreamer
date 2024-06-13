@@ -26,6 +26,9 @@ func initConnects(ctx context.Context, cfg *model.Config, logger *logs.Logger) (
 		return nil, err
 	}
 	sessionclient, err := connect.InitSession(ctx, cfg, logger)
+	if err != nil {
+		return nil, err
+	}
 	logger.Info("Complete connect initialize.")
 	return &initConnect{
 		cashingDB:    cashingDB,

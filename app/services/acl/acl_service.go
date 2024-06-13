@@ -17,11 +17,11 @@ import (
 
 const SecretKey = "secret"
 
-type AclService struct {
+type Service struct {
 	AccessControl *casbin.Enforcer
 }
 
-func NewAclService() (*AclService, error) {
+func NewACLService() (*Service, error) {
 	var enforcer *casbin.Enforcer
 
 	adapter := fileadapter.NewAdapter("acl/policy.csv")
@@ -30,16 +30,16 @@ func NewAclService() (*AclService, error) {
 		return nil, err
 	}
 
-	return &AclService{
+	return &Service{
 		AccessControl: enforcer,
 	}, nil
 }
 
-func (s *AclService) GetEnforcer() (*casbin.Enforcer, error) {
+func (s *Service) GetEnforcer() (*casbin.Enforcer, error) {
 	return s.AccessControl, nil
 }
 
-func (s *AclService) CheckAuthorization(c *gin.Context) (string, error) {
+func (s *Service) CheckAuthorization(c *gin.Context) (string, error) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "checkAuthorization")
 	defer span.End()
 	cookie, err := c.Cookie("jwt")
@@ -69,7 +69,7 @@ func (s *AclService) CheckAuthorization(c *gin.Context) (string, error) {
 	return claims["sub"].(string), nil
 }
 
-func (s *AclService) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.HandlerFunc {
+func (s *Service) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, span := otel.Tracer("").Start(ctx, "ExtractUserRole")
 		defer span.End()
@@ -128,7 +128,7 @@ func (s *AclService) ExtractUserRole(ctx context.Context, logger *logs.Logger) g
 	}
 }
 
-func (s *AclService) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logs.Logger,
+func (s *Service) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *logs.Logger,
 	roleExtractor func(*gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role := roleExtractor(c) // Extract user_handler's role using the provided function

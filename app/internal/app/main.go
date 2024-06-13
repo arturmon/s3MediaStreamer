@@ -20,11 +20,7 @@ type App struct {
 
 // NewAppInit initializes a new App instance.
 func NewAppInit(ctx context.Context, cfg *model.Config, logger *logs.Logger, appName, version string) (*App, error) {
-
-	myGin, err := initializeGin(ctx, cfg, logger)
-	if err != nil {
-		return nil, err
-	}
+	myGin := initializeGin(ctx, cfg, logger)
 
 	logger.Info("Start register consul lieder election ...")
 

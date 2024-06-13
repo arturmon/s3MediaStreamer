@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type OtelInterface interface {
+type Repository interface {
 	Close(ctx context.Context) error
 }
 
@@ -58,6 +58,7 @@ func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error)
 	tp, tpErr := jaegerTraceProvider(ctx, config)
 	if tpErr != nil {
 		config.Logger.Fatal(tpErr)
+		return nil, tpErr
 	}
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(

@@ -2,11 +2,12 @@ package cashing
 
 import (
 	"context"
+	"errors"
 	"s3MediaStreamer/app/internal/logs"
 	"strconv"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v8"
 )
 
 type CachingInterface interface {
@@ -19,7 +20,7 @@ type CachingRepository struct {
 }
 
 // Assuming you have a Redis client configured.
-//var redisClient *redis.Client
+// var redisClient *redis.Client
 
 // InitRedisRepository initializes the Redis client.
 func InitRedisRepository(logger *logs.Logger, redisClient *redis.Client) *CachingRepository {
@@ -40,7 +41,7 @@ func (c *CachingRepository) CachePasswordVerificationInRedis(ctx context.Context
 // CheckPasswordVerificationInRedis checks if the result of the password verification is cached in Redis.
 func (c *CachingRepository) CheckPasswordVerificationInRedis(ctx context.Context, userID string) (bool, bool, error) {
 	result, err := c.redisClient.Get(ctx, "password_verification:"+userID).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		// The result is not in the cache.
 		return false, false, nil
 	} else if err != nil {

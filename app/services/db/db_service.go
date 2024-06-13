@@ -9,52 +9,52 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type DBRepository interface {
+type Repository interface {
 	ExecuteSelectQuery(ctx context.Context, selectBuilder squirrel.SelectBuilder) ([]model.Track, error)
 	Connect(_ *logs.Logger) error
 	Ping(ctx context.Context) error
 	Close(_ context.Context) error
-	ExecInTransaction(ctx context.Context, sql string, args ...interface{}) error
-	QueryInTransaction(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	ExecInTransaction(ctx context.Context, sql string, args []interface{}) error
+	QueryInTransaction(ctx context.Context, sql string, args []interface{}) (pgx.Rows, error)
 	GetConnectionString() string
 	Begin(ctx context.Context) (pgx.Tx, error)
 }
 
-type DBService struct {
-	dbRepository DBRepository
+type Service struct {
+	dbRepository Repository
 }
 
-func NewDBService(dbRepository DBRepository) *DBService {
-	return &DBService{dbRepository: dbRepository}
+func NewDBService(dbRepository Repository) *Service {
+	return &Service{dbRepository: dbRepository}
 }
 
-func (s *DBService) ExecuteSelectQuery(ctx context.Context, selectBuilder squirrel.SelectBuilder) ([]model.Track, error) {
+func (s *Service) ExecuteSelectQuery(ctx context.Context, selectBuilder squirrel.SelectBuilder) ([]model.Track, error) {
 	return s.dbRepository.ExecuteSelectQuery(ctx, selectBuilder)
 }
 
-func (s *DBService) Connect(logs *logs.Logger) error {
+func (s *Service) Connect(logs *logs.Logger) error {
 	return s.dbRepository.Connect(logs)
 }
 
-func (s *DBService) Ping(ctx context.Context) error {
+func (s *Service) Ping(ctx context.Context) error {
 	return s.dbRepository.Ping(ctx)
 }
 
-func (s *DBService) Close(ctx context.Context) error {
+func (s *Service) Close(ctx context.Context) error {
 	return s.dbRepository.Close(ctx)
 }
 
-func (s *DBService) ExecInTransaction(ctx context.Context, sql string, args ...interface{}) error {
+func (s *Service) ExecInTransaction(ctx context.Context, sql string, args ...interface{}) error {
 	return s.dbRepository.ExecInTransaction(ctx, sql, args)
 }
 
-func (s *DBService) QueryInTransaction(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+func (s *Service) QueryInTransaction(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
 	return s.dbRepository.QueryInTransaction(ctx, sql, args)
 }
 
-func (s *DBService) GetConnectionString() string {
+func (s *Service) GetConnectionString() string {
 	return s.dbRepository.GetConnectionString()
 }
-func (s *DBService) Begin(ctx context.Context) (pgx.Tx, error) {
+func (s *Service) Begin(ctx context.Context) (pgx.Tx, error) {
 	return s.dbRepository.Begin(ctx)
 }

@@ -17,20 +17,20 @@ import (
 
 const millisecondsPerSecond = 1000
 
-type TagsRepository interface {
+type Repository interface {
 	ReadTags(filename string) (*model.Track, error)
 	getSampleRate(fileName string) (uint32, time.Duration, uint32)
 	getMp3Info(f io.Reader) (uint32, time.Duration, uint32, error)
 }
 
-type TagsService struct {
+type Service struct {
 }
 
-func NewTagsService() *TagsService {
-	return &TagsService{}
+func NewTagsService() *Service {
+	return &Service{}
 }
 
-func (s *TagsService) ReadTags(filename string) (*model.Track, error) {
+func (s *Service) ReadTags(filename string) (*model.Track, error) {
 	_, err := os.Stat(filename)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (s *TagsService) ReadTags(filename string) (*model.Track, error) {
 	}, nil
 }
 
-func (s *TagsService) getSampleRate(fileName string) (uint32, time.Duration, uint32) {
+func (s *Service) getSampleRate(fileName string) (uint32, time.Duration, uint32) {
 	f, err := flac.ParseFile(fileName)
 	if err != nil {
 		panic(err)
@@ -113,7 +113,7 @@ func (s *TagsService) getSampleRate(fileName string) (uint32, time.Duration, uin
 	return data.SampleRate, duration, bitrate
 }
 
-func (s *TagsService) getMp3Info(f io.Reader) (uint32, time.Duration, uint32, error) {
+func (s *Service) getMp3Info(f io.Reader) (uint32, time.Duration, uint32, error) {
 	dec := mp3.NewDecoder(f)
 	var frame mp3.Frame
 	var duration time.Duration

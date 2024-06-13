@@ -243,24 +243,19 @@ func (c *Client) CleanTracks(ctx context.Context) error {
 	_, span := otel.Tracer("").Start(ctx, "CleanTracks")
 	defer span.End()
 	// Create a new instance of squirrel.DeleteBuilder and specify the table name
-	generateSqlTrack := squirrel.Delete("tracks")
+	generateSQLTracks := squirrel.Delete("tracks")
 
 	// Add a WHERE condition to specify the record to delete
-	generateSqlTrack = generateSqlTrack.Where("_id NOT IN (SELECT track_id FROM s3Version)")
-	generateSqlTrack = generateSqlTrack.PlaceholderFormat(squirrel.Dollar)
+	generateSQLTracks = generateSQLTracks.Where("_id NOT IN (SELECT track_id FROM s3Version)")
+	generateSQLTracks = generateSQLTracks.PlaceholderFormat(squirrel.Dollar)
 
 	// Generate the SQL query and arguments
-	sql, args, err := generateSqlTrack.ToSql()
+	sql, args, err := generateSQLTracks.ToSql()
 	if err != nil {
 		return err
 	}
 
-	// Execute the DELETE query
-	if err = c.ExecInTransaction(ctx, sql, args...); err != nil {
-		return err
-	}
-
-	return nil
+	return c.ExecInTransaction(ctx, sql, args)
 }
 
 // DeleteTracksAll deletes all records from the "track" table.
@@ -269,20 +264,16 @@ func (c *Client) DeleteTracksAll(ctx context.Context) error {
 	defer span.End()
 
 	// Create a new instance of squirrel.DeleteBuilder
-	generateSqlTracks := squirrel.Delete("").From("tracks")
+	generateSQLTracks := squirrel.Delete("").From("tracks")
 
 	// Generate the SQL query and arguments
-	sql, args, err := generateSqlTracks.ToSql()
+	sql, args, err := generateSQLTracks.ToSql()
 	if err != nil {
 		return err
 	}
 
-	// Execute the DELETE query
-	if err = c.ExecInTransaction(ctx, sql, args...); err != nil {
-		return err
-	}
-
-	return nil
+	// Execute the DELETE query within a transaction
+	return c.ExecInTransaction(ctx, sql, args)
 }
 
 // UpdateTracks updates an track record in the "track" table based on the provided code.

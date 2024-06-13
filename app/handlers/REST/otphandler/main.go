@@ -1,4 +1,4 @@
-package otp_handler
+package otphandler
 
 import (
 	"net/http"
@@ -12,12 +12,12 @@ import (
 type OtpServiceInterface interface {
 }
 
-type OtpHandler struct {
-	otpService otp.OTPService
+type Handler struct {
+	otpService otp.Service
 }
 
-func NewOtpHandler(otpService otp.OTPService) *OtpHandler {
-	return &OtpHandler{otpService}
+func NewOtpHandler(otpService otp.Service) *Handler {
+	return &Handler{otpService}
 }
 
 // GenerateOTP generates and stores an OTP (One-Time Password) for a user_handler.
@@ -33,7 +33,7 @@ func NewOtpHandler(otpService otp.OTPService) *OtpHandler {
 // @Failure 401 {object} model.ErrorResponse "Failed to find user_handler or invalid email/password""
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP secret or URL"
 // @Router /otp/generate [post]
-func (h *OtpHandler) GenerateOTP(c *gin.Context) {
+func (h *Handler) GenerateOTP(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GenerateOTP")
 	defer span.End()
 	var payload *model.OTPInput
@@ -63,7 +63,7 @@ func (h *OtpHandler) GenerateOTP(c *gin.Context) {
 // @Failure 401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/verify [post]
-func (h *OtpHandler) VerifyOTP(c *gin.Context) {
+func (h *Handler) VerifyOTP(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "VerifyOTP")
 	defer span.End()
 	var payload *model.OTPInput
@@ -95,7 +95,7 @@ func (h *OtpHandler) VerifyOTP(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Not Found - User not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Router /otp/validate [post]
-func (h *OtpHandler) ValidateOTP(c *gin.Context) {
+func (h *Handler) ValidateOTP(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ValidateOTP")
 	defer span.End()
 	var payload *model.OTPInput
@@ -127,7 +127,7 @@ func (h *OtpHandler) ValidateOTP(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "User not found"
 // @Failure 500 {object} model.ErrorResponse "Failed to update OTP status"
 // @Router /otp/disable [post]
-func (h *OtpHandler) DisableOTP(c *gin.Context) {
+func (h *Handler) DisableOTP(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DisableOTP")
 	defer span.End()
 	var payload *model.OTPInput

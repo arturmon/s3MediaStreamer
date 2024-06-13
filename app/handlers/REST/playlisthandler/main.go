@@ -1,8 +1,8 @@
-package playlist_handler
+package playlisthandler
 
 import (
 	"net/http"
-	"s3MediaStreamer/app/handlers/REST/user_handler"
+	"s3MediaStreamer/app/handlers/REST/userhandler"
 	"s3MediaStreamer/app/model"
 	"s3MediaStreamer/app/services/playlist"
 
@@ -13,13 +13,13 @@ import (
 type PlaylistServiceInterface interface {
 }
 
-type PlaylistHandler struct {
-	playlistService playlist.PlaylistService
-	userHandler     user_handler.UserHandler
+type Handler struct {
+	playlistService playlist.Service
+	userHandler     userhandler.Handler
 }
 
-func NewPlaylistHandler(playlistService playlist.PlaylistService, userHandler user_handler.UserHandler) *PlaylistHandler {
-	return &PlaylistHandler{playlistService, userHandler}
+func NewPlaylistHandler(playlistService playlist.Service, userHandler userhandler.Handler) *Handler {
+	return &Handler{playlistService, userHandler}
 }
 
 // CreatePlaylist godoc
@@ -35,12 +35,12 @@ func NewPlaylistHandler(playlistService playlist.PlaylistService, userHandler us
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/create [post]
-func (h *PlaylistHandler) CreatePlaylist(c *gin.Context) {
+func (h *Handler) CreatePlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "CreatePlaylist")
 	defer span.End()
 
 	// Parse the JSON request body
-	if err := c.ShouldBindJSON(&model.PlaylistRequest); err != nil {
+	if err := c.ShouldBindJSON(&model.Request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -66,13 +66,13 @@ func (h *PlaylistHandler) CreatePlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [delete]
-func (h *PlaylistHandler) DeletePlaylist(c *gin.Context) {
+func (h *Handler) DeletePlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeletePlaylist")
 	defer span.End()
 
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -99,13 +99,13 @@ func (h *PlaylistHandler) DeletePlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [post]
-func (h *PlaylistHandler) AddToPlaylist(c *gin.Context) {
+func (h *Handler) AddToPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "AddToPlaylist")
 	defer span.End()
 	// Extract playlist ID and track_handler ID from path parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -117,7 +117,6 @@ func (h *PlaylistHandler) AddToPlaylist(c *gin.Context) {
 
 	// Return a success response
 	c.JSON(http.StatusCreated, gin.H{"message": "Track added to the playlist successfully"})
-
 }
 
 // RemoveFromPlaylist godoc
@@ -134,13 +133,13 @@ func (h *PlaylistHandler) AddToPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [delete]
-func (h *PlaylistHandler) RemoveFromPlaylist(c *gin.Context) {
+func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "RemoveFromPlaylist")
 	defer span.End()
 	// Get the playlist ID and track_handler ID from the request parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -151,7 +150,6 @@ func (h *PlaylistHandler) RemoveFromPlaylist(c *gin.Context) {
 	}
 	// Return a success response
 	c.JSON(http.StatusOK, "Track removed from playlist successfully")
-
 }
 
 // ClearPlaylist godoc
@@ -167,13 +165,13 @@ func (h *PlaylistHandler) RemoveFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/clear [delete]
-func (h *PlaylistHandler) ClearPlaylist(c *gin.Context) {
+func (h *Handler) ClearPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ClearPlaylist")
 	defer span.End()
 	// Get the playlist ID from the URL parameters
 	playlistID := c.Param("playlist_id")
 
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -185,7 +183,6 @@ func (h *PlaylistHandler) ClearPlaylist(c *gin.Context) {
 
 	// Return a success response
 	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
-
 }
 
 // SetFromPlaylist godoc
@@ -202,12 +199,12 @@ func (h *PlaylistHandler) ClearPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [post]
-func (h *PlaylistHandler) SetFromPlaylist(c *gin.Context) {
+func (h *Handler) SetFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "SetFromPlaylist")
 	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -217,7 +214,7 @@ func (h *PlaylistHandler) SetFromPlaylist(c *gin.Context) {
 	var request model.SetPlaylistTrackOrderRequest
 
 	// Parse the JSON request body into the request struct
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err = c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -244,12 +241,12 @@ func (h *PlaylistHandler) SetFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [get]
-func (h *PlaylistHandler) ListTracksFromPlaylist(c *gin.Context) {
+func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
 	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -273,10 +270,10 @@ func (h *PlaylistHandler) ListTracksFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/get [get]
-func (h *PlaylistHandler) ListPlaylists(c *gin.Context) {
+func (h *Handler) ListPlaylists(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
 	defer span.End()
-	userRole, userID, err := h.userHandler.ReadUserIdAndRole(c)
+	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 		return
@@ -288,5 +285,4 @@ func (h *PlaylistHandler) ListPlaylists(c *gin.Context) {
 
 	// Return the response in JSON format
 	c.JSON(http.StatusOK, response)
-
 }

@@ -16,7 +16,7 @@ const (
 	QueueNoWait     = false
 )
 
-func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *logs.Logger, conn *amqp.Connection, amqpService rabbitmq.MessageService) (*AmqpHandler, error) {
+func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *logs.Logger, conn *amqp.Connection, amqpService rabbitmq.Service) (*Handler, error) {
 	logger.Info("Starting rabbitmq handler...")
 	rabbitChannel, err := newRabbitMQChanel(conn)
 	if err != nil {
@@ -28,7 +28,7 @@ func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *l
 	if err != nil {
 		return nil, err
 	}
-	repo := NewAmqpHandler(amqpService, conn, rabbitChannel, rabbitQueue)
+	repo := NewAMQPHandler(amqpService, conn, rabbitChannel, rabbitQueue)
 	repo.StartAMQPConsumers(ctx, logger, repo)
 	return repo, nil
 }

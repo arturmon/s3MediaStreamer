@@ -15,7 +15,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type PLaylistRepository interface {
+type Repository interface {
 	CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error
 	GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error)
 	DeletePlaylist(ctx context.Context, playlistID string) error
@@ -27,33 +27,35 @@ type PLaylistRepository interface {
 	GetUserAtPlayList(ctx context.Context, playlistID string) (string, error)
 }
 
-type PlaylistService struct {
-	trackRepository    track.TrackRepository
-	playlistRepository PLaylistRepository
-	session            session.SessionService
-	authService        auth.AuthService
+type Service struct {
+	trackRepository    track.Repository
+	playlistRepository Repository
+	session            session.Service
+	authService        auth.Service
 	logger             *logs.Logger
 }
 
-func NewPlaylistService(trackRepository track.TrackRepository,
-	playlistRepository PLaylistRepository,
-	session session.SessionService,
-	authService auth.AuthService,
-	logger *logs.Logger) *PlaylistService {
-	return &PlaylistService{trackRepository,
+func NewPlaylistService(trackRepository track.Repository,
+	playlistRepository Repository,
+	session session.Service,
+	authService auth.Service,
+	logger *logs.Logger) *Service {
+	return &Service{trackRepository,
 		playlistRepository,
 		session,
 		authService,
 		logger}
 }
 
-func (s *PlaylistService) CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error {
+const adminPolicy = "admin"
+
+func (s *Service) CreatePlayListName(ctx context.Context, newPlaylist model.PLayList) error {
 	return s.playlistRepository.CreatePlayListName(ctx, newPlaylist)
 }
 
-func (s *PlaylistService) CreatePlaylist(c *gin.Context) (*model.PLayList, *model.RestError) {
+func (s *Service) CreatePlaylist(c *gin.Context) (*model.PLayList, *model.RestError) {
 	// Convert the 'Level' field from string to int64
-	level, err := strconv.ParseInt(model.PlaylistRequest.Level, 10, 64)
+	level, err := strconv.ParseInt(model.Request.Level, 10, 64)
 	if err != nil {
 		return nil, &model.RestError{Code: http.StatusBadRequest, Err: "Invalid 'level' format"}
 	}
@@ -79,8 +81,8 @@ func (s *PlaylistService) CreatePlaylist(c *gin.Context) (*model.PLayList, *mode
 		ID:          playlistID,
 		CreatedAt:   time.Now(),
 		Level:       level,
-		Title:       model.PlaylistRequest.Title,
-		Description: model.PlaylistRequest.Description,
+		Title:       model.Request.Title,
+		Description: model.Request.Description,
 		CreatorUser: valueUUID,
 	}
 
@@ -91,16 +93,15 @@ func (s *PlaylistService) CreatePlaylist(c *gin.Context) (*model.PLayList, *mode
 	return &newPlaylist, nil
 }
 
-func (s *PlaylistService) GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error) {
+func (s *Service) GetPlayListByID(ctx context.Context, playlistID string) (model.PLayList, []model.Track, error) {
 	return s.playlistRepository.GetPlayListByID(ctx, playlistID)
 }
 
-func (s *PlaylistService) DeletePlaylist(ctx context.Context, playlistID string) error {
+func (s *Service) DeletePlaylist(ctx context.Context, playlistID string) error {
 	return s.playlistRepository.DeletePlaylist(ctx, playlistID)
 }
 
-func (s *PlaylistService) DeletePlaylistService(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
-
+func (s *Service) DeletePlaylistService(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
 	// Check if the playlist_handler exists in the database
 	if !s.PlaylistExists(ctx, playlistID) {
 		return &model.RestError{Code: http.StatusNotFound, Err: "Playlist not found"}
@@ -111,48 +112,48 @@ func (s *PlaylistService) DeletePlaylistService(ctx context.Context, userRole, u
 		return &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
 	// Check if the playlist_handler is not empty
-	if err := s.ClearPlayList(ctx, playlistID); err != nil {
+	if err = s.ClearPlayList(ctx, playlistID); err != nil {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to clear playlist"}
 	}
 
 	// Delete the playlist_handler from the database
-	if err := s.DeletePlaylist(ctx, playlistID); err != nil {
+	if err = s.DeletePlaylist(ctx, playlistID); err != nil {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to delete playlist"}
 	}
 
 	return nil
 }
 
-func (s *PlaylistService) PlaylistExists(ctx context.Context, playlistID string) bool {
+func (s *Service) PlaylistExists(ctx context.Context, playlistID string) bool {
 	return s.playlistRepository.PlaylistExists(ctx, playlistID)
 }
 
-func (s *PlaylistService) ClearPlayList(ctx context.Context, playlistID string) error {
+func (s *Service) ClearPlayList(ctx context.Context, playlistID string) error {
 	return s.playlistRepository.ClearPlayList(ctx, playlistID)
 }
 
-func (s *PlaylistService) UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error {
+func (s *Service) UpdatePlaylistTrackOrder(ctx context.Context, playlistID string, trackOrderRequest []string) error {
 	return s.playlistRepository.UpdatePlaylistTrackOrder(ctx, playlistID, trackOrderRequest)
 }
 
-func (s *PlaylistService) GetTracksByPlaylist(ctx context.Context, playlistID string) ([]model.Track, error) {
+func (s *Service) GetTracksByPlaylist(ctx context.Context, playlistID string) ([]model.Track, error) {
 	return s.playlistRepository.GetTracksByPlaylist(ctx, playlistID)
 }
 
-func (s *PlaylistService) GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error) {
+func (s *Service) GetAllPlayList(ctx context.Context, creatorUserID string) ([]model.PLayList, error) {
 	return s.playlistRepository.GetAllPlayList(ctx, creatorUserID)
 }
 
-func (s *PlaylistService) GetUserAtPlayList(ctx context.Context, playlistID string) (string, error) {
+func (s *Service) GetUserAtPlayList(ctx context.Context, playlistID string) (string, error) {
 	return s.playlistRepository.GetUserAtPlayList(ctx, playlistID)
 }
 
-func (s *PlaylistService) AddToPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
+func (s *Service) AddToPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
 	// Check if the playlist_handler and track_handler exist (you should implement this)
 	if !s.PlaylistExists(ctx, playlistID) {
 		return &model.RestError{Code: http.StatusNotFound, Err: "Playlist not found"}
@@ -163,7 +164,7 @@ func (s *PlaylistService) AddToPlaylist(ctx context.Context, userRole, userID, p
 		return &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
@@ -181,7 +182,7 @@ func (s *PlaylistService) AddToPlaylist(ctx context.Context, userRole, userID, p
 	return nil
 }
 
-func (s *PlaylistService) RemoveFromPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
+func (s *Service) RemoveFromPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
 	// Check if the playlist exists
 	_, _, err := s.GetPlayListByID(ctx, playlistID)
 	if err != nil {
@@ -193,7 +194,7 @@ func (s *PlaylistService) RemoveFromPlaylist(ctx context.Context, userRole, user
 		return &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
@@ -210,8 +211,7 @@ func (s *PlaylistService) RemoveFromPlaylist(ctx context.Context, userRole, user
 	return nil
 }
 
-func (s PlaylistService) ClearPlaylistService(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
-
+func (s Service) ClearPlaylistService(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
 	// Check if the playlist exists
 	if !s.PlaylistExists(ctx, playlistID) {
 		return &model.RestError{Code: http.StatusNotFound, Err: "Playlist not found"}
@@ -222,19 +222,19 @@ func (s PlaylistService) ClearPlaylistService(ctx context.Context, userRole, use
 		return &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
 	// Clear the playlist by removing all tracks (you should implement this logic)
-	if err := s.playlistRepository.ClearPlayList(ctx, playlistID); err != nil {
+	if err = s.playlistRepository.ClearPlayList(ctx, playlistID); err != nil {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to clear playlist"}
 	}
 
 	return nil
 }
 
-func (s PlaylistService) SetFromPlaylistService(ctx context.Context, userRole, userID, playlistID string, request *model.SetPlaylistTrackOrderRequest) *model.RestError {
+func (s Service) SetFromPlaylistService(ctx context.Context, userRole, userID, playlistID string, request *model.SetPlaylistTrackOrderRequest) *model.RestError {
 	// Check if the playlist exists
 	if !s.PlaylistExists(ctx, playlistID) {
 		return &model.RestError{Code: http.StatusNotFound, Err: "Playlist not found"}
@@ -245,7 +245,7 @@ func (s PlaylistService) SetFromPlaylistService(ctx context.Context, userRole, u
 		return &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
@@ -258,14 +258,14 @@ func (s PlaylistService) SetFromPlaylistService(ctx context.Context, userRole, u
 	}
 
 	// Update the track_handler order in the playlist (you should implement this logic)
-	if err := s.UpdatePlaylistTrackOrder(ctx, playlistID, request.TrackOrder); err != nil {
+	if err = s.UpdatePlaylistTrackOrder(ctx, playlistID, request.TrackOrder); err != nil {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to update track_handler order"}
 	}
 
 	return nil
 }
 
-func (s PlaylistService) ListTracksFromPlaylistService(ctx context.Context, userRole, userID, playlistID string) (*model.PlaylistTracksResponse, *model.RestError) {
+func (s Service) ListTracksFromPlaylistService(ctx context.Context, userRole, userID, playlistID string) (*model.PlaylistTracksResponse, *model.RestError) {
 	// Check if the playlist exists (you should implement this logic)
 	if !s.PlaylistExists(ctx, playlistID) {
 		return nil, &model.RestError{Code: http.StatusNotFound, Err: "Playlist not found"}
@@ -276,7 +276,7 @@ func (s PlaylistService) ListTracksFromPlaylistService(ctx context.Context, user
 		return nil, &model.RestError{Code: http.StatusNotFound, Err: "get user at playlist"}
 	}
 
-	if userRole != "admin" && userID != playlistCreateUser {
+	if userRole != adminPolicy && userID != playlistCreateUser {
 		return nil, &model.RestError{Code: http.StatusInternalServerError, Err: "you are not an administrator or this is not your playlist"}
 	}
 
@@ -317,12 +317,12 @@ func (s PlaylistService) ListTracksFromPlaylistService(ctx context.Context, user
 	return &response, nil
 }
 
-func (s PlaylistService) ListPlaylistsService(ctx context.Context, userRole, userID string) (*model.PlaylistsResponse, *model.RestError) {
+func (s Service) ListPlaylistsService(ctx context.Context, userRole, userID string) (*model.PlaylistsResponse, *model.RestError) {
 	var playlists []model.PLayList
 	var err error
 
-	if userRole == "admin" {
-		playlists, err = s.GetAllPlayList(ctx, "admin")
+	if userRole == adminPolicy {
+		playlists, err = s.GetAllPlayList(ctx, adminPolicy)
 	} else {
 		playlists, err = s.GetAllPlayList(ctx, userID)
 	}

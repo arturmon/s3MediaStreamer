@@ -5,11 +5,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-type MonitoringService struct {
+type Service struct {
 }
 
-func NewMonitoringService() *MonitoringService {
-	return &MonitoringService{}
+func NewMonitoringService() *Service {
+	return &Service{}
 }
 
 type Metrics struct {

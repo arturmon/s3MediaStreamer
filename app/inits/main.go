@@ -41,7 +41,7 @@ type initConnect struct {
 type initRepo struct {
 	InitConnect *initConnect
 	CashingRepo cashing.CachingRepository
-	S3Repo      *repoS3.S3Repository
+	S3Repo      *repoS3.Repository
 	PgRepo      *repoDB.Client
 }
 
@@ -50,29 +50,27 @@ type initRepo struct {
 // TODO monitoring
 type Service struct {
 	InitRepo        *initRepo
-	ConsulService   *consul.ConsulService
-	ConsulElection  *consul.Election
+	ConsulService   *consul.Service
+	ConsulElection  *consul.ElService
 	AuthCache       *cashing.CachingService
-	TagService      *tags.TagsService
-	S3Storage       *s3.S3Service
+	S3Storage       *s3.Service
 	TracingProvider *otel.Provider
 	MetricsMonitor  *monitoring.Metrics
-	AccessControl   *auth.AuthService
-	Audio           *audio.AudioService
-	Track           *track.TrackService
-	Acl             *acl.AclService
-	Storage         *db.DBService
-	Health          *health.HealthCheckService
-	Message         *rabbitmq.MessageService
-	Tags            *tags.TagsService
-	User            *user.UserService
-	Playlist        *playlist.PlaylistService
-	Session         *session.SessionService
-	OTP             *otp.OTPService
+	AccessControl   *auth.Service
+	Audio           *audio.Service
+	Track           *track.Service
+	ACL             *acl.Service
+	Storage         *db.Service
+	Health          *health.Service
+	Message         *rabbitmq.Service
+	Tags            *tags.Service
+	User            *user.Service
+	Playlist        *playlist.Service
+	Session         *session.Service
+	OTP             *otp.Service
 }
 
 func InitServices(ctx context.Context, appName, version string, cfg *model.Config, logger *logs.Logger) (*Service, error) {
-
 	connectSetup, err := initConnects(ctx, cfg, logger)
 	if err != nil {
 		return nil, err

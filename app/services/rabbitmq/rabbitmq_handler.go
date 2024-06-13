@@ -8,7 +8,7 @@ import (
 	"s3MediaStreamer/app/model"
 )
 
-func (s *MessageService) HandleMessage(ctx context.Context, messageBody map[string]interface{}) {
+func (s *Service) HandleMessage(ctx context.Context, messageBody map[string]interface{}) {
 	s3event, errExtract := s.extractRecordsEvent(messageBody)
 	if errExtract != nil {
 		s.logger.Printf("Error extract message: %v", errExtract)
@@ -37,11 +37,9 @@ func (s *MessageService) HandleMessage(ctx context.Context, messageBody map[stri
 	default:
 		s.logger.Debugf("Event: %s not processed", action)
 	}
-
-	return
 }
 
-func (s *MessageService) deleteEvent(ctx context.Context, s3event *model.MessageBody) error {
+func (s *Service) deleteEvent(ctx context.Context, s3event *model.MessageBody) error {
 	err := s.s3.DeleteS3Version(ctx, s3event.Records[0].S3.Object.VersionID)
 	if err != nil {
 		return fmt.Errorf("error add s3 track_handler: %w", err)
@@ -54,7 +52,7 @@ func (s *MessageService) deleteEvent(ctx context.Context, s3event *model.Message
 	return nil
 }
 
-func (s *MessageService) putEvent(ctx context.Context, s3event *model.MessageBody) error {
+func (s *Service) putEvent(ctx context.Context, s3event *model.MessageBody) error {
 	err := s.checkObjectS3(ctx, s3event, s)
 	if err != nil {
 		return err
@@ -62,7 +60,7 @@ func (s *MessageService) putEvent(ctx context.Context, s3event *model.MessageBod
 	return nil
 }
 
-func (s *MessageService) extractRecordsEvent(data map[string]interface{}) (*model.MessageBody, error) {
+func (s *Service) extractRecordsEvent(data map[string]interface{}) (*model.MessageBody, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return &model.MessageBody{}, err
@@ -83,7 +81,7 @@ func (s *MessageService) extractRecordsEvent(data map[string]interface{}) (*mode
 	return &messageBody, nil
 }
 
-func (s *MessageService) checkObjectS3(ctx context.Context, object *model.MessageBody, c *MessageService) error {
+func (s *Service) checkObjectS3(ctx context.Context, object *model.MessageBody, c *Service) error {
 	// Download file data from S3
 	fileName, err := s.s3.DownloadFilesS3(ctx, object.Key)
 	if err != nil {
@@ -108,7 +106,7 @@ func (s *MessageService) checkObjectS3(ctx context.Context, object *model.Messag
 	return nil
 }
 
-func (s *MessageService) checkIfTrackExists(ctx context.Context, track *model.Track, s3id string, c *MessageService) error {
+func (s *Service) checkIfTrackExists(ctx context.Context, track *model.Track, s3id string, c *Service) error {
 	_, err := s.track.GetTracksByColumns(ctx, track.Title, "title")
 	if err != nil {
 		if s.isNoRecordsFound(err.Error()) {
@@ -119,7 +117,7 @@ func (s *MessageService) checkIfTrackExists(ctx context.Context, track *model.Tr
 	return nil
 }
 
-func (s *MessageService) handleNonexistentTrack(ctx context.Context, track *model.Track, s3id string, c *MessageService) error {
+func (s *Service) handleNonexistentTrack(ctx context.Context, track *model.Track, s3id string, c *Service) error {
 	c.logger.Printf("Track Artist: %s not found in the database.\n", track.Title)
 
 	existingTracksSlice := []model.Track{*track}
@@ -139,7 +137,7 @@ func (s *MessageService) handleNonexistentTrack(ctx context.Context, track *mode
 	return nil
 }
 
-func (s *MessageService) isNoRecordsFound(errMsg string) bool {
+func (s *Service) isNoRecordsFound(errMsg string) bool {
 	// Use a regex pattern to check for the "no records found" message
 	// Adjust the pattern based on the specific structure of your error messages
 	pattern := `no records found (.+)`

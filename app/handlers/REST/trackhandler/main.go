@@ -1,4 +1,4 @@
-package track_handler
+package trackhandler
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 
 type TrackServiceInterface interface {
 }
-type TrackHandler struct {
-	trackService track.TrackService
+type Handler struct {
+	trackService track.Service
 }
 
-func NewTrackHandler(trackService track.TrackService) *TrackHandler {
-	return &TrackHandler{trackService}
+func NewTrackHandler(trackService track.Service) *Handler {
+	return &Handler{trackService}
 }
 
 // GetAllTracks	godoc
@@ -37,7 +37,7 @@ func NewTrackHandler(trackService track.TrackService) *TrackHandler {
 // @Failure		500 {object} model.ErrorResponse "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/tracks [get]
-func (h *TrackHandler) GetAllTracks(c *gin.Context) {
+func (h *Handler) GetAllTracks(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetAllTracks")
 	defer span.End()
 
@@ -65,7 +65,6 @@ func (h *TrackHandler) GetAllTracks(c *gin.Context) {
 	c.Header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,Link")
 	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.IndentedJSON(http.StatusOK, tracks)
-
 }
 
 // GetTrackByID godoc
@@ -83,7 +82,7 @@ func (h *TrackHandler) GetAllTracks(c *gin.Context) {
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
 // @Security    ApiKeyAuth
 // @Router		/tracks/{code} [get]
-func (h *TrackHandler) GetTrackByID(c *gin.Context) {
+func (h *Handler) GetTrackByID(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetTrackByID")
 	defer span.End()
 	id := c.Param("code")

@@ -17,22 +17,21 @@ const (
 	checkHealthS3TimeoutSeconds     = 3
 )
 
-type HealthRepository interface {
+type Repository interface {
 }
 
 // HealthCheckWrapper предоставляет обертку для периодической проверки состояния здоровья различных сервисов.
-type HealthCheckService struct {
-	HealthMetrics  *HealthMetric
-	DBRepository   db.DBRepository
-	rabbitmq       *amqp.Connection
-	s3Repository   s3.S3Repository
-	s3DBRepository s3.S3DBRepository
-	logger         *logs.Logger
+type Service struct {
+	HealthMetrics *Metric
+	DBRepository  db.Repository
+	rabbitmq      *amqp.Connection
+	s3Repository  s3.Repository
+	logger        *logs.Logger
 }
 
 // NewHealthCheckWrapper создает новую обертку для проверки здоровья.
-func NewHealthCheckWrapper(metrics *HealthMetric, dbOps db.DBRepository, amqpClient *amqp.Connection, s3Handler s3.S3Repository, logger *logs.Logger) *HealthCheckService {
-	return &HealthCheckService{
+func NewHealthCheckWrapper(metrics *Metric, dbOps db.Repository, amqpClient *amqp.Connection, s3Handler s3.Repository, logger *logs.Logger) *Service {
+	return &Service{
 		HealthMetrics: metrics,
 		DBRepository:  dbOps,
 		rabbitmq:      amqpClient,
@@ -41,33 +40,33 @@ func NewHealthCheckWrapper(metrics *HealthMetric, dbOps db.DBRepository, amqpCli
 	}
 }
 
-// HeathMetrics представляет компонент здоровья приложения.
-type HeathMetrics struct {
+// Metrics представляет компонент здоровья приложения.
+type Metrics struct {
 	Status bool   `json:"status"`
 	Name   string `json:"name"`
 }
 
-// HealthMetric представляет метрику здоровья приложения.
-type HealthMetric struct {
-	Components []HeathMetrics
+// Metric представляет метрику здоровья приложения.
+type Metric struct {
+	Components []Metrics
 	Mutex      sync.Mutex
 }
 
-func NewHealthMetrics() *HealthMetric {
-	return &HealthMetric{
-		Components: []HeathMetrics{},
+func NewHealthMetrics() *Metric {
+	return &Metric{
+		Components: []Metrics{},
 	}
 }
 
 // StartHealthChecks запускает периодические проверки состояния различных сервисов.
-func (wrapper *HealthCheckService) StartHealthChecks() {
+func (wrapper *Service) StartHealthChecks() {
 	go wrapper.periodicPing(wrapper.pingDatabase, time.Second*checkHealthDBTimeoutSeconds)
 	go wrapper.periodicPing(wrapper.pingRabbitMQ, time.Second*checkHealthRabbitTimeoutSeconds)
 	go wrapper.periodicPing(wrapper.pingS3, time.Second*checkHealthS3TimeoutSeconds)
 }
 
 // periodicPing is a generic function for periodic health_handler checks.
-func (wrapper *HealthCheckService) periodicPing(pingFunc func(context.Context), interval time.Duration) {
+func (wrapper *Service) periodicPing(pingFunc func(context.Context), interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
@@ -76,7 +75,7 @@ func (wrapper *HealthCheckService) periodicPing(pingFunc func(context.Context), 
 	}
 }
 
-func (wrapper *HealthCheckService) CheckMonitoring(ctx context.Context, resultChan chan<- bool) {
+func (wrapper *Service) CheckMonitoring(ctx context.Context, resultChan chan<- bool) {
 	go func() {
 		defer func() {
 			// Optionally, you can close the channel here if needed

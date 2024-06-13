@@ -385,10 +385,6 @@ func (c *Client) GetUserAtPlayList(ctx context.Context, playlistID string) (stri
 	}
 	defer rows.Close()
 
-	if err != nil {
-		return "", err
-	}
-
 	var creatorUser string
 	if !rows.Next() {
 		return "", errors.New("playlist not found")

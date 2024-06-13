@@ -10,12 +10,12 @@ import (
 
 // Worker represents a worker that processes AMQP messages.
 type Worker struct {
-	MessageClient *AmqpHandler
+	MessageClient *Handler
 	workerDone    chan struct{}
 }
 
 // NewWorker creates a new Worker instance.
-func NewWorker(messageClient *AmqpHandler, workerDone chan struct{}) *Worker {
+func NewWorker(messageClient *Handler, workerDone chan struct{}) *Worker {
 	return &Worker{
 		MessageClient: messageClient,
 		workerDone:    workerDone,

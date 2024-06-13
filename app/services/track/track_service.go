@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type TrackRepository interface {
+type Repository interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
 	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
@@ -27,58 +27,56 @@ type TrackRepository interface {
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
 }
 
-type TrackService struct {
-	trackRepository TrackRepository
+type Service struct {
+	trackRepository Repository
 	logger          *logs.Logger
-	restError       *model.RestError
 }
 
-func NewTrackService(trackRepository TrackRepository) *TrackService {
-	return &TrackService{trackRepository: trackRepository}
+func NewTrackService(trackRepository Repository) *Service {
+	return &Service{trackRepository: trackRepository}
 }
 
-func (s *TrackService) CreateTracks(ctx context.Context, list []model.Track) error {
+func (s *Service) CreateTracks(ctx context.Context, list []model.Track) error {
 	return s.trackRepository.CreateTracks(ctx, list)
 }
 
-func (s *TrackService) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error) {
+func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error) {
 	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filterArtist)
 }
 
-func (s *TrackService) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
+func (s *Service) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
 	return s.trackRepository.GetTracksByColumns(ctx, code, columns)
 }
 
-func (s *TrackService) CleanTracks(ctx context.Context) error {
+func (s *Service) CleanTracks(ctx context.Context) error {
 	return s.trackRepository.CleanTracks(ctx)
 }
 
-func (s *TrackService) DeleteTracksAll(ctx context.Context) error {
+func (s *Service) DeleteTracksAll(ctx context.Context) error {
 	return s.trackRepository.DeleteTracksAll(ctx)
 }
 
-func (s *TrackService) UpdateTracks(ctx context.Context, track *model.Track) error {
+func (s *Service) UpdateTracks(ctx context.Context, track *model.Track) error {
 	return s.trackRepository.UpdateTracks(ctx, track)
 }
 
-func (s *TrackService) GetAllTracks(ctx context.Context) ([]model.Track, error) {
+func (s *Service) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return s.trackRepository.GetAllTracks(ctx)
 }
 
-func (s *TrackService) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
+func (s *Service) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
 	return s.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceID, referenceType)
 }
 
-func (s *TrackService) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
+func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
 	return s.trackRepository.RemoveTrackFromPlaylist(ctx, playlistID, trackID)
 }
 
-func (s *TrackService) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
+func (s *Service) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
 	return s.trackRepository.GetAllTracksByPositions(ctx, playlistID)
 }
 
-func (s *TrackService) GetTracksService(c *gin.Context, page, pageSize, filter string, sortBy, sortOrder string) ([]model.Track, int, int, int, *model.RestError) {
-
+func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string, sortBy, sortOrder string) ([]model.Track, int, int, int, *model.RestError) {
 	// Convert page, pageSize, and totalPages to integers
 	pageInt, errPage := strconv.Atoi(page)
 	pageSizeInt, errPageSize := strconv.Atoi(pageSize)
@@ -115,8 +113,7 @@ func (s *TrackService) GetTracksService(c *gin.Context, page, pageSize, filter s
 	return tracks, countTotal, pageInt, totalPages, &model.RestError{Code: http.StatusOK}
 }
 
-func (s *TrackService) GetTrackByID(c *gin.Context, id string) (*model.Track, *model.RestError) {
-
+func (s *Service) GetTrackByID(c *gin.Context, id string) (*model.Track, *model.RestError) {
 	result, err := s.trackRepository.GetTracksByColumns(c.Request.Context(), id, "code")
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

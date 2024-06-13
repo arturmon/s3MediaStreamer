@@ -8,23 +8,23 @@ import (
 	"s3MediaStreamer/app/services/track"
 )
 
-type MessageRepository interface {
+type Repository interface {
 }
 
-type MessageService struct {
+type Service struct {
 	logger  *logs.Logger
-	storage db.DBRepository
-	s3      s3.S3Service
-	track   track.TrackService
-	tags    tags.TagsService
+	storage db.Repository
+	s3      s3.Service
+	track   track.Service
+	tags    tags.Service
 }
 
 func NewMessageService(logger *logs.Logger,
-	storage db.DBRepository,
-	s3 s3.S3Service,
-	track track.TrackService,
-	tags tags.TagsService) *MessageService {
-	return &MessageService{
+	storage db.Repository,
+	s3 s3.Service,
+	track track.Service,
+	tags tags.Service) *Service {
+	return &Service{
 		logger,
 		storage,
 		s3,

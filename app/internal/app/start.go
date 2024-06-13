@@ -14,10 +14,9 @@ func (a *App) Start(ctx context.Context) {
 	a.handleHealthCheckResults(ctx, a.Service.Health)
 
 	a.Logger.Info("🚀 Running Application...")
-	a.Run(ctx, a.Service.Health)
+	a.Run(ctx)
 
 	a.Logger.Info("Application stopped")
-	return
 }
 
 // StartPprofServer запускает сервер pprof для профилирования.
@@ -35,11 +34,11 @@ func StartPprofServer(logger *logs.Logger) {
 	logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
 }
 
-func (a *App) Run(ctx context.Context, hcw *health.HealthCheckService) {
-	a.startHTTP(ctx, hcw)
+func (a *App) Run(ctx context.Context) {
+	a.startHTTP(ctx)
 }
 
-func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *health.HealthCheckService) {
+func (a *App) handleHealthCheckResults(ctx context.Context, healthCheckWrapper *health.Service) {
 	resultChan := make(chan bool)
 	healthCheckWrapper.CheckMonitoring(ctx, resultChan)
 	go func() {

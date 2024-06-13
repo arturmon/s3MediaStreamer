@@ -16,17 +16,17 @@ const (
 	SetMaxIdleConns    = 5
 )
 
-type SessionRepository interface {
+type Repository interface {
 }
 
-type SessionService struct {
+type Service struct {
 }
 
-func NewSessionHandler() *SessionService {
-	return &SessionService{}
+func NewSessionHandler() *Service {
+	return &Service{}
 }
 
-func (h *SessionService) SetSessionData(c *gin.Context, data map[string]interface{}) error {
+func (h *Service) SetSessionData(c *gin.Context, data map[string]interface{}) error {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "setSessionData")
 	defer span.End()
 	session := sessions.Default(c)
@@ -45,7 +45,7 @@ func (h *SessionService) SetSessionData(c *gin.Context, data map[string]interfac
 	return nil
 }
 
-func (h *SessionService) GetSessionKey(c *gin.Context, key string) (interface{}, error) {
+func (h *Service) GetSessionKey(c *gin.Context, key string) (interface{}, error) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetSessionKey")
 	defer span.End()
 	session := sessions.Default(c)
@@ -56,7 +56,7 @@ func (h *SessionService) GetSessionKey(c *gin.Context, key string) (interface{},
 	return value, nil
 }
 
-func (h *SessionService) LogoutSession(c *gin.Context) error {
+func (h *Service) LogoutSession(c *gin.Context) error {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "logoutSession")
 	defer span.End()
 	session := sessions.Default(c)

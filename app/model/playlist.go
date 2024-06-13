@@ -19,8 +19,8 @@ type PlaylistsResponse struct {
 	PLayLists []PLayList `json:"playlists"`
 }
 
-// Define a struct to parse the request body
-var PlaylistRequest struct {
+// Request Define a struct to parse the request body.
+var Request struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Level       string `json:"level"`

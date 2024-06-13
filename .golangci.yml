@@ -13,12 +13,12 @@ run:
   timeout: 5m
 
   skip-dirs:
-    - app/pkg/logging
-    - postgresql_dat
+    - app/internal/logs
+    - postgresql_data
 
   skip-files:
     - app/model/swagger.go
-
+    - app/model/playlist.go
 
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml

@@ -18,7 +18,7 @@ func NewRabbitMQConnection(_ context.Context, cfg *model.Config, logger *logs.Lo
 		amqpURL = cfg.MessageQueue.Broker
 	}
 
-	//amqpURLpriv := fmt.Sprintf("rabbitmq://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
+	// amqpURLpriv := fmt.Sprintf("rabbitmq://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 	amqpURLpriv := fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 	logger.Debugf("AMQP URL: %s", amqpURLpriv)
 	conn, err := amqp.Dial(amqpURLpriv)

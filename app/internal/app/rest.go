@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
-	"s3MediaStreamer/app/services/health"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -18,7 +17,7 @@ import (
 const shutdownTimeout = 5 * time.Second
 const ReadHeaderTimeout = 5 * time.Second
 
-func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) (*gin.Engine, error) {
+func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *gin.Engine {
 	logger.Info("router initializing")
 	// Gin instance
 	switch cfg.AppConfig.GinMode {
@@ -45,16 +44,16 @@ func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) (*
 	p.SetMetricPath("/metrics")
 	p.Use(router)
 
-	return router, nil
+	return router
 }
 
-func (a *App) startHTTP(ctx context.Context, hcw *health.HealthCheckService) {
+func (a *App) startHTTP(ctx context.Context) {
 	a.Logger.Info("start HTTP")
 
 	a.Logger.Debug("view Casbin Policies:")
-	//policies := a.Service.AccessControl.GetPolicy()
+	// policies := a.Service.AccessControl.GetPolicy()
 	var logMessage string
-	//for _, p := range policies {
+	// for _, p := range policies {
 	//	logMessage += fmt.Sprintf("Policy: %v\n", p)
 	//}
 	a.Logger.Debugf(logMessage)

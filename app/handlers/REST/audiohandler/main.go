@@ -1,4 +1,4 @@
-package audio_handler
+package audiohandler
 
 import (
 	"context"
@@ -21,13 +21,13 @@ type AudioServiceInterface interface {
 	StreamFileService(c *gin.Context, fileName string, f *os.File)
 }
 
-type AudioHandler struct {
+type Handler struct {
 	audio  AudioServiceInterface
 	logger *logs.Logger
 }
 
-func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *AudioHandler {
-	return &AudioHandler{audio, logger}
+func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *Handler {
+	return &Handler{audio, logger}
 }
 
 // Audio godoc
@@ -42,7 +42,7 @@ func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *AudioHan
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /audio/{playlist_id} [get]
-func (h *AudioHandler) Audio(c *gin.Context) {
+func (h *Handler) Audio(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Audio")
 	defer span.End()
 	// Assuming you have a function that retrieves or generates the M3U8 playlist_handler
@@ -79,7 +79,7 @@ func (h *AudioHandler) Audio(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /audio/stream/{segment} [get]
-func (h *AudioHandler) StreamM3U(c *gin.Context) {
+func (h *Handler) StreamM3U(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "StreamM3U")
 	defer span.End()
 	segmentPath := c.Param("segment")

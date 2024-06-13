@@ -1,4 +1,4 @@
-package jobs_handler
+package jobshandler
 
 import (
 	"net/http"
@@ -11,11 +11,11 @@ import (
 type JobServiceInterface interface {
 }
 
-type JobHandler struct {
+type Handler struct {
 }
 
-func NewJobHandler() *JobHandler {
-	return &JobHandler{}
+func NewJobHandler() *Handler {
+	return &Handler{}
 }
 
 // JobStatus godoc
@@ -27,7 +27,7 @@ func NewJobHandler() *JobHandler {
 // @Success 200 {object} map[string]interface{} "OK"
 // @Failure 404 {object} map[string]string "Not Found"
 // @Router /job/status [get]
-func (h *JobHandler) JobStatus(c *gin.Context) {
+func (h *Handler) JobStatus(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "JobStatus")
 	defer span.End()
 	c.JSON(http.StatusOK, jobrunner.StatusJson())

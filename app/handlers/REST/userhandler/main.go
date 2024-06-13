@@ -1,4 +1,4 @@
-package user_handler
+package userhandler
 
 import (
 	"net/http"
@@ -15,14 +15,14 @@ type UserServiceInterface interface {
 	ReadUserIdAndRole(c *gin.Context) (string, string, error)
 }
 
-type UserHandler struct {
-	acl         acl.AclService
-	userService user.UserService
-	authService auth.AuthService
+type Handler struct {
+	acl         acl.Service
+	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(acl acl.AclService, userService user.UserService, authService auth.AuthService) *UserHandler {
-	return &UserHandler{acl, userService, authService}
+func NewUserHandler(acl acl.Service, userService user.Service, authService auth.Service) *Handler {
+	return &Handler{acl, userService, authService}
 }
 
 // Register godoc
@@ -38,7 +38,7 @@ func NewUserHandler(acl acl.AclService, userService user.UserService, authServic
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/register [post]
-func (h *UserHandler) Register(c *gin.Context) {
+func (h *Handler) Register(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Register")
 	defer span.End()
 
@@ -68,7 +68,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 // @Failure     404 {object} model.ErrorResponse "Not Found - User not found"
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/login [post]
-func (h *UserHandler) Login(c *gin.Context) {
+func (h *Handler) Login(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Login")
 	defer span.End()
 
@@ -84,7 +84,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, login)
-
 }
 
 // DeleteUser godoc
@@ -98,7 +97,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure     404 {object} model.ErrorResponse "Not Found - User not found"
 // @Router		/users/delete [delete]
-func (h *UserHandler) DeleteUser(c *gin.Context) {
+func (h *Handler) DeleteUser(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeleteUser")
 	defer span.End()
 
@@ -131,7 +130,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure     500 {object} model.ErrorResponse "Internal Server Error"
 // @Router		/users/logout [post]
-func (h *UserHandler) Logout(c *gin.Context) {
+func (h *Handler) Logout(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Logout")
 	defer span.End()
 
@@ -153,7 +152,7 @@ func (h *UserHandler) Logout(c *gin.Context) {
 // @Failure 401 {object} model.ErrorResponse "Unauthenticated"
 // @Failure 404 {object} model.ErrorResponse "User not found"
 // @Router /users/me [get]
-func (h *UserHandler) User(c *gin.Context) {
+func (h *Handler) User(c *gin.Context) {
 	// Start h new span for the GetAllTracks operation
 	_, span := otel.Tracer("").Start(c.Request.Context(), "User")
 	defer span.End()
@@ -188,7 +187,7 @@ func (h *UserHandler) User(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "failed to get user"
 // @Failure 500 {object} model.ErrorResponse "failed to generate tokens and cookies"
 // @Router /users/refresh [post]
-func (h *UserHandler) RefreshTokenHandler(c *gin.Context) {
+func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "refreshTokenHandler")
 	defer span.End()
 
@@ -212,10 +211,9 @@ func (h *UserHandler) RefreshTokenHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, responce)
-
 }
 
-func (h *UserHandler) ReadUserIdAndRole(c *gin.Context) (string, string, error) {
+func (h *Handler) ReadUserIDAndRole(c *gin.Context) (string, string, error) {
 	var err error
 	userRole, ok := c.Get("userRole")
 	if !ok {

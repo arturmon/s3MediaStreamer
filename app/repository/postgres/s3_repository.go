@@ -39,10 +39,6 @@ func (c *Client) GetS3VersionByTrackID(ctx context.Context, trackID string) (str
 	}
 	defer rows.Close()
 
-	if err != nil {
-		return "", err
-	}
-
 	if !rows.Next() {
 		return "", errors.New("no connection was found in s3 with this identifier")
 	}

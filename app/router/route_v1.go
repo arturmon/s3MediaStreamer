@@ -85,8 +85,8 @@ func setupSystemRoutes(ctx context.Context, app *app.App, allHandlers *handlers.
 
 	app.REST.GET("/job/status", allHandlers.Job.JobStatus)
 
-	app.REST.Use(app.Service.Acl.ExtractUserRole(ctx, app.Logger))
-	app.REST.Use(app.Service.Acl.NewAuthorizerWithRoleExtractor(app.Service.Acl.AccessControl, app.Logger, func(c *gin.Context) string {
+	app.REST.Use(app.Service.ACL.ExtractUserRole(ctx, app.Logger))
+	app.REST.Use(app.Service.ACL.NewAuthorizerWithRoleExtractor(app.Service.ACL.AccessControl, app.Logger, func(c *gin.Context) string {
 		if role, ok := c.Get("userRole"); ok {
 			return role.(string)
 		}

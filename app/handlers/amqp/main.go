@@ -9,21 +9,21 @@ import (
 )
 
 // AmqpServiceInterface определяет методы для работы с RabbitMQ.
-type AmqpServiceInterface interface {
+type Interface interface {
 	HandleMessage(ctx context.Context, messageBody map[string]interface{})
 }
 
 // AmqpHandler представляет репозиторий для работы с RabbitMQ.
-type AmqpHandler struct {
-	amqpService rabbitmq.MessageService
+type Handler struct {
+	amqpService rabbitmq.Service
 	Conn        *amqp.Connection
 	channel     *amqp.Channel
 	queue       *amqp.Queue
 }
 
 // NewAmqpHandler создает новый экземпляр RabbitMQRepository.
-func NewAmqpHandler(amqpService rabbitmq.MessageService, conn *amqp.Connection, channel *amqp.Channel, queue *amqp.Queue) *AmqpHandler {
-	return &AmqpHandler{
+func NewAMQPHandler(amqpService rabbitmq.Service, conn *amqp.Connection, channel *amqp.Channel, queue *amqp.Queue) *Handler {
+	return &Handler{
 		amqpService: amqpService,
 		Conn:        conn,
 		channel:     channel,
@@ -31,15 +31,12 @@ func NewAmqpHandler(amqpService rabbitmq.MessageService, conn *amqp.Connection, 
 	}
 }
 
-func (c *AmqpHandler) Ping(_ context.Context) bool {
-	if c.Conn.IsClosed() {
-		return false
-	}
-	return true
+func (c *Handler) Ping(_ context.Context) bool {
+	return !c.Conn.IsClosed()
 }
 
 // TODO
-func (c *AmqpHandler) StartAMQPConsumers(ctx context.Context, logger *logs.Logger, messageClient *AmqpHandler) {
+func (c *Handler) StartAMQPConsumers(ctx context.Context, logger *logs.Logger, messageClient *Handler) {
 	numWorkers := 5
 	workerDone := make(chan struct{})
 	go func() {
@@ -50,6 +47,6 @@ func (c *AmqpHandler) StartAMQPConsumers(ctx context.Context, logger *logs.Logge
 	}()
 }
 
-func (c *AmqpHandler) HandleMessage(ctx context.Context, messageBody map[string]interface{}) {
+func (c *Handler) HandleMessage(ctx context.Context, messageBody map[string]interface{}) {
 	c.amqpService.HandleMessage(ctx, messageBody)
 }

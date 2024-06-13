@@ -18,32 +18,32 @@ const hoursInOneDay = 24
 const RefreshTokenSecret = "your_refresh_token_secret_key"
 const refreshTokenExpiration = 30 * 24 * time.Hour
 
-type AuthRepository interface {
+type Repository interface {
 	GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error)
 	SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error
-	//generateAccessToken(ctx context.Context, user model.User) (string, error)
-	//generateRefreshToken(ctx context.Context, user model.User) (string, error)
-	//generateTokensAndCookies(c *gin.Context, user model.User) (string, string, error)
+	// generateAccessToken(ctx context.Context, user model.User) (string, error)
+	// generateRefreshToken(ctx context.Context, user model.User) (string, error)
+	// generateTokensAndCookies(c *gin.Context, user model.User) (string, string, error)
 }
 
-type AuthService struct {
-	authRepository AuthRepository
+type Service struct {
+	authRepository Repository
 }
 
-func NewAuthService(authRepository AuthRepository) *AuthService {
-	return &AuthService{authRepository: authRepository}
+func NewAuthService(authRepository Repository) *Service {
+	return &Service{authRepository: authRepository}
 }
 
-func (s *AuthService) GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error) {
+func (s *Service) GetStoredRefreshToken(ctx context.Context, userEmail string) (string, error) {
 	return s.authRepository.GetStoredRefreshToken(ctx, userEmail)
 }
 
-func (s *AuthService) SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error {
+func (s *Service) SetStoredRefreshToken(ctx context.Context, userEmail, refreshToken string) error {
 	return s.authRepository.SetStoredRefreshToken(ctx, userEmail, refreshToken)
 }
 
 // GenerateAccessToken generates an access token for the given user_handler.
-func (s *AuthService) generateAccessToken(ctx context.Context, user model.User) (string, error) {
+func (s *Service) generateAccessToken(ctx context.Context, user model.User) (string, error) {
 	_, span := otel.Tracer("").Start(ctx, "generateAccessToken")
 	defer span.End()
 	key := []byte(SecretKey)
@@ -64,7 +64,7 @@ func (s *AuthService) generateAccessToken(ctx context.Context, user model.User) 
 }
 
 // GenerateRefreshToken generates a refresh token for the given user_handler.
-func (s *AuthService) generateRefreshToken(ctx context.Context, user model.User) (string, error) {
+func (s *Service) generateRefreshToken(ctx context.Context, user model.User) (string, error) {
 	_, span := otel.Tracer("").Start(ctx, "generateRefreshToken")
 	defer span.End()
 	key := []byte(RefreshTokenSecret)
@@ -83,7 +83,7 @@ func (s *AuthService) generateRefreshToken(ctx context.Context, user model.User)
 	return refreshToken, nil
 }
 
-func (s *AuthService) GenerateTokensAndCookies(c *gin.Context, user model.User) (string, string, error) {
+func (s *Service) GenerateTokensAndCookies(c *gin.Context, user model.User) (string, string, error) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "generateTokensAndCookies")
 	defer span.End()
 	accessToken, err := s.generateAccessToken(c.Request.Context(), user)

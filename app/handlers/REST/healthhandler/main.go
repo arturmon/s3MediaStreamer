@@ -1,4 +1,4 @@
-package health_handler
+package healthhandler
 
 import (
 	"net/http"
@@ -11,12 +11,12 @@ import (
 type MonitoringServiceInterface interface {
 }
 
-type MonitoringHandler struct {
-	monitoringService health.HealthCheckService
+type Handler struct {
+	monitoringService health.Service
 }
 
-func NewMonitoringHandler(monitoringService health.HealthCheckService) *MonitoringHandler {
-	return &MonitoringHandler{monitoringService}
+func NewMonitoringHandler(monitoringService health.Service) *Handler {
+	return &Handler{monitoringService}
 }
 
 // LivenessGET godoc
@@ -29,7 +29,7 @@ func NewMonitoringHandler(monitoringService health.HealthCheckService) *Monitori
 // @Success 200 {object} model.LivenessResponse
 // @Failure 502 {object} model.ErrorResponse "Internal Server Error"
 // @Router /health/liveness [get]
-func (h *MonitoringHandler) LivenessGET(c *gin.Context, wrapper *health.HealthCheckService) {
+func (h *Handler) LivenessGET(c *gin.Context, wrapper *health.Service) {
 	// Use pingDatabase for liveness probe
 	err := wrapper.DBRepository.Ping(c)
 	if err != nil {
@@ -54,9 +54,9 @@ func (h *MonitoringHandler) LivenessGET(c *gin.Context, wrapper *health.HealthCh
 // @Success 200 {object} model.ReadinessResponse
 // @Failure 502 {object} model.ErrorResponse "Internal Server Error"
 // @Router /health/readiness [get]
-func (h *MonitoringHandler) ReadinessGET(c *gin.Context, wrapper *health.HealthCheckService) {
-	//wrapper.HealthMetrics.Mutex.Lock()
-	//defer wrapper.HealthMetrics.Mutex.Unlock()
+func (h *Handler) ReadinessGET(c *gin.Context, wrapper *health.Service) {
+	// wrapper.HealthMetrics.Mutex.Lock()
+	// defer wrapper.HealthMetrics.Mutex.Unlock()
 	status := "UP"
 
 	// Create a slice to store HealthCheckComponent for each component

@@ -34,7 +34,7 @@ func initServices(ctx context.Context,
 	logger.Info("Starting initialize the service...")
 	consulService := consul.NewService(appName, cfg, logger)
 	consulService.Start()
-	leaderElectionService := consul.NewElection(appName, logger, consulService)
+	leaderElectionService := consul.NewElection(appName, logger, *consulService)
 	cashingService := cashing.NewCachingService(repo.CashingRepo)
 	tagsService := tags.NewTagsService()
 	s3Service := s3.NewS3Service(repo.S3Repo, repo.PgRepo)
@@ -44,11 +44,11 @@ func initServices(ctx context.Context,
 	}
 	registry := prometheus.NewRegistry()
 	metrics := monitoring.NewMetrics(registry)
-	//metricsMonitorService := monitoring.NewMonitoringService()
+	// metricsMonitorService := monitoring.NewMonitoringService()
 
 	accessControlService := auth.NewAuthService(repo.PgRepo)
 	trackService := track.NewTrackService(repo.PgRepo)
-	aclService, err := acl.NewAclService()
+	aclService, err := acl.NewACLService()
 	if err != nil {
 		return nil, err
 	}
@@ -62,29 +62,28 @@ func initServices(ctx context.Context,
 	messageService := rabbitmq.NewMessageService(logger, repo.PgRepo, *s3Service, *trackService, *tagsService)
 
 	userService := user.NewUserService(repo.PgRepo, *sessionService, *cashingService, logger, *accessControlService, cfg)
-	playlistSerrvice := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, logger)
-	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistSerrvice, logger)
+	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, logger)
+	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistService, logger)
 	otpService := otp.NewOTPService(*userService, cfg)
 	logger.Info("Complete service initialize.")
 	return &Service{
 		InitRepo:        repo,
-		ConsulService:   &consulService,
+		ConsulService:   consulService,
 		ConsulElection:  leaderElectionService,
 		AuthCache:       cashingService,
-		TagService:      tagsService,
 		S3Storage:       s3Service,
 		TracingProvider: tracingService,
 		MetricsMonitor:  metrics,
 		AccessControl:   accessControlService,
 		Audio:           audioService,
 		Track:           trackService,
-		Acl:             aclService,
+		ACL:             aclService,
 		Storage:         storageService,
 		Health:          healthService,
 		Message:         messageService,
 		Tags:            tagsService,
 		User:            userService,
-		Playlist:        playlistSerrvice,
+		Playlist:        playlistService,
 		Session:         sessionService,
 		OTP:             otpService,
 	}, nil

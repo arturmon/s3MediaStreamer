@@ -16,7 +16,7 @@ type OTPVerify struct {
 }
 
 type OTPUser struct {
-	Id         string `json:"id"`
+	ID         string `json:"id"`
 	Name       string `json:"name"`
 	Email      string `json:"email"`
 	OtpEnabled bool   `json:"otp_enabled"`

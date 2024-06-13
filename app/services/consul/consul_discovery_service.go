@@ -17,7 +17,7 @@ const (
 	healthTicket = time.Second * 5
 )
 
-type ConsulService interface {
+type Interface interface {
 	Start()
 	UpdateHealthCheck()
 	RegisterService()
@@ -34,7 +34,7 @@ type Service struct {
 	AppName      string
 }
 
-func NewService(appName string, cfg *model.Config, logger *logs.Logger) ConsulService {
+func NewService(appName string, cfg *model.Config, logger *logs.Logger) *Service {
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = cfg.Consul.URL
 	consulConfig.WaitTime = time.Duration(cfg.Consul.WaitTime) * time.Second
