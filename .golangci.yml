@@ -12,14 +12,6 @@ run:
   # Default: 1m
   timeout: 5m
 
-  skip-dirs:
-    - app/internal/logs
-    - postgresql_data
-
-  skip-files:
-    - app/model/swagger.go
-    - app/model/playlist.go
-
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
 linters-settings:
@@ -105,7 +97,7 @@ linters-settings:
         # Default: true
         skipRecvDeref: false
 
-  gomnd:
+  mnd:
     # List of function patterns to exclude from analysis.
     # Values always ignored: `time.Date`,
     # `strconv.FormatInt`, `strconv.FormatUint`, `strconv.FormatFloat`,
@@ -309,6 +301,13 @@ issues:
   # Set to 0 to disable.
   # Default: 3
   max-same-issues: 50
+
+  exclude-dirs:
+    - app/internal/logs
+    - postgresql_data
+  exclude-files:
+    - app/model/swagger.go
+    - app/model/playlist.go
 
   exclude-rules:
     - source: "// @Router"
