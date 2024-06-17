@@ -1,0 +1,292 @@
+# Default values for S3 Media Streamer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  registry: arturmon/s3stream
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+podAnnotations:
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+replicaCount: 3
+
+env:
+  S3_ACCESS_KEY_ID: app
+  S3_SECRET_ACCESS_KEY: E7ct9Zr1rOu0ZJZLxTqv
+  STORAGE_HOST: s3stream-postgresql
+  SESSION_POSTGRESQL_HOST: s3stream-postgresql
+  S3_ENDPOINT: s3stream-minio:9000
+  MQ_BROKER: s3stream-rabbitmq
+  CONSUL_URL: s3stream-consul-server:8500
+  LOG_TYPE: text
+  LOG_GELF_SERVER_URL: graylog:12201
+  OPEN_TELEMETRY_JAEGER_ENDPOINT: http://jaeger:4318
+  CACHING_ENABLED: true
+  CACHING_ADDRESS: s3stream-redis-headless:6379
+  CACHING_PASSWORD: redis
+  CACHING_EXPIRATION: 2
+
+
+port: 10000
+
+service:
+  type: ClusterIP
+  metrics:
+    enabled: true
+    scheme: http
+    path: /metrics
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 50Mi
+  limits:
+    cpu: 250m
+    memory: 512Mi
+
+ingress:
+  host: s3streammedia.localhost
+  className: nginx
+  useTls: false
+  #annotations:
+  #  cert-manager.io/cluster-issuer: letsencrypt-prod
+
+prometheus:
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - prometheus.localhost
+  prometheus-node-exporter:
+    enabled: false
+
+grafana:
+  adminUser: admin
+  adminPassword: admin
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.localhost
+  extraEmptyDirMounts:
+  - name: provisioning
+    mountPath: /etc/grafana/provisioning
+  plugins:
+    - grafana-piechart-panel
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://prometheus-prometheus-server
+          access: proxy
+          isDefault: true
+  dashboards:
+    default:
+      prometheus-stats:
+        # Ref: https://grafana.com/dashboards/2
+        gnetId: 2
+        revision: 2
+        datasource: Prometheus
+
+consul:
+  global:
+    datacenter: dc1
+    metrics:
+      enabled: true
+  server:
+    replicas: 1
+  ui:
+    ingress:
+      enabled: true
+      ingressClassName: "nginx"
+      hosts:
+        - host: consul.localhost
+          paths:
+            - /
+    metrics:
+      provider: "prometheus"
+      baseURL: http://prometheus-server
+  dns:
+    enabled: true
+
+
+postgresql:
+  auth:
+    username: root
+    password: 1qazxsw2
+    postgresPassword: postgres
+    database: db_issue_album
+  metrics:
+    enabled: true
+  primary:
+    initdb:
+      scripts:
+        init.sql: |
+          CREATE DATABASE session;
+    persistence:
+      size: 10Gi
+
+redis:
+  auth:
+    password: "redis"
+
+rabbitmq:
+  auth:
+    username: guest
+    password: "guest"
+  ingress:
+    enabled: true
+    hostname: rabbitmq.localhost
+    ingressClassName: "nginx"
+  metrics:
+    enabled: true
+  extraSecrets:
+    load-definition:
+      load_definition.json: |
+        {
+        "users": [
+          {
+            "name": "guest",
+            "password_hash": "BMfxN8drrYcIqXZMr+pWTpDT0nMcOagMduLX0bjr4jwud/pN",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": [
+              "administrator"
+            ],
+            "limits": {}
+          }
+        ],
+        "vhosts": [
+          {
+            "name": "/"
+          }
+        ],
+        "permissions": [
+          {
+            "user": "guest",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+          }
+        ],
+        "queues": [
+          {
+            "name": "s3_queue",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {
+              "x-queue-type": "classic"
+            }
+          }
+        ],
+        "exchanges": [
+          {
+            "name": "s3_exchange",
+            "vhost": "/",
+            "type": "fanout",
+            "durable": true,
+            "auto_delete": false,
+            "internal": false,
+            "arguments": {}
+          }
+        ],
+        "bindings": [
+          {
+            "source": "s3_exchange",
+            "vhost": "/",
+            "destination": "s3_queue",
+            "destination_type": "queue",
+            "routing_key": "s3_queue",
+            "arguments": {}
+          }
+        ]
+        }
+  loadDefinition:
+    enabled: true
+    existingSecret: load-definition
+  extraConfiguration: |-
+    load_definitions = /app/load_definition.json
+    
+
+minio:
+  auth:
+    rootUser: admin
+    rootPassword: "12345678"
+  #defaultBuckets: "music-bucket"
+  disableWebUI: false
+  extraEnvVars:
+    - name: MINIO_NOTIFY_AMQP_ENABLE
+      value: "on"
+    - name: MINIO_NOTIFY_AMQP_URL
+      value: "amqp://guest:guest@s3-streamer-rabbitmq-headless:5672"
+    - name: MINIO_NOTIFY_AMQP_EXCHANGE
+      value: "s3_exchange"
+    - name: MINIO_NOTIFY_AMQP_EXCHANGE_TYPE
+      value: "fanout"
+    - name: MINIO_NOTIFY_AMQP_DURABLE
+      value: "on"
+    - name: MINIO_NOTIFY_AMQP_DELIVERY_MODE
+      value: "2"
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hostname: minio.localhost
+  apiIngress:
+    enabled: true
+    ingressClassName: "nginx"
+    hostname: minio-api.localhost
+  provisioning:
+    enabled: true
+    policies:
+      - name: music-bucket-bucket-specific-policy
+        statements:
+          - resources:
+              - "arn:aws:s3:::*"
+            effect: "Allow"
+            actions:
+              - "s3:GetBucketLocation"
+              - "s3:ListBucket"
+              - "s3:GetObject"
+              - "s3:DeleteObject"
+              - "s3:PutObject"
+    config:
+      - name: region
+        options:
+          name: us-east-1
+    buckets:
+      - name: music-bucket
+        region: us-east-1
+        versioning: Versioned
+    users:
+      - username: app
+        password: E7ct9Zr1rOu0ZJZLxTqv
+        disabled: false
+        setPolicies: true
+        policies:
+          - music-bucket-bucket-specific-policy

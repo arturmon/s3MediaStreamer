@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fullname" . }}-service
+  {{- if .Values.service.metrics.enabled }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/scheme: {{ .Values.service.metrics.scheme | quote }}
+    prometheus.io/path: {{ .Values.service.metrics.path | quote }}
+    prometheus.io/port: {{ $.Values.port | quote }}
+  {{- end }}
+  labels:
+    {{- include "labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ $.Values.port }}
+      targetPort: {{ $.Values.port }}
+      protocol: TCP
+      name: http-backend
+  selector:
+    app.kubernetes.io/name: {{ include "name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/service: backend
+
