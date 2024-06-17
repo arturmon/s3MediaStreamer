@@ -206,7 +206,7 @@ services:
       - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
       - CACHING_ENABLED=true
       - CACHING_ADDRESS=caching:6379
-      - CACHING_PASSWORD-redis
+      - CACHING_PASSWORD=redis
       - CACHING_EXPIRATION=2
     image: arturmon/s3stream:latest
     restart: unless-stopped
@@ -225,7 +225,7 @@ services:
       - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
       - CACHING_ENABLED=true
       - CACHING_ADDRESS=caching:6379
-      - CACHING_PASSWORD-redis
+      - CACHING_PASSWORD=redis
       - CACHING_EXPIRATION=2
     image: arturmon/s3stream:latest
     restart: unless-stopped
@@ -244,7 +244,7 @@ services:
       - OPEN_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:4318
       - CACHING_ENABLED=true
       - CACHING_ADDRESS=caching:6379
-      - CACHING_PASSWORD-redis
+      - CACHING_PASSWORD=redis
       - CACHING_EXPIRATION=2
     image: arturmon/s3stream:latest
     restart: unless-stopped
