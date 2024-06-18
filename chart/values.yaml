@@ -2,52 +2,31 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+replicaCount: 3
+
 nameOverride: ""
 fullnameOverride: ""
 
 image:
   registry: arturmon/s3stream
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: latest
 
-podAnnotations:
+podAnnotations: {}
+  # example: "key": "value"
 
 podSecurityContext: {}
-# fsGroup: 2000
+  # example:
+  # runAsUser: 1000
+  # fsGroup: 2000
 
 securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
   # readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-replicaCount: 3
-
-env:
-  S3_ACCESS_KEY_ID: app
-  S3_SECRET_ACCESS_KEY: E7ct9Zr1rOu0ZJZLxTqv
-  STORAGE_HOST: s3stream-postgresql
-  SESSION_POSTGRESQL_HOST: s3stream-postgresql
-  S3_ENDPOINT: s3stream-minio:9000
-  MQ_BROKER: s3stream-rabbitmq
-  CONSUL_URL: s3stream-consul-server:8500
-  LOG_TYPE: text
-  LOG_GELF_SERVER_URL: graylog:12201
-  OPEN_TELEMETRY_JAEGER_ENDPOINT: http://jaeger:4318
-  CACHING_ENABLED: true
-  CACHING_ADDRESS: s3stream-redis-headless:6379
-  CACHING_PASSWORD: redis
-  CACHING_EXPIRATION: 2
-
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
 port: 10000
 
@@ -66,12 +45,63 @@ resources:
     cpu: 250m
     memory: 512Mi
 
+livenessProbe:
+  path: /metrics
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  path: /metrics
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+env:
+  LOG_LEVEL: info
+  S3_ACCESS_KEY_ID: app
+  S3_SECRET_ACCESS_KEY: E7ct9Zr1rOu0ZJZLxTqv
+  STORAGE_HOST: s3stream-postgresql
+  SESSION_POSTGRESQL_HOST: s3stream-postgresql
+  S3_ENDPOINT: s3stream-minio:9000
+  MQ_BROKER: s3stream-rabbitmq
+  CONSUL_URL: s3stream-consul-server:8500
+  LOG_TYPE: gelf
+  LOG_GELF_SERVER_URL: graylog.graylog.svc.cluster.local:12201
+  OPEN_TELEMETRY_JAEGER_ENDPOINT: http://s3stream-jaeger-collector:4318
+  CACHING_ENABLED: true
+  CACHING_ADDRESS: s3stream-redis-headless:6379
+  CACHING_PASSWORD: redis
+  CACHING_EXPIRATION: 2
+
+
 ingress:
   host: s3streammedia.localhost
   className: nginx
   useTls: false
   #annotations:
   #  cert-manager.io/cluster-issuer: letsencrypt-prod
+
+nodeSelector: {}
+# example: "kubernetes.io/hostname": "node1"
+
+tolerations: []
+  # example:
+  # - key: "key1"
+  #   operator: "Equal"
+  #   value: "value1"
+#   effect: "NoSchedule"
+
+affinity: {}
+  # example:
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #     - matchExpressions:
+  #       - key: kubernetes.io/e2e-az-name
+  #         operator: In
+  #         values:
+  #         - e2e-az1
+#         - e2e-az2
+
 
 prometheus:
   server:
@@ -82,6 +112,26 @@ prometheus:
         - prometheus.localhost
   prometheus-node-exporter:
     enabled: false
+  extraScrapeConfigs: |
+    - job_name: 'minio'
+      metrics_path: /minio/v2/metrics/resource
+      scrape_interval: 10s
+      static_configs:
+        - targets:
+            - s3stream-minio:9000
+    - job_name: 'minio-cluster'
+      metrics_path: /minio/v2/metrics/cluster
+      scrape_interval: 10s
+      static_configs:
+        - targets:
+            - s3stream-minio:9000
+    - job_name: 'minio-bucket'
+      metrics_path: /minio/v2/metrics/bucket
+      scrape_interval: 10s
+      static_configs:
+        - targets:
+            - s3stream-minio:9000    
+    
 
 grafana:
   adminUser: admin
@@ -102,24 +152,77 @@ grafana:
       datasources:
         - name: Prometheus
           type: prometheus
-          url: http://prometheus-prometheus-server
+          url: http://s3stream-prometheus-server
           access: proxy
           isDefault: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
   dashboards:
     default:
+      k3s-stats:
+        gnetId: 15282
+        revision: 1
+        datasource: Prometheus
       prometheus-stats:
-        # Ref: https://grafana.com/dashboards/2
         gnetId: 2
         revision: 2
         datasource: Prometheus
+      rabbitmq:
+        gnetId: 10991
+        revision: 14
+        datasource: Prometheus
+      Ingress-stats:
+        gnetId: 14314
+        revision: 2
+        datasource: Prometheus
+      consul:
+        gnetId: 10890
+        revision: 2
+        datasource: Prometheus
+      Go:
+        gnetId: 6671
+        revision: 2
+        datasource: Prometheus
+      postgres:
+        gnetId: 9628
+        revision: 7
+        datasource: Prometheus
+      minio-bucket:
+        gnetId: 19237
+        revision: 2
+        datasource: Prometheus
+      minio-cluster:
+        gnetId: 13502
+        revision: 26
+        datasource: Prometheus
+      minio-repl:
+        gnetId: 15305
+        revision: 5
+        datasource: Prometheus
+
 
 consul:
   global:
     datacenter: dc1
     metrics:
       enabled: true
+      enableAgentMetrics: true
+      enableHostMetrics: true
+      enableTelemetryCollector: true
   server:
     replicas: 1
+  telemetryCollector:
+    enabled: true
   ui:
     ingress:
       enabled: true
@@ -240,11 +343,14 @@ minio:
     rootPassword: "12345678"
   #defaultBuckets: "music-bucket"
   disableWebUI: false
+  persistence:
+    storageClass: "local-path"
+    size: 20Gi
   extraEnvVars:
     - name: MINIO_NOTIFY_AMQP_ENABLE
       value: "on"
     - name: MINIO_NOTIFY_AMQP_URL
-      value: "amqp://guest:guest@s3-streamer-rabbitmq-headless:5672"
+      value: "amqp://guest:guest@s3stream-rabbitmq:5672"
     - name: MINIO_NOTIFY_AMQP_EXCHANGE
       value: "s3_exchange"
     - name: MINIO_NOTIFY_AMQP_EXCHANGE_TYPE
@@ -257,6 +363,8 @@ minio:
     enabled: true
     ingressClassName: "nginx"
     hostname: minio.localhost
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 999m
   apiIngress:
     enabled: true
     ingressClassName: "nginx"
@@ -290,3 +398,23 @@ minio:
         setPolicies: true
         policies:
           - music-bucket-bucket-specific-policy
+
+
+jaeger:
+  provisionDataStore:
+    cassandra: false
+  allInOne:
+    enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - jaeger.localhost
+  storage:
+    type: memory
+  agent:
+    enabled: false
+  collector:
+    enabled: false
+  query:
+    enabled: false

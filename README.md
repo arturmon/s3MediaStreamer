@@ -13,3 +13,7 @@
 ## Docs
 
 [README.md](docs/README.md 'README.md')
+
+## Important !!!
+1. When deploying to Rancher desktop, it is mandatory to add events to the bucket
+2. if you use graylog, you need to manually add the GELF udp input

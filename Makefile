@@ -76,6 +76,8 @@ helm-dependency:
 infra-deploy:
 	helm upgrade --install ingress-nginx ingress-nginx \
   	--repo https://kubernetes.github.io/ingress-nginx \
+  	--set controller.opentelemetry.enabled=true \
+  	--set controller.metrics.enabled=true \
   	--namespace ingress-nginx --create-namespace
 	kubectl apply -f https://github.com/weaveworks/scope/releases/download/v1.13.2/k8s-scope.yaml
 	kubectl apply -f infra-kube/weave-scope-ingress.yaml
