@@ -6,6 +6,7 @@ LABEL author="Artur Mudrykh"
 WORKDIR /app
 RUN ls -la .
 RUN ls -la /
+RUN ls -la /workspace
 COPY conf/ /app/conf/
 COPY migrations/psql/ /app/migrations/psql/
 COPY s3stream /app/
