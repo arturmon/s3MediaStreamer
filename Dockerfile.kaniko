@@ -13,7 +13,7 @@ RUN git clone --single-branch --branch main https://github.com/arturmon/s3MediaS
 RUN go mod download
 
 # Build the application
-RUN go build -v -o /app/s3stream .
+RUN go build -v -o /app/s3stream -C ./app
 
 # Stage 2: Final stage
 FROM alpine:latest
