@@ -1,0 +1,40 @@
+# Stage 1: Build stage
+FROM golang:1.20-alpine AS builder
+
+# Install git
+RUN apk update && apk add --no-cache git
+
+# Set the working directory
+WORKDIR /go/src/github.com/arturmon/s3MediaStreamer
+
+# Clone the repository
+RUN git clone --single-branch --branch main https://github.com/arturmon/s3MediaStreamer.git .
+
+# Build the application
+RUN go build -o /app/s3stream .
+
+# Stage 2: Final stage
+FROM alpine:latest
+
+# Add user
+RUN adduser -D -g '' appuser
+
+# Copy the built binary from the builder stage
+COPY --from=builder /app/s3stream /app/s3stream
+
+# Set permissions
+RUN chown appuser: /app/s3stream && \
+    chmod +x /app/s3stream
+
+# Switch to non-root user
+USER appuser
+
+# Expose the port
+EXPOSE 10000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -qO- http://localhost:10000/health/liveness || exit 1
+
+# Entrypoint command
+ENTRYPOINT ["/app/s3stream"]
