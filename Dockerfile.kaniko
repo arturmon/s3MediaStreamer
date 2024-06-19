@@ -5,13 +5,15 @@ FROM golang:1.20-alpine AS builder
 RUN apk update && apk add --no-cache git
 
 # Set the working directory
-WORKDIR /workspace
+WORKDIR /go/src/github.com/arturmon/s3MediaStreamer
 
 # Clone the repository
 RUN git clone --single-branch --branch main https://github.com/arturmon/s3MediaStreamer.git .
 
+go mod download
+
 # Build the application
-RUN go build -o /app/s3stream .
+RUN go build -v -o /app/s3stream .
 
 # Stage 2: Final stage
 FROM alpine:latest
