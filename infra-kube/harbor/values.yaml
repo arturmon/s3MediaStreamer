@@ -1,0 +1,26 @@
+expose:
+  tls:
+    enabled: false
+  ingress:
+    hosts:
+      core: core.harbor.localhost
+externalURL: http://core.harbor.localhost
+persistence:
+  persistentVolumeClaim:
+    registry:
+      storageClass: "local-path"
+      size: 5Gi
+    jobservice:
+      storageClass: "local-path"
+      size: 1Gi
+    database:
+      storageClass: "local-path"
+      size: 1Gi
+    redis:
+      storageClass: "local-path"
+      size: 1Gi
+    trivy:
+      storageClass: "local-path"
+      size: 5Gi
+metrics:
+  enabled: true

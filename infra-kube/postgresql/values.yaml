@@ -1,0 +1,14 @@
+auth:
+  username: root
+  password: 1qazxsw2
+  postgresPassword: postgres
+  database: db_issue_album
+metrics:
+  enabled: true
+primary:
+  initdb:
+    scripts:
+      init.sql: |
+        CREATE DATABASE session;
+  persistence:
+    size: 10Gi

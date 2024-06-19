@@ -1,0 +1,27 @@
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - prometheus.localhost
+prometheus-node-exporter:
+  enabled: false
+extraScrapeConfigs: |
+  - job_name: 'minio'
+    metrics_path: /minio/v2/metrics/resource
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+          - minio.database.svc.cluster.local:9000
+  - job_name: 'minio-cluster'
+    metrics_path: /minio/v2/metrics/cluster
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+          - minio.database.svc.cluster.local:9000
+  - job_name: 'minio-bucket'
+    metrics_path: /minio/v2/metrics/bucket
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+          - minio.database.svc.cluster.local:9000

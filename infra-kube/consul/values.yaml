@@ -1,0 +1,24 @@
+global:
+  datacenter: dc1
+  metrics:
+    enabled: true
+    enableAgentMetrics: true
+    enableHostMetrics: true
+    enableTelemetryCollector: true
+server:
+  replicas: 1
+telemetryCollector:
+  enabled: true
+ui:
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - host: consul.localhost
+        paths:
+          - /
+  metrics:
+    provider: "prometheus"
+    baseURL: http://prometheus-server
+dns:
+  enabled: true

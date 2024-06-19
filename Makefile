@@ -51,27 +51,28 @@ debug-template:
 .PHONY: debug-template
 
 
-deploy:
+deploy-app:
 	helm version
 	helm list --namespace media
 	helm install s3stream ./chart --namespace media --create-namespace
 .PHONY: deploy
 
-deploy-update:
+deploy-update-app:
 	helm version
 	helm list --namespace media
 	helm upgrade s3stream ./chart --namespace media
 .PHONY: deploy
 
-deploy-delete:
+deploy-delete-app:
 	helm list --namespace media
 	helm uninstall s3stream --namespace media
 	kubectl delete namespace media
 .PHONY: deploy-delete
 
-helm-dependency:
-	helm dependency build ./chart
-.PHONY: helm-dependency
+
+infra-diff-deploy:
+	helmfile diff -f ./infra-kube/helmfile.yaml
+.PHONY: infra-diff-deploy
 
 infra-deploy:
 	helm upgrade --install ingress-nginx ingress-nginx \
@@ -79,12 +80,13 @@ infra-deploy:
   	--set controller.opentelemetry.enabled=true \
   	--set controller.metrics.enabled=true \
   	--namespace ingress-nginx --create-namespace
-	kubectl apply -f https://github.com/weaveworks/scope/releases/download/v1.13.2/k8s-scope.yaml
-	kubectl apply -f infra-kube/weave-scope-ingress.yaml
-	helm install greylog ./infra-kube/graylog  --namespace graylog --create-namespace
+	kubectl apply -f infra-kube/weave-scope/k8s-scope.yaml
+	kubectl apply -f infra-kube/weave-scope/weave-scope-ingress.yaml
+	helm upgrade --install greylog ./infra-kube/graylog  --namespace logs --create-namespace
+	helmfile apply -f ./infra-kube/helmfile.yaml
 .PHONY: infra-deploy
 
 infra-clean:
-	helm uninstall greylog --namespace graylog
-	kubectl delete namespace graylog
+	helm uninstall greylog --namespace logs
+	kubectl delete namespace logs
 .PHONY: infra-clean
