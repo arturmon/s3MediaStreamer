@@ -10,7 +10,7 @@ WORKDIR /go/src/github.com/arturmon/s3MediaStreamer
 # Clone the repository
 RUN git clone --single-branch --branch main https://github.com/arturmon/s3MediaStreamer.git .
 
-go mod download
+RUN go mod download
 
 # Build the application
 RUN go build -v -o /app/s3stream .
