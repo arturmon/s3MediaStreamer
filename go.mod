@@ -9,7 +9,7 @@ require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/casbin/casbin/v2 v2.97.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
-	github.com/exaring/otelpgx v0.6.1
+	github.com/exaring/otelpgx v0.6.2
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
