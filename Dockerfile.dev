@@ -16,7 +16,9 @@ RUN go mod download
 RUN go build -v -o /app/s3stream -C ./app
 
 # Stage 2: Final stage
-FROM alpine:latest
+FROM alpine:1.20-alpine
+
+LABEL author="Artur Mudrykh"
 
 # Add user
 RUN adduser -D -g '' appuser
