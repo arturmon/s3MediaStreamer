@@ -13,5 +13,8 @@
       "matchManagers": ["gomod", "github-actions"],
       "enabled": false
     }
+  ],
+  "labels": [
+    "docker", "dependencies"
   ]
 }
