@@ -3,23 +3,8 @@
   "extends": [
     "config:recommended"
   ],
-  "enabledManagers": ["helmv3", "dockerfile", "docker-compose"],
+  "enabledManagers": ["dockerfile", "docker-compose"],
   "packageRules": [
-    {
-      "matchManagers": ["helmv3"],
-      "matchPaths": [
-        "infra-kube/consul/helmfile.yaml",
-        "infra-kube/grafana/helmfile.yaml",
-        "infra-kube/harbor/helmfile.yaml",
-        "infra-kube/jaeger/helmfile.yaml",
-        "infra-kube/minio/helmfile.yaml",
-        "infra-kube/postgresql/helmfile.yaml",
-        "infra-kube/prometheus/helmfile.yaml",
-        "infra-kube/rabbitmq/helmfile.yaml",
-        "infra-kube/redis/helmfile.yaml"
-      ],
-      "reviewers": ["arturmon"] 
-    },
     {
       "matchManagers": ["dockerfile", "docker-compose"],
       "reviewers": ["arturmon"]
