@@ -17,7 +17,12 @@
         "infra-kube/prometheus/helmfile.yaml",
         "infra-kube/rabbitmq/helmfile.yaml",
         "infra-kube/redis/helmfile.yaml"
-      ]
+      ],
+      "reviewers": ["arturmon"] 
+    },
+    {
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "reviewers": ["arturmon"]
     },
     {
       "matchManagers": ["gomod", "github-actions"],
