@@ -1,7 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "gomod:disable",
+    "github-actions:disable"
   ],
-  "enabledManagers": ["helmv3", "docker"]
+  "enabledManagers": ["helmv3", "dockerfile", "docker-compose"]
 }
