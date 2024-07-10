@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "enabledManagers": ["dockerfile", "docker-compose"],
+  "packageRules": [
+    {
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "reviewers": ["arturmon"]
+    },
+    {
+      "matchManagers": ["gomod", "github-actions"],
+      "enabled": false
+    }
+  ]
+}
