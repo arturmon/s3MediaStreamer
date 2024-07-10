@@ -303,7 +303,7 @@ services:
           memory: 1g
 
   graylog:
-    image: graylog/graylog:5.0
+    image: graylog/graylog:5.2
     environment:
     # CHANGE ME (must be at least 16 characters)!
     - GRAYLOG_PASSWORD_SECRET=5XglVihdhMA2zCWf
