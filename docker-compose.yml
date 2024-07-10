@@ -281,7 +281,7 @@ services:
       - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
 
   mongo:
-    image: mongo:5.0.13
+    image: mongo:5.0.27
     restart: unless-stopped
 
 
