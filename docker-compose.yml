@@ -269,7 +269,7 @@ services:
     restart: unless-stopped
 
   haproxy:
-    image: haproxytech/haproxy-alpine:2.9.5
+    image: haproxytech/haproxy-alpine:2.9.9
     restart: unless-stopped
     depends_on:
       - jaeger
