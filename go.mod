@@ -7,7 +7,7 @@ require (
 	github.com/arturmon/consul-leader-election v1.2.6
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
-	github.com/casbin/casbin/v2 v2.97.0
+	github.com/casbin/casbin/v2 v2.98.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/exaring/otelpgx v0.6.2
 	github.com/gin-contrib/cors v1.7.2
@@ -56,7 +56,7 @@ require (
 	github.com/bradleypeabody/gorilla-sessions-memcache v0.0.0-20181103040241-659414f458e1 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
-	github.com/casbin/govaluate v1.1.0 // indirect
+	github.com/casbin/govaluate v1.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
