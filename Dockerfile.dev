@@ -16,18 +16,24 @@ RUN go mod download
 RUN go build -v -o /app/s3stream -C ./app
 
 # Stage 2: Final stage
-FROM alpine:1.20-alpine
+FROM alpine:3.20.1
 
 LABEL author="Artur Mudrykh"
 
 # Add user
 RUN adduser -D -g '' appuser
+RUN mkdir -p /app
+
+WORKDIR /app
 
 # Copy the built binary from the builder stage
-COPY --from=builder /app/s3stream /app/s3stream
+COPY --from=builder /app/s3stream ./s3stream
+COPY conf/ conf/
+COPY /migrations/psql/ ./migrations/psql/
+COPY acl/ acl/
 
 # Set permissions
-RUN chown appuser: /app/s3stream && \
+RUN chown appuser: /app && \
     chmod +x /app/s3stream
 
 # Switch to non-root user
