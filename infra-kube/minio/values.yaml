@@ -58,3 +58,4 @@ provisioning:
       setPolicies: true
       policies:
         - music-bucket-bucket-specific-policy
+  extraCommands: ["mc event add provisioning/music-bucket arn:minio:sqs:us-east-1:_:amqp"]
