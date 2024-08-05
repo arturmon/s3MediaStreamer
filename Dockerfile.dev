@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM golang:1.20-alpine AS builder
+FROM golang:1.21-alpine AS builder
 
 # Install git
 RUN apk update && apk add --no-cache git
@@ -13,7 +13,7 @@ RUN git clone --single-branch --branch main https://github.com/arturmon/s3MediaS
 RUN go mod download
 
 # Build the application
-RUN go build -v -o /app/s3stream -C ./app
+RUN go build -C ./app -v -o /app/s3stream
 
 # Stage 2: Final stage
 FROM alpine:3.20.1
