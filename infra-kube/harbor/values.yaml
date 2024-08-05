@@ -1,10 +1,13 @@
+harborAdminPassword: "Harbor12345"
 expose:
   tls:
     enabled: false
   ingress:
+    className: "nginx"
     hosts:
-      core: core.harbor.localhost
-externalURL: http://core.harbor.localhost
+      core: harbor.localhost
+      notary: harbor-notary.localhost
+externalURL: http://harbor.localhost
 persistence:
   persistentVolumeClaim:
     registry:
