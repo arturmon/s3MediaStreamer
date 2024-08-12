@@ -25,7 +25,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/mewkiz/flac v1.0.10
+	github.com/mewkiz/flac v1.0.12
 	github.com/minio/minio-go/v7 v7.0.74
 	github.com/penglongli/gin-metrics v0.1.10
 	github.com/pquerna/otp v1.4.0
