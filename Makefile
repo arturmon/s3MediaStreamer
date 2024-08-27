@@ -50,7 +50,6 @@ debug-template:
 	helm template s3media ./chart
 .PHONY: debug-template
 
-
 deploy-app:
 	helm version
 	helm list --namespace media
@@ -62,6 +61,53 @@ deploy-update-app:
 	helm list --namespace media
 	helm upgrade s3stream ./chart --namespace media
 .PHONY: deploy
+
+
+
+deploy-devspase-app:
+	devspace use namespace media
+	devspace deploy
+	devspace dev
+	devspace ui
+	devspace purge
+	devspace cleanup images
+	devspace cleanup local-registry
+.PHONY: deploy-devspase-app
+
+deploy-devspace-app: deploy-devspase-app-select-namespace deploy-devspase-app-deploy
+
+
+deploy-devspace-app-clean: deploy-devspase-app-purge deploy-devspase-app-clean-img
+
+deploy-devspace-app-purge: deploy-devspase-app-delete-local-repo
+
+deploy-devspase-app-select-namespace:
+	devspace use namespace media
+.PHONY: deploy-devspase-app-select-namespace
+
+deploy-devspase-app-deploy:
+	devspace deploy
+.PHONY: deploy-devspase-app-deploy
+
+deploy-devspase-app-dev:
+	devspace dev
+.PHONY: deploy-devspase-app-dev
+
+deploy-devspase-app-ui:
+	devspace ui
+.PHONY: deploy-devspase-app-ui
+
+deploy-devspase-app-purge:
+	devspace purge
+.PHONY: deploy-devspase-app-purge
+
+deploy-devspase-app-clean-img:
+	devspace cleanup images
+.PHONY: deploy-devspase-app-clean-img
+
+deploy-devspase-app-delete-local-repo:
+	devspace cleanup local-registry
+.PHONY: deploy-devspase-app-delete-local-repo
 
 deploy-delete-app:
 	helm list --namespace media

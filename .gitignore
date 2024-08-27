@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-postgresql_data
 
 # Test binary, built with `go test -c`
 *.test
@@ -24,12 +23,19 @@ postgresql_data
 *.http
 *.cookies
 
+# Devspace
+.devspace
+
 #secret
 app/internal/config/config.go
-
-# music
-music
 
 #ignore depences charts
 chart/charts
 chart/Chart.lock
+
+# Ignore DevSpace cache and log folder
+.devspace/
+
+
+# Ignore DevSpace cache and log folder
+.devspace/
