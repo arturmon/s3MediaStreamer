@@ -14,6 +14,13 @@
 
 [README.md](docs/README.md 'README.md')
 
+## Infra Repo
+
+[s3MediaStreamer-Infra](https://github.com/arturmon/s3MediaStreamer-Infra)
+
+## Env Repo
+[s3MediaStreamer-env](https://github.com/arturmon/s3MediaStreamer-env)
+
 ## Important !!!
 1. When deploying to Rancher desktop, it is mandatory to add events to the bucket
 2. if you use graylog, you need to manually add the GELF udp input

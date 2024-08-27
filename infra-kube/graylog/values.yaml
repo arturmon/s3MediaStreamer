@@ -1,3 +1,0 @@
-graylog:
-  version: '3.0'
-  host: graylog.localhost
