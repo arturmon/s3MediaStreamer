@@ -11,7 +11,12 @@ image:
   registry: arturmon/s3stream
   pullPolicy: Always
   tag: latest
-
+  imagePullSecrets:
+    name: devspace-pull-secrets
+    create: false
+    server: harbor.localhost
+    # username: xxx
+    # password: xxx
 podAnnotations: {}
   # example: "key": "value"
 
@@ -27,6 +32,10 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
+
+consulSidecar:
+  enabled: true
+  hosts: consul-consul-server.observability.svc.cluster.local
 
 port: 10000
 
@@ -63,7 +72,9 @@ env:
   SESSION_POSTGRESQL_HOST: postgresql.database.svc.cluster.local
   S3_ENDPOINT: minio.database.svc.cluster.local:9000
   MQ_BROKER: rabbitmq.message.svc.cluster.local
-  CONSUL_URL: consul-consul-server.observability.svc.cluster.local:8500
+  #CONSUL_URL: consul-consul-server.observability.svc.cluster.local:8500
+  # Use localhost only set helm values consulSidecar.enabled: true
+  CONSUL_URL: localhost:8500
   LOG_TYPE: gelf
   LOG_GELF_SERVER_URL: graylog.logs.svc.cluster.local:12201
   OPEN_TELEMETRY_JAEGER_ENDPOINT: http://jaeger-collector.monitoring.svc.cluster.local:4318

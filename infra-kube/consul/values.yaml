@@ -1,4 +1,5 @@
 global:
+  enabled: false
   datacenter: dc1
   metrics:
     enabled: true
@@ -6,10 +7,12 @@ global:
     enableHostMetrics: true
     enableTelemetryCollector: true
 server:
+  enabled: true
   replicas: 1
 telemetryCollector:
-  enabled: true
+  enabled: false
 ui:
+  enabled: true
   ingress:
     enabled: true
     ingressClassName: "nginx"
@@ -19,6 +22,9 @@ ui:
           - /
   metrics:
     provider: "prometheus"
-    baseURL: http://prometheus-server
+    baseURL: http://prometheus-server.monitoring.svc.cluster.local
 dns:
   enabled: true
+connectInject:
+  enabled: "-"
+  default: false

@@ -12,6 +12,20 @@ spec:
       targetPort: {{ $.Values.port }}
       protocol: TCP
       name: http-backend
+    {{- if .Values.consulSidecar.enabled }}
+    - name: http
+      port: 8500
+      protocol: TCP
+    - name: dns
+      port: 8600
+      protocol: UDP
+    - name: serf-wan
+      port: 8301
+      protocol: UDP
+    - name: serf-lan
+      port: 8302
+      protocol: UDP
+    {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

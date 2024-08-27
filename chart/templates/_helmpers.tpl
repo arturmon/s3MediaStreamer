@@ -50,3 +50,19 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+Generate a dockerconfigjson based on the given values
+*/}}
+{{- define "dockerconfigjson" -}}
+{
+  "auths": {
+    "{{ .Values.image.imagePullSecrets.server }}": {
+      "auth": "{{ printf "%s:%s" .Values.image.imagePullSecrets.username .Values.image.imagePullSecrets.password | b64enc }}"
+    },
+    "http://{{ .Values.image.imagePullSecrets.server }}": {
+      "auth": "{{ printf "%s:%s" .Values.image.imagePullSecrets.username .Values.image.imagePullSecrets.password | b64enc }}"
+    }
+  }
+}
+{{- end }}
