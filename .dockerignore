@@ -1,0 +1,13 @@
+.idea
+# Devspace
+.devspace
+.github
+chart
+infra
+infra-kube
+docker-compose.yml
+Dockerfile
+Dockerfile.dev
+!go.sum
+!go.mod
+!**/*.go
