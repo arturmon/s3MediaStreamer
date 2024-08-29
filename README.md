@@ -26,20 +26,4 @@
 2. if you use graylog, you need to manually add the GELF udp input
 
 ## Local Kuberntes
-### Setup harbor
-1. wsl Ubuntu add `echo "127.0.0.1     harbor.localhost" | sudo tee -a /etc/hosts`
-2. create password registry `echo -n 'user:password' | base64`
-3. add registry `~/.docker/config.json`
-```json
-{
-        "auths": {
-                "http://harbor.localhost": {
-                        "auth": "cm9ib3QkbGlicm****"
-                },
-                "https://index.docker.io/v1/": {
-                        "auth": "YXJ0dXJtb246bTl***"
-                }
-        }
-}
-```
-4. login `docker login harbor.localhost`
+use Rancher desktop and devspave usage
