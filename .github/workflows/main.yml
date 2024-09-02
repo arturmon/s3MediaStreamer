@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Checkov Dockerfile Scan
-        uses: bridgecrewio/checkov-action@v12.2860.0
+        uses: bridgecrewio/checkov-action@v12.2863.0
         with:
           directory: .
           framework: dockerfile
