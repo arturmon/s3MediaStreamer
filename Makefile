@@ -86,3 +86,6 @@ deploy-devspase-app-delete-local-repo:
 	devspace cleanup local-registry
 .PHONY: deploy-devspase-app-delete-local-repo
 
+port-forwarding:
+	kubectl port-forward service/postgresql 5432:5432 -n database
+.PHONY: port-forwarding
