@@ -5,7 +5,14 @@ import (
 	"time"
 
 	"github.com/bamzi/jobrunner"
+	"github.com/robfig/cron/v3"
 )
+
+// jobEntryMap tracks the jobs and their EntryID
+var jobEntryMap = make(map[string]cron.EntryID)
+
+// jobConfigMap stores the last known configuration for each job to detect changes
+var jobConfigMap = make(map[string]string)
 
 // InitJob initializes and schedules jobs using configuration from Consul.
 func InitJob(app *app.App) error {
@@ -35,25 +42,48 @@ func scheduleJobsFromConsul(app *app.App) error {
 			return err
 		}
 
+		// Check if the job configuration has changed
+		lastConfig, exists := jobConfigMap[jobConfig.Name]
+		if !exists || lastConfig != interval {
+			// Log the configuration change
+			app.Logger.Info("Job configuration changed:", jobConfig.Name, " from:", lastConfig, " to:", interval)
+
+			// Update the stored configuration
+			jobConfigMap[jobConfig.Name] = interval
+		} else {
+			// Skip scheduling if the configuration hasn't changed
+			app.Logger.Debug("No change in job configuration for:", jobConfig.Name)
+			continue
+		}
+
+		// Stop existing job if it exists
+		if entryID, exists := jobEntryMap[jobConfig.Name]; exists {
+			jobrunner.Remove(entryID)
+			app.Logger.Info("Removed existing job:", jobConfig.Name)
+		}
+
 		// Schedule the job based on the function name specified in the configuration
+		var entryID cron.EntryID
 		switch jobConfig.Name {
 		case "s3Clean":
 			job := NewCleanS3Job(app)
-			if err = jobrunner.Schedule(interval, job); err != nil {
-				app.Logger.Error("Failed to schedule job:", jobConfig.Name, err)
-				return err
-			}
-			app.Logger.Info("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
+			err = jobrunner.Schedule(interval, job)
 		case "sessionClean":
 			job := NewCleanOldSessionJob(app)
-			if err = jobrunner.Schedule(interval, job); err != nil {
-				app.Logger.Error("Failed to schedule job:", jobConfig.Name, err)
-				return err
-			}
-			app.Logger.Info("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
+			err = jobrunner.Schedule(interval, job)
 		default:
 			app.Logger.Warn("Unknown job function:", jobConfig.Name)
+			continue
 		}
+
+		if err != nil {
+			app.Logger.Error("Failed to schedule job:", jobConfig.Name, err)
+			return err
+		}
+
+		// Store the new EntryID in the map
+		jobEntryMap[jobConfig.Name] = entryID
+		app.Logger.Debug("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
 	}
 
 	return nil
