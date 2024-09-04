@@ -16,6 +16,8 @@
 
 # idea confDB
 .idea
+# VSCode
+.vscode
 
 # http
 *.cookies
