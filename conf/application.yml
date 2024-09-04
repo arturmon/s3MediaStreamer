@@ -15,7 +15,12 @@ app_config:
   log_gelf_server_type: "udp" # tcp, udp
   gin_mode: "release" # debug, test, release
   jobs:
-    job_clean_track_s3: "@every 10m"
+    interval_rescan_consul: 60 #second
+    job:
+      - name: "s3Clean"
+        start_job: "@every 10m"
+      - name: "sessionClean"
+        start_job: "@midnight"
   open_telemetry:
     tracing_enabled: true
     environment: "staging" # 'staging', 'production'

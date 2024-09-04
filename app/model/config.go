@@ -27,7 +27,11 @@ type Config struct {
 		GinMode           string `yaml:"gin_mode" env:"GIN_MODE"`
 
 		Jobs struct {
-			JobCleanTrackS3 string `yaml:"job_clean_track_s3" env:"JOB_CLEAN_ALBUM_PATH_NULL"`
+			IntervalRescanConsul int `yaml:"interval_rescan_consul" env:"INTERVAL_RESCAN_CONSUL"`
+			Job                  []struct {
+				Name     string `yaml:"name"`
+				StartJob string `yaml:"start_job"`
+			} `yaml:"job"`
 		} `yaml:"jobs"`
 
 		OpenTelemetry struct {

@@ -22,7 +22,7 @@ type App struct {
 func NewAppInit(ctx context.Context, cfg *model.Config, logger *logs.Logger, appName, version string) (*App, error) {
 	myGin := initializeGin(ctx, cfg, logger)
 
-	logger.Info("Start register consul lieder election ...")
+	logger.Info("Start init Services ...")
 
 	service, err := inits.InitServices(ctx, appName, version, cfg, logger)
 

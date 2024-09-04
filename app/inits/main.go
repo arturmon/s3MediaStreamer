@@ -52,6 +52,7 @@ type Service struct {
 	InitRepo        *initRepo
 	ConsulService   *consul.Service
 	ConsulElection  *consul.ElService
+	ConsulKV        *consul.KVService
 	AuthCache       *cashing.CachingService
 	S3Storage       *s3.Service
 	TracingProvider *otel.Provider

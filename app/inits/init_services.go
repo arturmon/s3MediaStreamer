@@ -32,9 +32,12 @@ func initServices(ctx context.Context,
 	logger *logs.Logger,
 	repo *initRepo) (*Service, error) {
 	logger.Info("Starting initialize the service...")
+
 	consulService := consul.NewService(appName, cfg, logger)
 	consulService.Start()
 	leaderElectionService := consul.NewElection(appName, logger, *consulService)
+	consulKV := consul.NewConsulKVService(cfg, logger, *consulService)
+
 	cashingService := cashing.NewCachingService(repo.CashingRepo)
 	tagsService := tags.NewTagsService()
 	s3Service := s3.NewS3Service(repo.S3Repo, repo.PgRepo)
@@ -70,6 +73,7 @@ func initServices(ctx context.Context,
 		InitRepo:        repo,
 		ConsulService:   consulService,
 		ConsulElection:  leaderElectionService,
+		ConsulKV:        consulKV,
 		AuthCache:       cashingService,
 		S3Storage:       s3Service,
 		TracingProvider: tracingService,
