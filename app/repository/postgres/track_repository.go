@@ -120,7 +120,7 @@ func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortO
 
 	// Build the WHERE clause for filtering if filter is provided
 	if filter != "" {
-		filterColumns := []string{"title", "artist", "sender", "_creator_user"}
+		filterColumns := []string{"album_artist", "composer", "artist"}
 
 		// Create a slice to hold the individual filter conditions
 		var filterExprs []string
