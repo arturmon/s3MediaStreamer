@@ -73,7 +73,7 @@ dev:
 
     containers:
       media:
-        devImage: ghcr.io/loft-sh/devspace-containers/go:1.21-alpine
+        devImage: ghcr.io/loft-sh/devspace-containers/go:1.22-alpine
         resources:
           requests:
             cpu: 0.4
@@ -112,18 +112,25 @@ dev:
 
 # Use the `commands` section to define repeatable dev workflows for this project
 commands:
-  migrate-db:
+  db-list-table:
     command: |-
-      echo 'This is a cross-platform, shared command that can be used to codify any kind of dev task.'
-      echo 'Anyone using this project can invoke it via "devspace run migrate-db"'
+      # Ensure yq is installed: https://github.com/mikefarah/yq
+      # Extract database details from application.yml
+      export PGHOST=$(yq e '.storage.host' ./conf/application.yml)
+      export PGPORT=$(yq e '.storage.port' ./conf/application.yml)
+      export PGUSER=$(yq e '.storage.username' ./conf/application.yml)
+      export PGPASSWORD=$(yq e '.storage.password' ./conf/application.yml)
+      export PGDATABASE=$(yq e '.storage.database' ./conf/application.yml)
 
-# Define dependencies to other projects with a devspace.yaml
-# dependencies:
-#   api:
-#     git: https://...  # Git-based dependencies
-#     tag: v1.0.0
-#   ui:
-#     path: ./ui        # Path-based dependencies (for monorepos)
+      # Check if psql is installed
+      if ! command -v psql &> /dev/null
+      then
+          echo "psql could not be found, please install it first."
+          exit
+      fi
+
+      # List all tables in the database
+      psql -c "\dt"
 
 localRegistry:
   enabled: true
