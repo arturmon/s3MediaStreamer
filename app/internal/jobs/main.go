@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"fmt"
 	"s3MediaStreamer/app/internal/app"
 	"time"
 
@@ -12,19 +13,21 @@ import (
 type JobScheduler struct {
 	jobEntryMap  map[string]cron.EntryID
 	jobConfigMap map[string]string
+	keyPrefix    string
 }
 
 // NewJobScheduler creates a new JobScheduler instance.
-func NewJobScheduler() *JobScheduler {
+func NewJobScheduler(appName string) *JobScheduler {
 	return &JobScheduler{
 		jobEntryMap:  make(map[string]cron.EntryID),
 		jobConfigMap: make(map[string]string),
+		keyPrefix:    fmt.Sprintf("service/%s/config/jobs/", appName),
 	}
 }
 
 // InitJob initializes and schedules jobs using configuration from Consul.
 func InitJob(app *app.App) error {
-	jobScheduler := NewJobScheduler()
+	jobScheduler := NewJobScheduler(app.AppName)
 	jobrunner.Start()
 
 	// Fetch initial schedules from Consul
@@ -44,7 +47,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 	// Iterate over job definitions from the configuration
 	for _, jobConfig := range app.Cfg.AppConfig.Jobs.Job {
 		// Fetch the job schedule from Consul with a default fallback value
-		key := "service/" + app.AppName + "/config/jobs/" + jobConfig.Name
+		key := js.keyPrefix + jobConfig.Name
 		interval, err := app.Service.ConsulKV.FetchConsulConfig(key, jobConfig.StartJob)
 		if err != nil {
 			app.Logger.Error("Failed to fetch Consul config for job:", jobConfig.Name, err)
