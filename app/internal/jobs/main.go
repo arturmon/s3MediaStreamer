@@ -8,30 +8,39 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-// jobEntryMap tracks the jobs and their EntryID
-var jobEntryMap = make(map[string]cron.EntryID)
+// JobScheduler encapsulates job scheduling and management.
+type JobScheduler struct {
+	jobEntryMap  map[string]cron.EntryID
+	jobConfigMap map[string]string
+}
 
-// jobConfigMap stores the last known configuration for each job to detect changes
-var jobConfigMap = make(map[string]string)
+// NewJobScheduler creates a new JobScheduler instance.
+func NewJobScheduler() *JobScheduler {
+	return &JobScheduler{
+		jobEntryMap:  make(map[string]cron.EntryID),
+		jobConfigMap: make(map[string]string),
+	}
+}
 
 // InitJob initializes and schedules jobs using configuration from Consul.
 func InitJob(app *app.App) error {
+	jobScheduler := NewJobScheduler()
 	jobrunner.Start()
 
 	// Fetch initial schedules from Consul
-	if err := scheduleJobsFromConsul(app); err != nil {
+	if err := jobScheduler.scheduleJobsFromConsul(app); err != nil {
 		app.Logger.Error("Failed to schedule jobs from Consul:", err)
 		return err
 	}
 
 	// Watch for configuration changes in Consul and reschedule jobs
-	go watchConsulForChanges(app)
+	go jobScheduler.watchConsulForChanges(app)
 
 	return nil
 }
 
 // scheduleJobsFromConsul schedules jobs based on configuration fetched from Consul.
-func scheduleJobsFromConsul(app *app.App) error {
+func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 	// Iterate over job definitions from the configuration
 	for _, jobConfig := range app.Cfg.AppConfig.Jobs.Job {
 		// Fetch the job schedule from Consul with a default fallback value
@@ -43,13 +52,13 @@ func scheduleJobsFromConsul(app *app.App) error {
 		}
 
 		// Check if the job configuration has changed
-		lastConfig, exists := jobConfigMap[jobConfig.Name]
-		if !exists || lastConfig != interval {
+		lastConfig, configExists := js.jobConfigMap[jobConfig.Name]
+		if !configExists || lastConfig != interval {
 			// Log the configuration change
 			app.Logger.Info("Job configuration changed:", jobConfig.Name, " from:", lastConfig, " to:", interval)
 
 			// Update the stored configuration
-			jobConfigMap[jobConfig.Name] = interval
+			js.jobConfigMap[jobConfig.Name] = interval
 		} else {
 			// Skip scheduling if the configuration hasn't changed
 			app.Logger.Debug("No change in job configuration for:", jobConfig.Name)
@@ -57,7 +66,7 @@ func scheduleJobsFromConsul(app *app.App) error {
 		}
 
 		// Stop existing job if it exists
-		if entryID, exists := jobEntryMap[jobConfig.Name]; exists {
+		if entryID, entryExists := js.jobEntryMap[jobConfig.Name]; entryExists {
 			jobrunner.Remove(entryID)
 			app.Logger.Info("Removed existing job:", jobConfig.Name)
 		}
@@ -82,7 +91,7 @@ func scheduleJobsFromConsul(app *app.App) error {
 		}
 
 		// Store the new EntryID in the map
-		jobEntryMap[jobConfig.Name] = entryID
+		js.jobEntryMap[jobConfig.Name] = entryID
 		app.Logger.Debug("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
 	}
 
@@ -90,10 +99,10 @@ func scheduleJobsFromConsul(app *app.App) error {
 }
 
 // watchConsulForChanges monitors Consul for changes in job scheduling configuration and reschedules jobs.
-func watchConsulForChanges(app *app.App) {
+func (js *JobScheduler) watchConsulForChanges(app *app.App) {
 	for {
 		// Re-schedule jobs if configuration in Consul changes
-		if err := scheduleJobsFromConsul(app); err != nil {
+		if err := js.scheduleJobsFromConsul(app); err != nil {
 			app.Logger.Error("Failed to reschedule jobs from Consul:", err)
 		}
 
