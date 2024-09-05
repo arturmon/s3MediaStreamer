@@ -110,7 +110,7 @@ func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string
 
 	res, _ := json.Marshal(tracks)
 	s.logger.Debugf("Tracks response: %s", res)
-	return tracks, countTotal, pageInt, totalPages, &model.RestError{Code: http.StatusOK}
+	return tracks, countTotal, pageInt, totalPages, nil
 }
 
 func (s *Service) GetTrackByID(c *gin.Context, id string) (*model.Track, *model.RestError) {
