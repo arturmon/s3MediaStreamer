@@ -176,7 +176,7 @@ func (s *Service) AddToPlaylist(ctx context.Context, userRole, userID, playlistI
 
 	// Add the track_handler to the playlist_handler (you should implement this)
 	// TODO track_handler
-	if err = s.trackRepository.AddTrackToPlaylist(ctx, playlistID, trackID, "track_handler"); err != nil {
+	if err = s.trackRepository.AddTrackToPlaylist(ctx, playlistID, trackID, "track"); err != nil {
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to add track_handler to playlist"}
 	}
 	return nil
