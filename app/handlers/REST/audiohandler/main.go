@@ -88,6 +88,7 @@ func (h *Handler) StreamM3U(c *gin.Context) {
 	findObject, fileName, f, track, errValidateOTP := h.audio.StreamM3UReadFileService(c, segmentPath)
 	if errValidateOTP != nil {
 		c.JSON(errValidateOTP.Code, errValidateOTP.Err)
+		return
 	}
 	defer f.Close()
 

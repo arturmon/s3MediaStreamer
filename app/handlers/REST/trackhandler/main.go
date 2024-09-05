@@ -56,6 +56,13 @@ func (h *Handler) GetAllTracks(c *gin.Context) {
 	tracks, pageInt, countTotal, totalPages, err := h.trackService.GetTracksService(c, page, pageSize, filter, sortBy, sortOrder)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
+	}
+	// Handle case where tracks might be empty, if applicable
+	if len(tracks) == 0 {
+		// Example: Return a 204 No Content status for empty results
+		c.JSON(http.StatusNoContent, nil)
+		return
 	}
 
 	baseURL = fmt.Sprintf("%s://%s", baseURL, c.Request.Host)
@@ -90,6 +97,7 @@ func (h *Handler) GetTrackByID(c *gin.Context) {
 	result, err := h.trackService.GetTrackByID(c, id)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 	c.IndentedJSON(http.StatusOK, result)
 }

@@ -46,6 +46,7 @@ func (h *Handler) GenerateOTP(c *gin.Context) {
 	otpResponse, errGenerateOTP := h.otpService.GenerateOTPService(c, payload)
 	if errGenerateOTP != nil {
 		c.JSON(errGenerateOTP.Code, errGenerateOTP.Err)
+		return
 	}
 	c.JSON(http.StatusOK, otpResponse)
 }
@@ -75,6 +76,7 @@ func (h *Handler) VerifyOTP(c *gin.Context) {
 	otpResponse, errVerifyOTP := h.otpService.VerifyOTPService(c, payload)
 	if errVerifyOTP != nil {
 		c.JSON(errVerifyOTP.Code, errVerifyOTP.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, otpResponse)
@@ -108,6 +110,7 @@ func (h *Handler) ValidateOTP(c *gin.Context) {
 	otpResponse, errValidateOTP := h.otpService.ValidateOTPService(c, payload)
 	if errValidateOTP != nil {
 		c.JSON(errValidateOTP.Code, errValidateOTP.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, otpResponse)
@@ -139,6 +142,7 @@ func (h *Handler) DisableOTP(c *gin.Context) {
 	otpResponse, errDisableOTP := h.otpService.DisableOTPService(c, payload)
 	if errDisableOTP != nil {
 		c.JSON(errDisableOTP.Code, errDisableOTP.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, otpResponse)

@@ -51,6 +51,7 @@ func (h *Handler) Register(c *gin.Context) {
 	register, err := h.userService.Register(c.Request.Context(), data)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 
 	c.JSON(http.StatusCreated, register)
@@ -81,6 +82,7 @@ func (h *Handler) Login(c *gin.Context) {
 	login, err := h.userService.Login(c, data)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, login)
@@ -137,6 +139,7 @@ func (h *Handler) Logout(c *gin.Context) {
 	err := h.userService.Logout(c)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 	c.JSON(http.StatusOK, model.OkResponse{Message: "success"})
 }
@@ -166,6 +169,7 @@ func (h *Handler) User(c *gin.Context) {
 	user, errService := h.userService.User(c.Request.Context(), email)
 	if errService != nil {
 		c.JSON(errService.Code, errService.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, user)
@@ -208,6 +212,7 @@ func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 	responce, err := h.userService.RefreshTocken(c, refreshToken)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 
 	c.JSON(http.StatusOK, responce)

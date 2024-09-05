@@ -48,6 +48,7 @@ func (h *Handler) CreatePlaylist(c *gin.Context) {
 	newPlaylist, err := h.playlistService.CreatePlaylist(c)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
+		return
 	}
 	// Return a success response
 	c.IndentedJSON(http.StatusCreated, newPlaylist)
@@ -80,6 +81,7 @@ func (h *Handler) DeletePlaylist(c *gin.Context) {
 	errDeletePlaylist := h.playlistService.DeletePlaylistService(c, userRole, userID, playlistID)
 	if errDeletePlaylist != nil {
 		c.JSON(errDeletePlaylist.Code, errDeletePlaylist.Err)
+		return
 	}
 	// Return a success response
 	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
@@ -113,6 +115,7 @@ func (h *Handler) AddToPlaylist(c *gin.Context) {
 	errAddToPlaylist := h.playlistService.AddToPlaylist(c, userRole, userID, playlistID, trackID)
 	if errAddToPlaylist != nil {
 		c.JSON(errAddToPlaylist.Code, errAddToPlaylist.Err)
+		return
 	}
 
 	// Return a success response
@@ -147,6 +150,7 @@ func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
 	errRemoveFromPlaylist := h.playlistService.RemoveFromPlaylist(c, userRole, userID, playlistID, trackID)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
+		return
 	}
 	// Return a success response
 	c.JSON(http.StatusOK, "Track removed from playlist successfully")
@@ -179,6 +183,7 @@ func (h *Handler) ClearPlaylist(c *gin.Context) {
 	errRemoveFromPlaylist := h.playlistService.ClearPlaylistService(c, userRole, userID, playlistID)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
+		return
 	}
 
 	// Return a success response
@@ -222,6 +227,7 @@ func (h *Handler) SetFromPlaylist(c *gin.Context) {
 	errSetFromPlaylist := h.playlistService.SetFromPlaylistService(c, userRole, userID, playlistID, &request)
 	if errSetFromPlaylist != nil {
 		c.JSON(errSetFromPlaylist.Code, errSetFromPlaylist.Err)
+		return
 	}
 
 	// Return a success response
@@ -254,6 +260,7 @@ func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
 	response, errListTracksFromPlaylist := h.playlistService.ListTracksFromPlaylistService(c, userRole, userID, playlistID)
 	if errListTracksFromPlaylist != nil {
 		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
+		return
 	}
 	// Return the response in JSON format
 	c.JSON(http.StatusOK, response)
@@ -281,6 +288,7 @@ func (h *Handler) ListPlaylists(c *gin.Context) {
 	response, errListTracksFromPlaylist := h.playlistService.ListPlaylistsService(c, userRole, userID)
 	if errListTracksFromPlaylist != nil {
 		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
+		return
 	}
 
 	// Return the response in JSON format
