@@ -107,5 +107,5 @@ type Config struct {
 	OTP struct {
 		Issuer     string `yaml:"issuer" env:"OTP_ISSUER"`
 		SecretSize uint   `yaml:"secret_size" env:"OTP_SECRET_SIZE"`
-	} `yaml:"otp_handler"`
+	} `yaml:"otp"`
 }

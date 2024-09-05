@@ -121,8 +121,6 @@ definitions:
       disc_total:
         example: 2
         type: integer
-      duration:
-        $ref: '#/definitions/time.Duration'
       genre:
         example: Genre name
         type: string
@@ -172,48 +170,6 @@ definitions:
       refresh_token:
         type: string
     type: object
-  time.Duration:
-    enum:
-    - -9223372036854775808
-    - 9223372036854775807
-    - 1
-    - 1000
-    - 1000000
-    - 1000000000
-    - 60000000000
-    - 3600000000000
-    - -9223372036854775808
-    - 9223372036854775807
-    - 1
-    - 1000
-    - 1000000
-    - 1000000000
-    - 60000000000
-    - 3600000000000
-    - 1
-    - 1000
-    - 1000000
-    type: integer
-    x-enum-varnames:
-    - minDuration
-    - maxDuration
-    - Nanosecond
-    - Microsecond
-    - Millisecond
-    - Second
-    - Minute
-    - Hour
-    - minDuration
-    - maxDuration
-    - Nanosecond
-    - Microsecond
-    - Millisecond
-    - Second
-    - Minute
-    - Hour
-    - Nanosecond
-    - Microsecond
-    - Millisecond
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -234,14 +190,13 @@ paths:
     get:
       consumes:
       - '*/*'
-      description: Streams audio_handler files in the specified directory as MP3 or
-        FLAC.
+      description: Streams audio files in the specified directory as MP3 or FLAC.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         type: string
-      - description: Control operation playlist_handler play
+      - description: Control operation playlist play
         in: path
         name: control
         type: string
@@ -260,27 +215,26 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Stream audio_handler files.
+      summary: Stream audio files.
       tags:
-      - track_handler-controller
+      - audio-controller
   /audio/stream/{segment}:
     get:
       consumes:
       - '*/*'
-      description: Streams audio_handler files in the specified directory as MP3 or
-        FLAC.
+      description: Streams audio files in the specified directory as MP3 or FLAC.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         type: string
-      - description: Control operation playlist_handler play
+      - description: Control operation playlist play
         in: path
         name: control
         type: string
       produces:
-      - audio_handler/mpeg
-      - audio_handler/flac
+      - audio/mpeg
+      - audio/flac
       - application/octet-stream
       responses:
         "200":
@@ -303,9 +257,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Stream audio_handler files.
+      summary: Stream audio files.
       tags:
-      - track_handler-controller
+      - audio-controller
   /health/liveness:
     get:
       consumes:
@@ -324,7 +278,7 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       summary: Get liveness status of the application
       tags:
-      - health_handler-controller
+      - health-controller
   /health/readiness:
     get:
       consumes:
@@ -343,7 +297,7 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       summary: Get readiness status of the application
       tags:
-      - health_handler-controller
+      - health-controller
   /job/status:
     get:
       consumes:
@@ -365,7 +319,7 @@ paths:
             type: object
       summary: All Job status
       tags:
-      - health-controller
+      - job-controller
   /otp/disable:
     post:
       consumes:
@@ -403,7 +357,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Disable OTP for a user_handler.
       tags:
       - OTP
@@ -411,7 +365,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Generate an OTP token for a user_handler and store it in the database.
+      description: Generate an OTP token for a user and store it in the database.
       parameters:
       - description: OTP input data
         in: body
@@ -439,15 +393,15 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
-      summary: Generate OTP for a user_handler.
+      - BearerAuth: []
+      summary: Generate OTP for a user.
       tags:
       - OTP
   /otp/validate:
     post:
       consumes:
       - application/json
-      description: Validates a One-Time Password (OTP) for a user_handler.
+      description: Validates a One-Time Password (OTP) for a user.
       parameters:
       - description: User ID
         in: path
@@ -484,7 +438,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Validates a One-Time Password (OTP).
       tags:
       - OTP
@@ -521,8 +475,8 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
-      summary: Verify OTP for a user_handler.
+      - BearerAuth: []
+      summary: Verify OTP for a user.
       tags:
       - OTP
   /playlist/{playlist_id}:
@@ -554,7 +508,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Delete a playlist by ID.
       tags:
       - playlist-controller
@@ -588,21 +542,21 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get tracks from a playlist.
       tags:
       - playlist-controller
     post:
       consumes:
       - application/json
-      description: Set tracks in a playlist by providing a list of track_handler IDs.
+      description: Set tracks in a playlist by providing a list of track IDs.
       parameters:
       - description: Playlist ID
         in: path
         name: playlist_id
         required: true
         type: string
-      - description: List of track_handler IDs to set in the playlist
+      - description: List of track IDs to set in the playlist
         in: body
         name: track_ids
         required: true
@@ -630,7 +584,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Set tracks in a playlist.
       tags:
       - playlist-controller
@@ -638,7 +592,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Remove a track_handler from the specified playlist.
+      description: Remove a track from the specified playlist.
       parameters:
       - description: Playlist ID
         in: path
@@ -662,7 +616,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Playlist or track_handler not found
+          description: Playlist or track not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -670,14 +624,14 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
-      summary: Remove a track_handler from the playlist.
+      - BearerAuth: []
+      summary: Remove a track from the playlist.
       tags:
       - playlist-controller
     post:
       consumes:
       - application/json
-      description: Add a track_handler to an existing playlist.
+      description: Add a track to an existing playlist.
       parameters:
       - description: Playlist ID
         in: path
@@ -701,7 +655,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "404":
-          description: Playlist or track_handler not found
+          description: Playlist or track not found
           schema:
             $ref: '#/definitions/model.ErrorResponse'
         "500":
@@ -709,8 +663,8 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
-      summary: Add a track_handler to a playlist
+      - BearerAuth: []
+      summary: Add a track to a playlist
       tags:
       - playlist-controller
   /playlist/{playlist_id}/clear:
@@ -744,7 +698,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Clear a playlist by removing all tracks from it.
       tags:
       - playlist-controller
@@ -784,7 +738,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Create a new playlist.
       tags:
       - playlist-controller
@@ -809,7 +763,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get all playlists
       tags:
       - playlist-controller
@@ -861,19 +815,19 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Show the list of all tracks.
       tags:
-      - track_handler-controller
+      - track-controller
   /tracks/{code}:
     get:
       consumes:
       - '*/*'
       description: |-
-        locates the track_handler whose ID value matches the id parameter sent by the client,
-        then returns that track_handler as a response.
+        locates the track whose ID value matches the id parameter sent by the client,
+        then returns that track as a response.
       parameters:
-      - description: Code track_handler
+      - description: Code track
         in: path
         name: code
         required: true
@@ -898,15 +852,15 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Track whose ID value matches the id.
       tags:
-      - track_handler-controller
+      - track-controller
   /users/delete:
     delete:
       consumes:
       - application/json
-      description: Deletes the authenticated user_handler.
+      description: Deletes the authenticated user.
       produces:
       - application/json
       responses:
@@ -924,14 +878,14 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Deletes a user_handler.
+      summary: Deletes a user.
       tags:
-      - user_handler-controller
+      - user-controller
   /users/login:
     post:
       consumes:
       - application/json
-      description: Authenticates a user_handler with provided email and password.
+      description: Authenticates a user with provided email and password.
       parameters:
       - description: Login User
         in: body
@@ -958,14 +912,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-      summary: Authenticates a user_handler.
+      summary: Authenticates a user.
       tags:
-      - user_handler-controller
+      - user-controller
   /users/logout:
     post:
       consumes:
       - application/json
-      description: Clears the authentication cookie, logging out the user_handler.
+      description: Clears the authentication cookie, logging out the user.
       produces:
       - application/json
       responses:
@@ -983,9 +937,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Logs out a user_handler.
+      summary: Logs out a user.
       tags:
-      - user_handler-controller
+      - user-controller
   /users/me:
     get:
       consumes:
@@ -1009,9 +963,9 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Get user_handler information
+      summary: Get user information
       tags:
-      - user_handler-controller
+      - user-controller
   /users/refresh:
     post:
       consumes:
@@ -1048,16 +1002,16 @@ paths:
       - ApiKeyAuth: []
       summary: Refreshes the access token using a valid refresh token.
       tags:
-      - user_handler-controller
+      - user-controller
   /users/register:
     post:
       consumes:
       - application/json
-      description: Register a new user_handler with provided name, email, and password.
+      description: Register a new user with provided name, email, and password.
       parameters:
       - description: Register User
         in: body
-        name: user_handler
+        name: user
         required: true
         schema:
           $ref: '#/definitions/model.User'
@@ -1082,13 +1036,16 @@ paths:
             $ref: '#/definitions/model.ErrorResponse'
       security:
       - ApiKeyAuth: []
-      summary: Registers a new user_handler.
+      summary: Registers a new user.
       tags:
-      - user_handler-controller
+      - user-controller
 schemes:
 - http
 - https
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  BearerAuth:
+    description: 'Enter the JWT token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

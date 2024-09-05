@@ -30,19 +30,19 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Streams audio_handler files in the specified directory as MP3 or FLAC.",
+                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
                 ],
                 "produces": [
-                    "audio_handler/mpeg",
-                    "audio_handler/flac",
+                    "audio/mpeg",
+                    "audio/flac",
                     "application/octet-stream"
                 ],
                 "tags": [
-                    "track_handler-controller"
+                    "audio-controller"
                 ],
-                "summary": "Stream audio_handler files.",
+                "summary": "Stream audio files.",
                 "parameters": [
                     {
                         "type": "string",
@@ -52,7 +52,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Control operation playlist_handler play",
+                        "description": "Control operation playlist play",
                         "name": "control",
                         "in": "path"
                     }
@@ -95,7 +95,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Streams audio_handler files in the specified directory as MP3 or FLAC.",
+                "description": "Streams audio files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
                 ],
@@ -103,9 +103,9 @@ const docTemplate = `{
                     "application/x-mpegURL"
                 ],
                 "tags": [
-                    "track_handler-controller"
+                    "audio-controller"
                 ],
-                "summary": "Stream audio_handler files.",
+                "summary": "Stream audio files.",
                 "parameters": [
                     {
                         "type": "string",
@@ -115,7 +115,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Control operation playlist_handler play",
+                        "description": "Control operation playlist play",
                         "name": "control",
                         "in": "path"
                     }
@@ -149,7 +149,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health_handler-controller"
+                    "health-controller"
                 ],
                 "summary": "Get liveness status of the application",
                 "responses": {
@@ -178,7 +178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health_handler-controller"
+                    "health-controller"
                 ],
                 "summary": "Get readiness status of the application",
                 "responses": {
@@ -207,7 +207,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "health-controller"
+                    "job-controller"
                 ],
                 "summary": "All Job status",
                 "responses": {
@@ -234,7 +234,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Disable OTP for a user_handler by setting 'otp_enabled' to 'false' in the database.",
@@ -297,10 +297,10 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Generate an OTP token for a user_handler and store it in the database.",
+                "description": "Generate an OTP token for a user and store it in the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -310,7 +310,7 @@ const docTemplate = `{
                 "tags": [
                     "OTP"
                 ],
-                "summary": "Generate OTP for a user_handler.",
+                "summary": "Generate OTP for a user.",
                 "parameters": [
                     {
                         "description": "OTP input data",
@@ -354,10 +354,10 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Validates a One-Time Password (OTP) for a user_handler.",
+                "description": "Validates a One-Time Password (OTP) for a user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -424,7 +424,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Verify the OTP token for a user_handler and update 'otp_enabled' and 'otp_verified' fields in the database.",
@@ -437,7 +437,7 @@ const docTemplate = `{
                 "tags": [
                     "OTP"
                 ],
-                "summary": "Verify OTP for a user_handler.",
+                "summary": "Verify OTP for a user.",
                 "parameters": [
                     {
                         "description": "OTP input data",
@@ -481,7 +481,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a new playlist with the provided information.",
@@ -544,7 +544,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieves all playlists available in the storage.",
@@ -584,7 +584,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get tracks from a playlist by providing the playlist ID.",
@@ -637,10 +637,10 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Set tracks in a playlist by providing a list of track_handler IDs.",
+                "description": "Set tracks in a playlist by providing a list of track IDs.",
                 "consumes": [
                     "application/json"
                 ],
@@ -660,7 +660,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "List of track_handler IDs to set in the playlist",
+                        "description": "List of track IDs to set in the playlist",
                         "name": "track_ids",
                         "in": "body",
                         "required": true,
@@ -702,7 +702,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Delete a playlist based on its unique ID.",
@@ -754,7 +754,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Removes all tracks from a playlist, effectively clearing it.",
@@ -809,10 +809,10 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Add a track_handler to an existing playlist.",
+                "description": "Add a track to an existing playlist.",
                 "consumes": [
                     "application/json"
                 ],
@@ -822,7 +822,7 @@ const docTemplate = `{
                 "tags": [
                     "playlist-controller"
                 ],
-                "summary": "Add a track_handler to a playlist",
+                "summary": "Add a track to a playlist",
                 "parameters": [
                     {
                         "type": "string",
@@ -853,7 +853,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Playlist or track_handler not found",
+                        "description": "Playlist or track not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -869,10 +869,10 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "Remove a track_handler from the specified playlist.",
+                "description": "Remove a track from the specified playlist.",
                 "consumes": [
                     "application/json"
                 ],
@@ -882,7 +882,7 @@ const docTemplate = `{
                 "tags": [
                     "playlist-controller"
                 ],
-                "summary": "Remove a track_handler from the playlist.",
+                "summary": "Remove a track from the playlist.",
                 "parameters": [
                     {
                         "type": "string",
@@ -913,7 +913,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Playlist or track_handler not found",
+                        "description": "Playlist or track not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -931,7 +931,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "responds with the list of all tracks as JSON.",
@@ -942,7 +942,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "track_handler-controller"
+                    "track-controller"
                 ],
                 "summary": "Show the list of all tracks.",
                 "parameters": [
@@ -1012,10 +1012,10 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "BearerAuth": []
                     }
                 ],
-                "description": "locates the track_handler whose ID value matches the id parameter sent by the client,\nthen returns that track_handler as a response.",
+                "description": "locates the track whose ID value matches the id parameter sent by the client,\nthen returns that track as a response.",
                 "consumes": [
                     "*/*"
                 ],
@@ -1023,13 +1023,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "track_handler-controller"
+                    "track-controller"
                 ],
                 "summary": "Track whose ID value matches the id.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Code track_handler",
+                        "description": "Code track",
                         "name": "code",
                         "in": "path",
                         "required": true
@@ -1070,7 +1070,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Deletes the authenticated user_handler.",
+                "description": "Deletes the authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1078,9 +1078,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
-                "summary": "Deletes a user_handler.",
+                "summary": "Deletes a user.",
                 "responses": {
                     "200": {
                         "description": "Success - User deleted",
@@ -1105,7 +1105,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "Authenticates a user_handler with provided email and password.",
+                "description": "Authenticates a user with provided email and password.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1113,9 +1113,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
-                "summary": "Authenticates a user_handler.",
+                "summary": "Authenticates a user.",
                 "parameters": [
                     {
                         "description": "Login User",
@@ -1162,7 +1162,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Clears the authentication cookie, logging out the user_handler.",
+                "description": "Clears the authentication cookie, logging out the user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1170,9 +1170,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
-                "summary": "Logs out a user_handler.",
+                "summary": "Logs out a user.",
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -1210,9 +1210,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
-                "summary": "Get user_handler information",
+                "summary": "Get user information",
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -1250,7 +1250,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
                 "summary": "Refreshes the access token using a valid refresh token.",
                 "parameters": [
@@ -1299,7 +1299,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Register a new user_handler with provided name, email, and password.",
+                "description": "Register a new user with provided name, email, and password.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1307,13 +1307,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user_handler-controller"
+                    "user-controller"
                 ],
-                "summary": "Registers a new user_handler.",
+                "summary": "Registers a new user.",
                 "parameters": [
                     {
                         "description": "Register User",
-                        "name": "user_handler",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1531,9 +1531,6 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 2
                 },
-                "duration": {
-                    "$ref": "#/definitions/time.Duration"
-                },
                 "genre": {
                     "type": "string",
                     "example": "Genre name"
@@ -1603,56 +1600,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "time.Duration": {
-            "type": "integer",
-            "enum": [
-                -9223372036854775808,
-                9223372036854775807,
-                1,
-                1000,
-                1000000,
-                1000000000,
-                60000000000,
-                3600000000000,
-                -9223372036854775808,
-                9223372036854775807,
-                1,
-                1000,
-                1000000,
-                1000000000,
-                60000000000,
-                3600000000000,
-                1,
-                1000,
-                1000000
-            ],
-            "x-enum-varnames": [
-                "minDuration",
-                "maxDuration",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond",
-                "Second",
-                "Minute",
-                "Hour",
-                "minDuration",
-                "maxDuration",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond",
-                "Second",
-                "Minute",
-                "Hour",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond"
-            ]
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+        "BearerAuth": {
+            "description": "Enter the JWT token in the format: Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "externalDocs": {

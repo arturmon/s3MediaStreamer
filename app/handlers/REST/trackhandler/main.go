@@ -23,7 +23,7 @@ func NewTrackHandler(trackService track.Service) *Handler {
 // GetAllTracks	godoc
 // @Summary		Show the list of all tracks.
 // @Description responds with the list of all tracks as JSON.
-// @Tags		track_handler-controller
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
 // @Param       page query   int           false "Page number"
@@ -35,7 +35,7 @@ func NewTrackHandler(trackService track.Service) *Handler {
 // @Failure		400 {object} model.ErrorResponse "Invalid page or page_size parameters"
 // @Failure		401 {object} model.ErrorResponse "Unauthorized"
 // @Failure		500 {object} model.ErrorResponse "Internal Server Error"
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Router		/tracks [get]
 func (h *Handler) GetAllTracks(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetAllTracks")
@@ -77,17 +77,17 @@ func (h *Handler) GetAllTracks(c *gin.Context) {
 // GetTrackByID godoc
 // @Summary		Track whose ID value matches the id.
 // noinspection
-// @Description locates the track_handler whose ID value matches the id parameter sent by the client,
-// @Description	then returns that track_handler as a response.
-// @Tags		track_handler-controller
+// @Description locates the track whose ID value matches the id parameter sent by the client,
+// @Description	then returns that track as a response.
+// @Tags		track-controller
 // @Accept		*/*
 // @Produce		json
-// @Param		code    path      string     true  "Code track_handler"
+// @Param		code    path      string     true  "Code track"
 // @Success     200 {object} model.Track  "OK"
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Router		/tracks/{code} [get]
 func (h *Handler) GetTrackByID(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetTrackByID")

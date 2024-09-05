@@ -29,8 +29,10 @@ import (
 // @BasePath	/v1
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
-// @securityDefinitions.basic	BasicAuth
-// @authorizationurl http://s3streammedia.com/v1/users/login
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter the JWT token in the format: Bearer {token}
 func main() {
 	// debug.SetMemoryLimit(2048)
 	version := "0.0.1"

@@ -22,7 +22,7 @@ func NewMonitoringHandler(monitoringService health.Service) *Handler {
 // LivenessGET godoc
 // @Summary Get liveness status of the application
 // @Description Checks and returns the liveness status of the application
-// @Tags health_handler-controller
+// @Tags health-controller
 // @Accept  */*
 // @Produce json
 // @BasePath	/
@@ -47,7 +47,7 @@ func (h *Handler) LivenessGET(c *gin.Context, wrapper *health.Service) {
 // ReadinessGET godoc
 // @Summary Get readiness status of the application
 // @Description Checks and returns the readiness status of the application
-// @Tags health_handler-controller
+// @Tags health-controller
 // @Accept  */*
 // @Produce json
 // @BasePath	/

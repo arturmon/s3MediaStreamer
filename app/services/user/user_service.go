@@ -145,6 +145,7 @@ func (s *Service) Login(c *gin.Context, data map[string]string) (*model.OkLoginR
 		Email:        user.Email,
 		UserID:       user.ID.String(),
 		Role:         user.Role,
+		JWTToken:     accessToken,
 		RefreshToken: refreshToken,
 		OtpEnabled:   user.OtpEnabled,
 	}

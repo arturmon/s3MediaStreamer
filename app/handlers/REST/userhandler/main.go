@@ -26,13 +26,13 @@ func NewUserHandler(acl acl.Service, userService user.Service, authService auth.
 }
 
 // Register godoc
-// @Summary		Registers a new user_handler.
-// @Description Register a new user_handler with provided name, email, and password.
-// @Tags		user_handler-controller
+// @Summary		Registers a new user.
+// @Description Register a new user with provided name, email, and password.
+// @Tags		user-controller
 // @Accept		json
 // @Produce		json
 // @Security    ApiKeyAuth
-// @Param		user_handler body model.User true "Register User"
+// @Param		user body model.User true "Register User"
 // @Success     201 {object} model.UserResponse  "Created"
 // @Failure     400 {object} model.ErrorResponse "Bad Request - User with this email exists"
 // @Failure     401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
@@ -58,9 +58,9 @@ func (h *Handler) Register(c *gin.Context) {
 }
 
 // Login godoc
-// @Summary		Authenticates a user_handler.
-// @Description Authenticates a user_handler with provided email and password.
-// @Tags		user_handler-controller
+// @Summary		Authenticates a user.
+// @Description Authenticates a user with provided email and password.
+// @Tags		user-controller
 // @Accept		json
 // @Produce		json
 // @Param		login body model.LoginInput true "Login User"
@@ -89,9 +89,9 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 // DeleteUser godoc
-// @Summary		Deletes a user_handler.
-// @Description Deletes the authenticated user_handler.
-// @Tags		user_handler-controller
+// @Summary		Deletes a user.
+// @Description Deletes the authenticated user.
+// @Tags		user-controller
 // @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
@@ -118,13 +118,13 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(err.Code, err.Err)
 	}
-	c.JSON(http.StatusOK, model.OkResponse{Message: "user_handler deleted"})
+	c.JSON(http.StatusOK, model.OkResponse{Message: "user deleted"})
 }
 
 // Logout godoc
-// @Summary		Logs out a user_handler.
-// @Description Clears the authentication cookie, logging out the user_handler.
-// @Tags		user_handler-controller
+// @Summary		Logs out a user.
+// @Description Clears the authentication cookie, logging out the user.
+// @Tags		user-controller
 // @Accept		json
 // @Produce		json
 // @Security	ApiKeyAuth
@@ -145,9 +145,9 @@ func (h *Handler) Logout(c *gin.Context) {
 }
 
 // User godoc
-// @Summary Get user_handler information
+// @Summary Get user information
 // @Description Retrieves user_handler information based on JWT in the request's cookies
-// @Tags user_handler-controller
+// @Tags user-controller
 // @Accept  */*
 // @Produce json
 // @Security    ApiKeyAuth
@@ -178,7 +178,7 @@ func (h *Handler) User(c *gin.Context) {
 // RefreshTokenHandler godoc
 // @Summary Refreshes the access token using a valid refresh token.
 // @Description Validates the provided refresh token, generates a new access token, and returns it.
-// @Tags user_handler-controller
+// @Tags user-controller
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -222,7 +222,7 @@ func (h *Handler) ReadUserIDAndRole(c *gin.Context) (string, string, error) {
 	var err error
 	userRole, ok := c.Get("userRole")
 	if !ok {
-		// Handle error: user_handler role not found in context
+		// Handle error: user role not found in context
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user role not found in context"})
 		return "", "", err
 	}

@@ -33,7 +33,7 @@ func NewPlaylistHandler(playlistService playlist.Service, userHandler userhandle
 // @Failure 400 {object} model.ErrorResponse "Invalid input"
 // @Failure 401 {object} model.ErrorResponse "Unauthorized - User unauthenticated"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/create [post]
 func (h *Handler) CreatePlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "CreatePlaylist")
@@ -65,7 +65,7 @@ func (h *Handler) CreatePlaylist(c *gin.Context) {
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
 // @Failure 404 {object} model.ErrorResponse "Not Found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id} [delete]
 func (h *Handler) DeletePlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeletePlaylist")
@@ -88,8 +88,8 @@ func (h *Handler) DeletePlaylist(c *gin.Context) {
 }
 
 // AddToPlaylist godoc
-// @Summary Add a track_handler to a playlist
-// @Description Add a track_handler to an existing playlist.
+// @Summary Add a track to a playlist
+// @Description Add a track to an existing playlist.
 // @Tags playlist-controller
 // @Accept json
 // @Produce json
@@ -97,14 +97,14 @@ func (h *Handler) DeletePlaylist(c *gin.Context) {
 // @Param track_id path string true "Track ID"
 // @Success 201 {string} string "Track added to the playlist successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
-// @Failure 404 {object} model.ErrorResponse "Playlist or track_handler not found"
+// @Failure 404 {object} model.ErrorResponse "Playlist or track not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id}/{track_id} [post]
 func (h *Handler) AddToPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "AddToPlaylist")
 	defer span.End()
-	// Extract playlist ID and track_handler ID from path parameters
+	// Extract playlist ID and track ID from path parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
 	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
@@ -123,8 +123,8 @@ func (h *Handler) AddToPlaylist(c *gin.Context) {
 }
 
 // RemoveFromPlaylist godoc
-// @Summary Remove a track_handler from the playlist.
-// @Description Remove a track_handler from the specified playlist.
+// @Summary Remove a track from the playlist.
+// @Description Remove a track from the specified playlist.
 // @Tags playlist-controller
 // @Accept json
 // @Produce json
@@ -132,14 +132,14 @@ func (h *Handler) AddToPlaylist(c *gin.Context) {
 // @Param track_id path string true "Track ID"
 // @Success 200 {string} string "Track removed from playlist successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
-// @Failure 404 {object} model.ErrorResponse "Playlist or track_handler not found"
+// @Failure 404 {object} model.ErrorResponse "Playlist or track not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id}/{track_id} [delete]
 func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "RemoveFromPlaylist")
 	defer span.End()
-	// Get the playlist ID and track_handler ID from the request parameters
+	// Get the playlist ID and track ID from the request parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
 	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
@@ -167,7 +167,7 @@ func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
 // @Failure 404 {object} model.ErrorResponse "Playlist not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id}/clear [delete]
 func (h *Handler) ClearPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ClearPlaylist")
@@ -192,17 +192,17 @@ func (h *Handler) ClearPlaylist(c *gin.Context) {
 
 // SetFromPlaylist godoc
 // @Summary Set tracks in a playlist.
-// @Description Set tracks in a playlist by providing a list of track_handler IDs.
+// @Description Set tracks in a playlist by providing a list of track IDs.
 // @Tags playlist-controller
 // @Accept json
 // @Produce json
 // @Param playlist_id path string true "Playlist ID"
-// @Param track_ids body []string true "List of track_handler IDs to set in the playlist"
+// @Param track_ids body []string true "List of track IDs to set in the playlist"
 // @Success 200 {string} string "Tracks set in the playlist successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id} [post]
 func (h *Handler) SetFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "SetFromPlaylist")
@@ -245,7 +245,7 @@ func (h *Handler) SetFromPlaylist(c *gin.Context) {
 // @Failure 400 {object} model.ErrorResponse "Bad Request"
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/{playlist_id} [get]
 func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
@@ -275,7 +275,7 @@ func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
 // @Success 200 {object} model.PlaylistsResponse "Playlists retrieved successfully"
 // @Failure 404 {object} model.ErrorResponse "Playlists not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Router /playlist/get [get]
 func (h *Handler) ListPlaylists(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")

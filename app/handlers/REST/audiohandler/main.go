@@ -31,13 +31,13 @@ func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *Handler 
 }
 
 // Audio godoc
-// @Summary Stream audio_handler files.
-// @Description Streams audio_handler files in the specified directory as MP3 or FLAC.
-// @Tags track_handler-controller
+// @Summary Stream audio files.
+// @Description Streams audio files in the specified directory as MP3 or FLAC.
+// @Tags audio-controller
 // @Accept */*
 // @Produce application/x-mpegURL
 // @Param playlist_id path string false "Playlist ID"
-// @Param control path string false "Control operation playlist_handler play"
+// @Param control path string false "Control operation playlist play"
 // @Success 200 {array} model.Track "OK"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
@@ -45,7 +45,7 @@ func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *Handler 
 func (h *Handler) Audio(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Audio")
 	defer span.End()
-	// Assuming you have a function that retrieves or generates the M3U8 playlist_handler
+	// Assuming you have a function that retrieves or generates the M3U8 playlist
 	playlistID := c.Param("playlist_id")
 	tracks, err := h.audio.PlayPlaylist(c.Request.Context(), playlistID)
 
@@ -64,15 +64,15 @@ func (h *Handler) Audio(c *gin.Context) {
 }
 
 // StreamM3U godoc
-// @Summary Stream audio_handler files.
-// @Description Streams audio_handler files in the specified directory as MP3 or FLAC.
-// @Tags track_handler-controller
+// @Summary Stream audio files.
+// @Description Streams audio files in the specified directory as MP3 or FLAC.
+// @Tags audio-controller
 // @Accept */*
-// @Produce audio_handler/mpeg
-// @Produce audio_handler/flac
+// @Produce audio/mpeg
+// @Produce audio/flac
 // @Produce application/octet-stream
 // @Param playlist_id path string false "Playlist ID"
-// @Param control path string false "Control operation playlist_handler play"
+// @Param control path string false "Control operation playlist play"
 // @Success 200 {array} model.Track "OK"
 // @Failure 404 {object} model.ErrorResponse "Segment not found"
 // @Failure 406 {object} model.ErrorResponse "Segment not found"

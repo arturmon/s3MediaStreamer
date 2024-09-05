@@ -24,7 +24,7 @@ type Track struct {
 	DiscTotal   int           `json:"disc_total" bson:"disc_total" example:"2"`
 	Track       int           `json:"track" bson:"track" example:"3"`
 	TrackTotal  int           `json:"track_total" bson:"track_total" example:"10"`
-	Duration    time.Duration `json:"duration" bson:"duration"`
+	Duration    time.Duration `json:"duration" bson:"duration" swaggerignore:"true"`
 	SampleRate  uint32        `json:"sample_rate" bson:"sample_rate" example:"44100"`
 	Bitrate     uint32        `json:"bitrate" bson:"bitrate" example:"320"`
 }

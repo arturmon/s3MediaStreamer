@@ -26,6 +26,7 @@ type OkLoginResponce struct {
 	Email        string `json:"email"`
 	UserID       string `json:"user_id"`
 	Role         string `json:"role"`
+	JWTToken     string `json:"jwt_token"`
 	RefreshToken string `json:"refresh_token"`
 	OtpEnabled   bool   `json:"otp_enabled"`
 }

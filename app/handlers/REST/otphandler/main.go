@@ -21,12 +21,12 @@ func NewOtpHandler(otpService otp.Service) *Handler {
 }
 
 // GenerateOTP generates and stores an OTP (One-Time Password) for a user_handler.
-// @Summary Generate OTP for a user_handler.
-// @Description Generate an OTP token for a user_handler and store it in the database.
+// @Summary Generate OTP for a user.
+// @Description Generate an OTP token for a user and store it in the database.
 // @Tags OTP
 // @Accept json
 // @Produce json
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkGenerateOTP "OTP generated successfully"
 // @Failure 400 {object} model.ErrorResponse "Invalid refresh payload"
@@ -51,13 +51,13 @@ func (h *Handler) GenerateOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, otpResponse)
 }
 
-// VerifyOTP verifies the OTP (One-Time Password) token for a user_handler.
-// @Summary Verify OTP for a user_handler.
+// VerifyOTP verifies the OTP (One-Time Password) token for a user.
+// @Summary Verify OTP for a user.
 // @Description Verify the OTP token for a user_handler and update 'otp_enabled' and 'otp_verified' fields in the database.
 // @Tags OTP
 // @Accept json
 // @Produce json
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP verified successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"
@@ -84,11 +84,11 @@ func (h *Handler) VerifyOTP(c *gin.Context) {
 
 // ValidateOTP godoc
 // @Summary Validates a One-Time Password (OTP).
-// @Description Validates a One-Time Password (OTP) for a user_handler.
+// @Description Validates a One-Time Password (OTP) for a user.
 // @Tags OTP
 // @Accept json
 // @Produce json
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Param user_id path string true "User ID"
 // @Param payload body model.OTPInput true "OTP Input"
 // @Success 200 {object} model.OkResponse "OTP Valid"
@@ -116,13 +116,13 @@ func (h *Handler) ValidateOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, otpResponse)
 }
 
-// DisableOTP disables OTP (One-Time Password) for a user_handler.
+// DisableOTP disables OTP (One-Time Password) for a user.
 // @Summary Disable OTP for a user_handler.
 // @Description Disable OTP for a user_handler by setting 'otp_enabled' to 'false' in the database.
 // @Tags OTP
 // @Accept json
 // @Produce json
-// @Security    ApiKeyAuth
+// @Security    BearerAuth
 // @Param payload body model.OTPInput true "OTP input data"
 // @Success 200 {object} model.OkLoginResponce "OTP disabled successfully"
 // @Failure 400 {object} model.ErrorResponse "Bad request"

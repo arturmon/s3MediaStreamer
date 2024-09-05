@@ -21,7 +21,7 @@ func NewJobHandler() *Handler {
 // JobStatus godoc
 // @Summary All Job status
 // @Description Check if the application server is running jobs
-// @Tags health-controller
+// @Tags job-controller
 // @Accept json
 // @Produce json
 // @Success 200 {object} map[string]interface{} "OK"
