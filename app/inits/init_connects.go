@@ -9,7 +9,8 @@ import (
 
 func initConnects(ctx context.Context, cfg *model.Config, logger *logs.Logger) (*initConnect, error) {
 	logger.Info("Starting initialize the connect...")
-	cashingDB, err := connect.InitRedis(ctx, cfg, logger)
+	logger.Info("Starting initialize the connect cashing user auth...")
+	cashingDB, err := connect.InitRedis(ctx, cfg, logger, 0)
 	if err != nil && !cfg.Storage.Caching.Enabled {
 		logger.Info("redis is NOT initializing or disabled !!!")
 	}
