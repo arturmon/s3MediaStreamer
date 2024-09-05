@@ -68,7 +68,7 @@ func (c *CachingRepository) CheckPasswordVerificationInRedis(ctx context.Context
 
 func (c *CachingRepository) GetTrackInCache(ctx context.Context, key string, result interface{}) error {
 	data, err := c.redisClient.Get(ctx, key).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		// Data not found in cache
 		return fmt.Errorf("cache miss")
 	} else if err != nil {
