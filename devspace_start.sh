@@ -24,6 +24,7 @@ This is how you can work with it:
 - Some ports will be forwarded, so you can access this container via localhost
 - Run DLV \`${COLOR_GREEN}dlv debug app/main.go --listen 0.0.0.0:2345 --headless --api-version=2 --output /tmp/__debug_bin${COLOR_RESET}\`
 - Run \`${COLOR_GREEN}go run app/main.go${COLOR_RESET}\` to start the application
+- Synchronize occasionally command: \`${COLOR_GREEN}devspace sync${COLOR_RESET}\`
 "
 
 # Set terminal prompt
