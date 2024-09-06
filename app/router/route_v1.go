@@ -87,7 +87,6 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 			playlist.POST("/:playlist_id", allHandlers.Playlist.SetFromPlaylist)
 			playlist.DELETE("/:playlist_id/:track_id", allHandlers.Playlist.RemoveFromPlaylist)
 			playlist.DELETE("/:playlist_id/clear", allHandlers.Playlist.ClearPlaylist)
-			playlist.GET("/get", allHandlers.Playlist.ListPlaylists)
 		}
 	}
 }
