@@ -14,25 +14,25 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// @title			S3 Media Streamer Application API
-// @version		0.0.1
-// @description	This is a s3 media streamer server.
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @title			               S3 Media Streamer Application API
+// @version		                   0.0.1
+// @description	                   This is a s3 media streamer server.
+// @contact.name                   API Support
+// @contact.url                    http://www.swagger.io/support
+// @contact.email                  support@swagger.io
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name                   Apache 2.0
+// @license.url                    http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @schemes http https
-// @host      s3streammedia.com
-// @BasePath	/v1
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description Enter the JWT token in the format: Bearer {token}
+// @schemes                        http https
+// @host                           s3streammedia.localhost
+// @BasePath	                   /v1
+// @externalDocs.description       OpenAPI
+// @externalDocs.url               https://swagger.io/resources/open-api/
+// @securityDefinitions.apikey     ApiKeyAuth
+// @in                             header
+// @name                           Authorization
+// @description                    Enter the JWT token in the format: Bearer {token}
 func main() {
 	// debug.SetMemoryLimit(2048)
 	version := "0.0.1"
