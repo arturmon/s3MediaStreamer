@@ -3,7 +3,10 @@
 GET http://{{host}}/metrics
 Content-Type: application/json
 ###
-GET http://{{host}}/health
+GET http://{{host}}/health/liveness
+Content-Type: application/json
+###
+GET http://{{host}}/health/readiness
 Content-Type: application/json
 ###---------------------------------------------------------JOB-------------------------------------------------
 GET http://{{host}}/job/status
@@ -34,7 +37,7 @@ GET http://{{host}}/v1/
     &page_size=10
     &sort_by=_id
     &sort_order=asc
-    &filter=0127b619-be74-499c-97f8-c8748194d7fd
+    &filter=DJ RATEK
 ###
 GET http://{{host}}/v1/
     tracks
@@ -42,7 +45,7 @@ GET http://{{host}}/v1/
     &page_size=10
     &sort_by=_id
     &sort_order=asc
-    &filter==0127b619-be74-499c-97f8-c8748194d7fd
+    &filter=VA
 Content-Type: application/json
 ###
 GET http://{{host}}/v1
