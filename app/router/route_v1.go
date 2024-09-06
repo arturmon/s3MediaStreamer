@@ -27,7 +27,7 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 			users.POST("/delete", allHandlers.User.DeleteUser)
 			users.POST("/logout", allHandlers.User.Logout)
 			users.POST("/refresh", allHandlers.User.RefreshTokenHandler)
-			otp := users.Group("/otp_handler")
+			otp := users.Group("/otp")
 			{
 				otp.POST("/generate", allHandlers.Otp.GenerateOTP)
 				otp.POST("/verify", allHandlers.Otp.VerifyOTP)
@@ -76,10 +76,10 @@ func setupSystemRoutes(ctx context.Context, app *app.App, allHandlers *handlers.
 	app.REST.Use(sessions.Sessions(sessionName, app.Service.InitRepo.InitConnect.SessionStore))
 
 	app.Logger.Info("heartbeat metric initializing")
-	app.REST.GET("/health_handler/liveness", func(c *gin.Context) {
+	app.REST.GET("/health/liveness", func(c *gin.Context) {
 		allHandlers.Health.LivenessGET(c, app.Service.Health) // Pass the healthMetrics to HealthGET.
 	})
-	app.REST.GET("/health_handler/readiness", func(c *gin.Context) {
+	app.REST.GET("/health/readiness", func(c *gin.Context) {
 		allHandlers.Health.ReadinessGET(c, app.Service.Health) // Pass the healthMetrics to HealthGET.
 	})
 
