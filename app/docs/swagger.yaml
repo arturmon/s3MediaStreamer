@@ -33,6 +33,8 @@ definitions:
     properties:
       email:
         type: string
+      jwt_token:
+        type: string
       otp_enabled:
         type: boolean
       refresh_token:
@@ -173,7 +175,7 @@ definitions:
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
-host: s3streammedia.com
+host: s3streammedia.localhost
 info:
   contact:
     email: support@swagger.io
@@ -213,8 +215,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
       summary: Stream audio files.
       tags:
       - audio-controller
@@ -255,8 +255,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
       summary: Stream audio files.
       tags:
       - audio-controller
@@ -357,7 +355,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Disable OTP for a user_handler.
       tags:
       - OTP
@@ -393,7 +391,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Generate OTP for a user.
       tags:
       - OTP
@@ -438,7 +436,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Validates a One-Time Password (OTP).
       tags:
       - OTP
@@ -475,7 +473,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Verify OTP for a user.
       tags:
       - OTP
@@ -508,7 +506,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Delete a playlist by ID.
       tags:
       - playlist-controller
@@ -542,7 +540,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Get tracks from a playlist.
       tags:
       - playlist-controller
@@ -584,7 +582,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Set tracks in a playlist.
       tags:
       - playlist-controller
@@ -624,7 +622,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Remove a track from the playlist.
       tags:
       - playlist-controller
@@ -663,7 +661,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Add a track to a playlist
       tags:
       - playlist-controller
@@ -698,7 +696,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Clear a playlist by removing all tracks from it.
       tags:
       - playlist-controller
@@ -738,7 +736,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Create a new playlist.
       tags:
       - playlist-controller
@@ -763,7 +761,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Get all playlists
       tags:
       - playlist-controller
@@ -815,7 +813,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Show the list of all tracks.
       tags:
       - track-controller
@@ -852,7 +850,7 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Track whose ID value matches the id.
       tags:
       - track-controller
@@ -1043,7 +1041,7 @@ schemes:
 - http
 - https
 securityDefinitions:
-  BearerAuth:
+  ApiKeyAuth:
     description: 'Enter the JWT token in the format: Bearer {token}'
     in: header
     name: Authorization

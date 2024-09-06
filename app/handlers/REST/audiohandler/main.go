@@ -40,7 +40,6 @@ func NewAudioHandler(audio AudioServiceInterface, logger *logs.Logger) *Handler 
 // @Param control path string false "Control operation playlist play"
 // @Success 200 {array} model.Track "OK"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
 // @Router /audio/{playlist_id} [get]
 func (h *Handler) Audio(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Audio")
@@ -77,7 +76,6 @@ func (h *Handler) Audio(c *gin.Context) {
 // @Failure 404 {object} model.ErrorResponse "Segment not found"
 // @Failure 406 {object} model.ErrorResponse "Segment not found"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
 // @Router /audio/stream/{segment} [get]
 func (h *Handler) StreamM3U(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "StreamM3U")

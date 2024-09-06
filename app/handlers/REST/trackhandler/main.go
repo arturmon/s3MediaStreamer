@@ -35,7 +35,7 @@ func NewTrackHandler(trackService track.Service) *Handler {
 // @Failure		400 {object} model.ErrorResponse "Invalid page or page_size parameters"
 // @Failure		401 {object} model.ErrorResponse "Unauthorized"
 // @Failure		500 {object} model.ErrorResponse "Internal Server Error"
-// @Security    BearerAuth
+// @Security    ApiKeyAuth
 // @Router		/tracks [get]
 func (h *Handler) GetAllTracks(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetAllTracks")
@@ -87,7 +87,7 @@ func (h *Handler) GetAllTracks(c *gin.Context) {
 // @Failure     401 {object} model.ErrorResponse  "Unauthorized"
 // @Failure     404 {object} model.ErrorResponse  "Not Found"
 // @Failure     500 {object} model.ErrorResponse  "Internal Server Error"
-// @Security    BearerAuth
+// @Security    ApiKeyAuth
 // @Router		/tracks/{code} [get]
 func (h *Handler) GetTrackByID(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "GetTrackByID")

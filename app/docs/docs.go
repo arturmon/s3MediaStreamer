@@ -25,11 +25,6 @@ const docTemplate = `{
     "paths": {
         "/audio/stream/{segment}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Streams audio files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
@@ -90,11 +85,6 @@ const docTemplate = `{
         },
         "/audio/{playlist_id}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Streams audio files in the specified directory as MP3 or FLAC.",
                 "consumes": [
                     "*/*"
@@ -234,7 +224,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Disable OTP for a user_handler by setting 'otp_enabled' to 'false' in the database.",
@@ -297,7 +287,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Generate an OTP token for a user and store it in the database.",
@@ -354,7 +344,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Validates a One-Time Password (OTP) for a user.",
@@ -424,7 +414,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Verify the OTP token for a user_handler and update 'otp_enabled' and 'otp_verified' fields in the database.",
@@ -481,7 +471,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Creates a new playlist with the provided information.",
@@ -544,7 +534,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Retrieves all playlists available in the storage.",
@@ -584,7 +574,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Get tracks from a playlist by providing the playlist ID.",
@@ -637,7 +627,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Set tracks in a playlist by providing a list of track IDs.",
@@ -702,7 +692,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Delete a playlist based on its unique ID.",
@@ -754,7 +744,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Removes all tracks from a playlist, effectively clearing it.",
@@ -809,7 +799,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Add a track to an existing playlist.",
@@ -869,7 +859,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "Remove a track from the specified playlist.",
@@ -931,7 +921,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "responds with the list of all tracks as JSON.",
@@ -1012,7 +1002,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "locates the track whose ID value matches the id parameter sent by the client,\nthen returns that track as a response.",
@@ -1402,6 +1392,9 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "jwt_token": {
+                    "type": "string"
+                },
                 "otp_enabled": {
                     "type": "boolean"
                 },
@@ -1603,7 +1596,7 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BearerAuth": {
+        "ApiKeyAuth": {
             "description": "Enter the JWT token in the format: Bearer {token}",
             "type": "apiKey",
             "name": "Authorization",
@@ -1619,7 +1612,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
-	Host:             "s3streammedia.com",
+	Host:             "s3streammedia.localhost",
 	BasePath:         "/v1",
 	Schemes:          []string{"http", "https"},
 	Title:            "S3 Media Streamer Application API",
