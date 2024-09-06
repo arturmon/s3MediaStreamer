@@ -192,7 +192,7 @@ func (s *Service) setMetadata() map[string]string {
 	}
 	return map[string]string{
 		"type":            "api",
-		"log-level":       s.cfg.AppConfig.GinMode,
+		"log-level":       s.cfg.AppConfig.Web.Mode,
 		"s3":              s3,
 		"caching":         caching,
 		"session-type":    s.cfg.Session.SessionStorageType,

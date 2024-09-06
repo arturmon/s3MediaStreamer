@@ -24,7 +24,10 @@ type Config struct {
 		LogType           string `yaml:"log_type" env:"LOG_TYPE"`
 		LogGelfServer     string `yaml:"log_gelf_server" env:"LOG_GELF_SERVER_URL"`
 		LogGelfServerType string `yaml:"log_gelf_server_type" env:"LOG_GELF_SERVER_TYPE"`
-		GinMode           string `yaml:"gin_mode" env:"GIN_MODE"`
+		Web               struct {
+			Mode             string `yaml:"mode" env:"WEB_MODE"`
+			CorsAllowOrigins string `yaml:"corsAllowOrigins" env:"CORS_ALLOW_ORIGINS"`
+		} `yaml:"web"`
 
 		Jobs struct {
 			IntervalRescanConsul int `yaml:"interval_rescan_consul" env:"INTERVAL_RESCAN_CONSUL"`

@@ -10,9 +10,9 @@ const (
 	MaxAgeDuration = 12 * time.Hour
 )
 
-func ConfigCORS() cors.Config {
+func ConfigCORS(allowOrigins string) cors.Config {
 	return cors.Config{
-		AllowOrigins:  []string{"http://localhost:3000"},
+		AllowOrigins:  []string{allowOrigins},
 		AllowMethods:  []string{"POST", "OPTIONS", "GET", "PATCH", "DELETE"},
 		ExposeHeaders: []string{"Origin"},
 		AllowHeaders: []string{

@@ -20,7 +20,7 @@ const ReadHeaderTimeout = 5 * time.Second
 func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *gin.Engine {
 	logger.Info("router initializing")
 	// Gin instance
-	switch cfg.AppConfig.GinMode {
+	switch cfg.AppConfig.Web.Mode {
 	case "debug":
 		gin.SetMode(gin.DebugMode)
 	case "test":
