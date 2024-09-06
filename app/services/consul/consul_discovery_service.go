@@ -94,14 +94,14 @@ func (s *Service) RegisterService() {
 	checks := []*api.AgentServiceCheck{
 		{
 			Name:     "Readiness",
-			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health_handler/readiness",
+			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health/readiness",
 			Interval: "3s",
 			Timeout:  "30s",
 			Notes:    "readiness probe",
 		},
 		{
 			Name:     "Liveness",
-			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health_handler/liveness",
+			HTTP:     "http://" + net.JoinHostPort(ip, strconv.Itoa(port)) + "/health/liveness",
 			Interval: "10s",
 			Timeout:  "30s",
 			Notes:    "liveness probe",
