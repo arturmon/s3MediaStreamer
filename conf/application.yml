@@ -13,7 +13,9 @@ app_config:
   log_type: "text" # text, json, gelf
   log_gelf_server: "localhost:12201"
   log_gelf_server_type: "udp" # tcp, udp
-  gin_mode: "release" # debug, test, release
+  web:
+    mode: "release" # debug, test, release
+    corsAllowOrigins: "*" # example: http://localhost:10000 or *
   jobs:
     interval_rescan_consul: 60 #second
     job:
