@@ -70,6 +70,7 @@ dev:
     labelSelector:
       app.kubernetes.io/name: media
       app.kubernetes.io/service: backend
+      app.kubernetes.io/instance: app
 
     containers:
       media:
