@@ -13,9 +13,7 @@ app_config:
   log_type: "text" # text, json, gelf
   log_gelf_server: "localhost:12201"
   log_gelf_server_type: "udp" # tcp, udp
-  web:
-    mode: "release" # debug, test, release
-    corsAllowOrigins: "*" # example: http://localhost:10000 or *
+  gin_mode: "release" # debug, test, release
   jobs:
     interval_rescan_consul: 60 #second
     job:
@@ -38,12 +36,12 @@ app_config:
 storage:
   caching:
     enabled: true
-    address: "redis-master.database.svc.cluster.local:6379"
+    address: "localhost:6379"
     password: "redis"
     expiration: 24 #Hours
   username: "root"
   password: "1qazxsw2"
-  host: "postgresql.database.svc.cluster.local"
+  host: "localhost"
   port: "5432"
   database: "db_issue_album"
 
@@ -71,7 +69,7 @@ session:
     mongo_user: "root"
     mongo_pass: "1qazxsw2"
   postgresql:
-    postgresql_host: "postgresql.database.svc.cluster.local"
+    postgresql_host: "localhost"
     postgresql_port: "5432"
     postgresql_database: "session"
     postgresql_user: "root"

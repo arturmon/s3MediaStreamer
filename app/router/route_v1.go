@@ -124,7 +124,7 @@ func HandleOptions(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNoContent)
 }
 
-// InitCacheUrl initializes the Redis cache store and returns a persist.RedisStore instance.
+// InitCacheURL initializes the Redis cache store and returns a persist.RedisStore instance.
 func InitCacheURL(ctx context.Context, app *app.App) (*persist.RedisStore, error) {
 	setDB := 1
 	redisClient := redis.NewClient(&redis.Options{
