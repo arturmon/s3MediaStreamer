@@ -22,7 +22,7 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 	setupSystemRoutes(ctx, app, allHandlers)
 
 	// Initialize the Redis cache store
-	cacheUrl, err := InitCacheUrl(ctx, app)
+	cacheURL, err := InitCacheURL(ctx, app)
 	if err != nil {
 		app.Logger.Fatalf("Failed to initialize Redis cache: %v", err)
 		return
@@ -51,8 +51,8 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 		tracks := v1.Group("/tracks")
 		{
 			if app.Cfg.Storage.Caching.Enabled {
-				tracks.GET("", cache.CacheByRequestURI(cacheUrl, ttl), allHandlers.Track.GetAllTracks)
-				tracks.GET("/:code", cache.CacheByRequestURI(cacheUrl, ttl), allHandlers.Track.GetTrackByID)
+				tracks.GET("", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetAllTracks)
+				tracks.GET("/:code", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetTrackByID)
 			} else {
 				tracks.GET("", allHandlers.Track.GetAllTracks)
 				tracks.GET("/:code", allHandlers.Track.GetTrackByID)
@@ -78,8 +78,8 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 			playlist.POST("/:playlist_id/:track_id", allHandlers.Playlist.AddToPlaylist)
 			// Conditionally add caching middleware based on configuration
 			if app.Cfg.Storage.Caching.Enabled {
-				playlist.GET("/:playlist_id", cache.CacheByRequestURI(cacheUrl, ttl), allHandlers.Playlist.ListTracksFromPlaylist)
-				playlist.GET("/get", cache.CacheByRequestURI(cacheUrl, ttl), allHandlers.Playlist.ListPlaylists)
+				playlist.GET("/:playlist_id", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Playlist.ListTracksFromPlaylist)
+				playlist.GET("/get", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Playlist.ListPlaylists)
 			} else {
 				playlist.GET("/:playlist_id", allHandlers.Playlist.ListTracksFromPlaylist)
 				playlist.GET("/get", allHandlers.Playlist.ListPlaylists)
@@ -125,7 +125,7 @@ func HandleOptions(c *gin.Context) {
 }
 
 // InitCacheUrl initializes the Redis cache store and returns a persist.RedisStore instance.
-func InitCacheUrl(ctx context.Context, app *app.App) (*persist.RedisStore, error) {
+func InitCacheURL(ctx context.Context, app *app.App) (*persist.RedisStore, error) {
 	setDB := 1
 	redisClient := redis.NewClient(&redis.Options{
 		Network:  "tcp",
