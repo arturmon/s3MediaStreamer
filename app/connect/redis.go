@@ -18,9 +18,12 @@ func InitRedis(ctx context.Context, cfg *model.Config, logger *logs.Logger, dbIn
 	})
 	// Ping the Redis server to ensure the connection is established
 	if err := redisClient.Ping(ctx).Err(); err != nil {
-		logger.Fatalln("Failed to connect redis:", err)
+		logger.Errorf("(Redis: Auth User) Failed to connect redis at %s, errors: %v", cfg.Storage.Caching.Address, err)
 		return nil, err
 	}
+
+	// Log successful connection
+	logger.Infof("(Redis: Auth User) Successfully connected to Redis at %s using DB index %d", cfg.Storage.Caching.Address, dbIndex)
 
 	return redisClient, nil
 }

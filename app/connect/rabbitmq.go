@@ -23,11 +23,12 @@ func NewRabbitMQConnection(_ context.Context, cfg *model.Config, logger *logs.Lo
 	logger.Debugf("AMQP URL: %s", amqpURLpriv)
 	conn, err := amqp.Dial(amqpURLpriv)
 	if err != nil {
-		logger.Fatalln("Failed to connect rabbitmq:", err)
+		logger.Errorf("(AMQP) Failed to connect rabbitmq at rabbitmq://%s:***@%s, errors: %v", cfg.MessageQueue.User, amqpURL, err)
+
 		return nil, err
 	}
 
-	logger.Infof("Connect AMQP Client: rabbitmq://%s:***@%s", cfg.MessageQueue.User, amqpURL)
+	logger.Infof("(AMQP) Successfully connected to AMQP Client: rabbitmq://%s:***@%s", cfg.MessageQueue.User, amqpURL)
 
 	return conn, nil
 }
