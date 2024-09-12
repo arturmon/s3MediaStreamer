@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"s3MediaStreamer/app/model"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -102,10 +103,17 @@ func (s *Service) GenerateTokensAndCookies(c *gin.Context, user model.User) (str
 		return "", "", err
 	}
 
+	// Extract only the domain part from the Host header
+	domain := c.Request.Host
+	if strings.Contains(domain, ":") {
+		// Remove the port number from the domain
+		domain = strings.Split(domain, ":")[0]
+	}
+
 	// Set both tokens as cookies
 	maxAge := secondsInOneMinute * minutesInOneHour * hoursInOneDay
-	c.SetCookie("jwt", accessToken, maxAge, "/", c.Request.Host, false, true)
-	c.SetCookie("refresh_token", refreshToken, maxAge, "/", c.Request.Host, false, true)
+	c.SetCookie("jwt", accessToken, maxAge, "/", domain, false, true)
+	c.SetCookie("refresh_token", refreshToken, maxAge, "/", domain, false, true)
 
 	return accessToken, refreshToken, nil
 }
