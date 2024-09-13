@@ -54,12 +54,6 @@ func (s *Service) CreatePlayListName(ctx context.Context, newPlaylist model.PLay
 }
 
 func (s *Service) CreatePlaylist(c *gin.Context) (*model.PLayList, *model.RestError) {
-	// Convert the 'Level' field from string to int64
-	level, err := strconv.ParseInt(model.Request.Level, 10, 64)
-	if err != nil {
-		return nil, &model.RestError{Code: http.StatusBadRequest, Err: "Invalid 'level' format"}
-	}
-
 	// Read user_id from the session
 	value, err := s.session.GetSessionKey(c, "user_id")
 	if err != nil {
@@ -80,7 +74,6 @@ func (s *Service) CreatePlaylist(c *gin.Context) (*model.PLayList, *model.RestEr
 	newPlaylist := model.PLayList{
 		ID:          playlistID,
 		CreatedAt:   time.Now(),
-		Level:       level,
 		Title:       model.Request.Title,
 		Description: model.Request.Description,
 		CreatorUser: valueUUID,
@@ -338,7 +331,6 @@ func (s Service) ListPlaylistsService(ctx context.Context, userRole, userID stri
 		response.PLayLists[i] = model.PLayList{
 			ID:          playlist.ID,
 			CreatedAt:   playlist.CreatedAt,
-			Level:       playlist.Level,
 			Title:       playlist.Title,
 			Description: playlist.Description,
 			CreatorUser: playlist.CreatorUser,

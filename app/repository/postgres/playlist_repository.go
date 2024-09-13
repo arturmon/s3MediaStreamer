@@ -40,11 +40,10 @@ func (c *Client) CreatePlayListName(ctx context.Context, playlist model.PLayList
 	// Create a new squirrel.InsertBuilder
 	insertBuilder := squirrel.
 		Insert("playlists").
-		Columns("_id", "created_at", "level", "title", "description", "_creator_user").
+		Columns("_id", "created_at", "title", "description", "_creator_user").
 		Values(
 			playlist.ID,
 			playlist.CreatedAt,
-			playlist.Level,
 			playlist.Title,
 			playlist.Description,
 			playlist.CreatorUser,
@@ -91,7 +90,7 @@ func (c *Client) GetPlayListByID(ctx context.Context, playlistID string) (model.
 
 	// Execute the query and scan the result into the playlist struct
 	err = c.Pool.QueryRow(ctx, sql, args...).
-		Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Level, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
+		Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
 
 	if err != nil {
 		return playlist, tracks, err
@@ -346,7 +345,7 @@ func (c *Client) GetAllPlayList(ctx context.Context, creatorUserID string) ([]mo
 	// Iterate over the result set
 	for rows.Next() {
 		var playlist model.PLayList
-		err = rows.Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Level, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
+		err = rows.Scan(&playlist.ID, &playlist.CreatedAt, &playlist.Title, &playlist.Description, &playlist.CreatorUser)
 		if err != nil {
 			return nil, err
 		}
