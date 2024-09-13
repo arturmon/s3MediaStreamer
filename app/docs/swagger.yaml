@@ -54,9 +54,6 @@ definitions:
       description:
         example: A short description of the application
         type: string
-      level:
-        example: 34
-        type: integer
       title:
         example: Title name
         type: string

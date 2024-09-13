@@ -140,7 +140,6 @@ playlist/1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
 playlist/create
 ```json
 {
-  "level":"1",
   "title":"test Play list",
   "description":"test Play list"
 }

@@ -1424,10 +1424,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "A short description of the application"
                 },
-                "level": {
-                    "type": "integer",
-                    "example": 34
-                },
                 "title": {
                     "type": "string",
                     "example": "Title name"
