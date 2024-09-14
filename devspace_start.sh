@@ -22,9 +22,11 @@ Welcome to your development container!
 This is how you can work with it:
 - Files will be synchronized between your local machine and this container
 - Some ports will be forwarded, so you can access this container via localhost
-- Run DLV \`${COLOR_GREEN}dlv debug app/main.go --listen 0.0.0.0:2345 --headless --api-version=2 --output /tmp/__debug_bin${COLOR_RESET}\`
-- Run \`${COLOR_GREEN}go run app/main.go${COLOR_RESET}\` to start the application
-- Synchronize occasionally command: \`${COLOR_GREEN}devspace sync${COLOR_RESET}\`
+- command:
+- Run DLV \`${COLOR_GREEN}app_debug${COLOR_RESET}\`
+- Run \`${COLOR_GREEN}app_run${COLOR_RESET}\`
+- Synchronize \`${COLOR_GREEN}app_sync${COLOR_RESET}\`
+- View all aliases use: \`${COLOR_GREEN}alias${COLOR_RESET}\`
 "
 
 # Set terminal prompt
@@ -35,4 +37,4 @@ if [ -z "$BASH" ]; then export PS1="$ "; fi
 export PATH="./bin:$PATH"
 
 # Open shell
-bash --norc
+bash --rcfile <(cat aliases.sh)
