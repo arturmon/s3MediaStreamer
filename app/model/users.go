@@ -18,3 +18,8 @@ type User struct {
 	OtpSecret  string `bson:"otp_secret"`
 	OtpAuthURL string `bson:"otp_auth_url"`
 }
+
+type UserContext struct {
+	UserRole string
+	UserID   string
+}

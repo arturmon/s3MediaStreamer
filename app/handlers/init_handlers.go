@@ -22,6 +22,7 @@ type Handlers struct {
 	Track    *trackhandler.Handler
 	User     *userhandler.Handler
 	Messages *amqp2.Handler
+	Wrapper  *WrapperHandler
 }
 
 func NewHandlers(ctx context.Context, app *app.App) *Handlers {
@@ -33,6 +34,7 @@ func NewHandlers(ctx context.Context, app *app.App) *Handlers {
 	otpHandler := otphandler.NewOtpHandler(*app.Service.OTP)
 	messageRepo, err := amqp2.NewRabbitMQHandlerWrapper(ctx, app.Cfg, app.Logger, app.Service.InitRepo.InitConnect.RabbitCon, *app.Service.Message)
 	audioHandler := audiohandler.NewAudioHandler(app.Service.Audio, app.Logger)
+	wrapper := NewTrackHandler(*app.Service.User, app.Logger)
 	if err != nil {
 		return nil
 	}
@@ -45,5 +47,6 @@ func NewHandlers(ctx context.Context, app *app.App) *Handlers {
 		trackHandler,
 		userHandler,
 		messageRepo,
+		wrapper,
 	}
 }

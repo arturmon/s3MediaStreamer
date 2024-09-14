@@ -21,74 +21,89 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 	setupStaticFiles(app)
 	setupSystemRoutes(ctx, app, allHandlers)
 
-	// Initialize the Redis cache store
-	cacheURL, err := InitCacheURL(ctx, app)
-	if err != nil {
-		app.Logger.Fatalf("Failed to initialize Redis cache: %v", err)
-		return
-	}
-	ttl := time.Duration(app.Cfg.Storage.Caching.Expiration) * time.Hour
+	// Initialize Redis cache store
+	cacheURL, ttl := initCache(ctx, app)
 
 	v1 := app.REST.Group("/v1")
+
+	// Users routes
+	initUserRoutes(v1.Group("/users"), allHandlers)
+
+	// Tracks routes
+	initTrackRoutes(v1.Group("/tracks"), allHandlers, cacheURL, ttl, app.Cfg.Storage.Caching.Enabled)
+
+	// Swagger docs
+	initSwaggerRoutes(v1.Group("/swagger"))
+
+	// Audio routes
+	initAudioRoutes(v1.Group("/audio"), allHandlers)
+
+	// Playlist routes
+	initPlaylistRoutes(v1.Group("/playlist"), allHandlers, cacheURL, ttl, app.Cfg.Storage.Caching.Enabled)
+}
+
+// User-related routes
+func initUserRoutes(users *gin.RouterGroup, allHandlers *handlers.Handlers) {
+	users.POST("/register", allHandlers.User.Register)
+	users.OPTIONS("/login", HandleOptions)
+	users.POST("/login", allHandlers.User.Login)
+	users.GET("/me", allHandlers.User.User)
+	users.POST("/delete", allHandlers.User.DeleteUser)
+	users.POST("/logout", allHandlers.User.Logout)
+	users.POST("/refresh", allHandlers.User.RefreshTokenHandler)
+
+	otp := users.Group("/otp")
 	{
-		users := v1.Group("/users")
-		{
-			users.POST("/register", allHandlers.User.Register)
-			users.OPTIONS("/login", HandleOptions)
-			users.POST("/login", allHandlers.User.Login)
-			users.GET("/me", allHandlers.User.User)
-			users.POST("/delete", allHandlers.User.DeleteUser)
-			users.POST("/logout", allHandlers.User.Logout)
-			users.POST("/refresh", allHandlers.User.RefreshTokenHandler)
-			otp := users.Group("/otp")
-			{
-				otp.POST("/generate", allHandlers.Otp.GenerateOTP)
-				otp.POST("/verify", allHandlers.Otp.VerifyOTP)
-				otp.POST("/validate", allHandlers.Otp.ValidateOTP)
-				otp.POST("/disable", allHandlers.Otp.DisableOTP)
-			}
-		}
-		tracks := v1.Group("/tracks")
-		{
-			if app.Cfg.Storage.Caching.Enabled {
-				tracks.GET("", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetAllTracks)
-				tracks.GET("/:code", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetTrackByID)
-			} else {
-				tracks.GET("", allHandlers.Track.GetAllTracks)
-				tracks.GET("/:code", allHandlers.Track.GetTrackByID)
-			}
-		}
-		app.Logger.Info("swagger docs initializing")
-		swagger := v1.Group("/swagger")
-		{
-			swagger.GET("", func(c *gin.Context) {
-				c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-			})
-			swagger.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-		}
-		audio := v1.Group("/audio")
-		{
-			audio.GET("/stream/:segment", allHandlers.Audio.StreamM3U)
-			audio.GET("/:playlist_id", allHandlers.Audio.Audio)
-		}
-		playlist := v1.Group("/playlist")
-		{
-			playlist.POST("/create", allHandlers.Playlist.CreatePlaylist)
-			playlist.DELETE("/:playlist_id", allHandlers.Playlist.DeletePlaylist)
-			playlist.POST("/:playlist_id/:track_id", allHandlers.Playlist.AddToPlaylist)
-			// Conditionally add caching middleware based on configuration
-			if app.Cfg.Storage.Caching.Enabled {
-				playlist.GET("/:playlist_id", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Playlist.ListTracksFromPlaylist)
-				playlist.GET("/get", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Playlist.ListPlaylists)
-			} else {
-				playlist.GET("/:playlist_id", allHandlers.Playlist.ListTracksFromPlaylist)
-				playlist.GET("/get", allHandlers.Playlist.ListPlaylists)
-			}
-			playlist.POST("/:playlist_id", allHandlers.Playlist.SetFromPlaylist)
-			playlist.DELETE("/:playlist_id/:track_id", allHandlers.Playlist.RemoveFromPlaylist)
-			playlist.DELETE("/:playlist_id/clear", allHandlers.Playlist.ClearPlaylist)
-		}
+		otp.POST("/generate", allHandlers.Otp.GenerateOTP)
+		otp.POST("/verify", allHandlers.Otp.VerifyOTP)
+		otp.POST("/validate", allHandlers.Otp.ValidateOTP)
+		otp.POST("/disable", allHandlers.Otp.DisableOTP)
 	}
+}
+
+// Track-related routes
+func initTrackRoutes(tracks *gin.RouterGroup, allHandlers *handlers.Handlers, cacheURL *persist.RedisStore, ttl time.Duration, cacheEnabled bool) {
+	if cacheEnabled {
+		tracks.GET("", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetAllTracks)
+		tracks.GET("/:code", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetTrackByID)
+	} else {
+		tracks.GET("", allHandlers.Track.GetAllTracks)
+		tracks.GET("/:code", allHandlers.Track.GetTrackByID)
+	}
+}
+
+// Audio routes
+func initAudioRoutes(audio *gin.RouterGroup, allHandlers *handlers.Handlers) {
+	audio.GET("/stream/:segment", allHandlers.Audio.StreamM3U)
+	audio.GET("/:playlist_id", allHandlers.Audio.Audio)
+}
+
+// Playlist-related routes
+func initPlaylistRoutes(playlist *gin.RouterGroup, allHandlers *handlers.Handlers, cacheURL *persist.RedisStore, ttl time.Duration, cacheEnabled bool) {
+	playlist.POST("/create", allHandlers.Playlist.CreatePlaylist)
+
+	playlist.DELETE("/:playlist_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.DeletePlaylist))
+	playlist.POST("/:playlist_id/:track_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.AddToPlaylist))
+
+	if cacheEnabled {
+		playlist.GET("/:playlist_id", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ListTracksFromPlaylist))
+		playlist.GET("/get", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ListPlaylists))
+	} else {
+		playlist.GET("/:playlist_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ListTracksFromPlaylist))
+		playlist.GET("/get", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ListPlaylists))
+	}
+
+	playlist.POST("/:playlist_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.SetFromPlaylist))
+	playlist.DELETE("/:playlist_id/:track_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.RemoveFromPlaylist))
+	playlist.DELETE("/:playlist_id/clear", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ClearPlaylist))
+}
+
+// Swagger routes
+func initSwaggerRoutes(swagger *gin.RouterGroup) {
+	swagger.GET("", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
+	swagger.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func setupStaticFiles(app *app.App) {

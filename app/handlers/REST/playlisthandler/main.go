@@ -67,18 +67,13 @@ func (h *Handler) CreatePlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [delete]
-func (h *Handler) DeletePlaylist(c *gin.Context) {
+func (h *Handler) DeletePlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeletePlaylist")
 	defer span.End()
 
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	errDeletePlaylist := h.playlistService.DeletePlaylistService(c, userRole, userID, playlistID)
+	errDeletePlaylist := h.playlistService.DeletePlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
 	if errDeletePlaylist != nil {
 		c.JSON(errDeletePlaylist.Code, errDeletePlaylist.Err)
 		return
@@ -101,18 +96,15 @@ func (h *Handler) DeletePlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [post]
-func (h *Handler) AddToPlaylist(c *gin.Context) {
+func (h *Handler) AddToPlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "AddToPlaylist")
 	defer span.End()
 	// Extract playlist ID and track ID from path parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	errAddToPlaylist := h.playlistService.AddToPlaylist(c, userRole, userID, playlistID, trackID)
+	parentID := c.DefaultQuery("parent_id", "")
+
+	errAddToPlaylist := h.playlistService.AddToPlaylist(c, userContext.UserRole, userContext.UserID, playlistID, trackID, parentID)
 	if errAddToPlaylist != nil {
 		c.JSON(errAddToPlaylist.Code, errAddToPlaylist.Err)
 		return
@@ -136,18 +128,14 @@ func (h *Handler) AddToPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/{track_id} [delete]
-func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
+func (h *Handler) RemoveFromPlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "RemoveFromPlaylist")
 	defer span.End()
 	// Get the playlist ID and track ID from the request parameters
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	errRemoveFromPlaylist := h.playlistService.RemoveFromPlaylist(c, userRole, userID, playlistID, trackID)
+
+	errRemoveFromPlaylist := h.playlistService.RemoveFromPlaylist(c, userContext.UserRole, userContext.UserID, playlistID, trackID)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
 		return
@@ -169,18 +157,13 @@ func (h *Handler) RemoveFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id}/clear [delete]
-func (h *Handler) ClearPlaylist(c *gin.Context) {
+func (h *Handler) ClearPlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ClearPlaylist")
 	defer span.End()
 	// Get the playlist ID from the URL parameters
 	playlistID := c.Param("playlist_id")
 
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	errRemoveFromPlaylist := h.playlistService.ClearPlaylistService(c, userRole, userID, playlistID)
+	errRemoveFromPlaylist := h.playlistService.ClearPlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
 		return
@@ -204,16 +187,11 @@ func (h *Handler) ClearPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [post]
-func (h *Handler) SetFromPlaylist(c *gin.Context) {
+func (h *Handler) SetFromPlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "SetFromPlaylist")
 	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
 
 	// Define a variable to hold the request data
 	var request model.SetPlaylistTrackOrderRequest
@@ -247,17 +225,13 @@ func (h *Handler) SetFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/{playlist_id} [get]
-func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
+func (h *Handler) ListTracksFromPlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
 	defer span.End()
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	response, errListTracksFromPlaylist := h.playlistService.ListTracksFromPlaylistService(c, userRole, userID, playlistID)
+
+	response, errListTracksFromPlaylist := h.playlistService.ListTracksFromPlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
 	if errListTracksFromPlaylist != nil {
 		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
 		return
@@ -277,15 +251,11 @@ func (h *Handler) ListTracksFromPlaylist(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
 // @Router /playlist/get [get]
-func (h *Handler) ListPlaylists(c *gin.Context) {
+func (h *Handler) ListPlaylists(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
 	defer span.End()
-	userRole, userID, err := h.userHandler.ReadUserIDAndRole(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
-		return
-	}
-	response, errListTracksFromPlaylist := h.playlistService.ListPlaylistsService(c, userRole, userID)
+
+	response, errListTracksFromPlaylist := h.playlistService.ListPlaylistsService(c, userContext.UserRole, userContext.UserID)
 	if errListTracksFromPlaylist != nil {
 		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
 		return
