@@ -90,6 +90,10 @@ dev:
         sync:
           - path: ./
             uploadExcludeFile: .dockerignore
+            excludePaths:
+              - .devspace/
+              - .github/
+              - .vscode/
     # Open a terminal and use the following command to start it
         terminal:
           command: ./devspace_start.sh

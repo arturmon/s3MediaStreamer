@@ -28,11 +28,11 @@
 ## Local Kuberntes
 use Rancher desktop and devspave usage
 
-## Port Forwarding
+## Run Devspace
 
 ```shell
-cd GolandProjects/s3MediaStreamer
-devspace dev
-kubectl port-forward service/redis-master 6379:6379 -n database
-kubectl port-forward service/postgresql 5432:5432 -n database
+kubectl port-forward service/redis-master 6379:6379 -n database > /dev/null 2>&1 & \
+kubectl port-forward service/postgresql 5432:5432 -n database > /dev/null 2>&1 & \
+DEVSPACE_WORKING_DIR=GolandProjects/s3MediaStreamer devspace dev
+
 ```
