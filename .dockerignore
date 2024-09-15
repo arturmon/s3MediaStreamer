@@ -3,8 +3,6 @@
 .devspace
 .github
 chart
-infra
-infra-kube
 docker-compose.yml
 Dockerfile
 Dockerfile.dev
