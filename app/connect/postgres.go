@@ -34,7 +34,7 @@ type StorageConfig struct {
 }
 
 func NewDBConfig(ctx context.Context, cfg *model.Config, logger *logs.Logger) (*postgres.Client, error) {
-	logger.Info("Starting Postgres Connection...")
+	logger.Info("Starting Postgres connection initialization...")
 	pool, err := NewClient(ctx, MaxAttempts, MaxDelay, &StorageConfig{
 		Host:     cfg.Storage.Host,
 		Port:     cfg.Storage.Port,
@@ -43,7 +43,7 @@ func NewDBConfig(ctx context.Context, cfg *model.Config, logger *logs.Logger) (*
 		Database: cfg.Storage.Database,
 	}, logger)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to Postgres: %w", err)
 	}
 	return &postgres.Client{
 		Pool: pool,
@@ -55,6 +55,7 @@ func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) error 
 	metrics := NewDBPrometheusMetrics()
 	metrics.DatabaseConnectionAttemptCounter.Inc()
 
+	logger.Info("Attempting to connect to Postgres...")
 	pool, err := NewClient(ctx, MaxAttempts, MaxDelay, s, logger)
 	if err != nil {
 		metrics.DatabaseConnectionFailureCounter.Inc()
@@ -66,6 +67,7 @@ func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) error 
 	duration := time.Since(startTime)
 	metrics.ResponseTimeDBConnect.Observe(duration.Seconds())
 	metrics.DatabaseConnectionSuccessCounter.Inc()
+	logger.Info("Successfully connected to Postgres")
 	return nil
 }
 
@@ -87,30 +89,31 @@ func NewClient(ctx context.Context, maxAttempts int,
 
 		pgxCfg, err := pgxpool.ParseConfig(dsn.String())
 		if err != nil {
-			logger.Fatalf("Unable to parse config: %v\n", err)
+			logger.Fatalf("Failed to parse Postgres config: %v\n", err)
 		}
 		// otel
 		pgxCfg.ConnConfig.Tracer = otelpgx.NewTracer()
 
+		logger.Info("Connecting to Postgres...")
 		pool, err = pgxpool.NewWithConfig(ctxWithTimeout, pgxCfg)
 		if err != nil {
-			logger.Println("Failed to connect to postgres... Going to do the next attempt")
+			logger.Warn("Failed to connect to Postgres. Retrying...")
 			return err
 		}
 
 		// Run database migrations
-		logger.Println("Start migration...")
+		logger.Info("Running database migrations...")
 		err = RunMigrations(ctx, dsn.String())
 		if err != nil {
-			logger.Printf("Error: %s", err)
+			logger.Errorf("Database migration failed: %s", err)
 			return err
 		}
-		logger.Println("Finish migration.")
+		logger.Info("Database migration completed successfully.")
 		return nil
 	}, maxAttempts, maxDelay)
 
 	if err != nil {
-		logger.Fatal("All attempts are exceeded. Unable to connect to postgres")
+		logger.Fatalf("All connection attempts failed. Unable to connect to Postgres: %v", err)
 		return nil, err
 	}
 

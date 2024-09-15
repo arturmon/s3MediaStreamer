@@ -33,22 +33,27 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 	gob.Register(uuid.UUID{})
 	var store sessions.Store
 
+	logger.Info("Initializing session store...")
 	// Initialize session
 	switch cfg.Session.SessionStorageType {
 	case "cookie":
+		logger.Info("Configuring session store: cookie")
 		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	case "memory":
+		logger.Info("Configuring session store: memory")
 		store = memstore.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	case "memcached":
 		memcachedURL := cfg.Session.Memcached.MemcachedHost + ":" + cfg.Session.Memcached.MemcachedPort
+		logger.Infof("Configuring session store: memcached at %s", memcachedURL)
 		store = memcached.NewStore(memcache.New(memcachedURL), "", []byte(cfg.Session.Cookies.SessionSecretKey))
 	case "mongo":
 		mongoURL := "mongodb://" + cfg.Session.Mongodb.MongoUser + ":" + cfg.Session.Mongodb.MongoPass +
 			"@" + cfg.Session.Mongodb.MongoHost + ":" + cfg.Session.Mongodb.MongoPort
+		logger.Infof("Configuring session store: mongo at %s", mongoURL)
 		mongoOptions := options.Client().ApplyURI(mongoURL)
 		client, err := mongo.Connect(ctx, mongoOptions) // Use Connect instead of NewClient
 		if err != nil {
-			logger.Errorf("Error creating Mongo store: %v", err)
+			logger.Errorf("Failed to create Mongo client: %v", err)
 		} else {
 			c := client.Database(cfg.Session.Mongodb.MongoDatabase).Collection("sessions")
 			store = mongodriver.NewStore(c, mongodriverMaxIdle, true, []byte(cfg.Session.Cookies.SessionSecretKey))
@@ -61,19 +66,21 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 			Path:     cfg.Session.Postgresql.PostgresqlDatabase,
 			RawQuery: "sslmode=disable", // This enables SSL/TLS
 		}
+		logger.Infof("Configuring session store: postgres with DSN %s", dsn.Redacted())
 		db, err := sql.Open("postgres", dsn.String())
 		if err != nil {
-			logger.Errorf("Error creating Postgres store: %v", err)
+			logger.Errorf("Failed to create Postgres database connection: %v", err)
 			return nil, err
 		}
 		db.SetMaxOpenConns(SetMaxOpenConns)
 		db.SetMaxIdleConns(SetMaxIdleConns)
 		store, err = postgres.NewStore(db, []byte(cfg.Session.Cookies.SessionSecretKey))
 		if err != nil {
-			logger.Errorf("Error creating Postres store: %v", err)
+			logger.Errorf("Failed to create Postgres store: %v", err)
 			return nil, err
 		}
 	default:
+		logger.Warnf("Unknown session storage type '%s', defaulting to cookie store", cfg.Session.SessionStorageType)
 		store = cookie.NewStore([]byte(cfg.Session.Cookies.SessionSecretKey))
 	}
 	store.Options(sessions.Options{
@@ -83,8 +90,6 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 		SameSite: http.SameSiteStrictMode,
 	})
 
-	logger.Info("session initializing")
-
-	logger.Infof("session use storage: %s", cfg.Session.SessionStorageType)
+	logger.Info("Session store initialized successfully")
 	return store, nil
 }

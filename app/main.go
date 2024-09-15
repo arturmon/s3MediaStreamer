@@ -42,29 +42,52 @@ func main() {
 	defer cancel()
 
 	cfg := config.GetConfig()
-	logger := logs.GetLogger(cfg.AppConfig.LogLevel, cfg.AppConfig.LogType, cfg.AppConfig.LogGelfServer, cfg.AppConfig.LogGelfServerType, appName)
+	logger := logs.GetLogger(
+		cfg.AppConfig.LogLevel,
+		cfg.AppConfig.LogType,
+		cfg.AppConfig.LogGelfServer,
+		cfg.AppConfig.LogGelfServerType,
+		appName,
+	)
 	logger.Printf("App Version: %s Build Time: %s\n", version, buildTime)
 	logger.Info("config initialize")
-	logger.Info("logger initialize")
+	logger.Infof("Logger initialized with level: %s, type: %s", cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
 	if cfg.AppConfig.LogLevel == "debug" {
 		config.PrintAllDefaultEnvs(logger)
 		go app.StartPprofServer(logger)
 	}
+	logger.Info("Initializing application...")
 	myApp, err := app.NewAppInit(ctx, cfg, logger, appName, version)
 	if err != nil {
-		logger.Error("Failed to initialize the new my app:", err)
+		logger.Fatalf("Failed to initialize the application: %v", err)
 	}
+	logger.Info("Application initialized successfully")
+
+	// Initialize handlers
+	logger.Info("Initializing handlers...")
 	handler := handlers.NewHandlers(ctx, myApp)
+	logger.Info("Handlers initialized successfully")
 
+	// Initialize router
+	logger.Info("Initializing router...")
 	router.InitRouter(ctx, myApp, handler)
+	logger.Info("Router initialized successfully")
 
-	logger.Info("Starting initialize the job runner...")
+	// Initialize job runner
+	logger.Info("Initializing job runner...")
 	err = jobs.InitJob(myApp)
 	if err != nil {
-		logger.Error("Failed to initialize the job runner:", err)
+		logger.Fatalf("Failed to initialize the job runner: %v", err)
 	}
+	logger.Info("Job runner initialized successfully")
 
+	// Handle system signals
+	logger.Info("Setting up signal handling...")
 	app.HandleSignals(ctx, logger, cancel)
+	logger.Info("Signal handling setup complete")
 
+	// Start the application
+	logger.Info("Starting the application...")
 	myApp.Start(ctx)
+	logger.Info("Application started successfully")
 }
