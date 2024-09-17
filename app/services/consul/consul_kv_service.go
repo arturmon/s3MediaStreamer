@@ -28,13 +28,20 @@ func NewConsulKVService(cfg *model.Config, logger *logs.Logger, client Service) 
 	}
 }
 
-// GetFromConsul fetches the value from Consul for a given key.
+// GetFromConsul retrieves the value for a given key from Consul.
 func (k *KVService) GetFromConsul(key string) ([]byte, error) {
 	kv, _, err := k.ConsulClient.KV().Get(key, nil)
 	if err != nil {
 		k.logger.Error("Error fetching key from Consul:", err)
 		return nil, err
 	}
+
+	// Handle the case where the key is not found (kv is nil).
+	if kv == nil {
+		k.logger.Warn("Key not found in Consul:", key)
+		return nil, nil // Return nil, indicating the key does not exist.
+	}
+
 	return kv.Value, nil
 }
 
