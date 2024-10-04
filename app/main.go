@@ -9,6 +9,7 @@ import (
 	"s3MediaStreamer/app/internal/config"
 	"s3MediaStreamer/app/internal/jobs"
 	"s3MediaStreamer/app/internal/logs"
+	"s3MediaStreamer/app/model"
 	"s3MediaStreamer/app/router"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -38,8 +39,15 @@ func main() {
 	version := "0.0.1"
 	buildTime := "0000-00-00 UTC"
 	appName := "s3MediaStreamer"
+	appInfo := &model.AppInfo{
+		AppName:   appName,
+		Version:   version,
+		BuildTime: buildTime,
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	ctx = context.WithValue(ctx, "appInfo", appInfo)
 
 	cfg := config.GetConfig()
 	logger := logs.GetLogger(
@@ -49,7 +57,8 @@ func main() {
 		cfg.AppConfig.LogGelfServerType,
 		appName,
 	)
-	logger.Printf("App Version: %s Build Time: %s\n", version, buildTime)
+	appsInfo, _ := ctx.Value("appInfo").(*model.AppInfo)
+	logger.Infof("App Info: Name: %s, Version: %s, Build Time: %s", appsInfo.AppName, appsInfo.Version, appsInfo.BuildTime)
 	logger.Info("config initialize")
 	logger.Infof("Logger initialized with level: %s, type: %s", cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
 	if cfg.AppConfig.LogLevel == "debug" {
