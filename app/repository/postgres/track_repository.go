@@ -6,8 +6,6 @@ import (
 	"s3MediaStreamer/app/model"
 	"strings"
 
-	"go.opentelemetry.io/otel"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 )
@@ -29,8 +27,10 @@ type TracksRepositoryInterface interface {
 
 // CreateTracks inserts multiple track records into the "track" table.
 func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
-	_, span := otel.Tracer("").Start(ctx, "CreateTracks")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "CreateTracks")
 	defer span.End()
+
 	if len(list) == 0 {
 		return nil
 	}
@@ -113,8 +113,10 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 
 // GetTracks retrieves a list of tracks with pagination and filtering.
 func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter string) ([]model.Track, int, error) {
-	_, span := otel.Tracer("").Start(ctx, "GetTracks")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "GetTracks")
 	defer span.End()
+
 	// Create a new instance of squirrel.SelectBuilder
 	queryBuilder := squirrel.Select("*").From("tracks")
 
@@ -200,8 +202,10 @@ func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortO
 
 // GetTracksByColumns retrieves an track record from the "track" table based on the provided code.
 func (c *Client) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
-	_, span := otel.Tracer("").Start(ctx, "GetTracksByColumns")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "GetTracksByColumns")
 	defer span.End()
+
 	getTrackByColumns := squirrel.Select("*").From("tracks")
 	getTrackByColumns = getTrackByColumns.Where(squirrel.Eq{columns: code})
 	getTrackByColumns = getTrackByColumns.PlaceholderFormat(squirrel.Dollar)
@@ -240,8 +244,10 @@ func (c *Client) GetTracksByColumns(ctx context.Context, code, columns string) (
 
 // CleanTracks deletes a single record from the "track" table based on the provided code.
 func (c *Client) CleanTracks(ctx context.Context) error {
-	_, span := otel.Tracer("").Start(ctx, "CleanTracks")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "CleanTracks")
 	defer span.End()
+
 	// Create a new instance of squirrel.DeleteBuilder and specify the table name
 	generateSQLTracks := squirrel.Delete("tracks")
 
@@ -260,7 +266,8 @@ func (c *Client) CleanTracks(ctx context.Context) error {
 
 // DeleteTracksAll deletes all records from the "track" table.
 func (c *Client) DeleteTracksAll(ctx context.Context) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteTracksAll")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "DeleteTracksAll")
 	defer span.End()
 
 	// Create a new instance of squirrel.DeleteBuilder
@@ -278,8 +285,10 @@ func (c *Client) DeleteTracksAll(ctx context.Context) error {
 
 // UpdateTracks updates an track record in the "track" table based on the provided code.
 func (c *Client) UpdateTracks(ctx context.Context, track *model.Track) error {
-	_, span := otel.Tracer("").Start(ctx, "UpdateTracks")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "UpdateTracks")
 	defer span.End()
+
 	// Create a new instance of squirrel.UpdateBuilder
 	updateBuilder := squirrel.Update("tracks")
 
@@ -324,8 +333,10 @@ func (c *Client) UpdateTracks(ctx context.Context, track *model.Track) error {
 }
 
 func (c *Client) GetAllTracks(ctx context.Context) ([]model.Track, error) {
-	_, span := otel.Tracer("").Start(ctx, "GetAllTracks")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "GetAllTracks")
 	defer span.End()
+
 	selectBuilder := squirrel.Select("*").
 		From("tracks").
 		Limit(ChunkSize) // Adjust the limit based on your requirements
@@ -377,8 +388,10 @@ func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID
 }
 
 func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
-	_, span := otel.Tracer("").Start(ctx, "RemoveTrackFromPlaylist")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "RemoveTrackFromPlaylist")
 	defer span.End()
+
 	// Start a transaction
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
@@ -418,8 +431,10 @@ func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackI
 }
 
 func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
-	_, span := otel.Tracer("").Start(ctx, "GetAllTracksByPositions")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "GetAllTracksByPositions")
 	defer span.End()
+
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return nil, err

@@ -3,8 +3,6 @@ package postgres
 import (
 	"errors"
 
-	"go.opentelemetry.io/otel"
-
 	"context"
 
 	"github.com/Masterminds/squirrel"
@@ -17,8 +15,10 @@ type S3RepositoryInterface interface {
 }
 
 func (c *Client) GetS3VersionByTrackID(ctx context.Context, trackID string) (string, error) {
-	_, span := otel.Tracer("").Start(ctx, "GetS3VersionByTrackID")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "GetS3VersionByTrackID")
 	defer span.End()
+
 	var version string
 
 	// Create a SQL query to fetch
@@ -50,7 +50,8 @@ func (c *Client) GetS3VersionByTrackID(ctx context.Context, trackID string) (str
 }
 
 func (c *Client) AddS3Version(ctx context.Context, trackID, version string) error {
-	_, span := otel.Tracer("").Start(ctx, "AddS3Version")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "AddS3Version")
 	defer span.End()
 
 	// Create an insert query using Squirrel
@@ -74,7 +75,8 @@ func (c *Client) AddS3Version(ctx context.Context, trackID, version string) erro
 }
 
 func (c *Client) DeleteS3Version(ctx context.Context, version string) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteS3Version")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "DeleteS3Version")
 	defer span.End()
 
 	// Create a delete query using Squirrel
