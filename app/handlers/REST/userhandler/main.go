@@ -166,13 +166,14 @@ func (h *Handler) User(c *gin.Context) {
 		return
 	}
 
-	user, errService := h.userService.User(c.Request.Context(), email)
+	userInfo, errService := h.userService.User(c, email)
+
 	if errService != nil {
 		c.JSON(errService.Code, errService.Err)
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, userInfo)
 }
 
 // RefreshTokenHandler godoc

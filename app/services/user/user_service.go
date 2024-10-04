@@ -164,17 +164,22 @@ func (s *Service) Logout(c *gin.Context) *model.RestError {
 	return nil
 }
 
-func (s *Service) User(ctx context.Context, email string) (*model.OkLoginResponce, *model.RestError) {
+func (s *Service) User(c *gin.Context, email string) (*model.OkLoginResponce, *model.RestError) {
 	var user model.User
-	user, err := s.FindUser(ctx, email, "email")
+	user, err := s.FindUser(c.Request.Context(), email, "email")
 	if err != nil {
 		return nil, &model.RestError{Code: http.StatusNotFound, Err: "user not found"}
+	}
+	jwtToken, err := c.Cookie("jwt")
+	if err != nil {
+		return nil, &model.RestError{Code: http.StatusUnauthorized, Err: "jwt token not found"}
 	}
 
 	loginResponse := model.OkLoginResponce{
 		Email:        user.Email,
 		UserID:       user.ID.String(),
 		Role:         user.Role,
+		JWTToken:     jwtToken,
 		RefreshToken: user.RefreshToken,
 		OtpEnabled:   user.OtpEnabled,
 	}
