@@ -26,6 +26,7 @@ This is how you can work with it:
 - Run DLV \`${COLOR_GREEN}app_debug${COLOR_RESET}\`
 - Run \`${COLOR_GREEN}app_run${COLOR_RESET}\`
 - Synchronize \`${COLOR_GREEN}app_sync${COLOR_RESET}\`
+- Run Build \`${COLOR_GREEN}app_build${COLOR_RESET}\`
 - View all aliases use: \`${COLOR_GREEN}alias${COLOR_RESET}\`
 "
 

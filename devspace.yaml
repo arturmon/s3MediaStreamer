@@ -94,6 +94,7 @@ dev:
               - .devspace/
               - .github/
               - .vscode/
+              - .idea/
     # Open a terminal and use the following command to start it
         terminal:
           command: ./devspace_start.sh

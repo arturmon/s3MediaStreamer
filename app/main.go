@@ -15,6 +15,11 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+// global vars
+var version = "latest"
+var buildTime = "0000-00-00 UTC"
+var appName = "s3MediaStreamer"
+
 // @title			               S3 Media Streamer Application API
 // @version		                   0.0.1
 // @description	                   This is a s3 media streamer server.
@@ -36,9 +41,7 @@ import (
 // @description                    Enter the JWT token in the format: Bearer {token}
 func main() {
 	// debug.SetMemoryLimit(2048)
-	version := "0.0.1"
-	buildTime := "0000-00-00 UTC"
-	appName := "s3MediaStreamer"
+
 	appInfo := &model.AppInfo{
 		AppName:   appName,
 		Version:   version,
