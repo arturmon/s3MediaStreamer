@@ -15,8 +15,7 @@ func (j *CleanOldSessionJob) Run() {
 		return
 	}
 
-	j.app.Logger.Println("I'm the leader!")
-	j.app.Logger.Println("inits Clean old session storage...")
+	j.app.Logger.Println("Start Clean old session storage...")
 
 	var dbPool *pgxpool.Pool
 

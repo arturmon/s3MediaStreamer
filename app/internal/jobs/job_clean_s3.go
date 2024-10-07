@@ -14,8 +14,7 @@ func (j *CleanS3Job) Run() {
 		return
 	}
 
-	j.app.Logger.Println("I'm the leader!")
-	j.app.Logger.Println("inits Job Clean empty tags s3 files...")
+	j.app.Logger.Println("Start Job Clean empty tags s3 files...")
 
 	listObject, err := j.app.Service.S3Storage.ListObjectS3(ctx)
 	if err != nil {
