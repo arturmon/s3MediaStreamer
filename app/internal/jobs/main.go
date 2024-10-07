@@ -95,7 +95,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 
 		// Store the new EntryID in the map
 		js.jobEntryMap[jobConfig.Name] = entryID
-		app.Logger.Debug("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
+		app.Logger.Info("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
 	}
 
 	return nil
