@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"s3MediaStreamer/app/model"
 
-	"go.opentelemetry.io/otel"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 )
@@ -21,8 +19,10 @@ type UserRepositoryInterface interface {
 
 // FindUser retrieves a user by a specified column type and value.
 func (c *Client) FindUser(ctx context.Context, value interface{}, columnType string) (model.User, error) {
-	_, span := otel.Tracer("").Start(ctx, "FindUser")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "FindUser")
 	defer span.End()
+
 	var user model.User
 
 	// Define the condition for the WHERE clause based on the column type and value.
@@ -48,8 +48,10 @@ func (c *Client) FindUser(ctx context.Context, value interface{}, columnType str
 
 // CreateUser inserts a new user into the "users" table.
 func (c *Client) CreateUser(ctx context.Context, user model.User) error {
-	_, span := otel.Tracer("").Start(ctx, "CreateUser")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "CreateUser")
 	defer span.End()
+
 	// Define the data to be inserted into the "users" table.
 	userData := map[string]interface{}{
 		"_id":      user.ID,
@@ -74,8 +76,10 @@ func (c *Client) CreateUser(ctx context.Context, user model.User) error {
 
 // DeleteUser deletes a user by their email from the "users" table.
 func (c *Client) DeleteUser(ctx context.Context, email string) error {
-	_, span := otel.Tracer("").Start(ctx, "DeleteUser")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "DeleteUser")
 	defer span.End()
+
 	// Define the condition for the WHERE clause to delete the user by email.
 	condition := squirrel.Eq{"email": email}
 
@@ -98,8 +102,10 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 
 // UpdateUser updates user fields in the "users" table based on the provided email.
 func (c *Client) UpdateUser(ctx context.Context, email string, fields map[string]interface{}) error {
-	_, span := otel.Tracer("").Start(ctx, "UpdateUser")
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "UpdateUser")
 	defer span.End()
+
 	// Create a new instance of squirrel.UpdateBuilder
 	updateBuilder := squirrel.Update("users")
 
