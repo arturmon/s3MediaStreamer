@@ -29,26 +29,26 @@ func NewTrackHandler(
 // Wrapper with user role and ID check, including logging
 func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userContext *model.UserContext)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		h.logger.Println("Checking user role and ID")
+		h.logger.Println("Checking user role and ID in session data")
 
-		// Выполняем проверку userRole и userID
+		// Perform user role and user ID check
 		userRole, userID, err := h.ReadUserIDAndRole(c)
 		if err != nil {
-			h.logger.Printf("Error reading user role and ID: %v", err)
+			h.logger.Warnf("Error reading user role and ID: %v", err)
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 			return
 		}
 
-		// Создаём экземпляр UserContext
+		// Create an instance of UserContext
 		userContext := &model.UserContext{
 			UserRole: userRole,
 			UserID:   userID,
 		}
 
-		// Логируем успешную проверку
-		h.logger.Printf("User role: %s, User ID: %s", userRole, userID)
+		// Log the successfully extracted user role and ID
+		h.logger.Printf("User role: %s, User ID: %s - Success extracted in session data", userRole, userID)
 
-		// Вызываем исходный хендлер с userContext
+		// Call the original handler with userContext
 		handler(c, userContext)
 	}
 }
@@ -58,6 +58,7 @@ func (h *WrapperHandler) ReadUserIDAndRole(c *gin.Context) (string, string, erro
 	userRole, ok := c.Get("userRole")
 	if !ok {
 		// Handle error: user role not found in context
+		h.logger.Warnf("User role not found in context")
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user role not found in context"})
 		return "", "", err
 	}
@@ -65,6 +66,7 @@ func (h *WrapperHandler) ReadUserIDAndRole(c *gin.Context) (string, string, erro
 	userIDInterface, ok := c.Get("user_id")
 	if !ok {
 		// Handle error: user_id not found in context
+		h.logger.Warnf("User ID not found in context")
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id not found in context"})
 		return "", "", err
 	}
@@ -72,6 +74,7 @@ func (h *WrapperHandler) ReadUserIDAndRole(c *gin.Context) (string, string, erro
 	userIDString, ok := userIDInterface.(string)
 	if !ok {
 		// Handle error: user_id in context is not a string
+		h.logger.Warnf("User ID in context is not a string")
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "user_id in context is not a string"})
 		return "", "", err
 	}
@@ -79,6 +82,7 @@ func (h *WrapperHandler) ReadUserIDAndRole(c *gin.Context) (string, string, erro
 	userRoleString, ok := userRole.(string)
 	if !ok {
 		// Handle error: user_id in context is not a string
+		h.logger.Warnf("User role in context is not a string")
 		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "role in context is not a string"})
 		return "", "", err
 	}
