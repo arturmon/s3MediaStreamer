@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+app/app-media
 
 # Test binary, built with `go test -c`
 *.test
@@ -23,10 +24,6 @@
 *.cookies
 *.html
 *.http
-*.cookies
-
-#secret
-app/internal/config/config.go
 
 #ignore depences charts
 chart/charts
@@ -34,3 +31,4 @@ chart/Chart.lock
 
 # Ignore DevSpace cache and log folder
 .devspace/
+
