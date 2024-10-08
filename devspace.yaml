@@ -89,12 +89,14 @@ dev:
     # Sync files between the local filesystem and the development container
         sync:
           - path: ./
-            uploadExcludeFile: .dockerignore
-            excludePaths:
-              - .devspace/
-              - .github/
-              - .vscode/
-              - .idea/
+            excludeFile: .gitignore
+            downloadExcludePaths:
+              - app/
+              - acl/
+              - conf/
+              - docs/
+              - migration/
+              - utils/
     # Open a terminal and use the following command to start it
         terminal:
           command: ./devspace_start.sh
