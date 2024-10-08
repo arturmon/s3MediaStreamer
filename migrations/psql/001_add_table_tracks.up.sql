@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS tracks (
-                                      _id               TEXT NOT NULL PRIMARY KEY,
+                                      _id               UUID NOT NULL PRIMARY KEY,
                                       created_at        TIMESTAMPTZ NOT NULL,
                                       updated_at        TIMESTAMPTZ,
                                       album             TEXT DEFAULT '',

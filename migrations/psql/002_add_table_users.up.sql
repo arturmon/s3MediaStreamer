@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-                                     _id           TEXT,
+                                     _id           UUID PRIMARY KEY,
                                      name          TEXT,
                                      email         TEXT UNIQUE,
                                      password      BYTEA,
