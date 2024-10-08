@@ -16,10 +16,10 @@ type Repository interface {
 	AddToTree(tree *treemap.Map, items []model.PlaylistStruct, rebalance bool) error
 }
 
-type TreeService struct{}
+type Service struct{}
 
-func NewTreeService() *TreeService {
-	return &TreeService{}
+func NewTreeService() *Service {
+	return &Service{}
 }
 
 // RebalanceTreePositions reassigns sequential positions to the nodes of a tree.
@@ -34,7 +34,7 @@ func NewTreeService() *TreeService {
 // Return Values:
 //   - error: Returns an error if any issue occurs during the operation (e.g., invalid data types).
 //     Returns nil if the operation is successful.
-func (s *TreeService) RebalanceTreePositions(tree *treemap.Map) error {
+func (s *Service) RebalanceTreePositions(tree *treemap.Map) error {
 	// Create a slice to hold the nodes for sorting by position
 	var nodes []*model.Node
 	var keys []string
@@ -92,7 +92,7 @@ func (s *TreeService) RebalanceTreePositions(tree *treemap.Map) error {
 // Return Values:
 //   - error: Returns an error if any of the paths are in an invalid format or if there is
 //     any issue during insertion into the tree.
-func (s *TreeService) FillTree(tree *treemap.Map, items []model.PlaylistStruct) error {
+func (s *Service) FillTree(tree *treemap.Map, items []model.PlaylistStruct) error {
 	for _, item := range items {
 		// Convert Ltree to string and split into components by dot (.)
 		pathStr := item.Path.String
@@ -140,7 +140,7 @@ func (s *TreeService) FillTree(tree *treemap.Map, items []model.PlaylistStruct) 
 // Return Values:
 //   - error: Returns an error if any issue occurs during the operation (e.g., invalid data types).
 //     Returns nil if the operation is successful.
-func (s *TreeService) AddToTree(tree *treemap.Map, items []model.PlaylistStruct, rebalance bool) error {
+func (s *Service) AddToTree(tree *treemap.Map, items []model.PlaylistStruct, rebalance bool) error {
 	for _, item := range items {
 		err := s.addItemToTree(tree, item)
 		if err != nil {
@@ -170,7 +170,7 @@ func (s *TreeService) AddToTree(tree *treemap.Map, items []model.PlaylistStruct,
 // Return Values:
 //   - error: Returns an error if the path format is invalid or if any issue occurs during
 //     insertion into the tree.
-func (s *TreeService) addItemToTree(tree *treemap.Map, item model.PlaylistStruct) error {
+func (s *Service) addItemToTree(tree *treemap.Map, item model.PlaylistStruct) error {
 	pathStr := item.Path.String
 	components := strings.Split(pathStr, ".")
 

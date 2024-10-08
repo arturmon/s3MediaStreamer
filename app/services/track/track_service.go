@@ -35,11 +35,11 @@ type Repository interface {
 
 type Service struct {
 	trackRepository Repository
-	tree            *tree.TreeService
+	tree            *tree.Service
 	logger          *logs.Logger
 }
 
-func NewTrackService(trackRepository Repository, tree *tree.TreeService) *Service {
+func NewTrackService(trackRepository Repository, tree *tree.Service) *Service {
 	return &Service{trackRepository: trackRepository, tree: tree}
 }
 
