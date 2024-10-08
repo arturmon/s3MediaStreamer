@@ -338,7 +338,7 @@ func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, pla
 	}
 	stringPlaylistID, err := uuid.Parse(playlistID) // Convert string to uuid.UUID
 	if err != nil {
-		fmt.Printf("Invalid PlaylistID %s: %v\n", playlistID, err)
+		s.logger.Printf("Invalid PlaylistID %s: %v\n", playlistID, err)
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Invalid parse PlaylistID string to UUID"}
 	}
 
