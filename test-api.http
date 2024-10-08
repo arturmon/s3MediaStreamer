@@ -50,7 +50,7 @@ Content-Type: application/json
 ###
 GET http://{{host}}/v1
     /tracks
-    /0127b619-be74-499c-97f8-c8748194d7fd
+    /d23c2540-fba5-4e14-b636-20500ddec4db
 Content-Type: application/json
 
 ###--------------------------------------------------------USERS------------------------------------------------
@@ -136,58 +136,91 @@ POST  http://{{host}}/v1/playlist/create
 Content-Type: application/json
 
 {
-  "level":"1",
   "title":"test Play list",
   "description":"test Play list"
 }
-### DeletePlaylist
-DELETE http://{{host}}/v1
-    /playlist
-    /e816469a-1eb7-4f84-b63a-257b13d7ad53
-Content-Type: application/json
-### AddToPlaylist
-POST http://{{host}}/v1
-    /playlist
-    /14c82429-069a-4fe5-897b-44776b102e3a
-    /cfbaf598-50df-4cf3-a16c-aa94aff9222d
-Content-Type: application/json
-### ListPlaylist
-GET http://{{host}}/v1
-    /playlist
-    /f7d86b17-f6d9-47f1-b3d5-86f229c3704c
-### SetFromPlaylist
-POST http://{{host}}/v1
-    /playlist
-    /14c82429-069a-4fe5-897b-44776b102e3a
-Content-Type: application/json
 
-{
-  "track_order":
-  [
-    "ae80ced6-5989-4330-a763-e9d7159022d9",
-    "cfbaf598-50df-4cf3-a16c-aa94aff9222d",
-    "41331e3f-6b1a-433a-b418-b46cf141251f"
-  ]
-}
-### RemoveFromPlaylist
-DELETE http://{{host}}/v1
-    /playlist
-    /1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7
-    /89ffa57f-7186-4435-9604-cc21e9458489
-Content-Type: application/json
-### ClearPlaylist
-DELETE http://{{host}}/v1
-    /playlist
-    /1e1dc1d2-d888-4d2d-b59e-ceb8f4e801c7/clear
-Content-Type: application/json
 ### ListAllPlaylist
 GET http://{{host}}/v1
     /playlist
     /get
 
-###-------------------------------------------------------PLAYER--------------------------------------------
-### Play playlist
-GET http://{{host}}/v1/audio/930b1542-7f1f-4755-8c91-f19fb7c9eef4
+### AddToPlaylist
+POST http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3
+    /bda7a5d0-2641-453b-a183-3adb71c4d573
 Content-Type: application/json
 
+### DeletePlaylist
+DELETE http://{{host}}/v1
+    /playlist
+    /56f9da20-6213-4505-b089-bf4109185b30
+Content-Type: application/json
+
+### DeleteTrackFromPlaylist
+DELETE http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3
+    /5ac0e5a1-5354-4921-ba32-2faf9c658edd
+Content-Type: application/json
+
+### ClearPlaylist
+DELETE http://{{host}}/v1
+    /playlist
+    /85df89a3-73e5-4184-bc62-ef82189f8b61
+    /clear
+Content-Type: application/json
+
+
+### ListPlaylist
+GET http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3
+
+### AddSingleTrackToPlaylist
+POST http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3/tracks
+Content-Type: application/json
+
+{
+  "item_ids": ["20b502af-8f95-4576-9951-51c81062b52a"]
+}
+
+### AddMultipleTrackToPlaylist
+POST http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3/tracks
+Content-Type: application/json
+
+{
+  "item_ids":
+  [
+    "023c9db1-5248-442d-b561-b63c950a5970",
+    "4746eb63-00e9-41ba-90c7-ab17fb9986a3",
+    "90b4326b-18eb-42a1-aaa7-4cf15a211aaf"
+  ]
+}
+
+### AddMultipleWithPositionToPlaylist
+POST http://{{host}}/v1
+    /playlist
+    /6ec68de6-4114-49e9-9f85-50c1625e3af3/tracks
+Content-Type: application/json
+
+{
+  "item_ids":
+  [
+    "023c9db1-5248-442d-b561-b63c950a5970",
+    "4746eb63-00e9-41ba-90c7-ab17fb9986a3",
+    "90b4326b-18eb-42a1-aaa7-4cf15a211aaf"
+  ],
+  "position": 5
+}
+
+###-------------------------------------------------------PLAYER--------------------------------------------
+### Play playlist
+GET http://{{host}}/v1/audio/52ca215e-43b2-4982-94ee-34179ea19cfe
+Content-Type: application/json
 
