@@ -492,41 +492,6 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 	}
 	defer rows.Close()
 
-	//var tracks []model.TrackRequest
-	/*
-		//TODO:
-		var results []map[string]interface{}
-
-		for rows.Next() {
-			// Получаем описание полей
-			fieldDescriptions := rows.FieldDescriptions()
-			values := make([]interface{}, len(fieldDescriptions))
-			for i := range values {
-				values[i] = new(interface{}) // создаем указатели для хранения значений
-			}
-
-			// Считываем значения в переменную values
-			if err := rows.Scan(values...); err != nil {
-				return nil, err
-			}
-
-			row := make(map[string]interface{})
-			for i, field := range fieldDescriptions {
-				val := *(values[i].(*interface{}))
-				row[string(field.Name)] = val // Преобразуем []byte в строку
-			}
-			results = append(results, row)
-		}
-
-		if err := rows.Err(); err != nil {
-			return nil, err
-		}
-
-		for _, result := range results {
-			fmt.Println(result)
-		}
-
-	*/
 	var trackRequests []model.TrackRequest
 
 	for rows.Next() {
