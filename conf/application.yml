@@ -23,6 +23,8 @@ app_config:
         start_job: "@every 10m"
       - name: "sessionClean"
         start_job: "@midnight"
+      - name: "createNewMusicChart"
+        start_job: "@daily"
   open_telemetry:
     tracing_enabled: true
     environment: "staging" # 'staging', 'production'
