@@ -118,7 +118,7 @@ func QueryMaps(conn *pgx.Conn, query string, args ...interface{}) ([]map[string]
 		row := make(map[string]interface{}) // Create a map to hold the row data
 		for i, field := range fieldDescriptions {
 			val := *(values[i].(*interface{})) // Dereference the value
-			row[string(field.Name)] = val      // Store the value in the map with the field name as the key
+			row[field.Name] = val              // Store the value in the map with the field name as the key
 		}
 		results = append(results, row) // Append the row to the results
 	}
