@@ -54,7 +54,12 @@ func (s *Service) Start() {
 		if err != nil {
 			s.logger.Fatalf("Failed to start mDNS server: %v", err)
 		}
-		defer server.Shutdown()
+		defer func(server *mdns.Server) {
+			err = server.Shutdown()
+			if err != nil {
+				s.logger.Fatalf("Failed to shutdown mDNS server: %v", err)
+			}
+		}(server)
 
 		s.logger.Infof("mDNS service '%s' started on port %d", s.serviceName, s.port)
 
