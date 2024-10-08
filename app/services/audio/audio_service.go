@@ -84,21 +84,21 @@ func (h Service) StreamM3UReadFileService(ctx context.Context, segmentPath strin
 	return &findObject, fileName, f, track, nil
 }
 
-func (h *Service) GenerateM3U8Playlist(filePaths *[]model.Track) []*model.PlaylistM3U {
-	var playlist []*model.PlaylistM3U
+func (h *Service) GenerateM3U8Playlist(filePaths *[]model.TrackRequest) []*model.PlaylistM3U {
+	var generatePlaylist []*model.PlaylistM3U
 
 	var prefixURI = "stream/"
-	for _, track := range *filePaths {
+	for _, trackRequest := range *filePaths {
+		item := trackRequest.Track // Access the embedded Track struct
 		segment := &model.PlaylistM3U{
-			URI:      prefixURI + track.ID.String(),
-			Title:    filepath.Base(track.Artist) + " - " + filepath.Base(track.Title),
-			Duration: track.Duration.Seconds(),
+			URI:      prefixURI + item.ID.String(),
+			Title:    filepath.Base(item.Artist) + " - " + filepath.Base(item.Title),
+			Duration: item.Duration.Seconds(),
 		}
-		playlist = append(playlist, segment)
+		generatePlaylist = append(generatePlaylist, segment)
 	}
-	return playlist
+	return generatePlaylist
 }
-
 func (h *Service) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "PlayM3UPlaylist")
 	defer span.End()
@@ -121,18 +121,22 @@ func (h *Service) PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context)
 	}
 }
 
-func (h *Service) PlayPlaylist(ctx context.Context, playlistID string) (*[]model.Track, error) {
-	// Get the playlist_handler and its tracks
-	playlist, _, err := h.playlist.GetPlayListByID(context.Background(), playlistID)
+func (h *Service) PlayPlaylist(ctx context.Context, playlistID string) (*[]model.TrackRequest, error) {
+	// Simulate the playlist retrieval
+
+	isExist, err := h.playlist.CheckPlaylistExists(ctx, playlistID)
+	if err != nil {
+		return nil, err
+	}
+	if !isExist {
+		h.logger.Infof("Playlist not found")
+		return nil, fmt.Errorf("playlist not found")
+	}
+	allTracks, err := h.playlist.GetPlaylistAllTracks(ctx, playlistID)
 	if err != nil {
 		return nil, err
 	}
 
-	sortTracks, err := h.track.GetAllTracksByPositions(ctx, playlist.ID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	// If there is no previous track_handler to play, return an error or handle it as needed
-	return &sortTracks, nil
+	// Return the stubbed data without any real logic
+	return &allTracks, nil
 }

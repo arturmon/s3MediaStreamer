@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -14,15 +15,20 @@ const ChunkSize = 1000
 
 type TracksRepositoryInterface interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
-	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
+	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
 	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
 	UpdateTracks(ctx context.Context, track *model.Track) error
 	GetAllTracks(ctx context.Context) ([]model.Track, error)
-	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
+	AddTrackToPlaylist(ctx context.Context, playlistID, referenceType, referenceID, parentPath string) error
 	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
+	// playlist_tree.go
+	UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) error
+	InsertPositionInDB(ctx context.Context, tree *treemap.Map) error
+	//	ValidateParentPath(ctx context.Context, parentPath, playlistID string) bool
+	//	GetPathByReferenceID(ctx context.Context, playlistID, referenceID string) (string, error)
 }
 
 // CreateTracks inserts multiple track records into the "track" table.
@@ -46,9 +52,6 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 			err = rErr
 		}
 	}()
-
-	// Create a batch to batch insert queries
-	batch := &pgx.Batch{}
 
 	// Prepare the squirrel insert builder
 	ib := squirrel.Insert("tracks").Columns(
@@ -92,6 +95,7 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 	}
 
 	// Queue the SQL query and arguments to the batch
+	batch := &pgx.Batch{}
 	batch.Queue(sql, args...)
 
 	// Execute the batch
@@ -112,7 +116,7 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 }
 
 // GetTracks retrieves a list of tracks with pagination and filtering.
-func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter string) ([]model.Track, int, error) {
+func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error) {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "GetTracks")
 	defer span.End()
@@ -151,6 +155,14 @@ func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortO
 		queryBuilder = queryBuilder.Where(orCondition, filter)
 	}
 
+	// Add the time filter if startTime or endTime are provided
+	if startTime != "" {
+		queryBuilder = queryBuilder.Where("updated_at >= $1", startTime)
+	}
+	if endTime != "" {
+		queryBuilder = queryBuilder.Where("updated_at <= $2", endTime)
+	}
+
 	// Build the ORDER BY clause if sortBy and sortOrder are provided
 	if sortBy != "" && sortOrder != "" {
 		queryBuilder = queryBuilder.OrderBy(sortBy + " " + sortOrder)
@@ -158,6 +170,8 @@ func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortO
 
 	// Add LIMIT and OFFSET to the query
 	queryBuilder = queryBuilder.Limit(uint64(limit)).Offset(uint64(offset))
+
+	queryBuilder = queryBuilder.PlaceholderFormat(squirrel.Dollar)
 
 	// Generate the SQL query and arguments
 	sql, args, err := queryBuilder.ToSql()
@@ -344,8 +358,10 @@ func (c *Client) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return c.ExecuteSelectQuery(ctx, selectBuilder)
 }
 
-func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
-	_, span := otel.Tracer("").Start(ctx, "AddTrackToPlaylist")
+// AddTrackToPlaylist inserts a track or playlist into a playlist_tracks table supporting nested structures with LTREE
+func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceType, referenceID, parentPath string) error {
+	tracer := GetTracer(ctx)
+	_, span := tracer.Start(ctx, "AddTrackToPlaylist")
 	defer span.End()
 
 	// Start a transaction
@@ -354,25 +370,45 @@ func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID
 		return err
 	}
 	defer func() {
-		// Defer the rollback and check for errors
 		if rErr := tx.Rollback(ctx); rErr != nil && err == nil {
 			err = rErr
 		}
 	}()
 
-	// Create a new squirrel.InsertBuilder for the playlist_tracks table
-	insertBuilder := squirrel.
-		Insert("playlist_tracks").
-		Columns("playlist_id", "reference_type", "reference_id", "position").
-		Values(playlistID, referenceType, referenceID, squirrel.Expr("COALESCE((SELECT MAX(position) FROM playlist_tracks WHERE playlist_id = ?), 0) + 1", playlistID))
+	// Get the maximum position in the current parent path
+	var maxPosition int
+	positionQuery := squirrel.Select("COALESCE(MAX(CAST(ltree2text(subpath(path, -1, 1)) AS INTEGER)), 0)").
+		From("playlist_tracks").
+		Where("path <@ ?", parentPath).
+		PlaceholderFormat(squirrel.Dollar)
 
-	// Generate the SQL query
-	query, args, err := insertBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
+	sql, args, err := positionQuery.ToSql()
 	if err != nil {
 		return err
 	}
 
-	// Execute the query
+	err = tx.QueryRow(ctx, sql, args...).Scan(&maxPosition)
+	if err != nil {
+		return err
+	}
+
+	// Increment the position for the new item
+	newPosition := maxPosition + 1
+
+	// Compute the new path with the updated position
+	newPath := fmt.Sprintf("%s.%s.%s.%d", parentPath, referenceType, referenceID, newPosition)
+
+	// Insert into the playlist_tracks table
+	insertBuilder := squirrel.Insert("playlist_tracks").
+		Columns("playlist_id", "path").
+		Values(playlistID, newPath).
+		PlaceholderFormat(squirrel.Dollar)
+
+	query, args, err := insertBuilder.ToSql()
+	if err != nil {
+		return err
+	}
+
 	_, err = c.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return err
@@ -387,6 +423,7 @@ func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID
 	return nil
 }
 
+// RemoveTrackFromPlaylist removes a track from a playlist_tracks table, handling hierarchical relationships with LTREE
 func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "RemoveTrackFromPlaylist")
@@ -404,13 +441,18 @@ func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackI
 		}
 	}()
 
-	// Create a DELETE query using Squirrel to remove the track from the playlist_tracks table
+	// Create a DELETE query using LTREE to remove the track and its nested paths
 	deleteBuilder := squirrel.
 		Delete("playlist_tracks").
-		Where(squirrel.Eq{"playlist_id": playlistID, "track_id": trackID})
+		Where(squirrel.Expr(
+			"path <@ (SELECT path FROM playlist_tracks WHERE playlist_id = ? AND ltree2text(path) LIKE ?)",
+			playlistID,
+			"%."+trackID+".%",
+		)).
+		PlaceholderFormat(squirrel.Dollar)
 
 	// Generate the SQL query and arguments
-	query, args, err := deleteBuilder.PlaceholderFormat(squirrel.Dollar).ToSql()
+	query, args, err := deleteBuilder.ToSql()
 	if err != nil {
 		return err
 	}
@@ -430,6 +472,7 @@ func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackI
 	return nil
 }
 
+// GetAllTracksByPositions retrieves all tracks within a playlist, including nested ones, ordered by position using LTREE
 func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "GetAllTracksByPositions")
@@ -446,47 +489,48 @@ func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string)
 		}
 	}()
 
-	// Create a query to fetch tracks and their positions
-	trackQuery := squirrel.Select("pt.reference_id as track_id, pt.position, t.*").
-		From("playlist_tracks pt").
-		Join("tracks t ON pt.reference_id = t._id").
-		Where(squirrel.Eq{"pt.playlist_id": playlistID}).
-		OrderBy("pt.position ASC")
+	// Construct the path pattern
+	pathPattern := playlistID
 
-	query, args, err := trackQuery.PlaceholderFormat(squirrel.Dollar).ToSql()
+	// Create a query to fetch tracks ordered by their hierarchical path
+	trackQuery := squirrel.Select("t.*").
+		From("playlist_tracks pt").
+		Join("tracks t ON t._id = pt.path").
+		Where(squirrel.Expr("pt.path <@ ?", pathPattern)). // Fetch all tracks in the hierarchy
+		OrderBy("pt.path ASC").
+		PlaceholderFormat(squirrel.Dollar)
+
+	query, args, err := trackQuery.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
-	// Execute the query within the transaction
+	// Execute the query
 	rows, err := tx.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Create a map to group tracks by playlist ID
+	// Process the result
 	var playlistTracks []model.Track
-
 	for rows.Next() {
 		var track model.Track
-		var position int64
-		var trackPlaylistID string
-		if err = rows.Scan(
-			&trackPlaylistID, &position, &track.ID,
-			&track.CreatedAt, &track.UpdatedAt,
+		err = rows.Scan(
+			&track.ID, &track.CreatedAt, &track.UpdatedAt,
 			&track.Album, &track.AlbumArtist, &track.Composer,
 			&track.Genre, &track.Lyrics, &track.Title,
 			&track.Artist, &track.Year, &track.Comment,
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
 			&track.Bitrate,
-		); err != nil {
+		)
+		if err != nil {
 			return nil, err
 		}
-
 		playlistTracks = append(playlistTracks, track)
 	}
+
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}

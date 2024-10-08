@@ -83,6 +83,9 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 		case "sessionClean":
 			job := NewCleanOldSessionJob(app)
 			err = jobrunner.Schedule(interval, job)
+		case "createNewMusicChart":
+			job := NewCreateNewMusicChartJob(app)
+			err = jobrunner.Schedule(interval, job)
 		default:
 			app.Logger.Warn("Unknown job function:", jobConfig.Name)
 			continue
@@ -134,5 +137,16 @@ func NewCleanOldSessionJob(app *app.App) *CleanOldSessionJob {
 }
 
 type CleanOldSessionJob struct {
+	app *app.App
+}
+
+// NewCreateNewMusicChartJob creates a new CreateNewMusicChartJob instance.
+func NewCreateNewMusicChartJob(app *app.App) *CreateNewMusicChartJob {
+	return &CreateNewMusicChartJob{
+		app: app,
+	}
+}
+
+type CreateNewMusicChartJob struct {
 	app *app.App
 }

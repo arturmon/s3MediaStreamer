@@ -14,9 +14,9 @@ import (
 )
 
 type AudioServiceInterface interface {
-	GenerateM3U8Playlist(filePaths *[]model.Track) []*model.PlaylistM3U
+	GenerateM3U8Playlist(filePaths *[]model.TrackRequest) []*model.PlaylistM3U
 	PlayM3UPlaylist(playlist []*model.PlaylistM3U, c *gin.Context)
-	PlayPlaylist(ctx context.Context, playlistID string) (*[]model.Track, error)
+	PlayPlaylist(ctx context.Context, playlistID string) (*[]model.TrackRequest, error)
 	StreamM3UReadFileService(ctx context.Context, segmentPath string) (*minio.ObjectInfo, string, *os.File, *model.Track, *model.RestError)
 	StreamFileService(c *gin.Context, fileName string, f *os.File)
 }

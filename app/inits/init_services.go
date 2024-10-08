@@ -20,6 +20,7 @@ import (
 	session "s3MediaStreamer/app/services/session"
 	"s3MediaStreamer/app/services/tags"
 	"s3MediaStreamer/app/services/track"
+	"s3MediaStreamer/app/services/tree"
 	"s3MediaStreamer/app/services/user"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -50,7 +51,8 @@ func initServices(ctx context.Context,
 	// metricsMonitorService := monitoring.NewMonitoringService()
 
 	accessControlService := auth.NewAuthService(repo.PgRepo)
-	trackService := track.NewTrackService(repo.PgRepo)
+	treeService := tree.NewTreeService()
+	trackService := track.NewTrackService(repo.PgRepo, treeService)
 	aclService, err := acl.NewACLService()
 	if err != nil {
 		return nil, err
@@ -65,7 +67,7 @@ func initServices(ctx context.Context,
 	messageService := rabbitmq.NewMessageService(logger, repo.PgRepo, *s3Service, *trackService, *tagsService)
 
 	userService := user.NewUserService(repo.PgRepo, *sessionService, *cashingService, logger, *accessControlService, cfg)
-	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, logger)
+	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, *userService, logger, treeService)
 	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistService, logger)
 	otpService := otp.NewOTPService(*userService, cfg)
 	logger.Info("Complete service initialize.")

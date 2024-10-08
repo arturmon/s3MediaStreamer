@@ -22,6 +22,7 @@ import (
 	session "s3MediaStreamer/app/services/session"
 	"s3MediaStreamer/app/services/tags"
 	"s3MediaStreamer/app/services/track"
+	"s3MediaStreamer/app/services/tree"
 	"s3MediaStreamer/app/services/user"
 
 	"github.com/gin-contrib/sessions"
@@ -45,9 +46,6 @@ type initRepo struct {
 	PgRepo      *repoDB.Client
 }
 
-// TODO metrics,enforcer, audio, track, acl, auth, db, health, rabbit, s3, session, tags, user
-// TODO refactor , otel
-// TODO monitoring
 type Service struct {
 	InitRepo        *initRepo
 	ConsulService   *consul.Service
@@ -69,6 +67,7 @@ type Service struct {
 	Playlist        *playlist.Service
 	Session         *session.Service
 	OTP             *otp.Service
+	tree            *tree.TreeService
 }
 
 func InitServices(ctx context.Context, appName, version string, cfg *model.Config, logger *logs.Logger) (*Service, error) {

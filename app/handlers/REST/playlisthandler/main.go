@@ -45,7 +45,7 @@ func (h *Handler) CreatePlaylist(c *gin.Context) {
 		return
 	}
 
-	newPlaylist, err := h.playlistService.CreatePlaylist(c)
+	newPlaylist, err := h.playlistService.CreateNewPlaylist(c)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
 		return
@@ -70,10 +70,9 @@ func (h *Handler) CreatePlaylist(c *gin.Context) {
 func (h *Handler) DeletePlaylist(c *gin.Context, userContext *model.UserContext) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeletePlaylist")
 	defer span.End()
-
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("playlist_id")
-	errDeletePlaylist := h.playlistService.DeletePlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
+	errDeletePlaylist := h.playlistService.DeletePlaylistForUser(c, userContext.UserRole, userContext.UserID, playlistID)
 	if errDeletePlaylist != nil {
 		c.JSON(errDeletePlaylist.Code, errDeletePlaylist.Err)
 		return
@@ -104,14 +103,85 @@ func (h *Handler) AddToPlaylist(c *gin.Context, userContext *model.UserContext) 
 	trackID := c.Param("track_id")
 	parentID := c.DefaultQuery("parent_id", "")
 
-	errAddToPlaylist := h.playlistService.AddToPlaylist(c, userContext.UserRole, userContext.UserID, playlistID, trackID, parentID)
+	errAddToPlaylist := h.playlistService.AddTrackToPlaylist(
+		c,
+		userContext.UserRole,
+		userContext.UserID,
+		playlistID,
+		trackID,
+		parentID,
+	)
 	if errAddToPlaylist != nil {
 		c.JSON(errAddToPlaylist.Code, errAddToPlaylist.Err)
 		return
 	}
 
 	// Return a success response
-	c.JSON(http.StatusCreated, gin.H{"message": "Track added to the playlist successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Track or playlist added to the playlist successfully"})
+}
+
+// ListTracksFromPlaylist godoc
+// @Summary Get tracks from a playlist.
+// @Description Get tracks from a playlist by providing the playlist ID.
+// @Tags playlist-controller
+// @Accept json
+// @Produce json
+// @Param playlist_id path string true "Playlist ID"
+// @Success 200 {object} model.PlaylistTracksResponse "Tracks retrieved successfully"
+// @Failure 400 {object} model.ErrorResponse "Bad Request"
+// @Failure 401 {object} model.ErrorResponse "Unauthorized"
+// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
+// @Security ApiKeyAuth
+// @Router /playlist/{playlist_id} [get]
+func (h *Handler) ListTracksFromPlaylist(c *gin.Context, userContext *model.UserContext) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
+	defer span.End()
+
+	// Extract playlist ID from path parameter
+	playlistID := c.Param("playlist_id")
+
+	response, errListTracksFromPlaylist := h.playlistService.GetTracksInPlaylist(
+		c,
+		userContext.UserRole,
+		userContext.UserID,
+		playlistID,
+	)
+	if errListTracksFromPlaylist != nil {
+		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
+		return
+	}
+
+	// Return the response in JSON format
+	c.JSON(http.StatusOK, response)
+}
+
+// ListPlaylists godoc
+// @Summary Get all playlists
+// @Description Retrieves all playlists available in the storage.
+// @Tags playlist-controller
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.PlaylistsResponse "Playlists retrieved successfully"
+// @Failure 404 {object} model.ErrorResponse "Playlists not found"
+// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
+// @Security ApiKeyAuth
+// @Router /playlist/get [get]
+func (h *Handler) ListPlaylists(c *gin.Context, userContext *model.UserContext) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
+	defer span.End()
+
+	response, errListTracksFromPlaylist := h.playlistService.GetUserPlaylists(
+		c,
+		userContext.UserRole,
+		userContext.UserID,
+	)
+	if errListTracksFromPlaylist != nil {
+		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
+		return
+	}
+
+	// Return the response in JSON format
+	c.JSON(http.StatusOK, response)
 }
 
 // RemoveFromPlaylist godoc
@@ -135,7 +205,13 @@ func (h *Handler) RemoveFromPlaylist(c *gin.Context, userContext *model.UserCont
 	playlistID := c.Param("playlist_id")
 	trackID := c.Param("track_id")
 
-	errRemoveFromPlaylist := h.playlistService.RemoveFromPlaylist(c, userContext.UserRole, userContext.UserID, playlistID, trackID)
+	errRemoveFromPlaylist := h.playlistService.RemoveTrackFromPlaylist(
+		c,
+		userContext.UserRole,
+		userContext.UserID,
+		playlistID,
+		trackID,
+	)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
 		return
@@ -163,7 +239,12 @@ func (h *Handler) ClearPlaylist(c *gin.Context, userContext *model.UserContext) 
 	// Get the playlist ID from the URL parameters
 	playlistID := c.Param("playlist_id")
 
-	errRemoveFromPlaylist := h.playlistService.ClearPlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
+	errRemoveFromPlaylist := h.playlistService.ClearAllTracksInPlaylist(
+		c,
+		userContext.UserRole,
+		userContext.UserID,
+		playlistID,
+	)
 	if errRemoveFromPlaylist != nil {
 		c.JSON(errRemoveFromPlaylist.Code, errRemoveFromPlaylist.Err)
 		return
@@ -173,7 +254,7 @@ func (h *Handler) ClearPlaylist(c *gin.Context, userContext *model.UserContext) 
 	c.IndentedJSON(http.StatusNoContent, model.OkResponse{Message: "OK"})
 }
 
-// SetFromPlaylist godoc
+// AddTracksToPlaylist godoc
 // @Summary Set tracks in a playlist.
 // @Description Set tracks in a playlist by providing a list of track IDs.
 // @Tags playlist-controller
@@ -186,81 +267,34 @@ func (h *Handler) ClearPlaylist(c *gin.Context, userContext *model.UserContext) 
 // @Failure 401 {object} model.ErrorResponse "Unauthorized"
 // @Failure 500 {object} model.ErrorResponse "Internal Server Error"
 // @Security ApiKeyAuth
-// @Router /playlist/{playlist_id} [post]
-func (h *Handler) SetFromPlaylist(c *gin.Context, userContext *model.UserContext) {
-	_, span := otel.Tracer("").Start(c.Request.Context(), "SetFromPlaylist")
+// @Router /playlist/{playlist_id}/tracks [post]
+func (h *Handler) AddTracksToPlaylist(c *gin.Context, userContext *model.UserContext) {
+	_, span := otel.Tracer("").Start(c.Request.Context(), "AddTracksToPlaylist")
 	defer span.End()
+
 	// Extract playlist ID from path parameter
 	playlistID := c.Param("playlist_id")
 
-	// Define a variable to hold the request data
-	var request model.SetPlaylistTrackOrderRequest
-
 	// Parse the JSON request body into the request struct
-	if err = c.ShouldBindJSON(&request); err != nil {
+	var request model.SetPlaylistTrackOrderRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	errSetFromPlaylist := h.playlistService.SetFromPlaylistService(c, userRole, userID, playlistID, &request)
-	if errSetFromPlaylist != nil {
-		c.JSON(errSetFromPlaylist.Code, errSetFromPlaylist.Err)
+	// Call the service function
+	if err := h.playlistService.AddTracksToPlaylist(
+		c.Request.Context(),
+		userContext.UserRole,
+		userContext.UserID,
+		playlistID,
+		&request,
+		true,
+	); err != nil {
+		c.JSON(err.Code, model.ErrorResponse{Message: err.Err})
 		return
 	}
 
 	// Return a success response
-	c.JSON(http.StatusOK, gin.H{"message": "Track order updated successfully"})
-}
-
-// ListTracksFromPlaylist godoc
-// @Summary Get tracks from a playlist.
-// @Description Get tracks from a playlist by providing the playlist ID.
-// @Tags playlist-controller
-// @Accept json
-// @Produce json
-// @Param playlist_id path string true "Playlist ID"
-// @Success 200 {object} model.PlaylistTracksResponse "Tracks retrieved successfully"
-// @Failure 400 {object} model.ErrorResponse "Bad Request"
-// @Failure 401 {object} model.ErrorResponse "Unauthorized"
-// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
-// @Router /playlist/{playlist_id} [get]
-func (h *Handler) ListTracksFromPlaylist(c *gin.Context, userContext *model.UserContext) {
-	_, span := otel.Tracer("").Start(c.Request.Context(), "ListTracksFromPlaylist")
-	defer span.End()
-	// Extract playlist ID from path parameter
-	playlistID := c.Param("playlist_id")
-
-	response, errListTracksFromPlaylist := h.playlistService.ListTracksFromPlaylistService(c, userContext.UserRole, userContext.UserID, playlistID)
-	if errListTracksFromPlaylist != nil {
-		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
-		return
-	}
-	// Return the response in JSON format
-	c.JSON(http.StatusOK, response)
-}
-
-// ListPlaylists godoc
-// @Summary Get all playlists
-// @Description Retrieves all playlists available in the storage.
-// @Tags playlist-controller
-// @Accept json
-// @Produce json
-// @Success 200 {object} model.PlaylistsResponse "Playlists retrieved successfully"
-// @Failure 404 {object} model.ErrorResponse "Playlists not found"
-// @Failure 500 {object} model.ErrorResponse "Internal Server Error"
-// @Security ApiKeyAuth
-// @Router /playlist/get [get]
-func (h *Handler) ListPlaylists(c *gin.Context, userContext *model.UserContext) {
-	_, span := otel.Tracer("").Start(c.Request.Context(), "ListAllPlaylist")
-	defer span.End()
-
-	response, errListTracksFromPlaylist := h.playlistService.ListPlaylistsService(c, userContext.UserRole, userContext.UserID)
-	if errListTracksFromPlaylist != nil {
-		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
-		return
-	}
-
-	// Return the response in JSON format
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, gin.H{"message": "Tracks set in the playlist successfully"})
 }

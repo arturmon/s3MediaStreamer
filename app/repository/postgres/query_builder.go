@@ -69,6 +69,10 @@ func GenerateDeleteQuery(table string, condition squirrel.Sqlizer) (string, []in
 
 // GetTotalTrackCount returns the total count of tracks based on the query builder.
 func (c *Client) GetTotalTrackCount(queryBuilder squirrel.SelectBuilder) (int, error) {
+	queryBuilder = queryBuilder.RemoveLimit().RemoveOffset()
+	// Manually remove ORDER BY clause
+	queryBuilder = queryBuilder.OrderBy("")
+	queryBuilder.PlaceholderFormat(squirrel.Dollar)
 	countQuery := squirrel.Select("COUNT(*)").FromSelect(queryBuilder, "subquery")
 	sql, args, err := countQuery.ToSql()
 	if err != nil {

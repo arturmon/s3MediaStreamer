@@ -12,6 +12,7 @@ require (
 	github.com/casbin/casbin/v2 v2.98.0
 	github.com/chenyahui/gin-cache v1.9.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
+	github.com/emirpasic/gods v1.18.1
 	github.com/exaring/otelpgx v0.6.2
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.1
@@ -24,6 +25,7 @@ require (
 	github.com/hashicorp/consul/api v1.29.2
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/jackc/pgtype v1.14.3
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mewkiz/flac v1.0.12
@@ -95,8 +97,10 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/icza/bitio v1.1.0 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/pgx/v4 v4.18.3 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jellydator/ttlcache/v2 v2.11.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

@@ -29,7 +29,9 @@ type Track struct {
 	Bitrate     uint32        `json:"bitrate" bson:"bitrate" example:"320"`
 }
 
-type PlaylistTracksResponse struct {
-	Playlist PLayList `json:"playlist"`
-	Tracks   []Track  `json:"tracks"`
+// Track represents data about a record track.
+type TrackRequest struct {
+	Position   string `json:"position" bson:"position" example:"0"`
+	PlaylistID string `json:"playlist_id" bson:"playlist_id" pg:"type:uuid" swaggerignore:"true"`
+	Track
 }

@@ -624,71 +624,6 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Set tracks in a playlist by providing a list of track IDs.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "playlist-controller"
-                ],
-                "summary": "Set tracks in a playlist.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Playlist ID",
-                        "name": "playlist_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "List of track IDs to set in the playlist",
-                        "name": "track_ids",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Tracks set in the playlist successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
@@ -782,6 +717,73 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Playlist not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/playlist/{playlist_id}/tracks": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set tracks in a playlist by providing a list of track IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "playlist-controller"
+                ],
+                "summary": "Set tracks in a playlist.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Playlist ID",
+                        "name": "playlist_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "List of track IDs to set in the playlist",
+                        "name": "track_ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tracks set in the playlist successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -1368,6 +1370,40 @@ const docTemplate = `{
                 }
             }
         },
+        "model.NestedPlaylist": {
+            "type": "object",
+            "properties": {
+                "_creator_user": {
+                    "type": "string"
+                },
+                "_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "sub_playlists": {
+                    "description": "Further nested playlists",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NestedPlaylist"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "tracks": {
+                    "description": "Tracks directly under this playlist",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Track"
+                    }
+                }
+            }
+        },
         "model.OTPInput": {
             "type": "object",
             "properties": {
@@ -1443,7 +1479,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "playlist": {
-                    "$ref": "#/definitions/model.PLayList"
+                    "$ref": "#/definitions/model.NestedPlaylist"
+                },
+                "sub_playlists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NestedPlaylist"
+                    }
                 },
                 "tracks": {
                     "type": "array",

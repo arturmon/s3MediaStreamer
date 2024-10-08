@@ -8,40 +8,47 @@ import (
 	"net/http"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/services/tree"
 	"strconv"
 
+	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 )
 
 type Repository interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
-	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error)
+	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
 	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
 	UpdateTracks(ctx context.Context, track *model.Track) error
 	GetAllTracks(ctx context.Context) ([]model.Track, error)
-	AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error
+	AddTrackToPlaylist(ctx context.Context, playlistID, referenceType, referenceID, parentPath string) error
 	RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error
+	GetPlaylistItems(ctx context.Context, playlistID string) ([]model.PlaylistStruct, error)
 	GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error)
+	// playlist_tree.go
+	UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) error
+	InsertPositionInDB(ctx context.Context, tree *treemap.Map) error
 }
 
 type Service struct {
 	trackRepository Repository
+	tree            *tree.TreeService
 	logger          *logs.Logger
 }
 
-func NewTrackService(trackRepository Repository) *Service {
-	return &Service{trackRepository: trackRepository}
+func NewTrackService(trackRepository Repository, tree *tree.TreeService) *Service {
+	return &Service{trackRepository: trackRepository, tree: tree}
 }
 
 func (s *Service) CreateTracks(ctx context.Context, list []model.Track) error {
 	return s.trackRepository.CreateTracks(ctx, list)
 }
 
-func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filterArtist string) ([]model.Track, int, error) {
-	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filterArtist)
+func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error) {
+	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filter, startTime, endTime)
 }
 
 func (s *Service) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
@@ -64,16 +71,53 @@ func (s *Service) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return s.trackRepository.GetAllTracks(ctx)
 }
 
-func (s *Service) AddTrackToPlaylist(ctx context.Context, playlistID, referenceID, referenceType string) error {
-	return s.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceID, referenceType)
+func (s *Service) AddTrackToPlaylist(ctx context.Context, playlistID, referenceType, referenceID, parentPath string) error {
+	return s.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceType, referenceID, parentPath)
 }
 
 func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
-	return s.trackRepository.RemoveTrackFromPlaylist(ctx, playlistID, trackID)
+	err := s.trackRepository.RemoveTrackFromPlaylist(ctx, playlistID, trackID)
+	if err != nil {
+		return err
+	}
+	items, err := s.GetPlaylistItems(ctx, playlistID)
+	if err != nil {
+		return err
+	}
+	// Fill the tree using the list of PlaylistStruct.
+	treeItems := treemap.NewWithStringComparator()
+	err = s.tree.FillTree(treeItems, items)
+	if err != nil {
+		return err
+	}
+	// Rebalance the positions in the tree.
+	err = s.tree.RebalanceTreePositions(treeItems)
+	if err != nil {
+		return err
+	}
+	// Update positions in the database after rebalancing.
+	err = s.UpdatePositionsInDB(ctx, treeItems)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetPlaylistItems(ctx context.Context, playlistID string) ([]model.PlaylistStruct, error) {
+	return s.trackRepository.GetPlaylistItems(ctx, playlistID)
 }
 
 func (s *Service) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
 	return s.trackRepository.GetAllTracksByPositions(ctx, playlistID)
+}
+
+func (s *Service) UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) error {
+	return s.trackRepository.UpdatePositionsInDB(ctx, tree)
+}
+
+func (s *Service) InsertPositionInDB(ctx context.Context, tree *treemap.Map) error {
+	return s.trackRepository.InsertPositionInDB(ctx, tree)
 }
 
 func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string, sortBy, sortOrder string) ([]model.Track, int, int, int, *model.RestError) {
@@ -98,7 +142,7 @@ func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string
 	offset := (pageInt - 1) * pageSizeInt
 
 	// Retrieve paginated tracks from the storage
-	tracks, countTotal, err := s.trackRepository.GetTracks(c.Request.Context(), offset, pageSizeInt, sortBy, sortOrder, filter)
+	tracks, countTotal, err := s.GetTracks(c.Request.Context(), offset, pageSizeInt, sortBy, sortOrder, filter, "", "")
 	if err != nil {
 		s.logger.Error(err)
 
@@ -114,7 +158,7 @@ func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string
 }
 
 func (s *Service) GetTrackByID(c *gin.Context, id string) (*model.Track, *model.RestError) {
-	result, err := s.trackRepository.GetTracksByColumns(c.Request.Context(), id, "code")
+	result, err := s.GetTracksByColumns(c.Request.Context(), id, "code")
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &model.RestError{Code: http.StatusNotFound, Err: "track_handler not found"}
