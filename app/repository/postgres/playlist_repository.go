@@ -530,63 +530,6 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 	return tracks, nil
 }
 
-// getTrackByID fetches a single track by its unique identifier and maps it to TrackRequest.
-//
-// Parameters:
-//   - ctx: context.Context
-//     The context that carries deadlines, cancellation signals, and other request-scoped values.
-//   - trackID: uuid.UUID
-//     The unique identifier of the track to be retrieved.
-//
-// Return Values:
-//   - model.TrackRequest: A TrackRequest struct that holds the track's metadata (e.g., title, artist, album, etc.).
-//   - error: Returns an error if there is an issue executing the SQL queries or retrieving the data.
-func (c *Client) getTrackByID(ctx context.Context, trackID uuid.UUID) (model.TrackRequest, error) {
-	// Get the tracer for the current context
-	tracer := GetTracer(ctx)
-	_, span := tracer.Start(ctx, "getTrackByID")
-	defer span.End()
-
-	var trackRequest model.TrackRequest
-
-	// Query to fetch track data
-	query := squirrel.Select("_id", "title", "artist", "album", "duration", "album_artist", "composer", "genre", "lyrics", "year", "comment", "disc", "disc_total", "track", "track_total", "sample_rate", "bitrate").
-		From("tracks").
-		Where("_id = ?", trackID).
-		PlaceholderFormat(squirrel.Dollar)
-
-	sql, args, err := query.ToSql()
-	if err != nil {
-		return trackRequest, err
-	}
-
-	// Execute the query and scan results
-	err = c.Pool.QueryRow(ctx, sql, args...).Scan(
-		&trackRequest.ID,
-		&trackRequest.Title,
-		&trackRequest.Artist,
-		&trackRequest.Album,
-		&trackRequest.Duration,
-		&trackRequest.AlbumArtist,
-		&trackRequest.Composer,
-		&trackRequest.Genre,
-		&trackRequest.Lyrics,
-		&trackRequest.Year,
-		&trackRequest.Comment,
-		&trackRequest.Disc,
-		&trackRequest.DiscTotal,
-		&trackRequest.Track,
-		&trackRequest.TrackTotal,
-		&trackRequest.SampleRate,
-		&trackRequest.Bitrate,
-	)
-	if err != nil {
-		return trackRequest, err
-	}
-
-	return trackRequest, nil
-}
-
 // GetPlaylistItems retrieves the items (tracks and nested playlists) from a given playlist.
 //
 // Parameters:
