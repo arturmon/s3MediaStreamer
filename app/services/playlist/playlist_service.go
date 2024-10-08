@@ -13,7 +13,6 @@ import (
 	"s3MediaStreamer/app/services/user"
 	"time"
 
-	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
@@ -325,101 +324,42 @@ func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID,
 //   - *model.RestError: An error response if something goes wrong.
 //     Returns nil if successful.
 func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, playlistID string, request *model.SetPlaylistTrackOrderRequest, rebalance bool) *model.RestError {
-	// TODO Validate user
-	_, restErr := s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
-	if restErr != nil {
+	// Step 1: Validate the user and playlist existence
+	if restErr := s.validateUserForPlaylist(ctx, userRole, userID, playlistID); restErr != nil {
 		return restErr
 	}
 
-	// Check if the playlist exists
-	_, restErr = s.ensurePlaylistExists(ctx, playlistID)
-	if restErr != nil {
-		return restErr
-	}
-	stringPlaylistID, err := uuid.Parse(playlistID) // Convert string to uuid.UUID
+	// Step 2: Generate paths and validate tracks or playlists
+	stringPlaylistID, err := uuid.Parse(playlistID)
 	if err != nil {
 		s.logger.Printf("Invalid PlaylistID %s: %v\n", playlistID, err)
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Invalid parse PlaylistID string to UUID"}
 	}
 
-	//generate path
 	var addPlaylistStructs []model.PlaylistStruct
 	for i, referenceID := range request.ItemIDs {
-		var referenceType string
-		// Check if the referenceID is a track
-		_, errTrack := s.trackRepository.GetTracksByColumns(ctx, referenceID, "_id")
-		isPlaylist, err := s.CheckPlaylistExists(ctx, referenceID)
-		if err != nil && errTrack != nil {
-			return &model.RestError{
-				Code: http.StatusNotFound,
-				Err:  fmt.Sprintf("item with ID %s not found", referenceID),
-			}
+		referenceType, restErr := s.validateTrackOrPlaylist(ctx, referenceID)
+		if restErr != nil {
+			return restErr
 		}
-		// Determine reference type
-		switch {
-		case errTrack == nil:
-			// It's a track
-			referenceType = "track"
-		case isPlaylist:
-			// It's a playlist
-			referenceType = "playlist"
-		default:
-			// Neither track nor playlist found
-			return &model.RestError{Code: http.StatusNotFound, Err: fmt.Sprintf("Reference (track or playlist) with ID %s not found", referenceID)}
-		}
-		// Используем значение Position, если оно не nil
-		var positionStr string
 
-		// Handle positions
-		if len(request.ItemIDs) == 1 {
-			// If there's only one item, use the provided position or default to 0
-			if request.Position != nil {
-				positionStr = fmt.Sprintf("%d", *request.Position) // convert to string
-			} else {
-				positionStr = "0" // default position
-			}
-		} else {
-			// For multiple items, assign incrementing positions starting from 0
-			positionStr = fmt.Sprintf("%d", i) // Position will be the index (0, 1, 2, ...)
-		}
+		positionStr := generatePositionStr(request, i)
 
 		addPlaylistStructs = append(addPlaylistStructs, model.PlaylistStruct{
 			PlaylistID: stringPlaylistID,
-			// <parentID>.<trackType>.<trackID>.<position>
-			Path: pgtype.Ltree{String: fmt.Sprintf("%s.%s.%s.%s", playlistID, referenceType, referenceID, positionStr)},
+			Path:       pgtype.Ltree{String: fmt.Sprintf("%s.%s.%s.%s", playlistID, referenceType, referenceID, positionStr)},
 		})
 	}
 
-	// get all playlist items
-	structPlaylist, err := s.trackRepository.GetPlaylistItems(ctx, playlistID)
-	if err != nil {
-		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to retrieve playlist tracks"}
+	// Step 3: Update the playlist tree with new tracks
+	treeAddItems, restErr := s.updatePlaylistTree(ctx, playlistID, addPlaylistStructs, rebalance)
+	if restErr != nil {
+		return restErr
 	}
 
-	// Initialize the tree and fill it with existing tracks
-	treeAddItems := treemap.NewWithStringComparator()
-	err = s.tree.FillTree(treeAddItems, structPlaylist)
-	if err != nil {
-		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to load playlist into tree"}
-	}
-	// Step 2: Add new tracks to the tree using the tree service
-	// We assume the request contains a list of track IDs and optional positions
-	err = s.tree.AddToTree(treeAddItems, addPlaylistStructs, rebalance) // true means we want to rebalance positions
-	if err != nil {
-		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to add tracks to playlist"}
-	}
-	treeAddItems.Each(func(key, value interface{}) {
-		node, ok := value.(*model.Node)
-		if !ok {
-			return
-		}
-		s.logger.Debugf("Key: %s, Position: %d, ParentID: %v, ID: %v, Type: %v \n", key.(string), node.Position, node.ParentID, node.ID, node.Type)
-	})
-
-	// Step 4: Update the playlist in the database with the new track order
-	err = s.trackRepository.InsertPositionInDB(ctx, treeAddItems)
-	if err != nil {
-		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to update playlist in database"}
+	// Step 4: Update the playlist in the database
+	if restErr = s.updateDatabaseWithTree(ctx, treeAddItems); restErr != nil {
+		return restErr
 	}
 
 	return nil
