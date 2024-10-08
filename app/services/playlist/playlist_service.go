@@ -409,8 +409,10 @@ func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, pla
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to add tracks to playlist"}
 	}
 	treeAddItems.Each(func(key, value interface{}) {
-		node := value.(*model.Node)
-		fmt.Printf("(s *Service) AddTracksToPlaylist :")
+		node, ok := value.(*model.Node)
+		if !ok {
+			return
+		}
 		s.logger.Debugf("Key: %s, Position: %d, ParentID: %v, ID: %v, Type: %v \n", key.(string), node.Position, node.ParentID, node.ID, node.Type)
 	})
 

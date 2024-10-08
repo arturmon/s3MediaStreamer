@@ -41,7 +41,10 @@ func (s *Service) RebalanceTreePositions(tree *treemap.Map) error {
 
 	// Collect all nodes from the tree along with their keys
 	tree.Each(func(key interface{}, value interface{}) {
-		node := value.(*model.Node)
+		node, ok := value.(*model.Node)
+		if !ok {
+			return
+		}
 		nodes = append(nodes, node)
 		keys = append(keys, key.(string)) // Save the corresponding key
 	})
