@@ -36,8 +36,8 @@ func (c *Service) isAuthorizedForPlaylist(ctx context.Context, userRole, userID,
 	return &user, nil
 }
 
-func (s *Service) ensurePlaylistExists(ctx context.Context, playlistID string) (*model.PLayList, *model.RestError) {
-	exists, err := s.playlistRepository.CheckPlaylistExists(ctx, playlistID)
+func (c *Service) ensurePlaylistExists(ctx context.Context, playlistID string) (*model.PLayList, *model.RestError) {
+	exists, err := c.playlistRepository.CheckPlaylistExists(ctx, playlistID)
 	if err != nil {
 		return nil, &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to check if playlist exists"}
 	}
@@ -46,7 +46,7 @@ func (s *Service) ensurePlaylistExists(ctx context.Context, playlistID string) (
 	}
 
 	var playlist model.PLayList
-	err = s.playlistRepository.FetchPlaylistInfo(ctx, playlistID, &playlist)
+	err = c.playlistRepository.FetchPlaylistInfo(ctx, playlistID, &playlist)
 	if err != nil {
 		return nil, &model.RestError{Code: http.StatusNotFound, Err: "Failed to retrieve playlist"}
 	}
