@@ -159,23 +159,23 @@ func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, p
 	return nil
 }
 
-func (c *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, playlistID, referenceID, parentID string) *model.RestError {
+func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, playlistID, referenceID, parentID string) *model.RestError {
 	// Check if the playlist exists
-	restErr := c.ensurePlaylistExists(ctx, playlistID)
+	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}
 
 	// Validate user authorization
-	restErr = c.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return restErr
 	}
 
 	// Determine if the reference is a track or playlist
 	var referenceType string
-	_, errTrack := c.trackRepository.GetTracksByColumns(ctx, referenceID, "_id")
-	isPlaylist, errPlaylist := c.CheckPlaylistExists(ctx, referenceID)
+	_, errTrack := s.trackRepository.GetTracksByColumns(ctx, referenceID, "_id")
+	isPlaylist, errPlaylist := s.CheckPlaylistExists(ctx, referenceID)
 
 	switch {
 	case errTrack == nil:
@@ -191,7 +191,7 @@ func (c *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	var parentPath string
 	if parentID != "" {
 		// If the parent is provided, retrieve its path
-		_, err := c.GetPlaylistPath(ctx, parentID)
+		_, err := s.GetPlaylistPath(ctx, parentID)
 		if err != nil {
 			return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to retrieve parent playlist path"}
 		}
@@ -201,9 +201,9 @@ func (c *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	}
 
 	// Delegate the task of adding the track or playlist to the repository layer
-	err := c.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceType, referenceID, parentPath) // Pass parentPath to the repository
+	err := s.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceType, referenceID, parentPath) // Pass parentPath to the repository
 	if err != nil {
-		c.logger.Error(err)
+		s.logger.Error(err)
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to add reference to playlist"}
 	}
 
