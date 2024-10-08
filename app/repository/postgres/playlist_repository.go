@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"errors"
-	"fmt"
 	"s3MediaStreamer/app/model"
 
 	"github.com/Masterminds/squirrel"
