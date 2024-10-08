@@ -40,7 +40,7 @@ type Service struct {
 	authService        auth.Service
 	logger             *logs.Logger
 	user               user.Service
-	tree               *tree.TreeService
+	tree               *tree.Service
 }
 
 func (s *Service) CheckPlaylistExists(ctx context.Context, playlistID string) (bool, error) {
@@ -93,7 +93,7 @@ func NewPlaylistService(trackRepository track.Repository,
 	authService auth.Service,
 	user user.Service,
 	logger *logs.Logger,
-	tree *tree.TreeService) *Service {
+	tree *tree.Service) *Service {
 	return &Service{
 		trackRepository,
 		playlistRepository,
