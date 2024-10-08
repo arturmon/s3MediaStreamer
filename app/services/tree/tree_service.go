@@ -10,6 +10,10 @@ import (
 	"github.com/emirpasic/gods/maps/treemap"
 )
 
+const (
+	expectedPathComponents = 4 // Expected number of components in the playlist path
+)
+
 type Repository interface {
 	RebalanceTreePositions(tree *treemap.Map) error
 	FillTree(tree *treemap.Map, items []model.PlaylistStruct) error
@@ -64,7 +68,7 @@ func (s *Service) RebalanceTreePositions(tree *treemap.Map) error {
 
 		// Split the original key and update the last segment (position)
 		components := strings.Split(keys[i], ".")
-		if len(components) != 4 {
+		if len(components) != expectedPathComponents {
 			return fmt.Errorf("invalid key format: %s", keys[i])
 		}
 
@@ -102,7 +106,7 @@ func (s *Service) FillTree(tree *treemap.Map, items []model.PlaylistStruct) erro
 		components := strings.Split(pathStr, ".")
 
 		// We expect the format <trackType>.<parentID>.<trackID>.<position>
-		if len(components) != 4 {
+		if len(components) != expectedPathComponents {
 			return fmt.Errorf("invalid path format: %s", pathStr)
 		}
 
@@ -177,7 +181,7 @@ func (s *Service) addItemToTree(tree *treemap.Map, item model.PlaylistStruct) er
 	pathStr := item.Path.String
 	components := strings.Split(pathStr, ".")
 
-	if len(components) != 4 {
+	if len(components) != expectedPathComponents {
 		return fmt.Errorf("invalid path format: %s", pathStr)
 	}
 

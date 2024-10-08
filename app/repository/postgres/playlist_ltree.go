@@ -12,10 +12,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+const (
+	expectedPathComponents = 4 // Expected number of components in the playlist path
+)
+
 // Helper function to parse the path and return the components
 func parsePath(pathStr string) (string, string, string, string, uuid.UUID, error) {
 	components := strings.Split(pathStr, ".")
-	if len(components) != 4 {
+	if len(components) != expectedPathComponents {
 		return "", "", "", "", uuid.Nil, fmt.Errorf("invalid path format: %s", pathStr)
 	}
 
