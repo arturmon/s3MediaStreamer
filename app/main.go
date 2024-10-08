@@ -19,9 +19,9 @@ import (
 type contextKey string
 
 var (
-	version   = "latest"               //nolint: gochecknoglobals
-	buildTime = "0000-00-00T00:00:00Z" //nolint: gochecknoglobals
-	appName   = "s3MediaStreamer"      //nolint: gochecknoglobals
+	version   = "latest"               //nolint: gochecknoglobals // Global variables are necessary for CI/CD
+	buildTime = "0000-00-00T00:00:00Z" //nolint: gochecknoglobals // Global variables are necessary for CI/CD
+	appName   = "s3MediaStreamer"      //nolint: gochecknoglobals // Global variables are necessary for CI/CD
 )
 
 // @title			               S3 Media Streamer Application API
