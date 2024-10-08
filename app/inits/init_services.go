@@ -99,6 +99,7 @@ func initServices(ctx context.Context,
 		Playlist:        playlistService,
 		Session:         sessionService,
 		OTP:             otpService,
+		Tree:            treeService,
 		mDNS:            mDNSService,
 	}, nil
 }

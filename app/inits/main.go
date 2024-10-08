@@ -68,7 +68,7 @@ type Service struct {
 	Playlist        *playlist.Service
 	Session         *session.Service
 	OTP             *otp.Service
-	tree            *tree.Service
+	Tree            *tree.Service
 	mDNS            *mdns.Service
 }
 
