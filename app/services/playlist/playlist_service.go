@@ -140,8 +140,8 @@ func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, p
 		return restErr
 	}
 
-	// TODO Validate user
-	_, restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	// Validate user authorization
+	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -167,7 +167,7 @@ func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	}
 
 	// Validate user authorization
-	_, restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -211,8 +211,8 @@ func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 }
 
 func (s Service) GetTracksInPlaylist(ctx context.Context, userRole, userID, playlistID string) ([]model.TrackRequest, *model.RestError) {
-	// TODO Validate user
-	_, restErr := s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	// Validate user authorization
+	restErr := s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return nil, restErr
 	}
@@ -262,8 +262,8 @@ func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID,
 		return restErr
 	}
 
-	// TODO Validate user
-	_, restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	// Validate user authorization
+	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -289,8 +289,8 @@ func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID,
 		return restErr
 	}
 
-	// TODO Validate user
-	_, restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	// Validate user authorization
+	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
 	if restErr != nil {
 		return restErr
 	}
