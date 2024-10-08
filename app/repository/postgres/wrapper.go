@@ -77,13 +77,13 @@ func ExecuteSQL(ctx context.Context, tx pgx.Tx, query squirrel.Sqlizer) error {
 func QueryMapsWithLogging(conn *pgx.Conn, query squirrel.Sqlizer) ([]map[string]interface{}, error) {
 	sql, args, err := query.ToSql() // Convert squirrel query to SQL
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", fmt.Errorf("error generating SQL query"), err)
+		return nil, fmt.Errorf("%w: %w", fmt.Errorf("error generating SQL query"), err)
 	}
 
 	// Call the original QueryMaps function
 	results, err := QueryMaps(conn, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", fmt.Errorf("error executing query"), err)
+		return nil, fmt.Errorf("%w: %w", fmt.Errorf("error executing query"), err)
 	}
 
 	if len(results) == 0 {
@@ -112,7 +112,7 @@ func QueryMaps(conn *pgx.Conn, query string, args ...interface{}) ([]map[string]
 
 		// Scan the row into values
 		if err = rows.Scan(values...); err != nil {
-			return nil, fmt.Errorf("%w: %s", fmt.Errorf("error scanning row"), err)
+			return nil, fmt.Errorf("%w: %w", fmt.Errorf("error scanning row"), err)
 		}
 
 		row := make(map[string]interface{}) // Create a map to hold the row data
