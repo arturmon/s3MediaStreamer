@@ -93,7 +93,7 @@ func initPlaylistRoutes(playlist *gin.RouterGroup, allHandlers *handlers.Handler
 		playlist.GET("/get", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ListPlaylists))
 	}
 
-	playlist.POST("/:playlist_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.SetFromPlaylist))
+	playlist.POST("/:playlist_id/tracks", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.AddTracksToPlaylist))
 	playlist.DELETE("/:playlist_id/:track_id", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.RemoveFromPlaylist))
 	playlist.DELETE("/:playlist_id/clear", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ClearPlaylist))
 }
