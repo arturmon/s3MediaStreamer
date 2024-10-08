@@ -530,65 +530,6 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 	return tracks, nil
 }
 
-// getTracksWithPosition recursively fetches the tracks from a playlist and handles the position incrementing
-// for tracks inside both the root and nested playlists.
-//
-// Parameters:
-//   - ctx: context.Context
-//     The context that carries deadlines, cancellation signals, and other request-scoped values.
-//   - playlistID: string
-//     The unique identifier of the current playlist (either root or nested).
-//   - lastPosition: int
-//     The last known position from the parent playlist. Used as the base position for nested tracks.
-//
-// Return Values:
-//   - []model.TrackRequest: A slice that includes tracks from both the playlist and any nested playlists.
-//   - int: The updated position after processing all the tracks.
-//   - error: Returns an error if there is an issue executing the SQL queries or retrieving the data.
-func (c *Client) getTracksWithPosition(ctx context.Context, playlistID string, position int) ([]model.TrackRequest, int, error) {
-	// Get the tracer for the current context
-	tracer := GetTracer(ctx)
-	_, span := tracer.Start(ctx, "getTracksWithPosition")
-	defer span.End()
-
-	var trackRequests []model.TrackRequest
-
-	// Get all playlist items (both tracks and nested playlists)
-	_, err := c.GetPlaylistItems(ctx, playlistID)
-	if err != nil {
-		return nil, position, err
-	}
-	/*
-		for _, item := range items {
-			if item.ReferenceType == "track" {
-				// Fetch the track data from the `tracks` table
-				trackRequest, err := c.getTrackByID(ctx, item.ReferenceID)
-				if err != nil {
-					return nil, position, err
-				}
-				trackRequest.Position = position // Set current position (parent playlist)
-				trackRequest.PlaylistID, _ = uuid.Parse(playlistID)
-				trackRequests = append(trackRequests, trackRequest)
-				position++ // Increment position for the next track
-			} else if item.ReferenceType == "playlist" {
-				// Recursively fetch tracks from the nested playlist
-				// Pass the current position to start with nested playlist tracks
-				nestedTracks, updatedPosition, err := c.getTracksWithPosition(ctx, item.ReferenceID.String(), position)
-				if err != nil {
-					return nil, position, err
-				}
-
-				trackRequests = append(trackRequests, nestedTracks...)
-				// Update the position after processing nested playlist
-				position = updatedPosition
-			}
-		}
-
-	*/
-
-	return trackRequests, position, nil
-}
-
 // getTrackByID fetches a single track by its unique identifier and maps it to TrackRequest.
 //
 // Parameters:
