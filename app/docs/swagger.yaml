@@ -17,6 +17,29 @@ definitions:
       password:
         type: string
     type: object
+  model.NestedPlaylist:
+    properties:
+      _creator_user:
+        type: string
+      _id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      sub_playlists:
+        description: Further nested playlists
+        items:
+          $ref: '#/definitions/model.NestedPlaylist'
+        type: array
+      title:
+        type: string
+      tracks:
+        description: Tracks directly under this playlist
+        items:
+          $ref: '#/definitions/model.Track'
+        type: array
+    type: object
   model.OTPInput:
     properties:
       token:
@@ -67,7 +90,11 @@ definitions:
   model.PlaylistTracksResponse:
     properties:
       playlist:
-        $ref: '#/definitions/model.PLayList'
+        $ref: '#/definitions/model.NestedPlaylist'
+      sub_playlists:
+        items:
+          $ref: '#/definitions/model.NestedPlaylist'
+        type: array
       tracks:
         items:
           $ref: '#/definitions/model.Track'
@@ -541,48 +568,6 @@ paths:
       summary: Get tracks from a playlist.
       tags:
       - playlist-controller
-    post:
-      consumes:
-      - application/json
-      description: Set tracks in a playlist by providing a list of track IDs.
-      parameters:
-      - description: Playlist ID
-        in: path
-        name: playlist_id
-        required: true
-        type: string
-      - description: List of track IDs to set in the playlist
-        in: body
-        name: track_ids
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Tracks set in the playlist successfully
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Set tracks in a playlist.
-      tags:
-      - playlist-controller
   /playlist/{playlist_id}/{track_id}:
     delete:
       consumes:
@@ -695,6 +680,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Clear a playlist by removing all tracks from it.
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/tracks:
+    post:
+      consumes:
+      - application/json
+      description: Set tracks in a playlist by providing a list of track IDs.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: List of track IDs to set in the playlist
+        in: body
+        name: track_ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks set in the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Set tracks in a playlist.
       tags:
       - playlist-controller
   /playlist/create:
