@@ -11,6 +11,7 @@ import (
 	"s3MediaStreamer/app/services/consul"
 	"s3MediaStreamer/app/services/db"
 	"s3MediaStreamer/app/services/health"
+	"s3MediaStreamer/app/services/mdns"
 	"s3MediaStreamer/app/services/monitoring"
 	"s3MediaStreamer/app/services/otel"
 	"s3MediaStreamer/app/services/otp"
@@ -70,6 +71,12 @@ func initServices(ctx context.Context,
 	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, *userService, logger, treeService)
 	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistService, logger)
 	otpService := otp.NewOTPService(*userService, cfg)
+	// Initialize mDNS service if enabled
+	var mDNSService *mdns.Service
+	if cfg.AppConfig.MDNS.Enabled {
+		mDNSService = mdns.NewMDNSService(appName, cfg.Listen.Port, logger)
+		mDNSService.Start()
+	}
 	logger.Info("Complete service initialize.")
 	return &Service{
 		InitRepo:        repo,
@@ -92,5 +99,6 @@ func initServices(ctx context.Context,
 		Playlist:        playlistService,
 		Session:         sessionService,
 		OTP:             otpService,
+		mDNS:            mDNSService,
 	}, nil
 }

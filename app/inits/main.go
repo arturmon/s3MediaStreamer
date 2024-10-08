@@ -13,6 +13,7 @@ import (
 	"s3MediaStreamer/app/services/consul"
 	"s3MediaStreamer/app/services/db"
 	"s3MediaStreamer/app/services/health"
+	"s3MediaStreamer/app/services/mdns"
 	"s3MediaStreamer/app/services/monitoring"
 	"s3MediaStreamer/app/services/otel"
 	"s3MediaStreamer/app/services/otp"
@@ -68,6 +69,7 @@ type Service struct {
 	Session         *session.Service
 	OTP             *otp.Service
 	tree            *tree.Service
+	mDNS            *mdns.Service
 }
 
 func InitServices(ctx context.Context, appName, version string, cfg *model.Config, logger *logs.Logger) (*Service, error) {

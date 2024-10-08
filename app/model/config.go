@@ -51,6 +51,9 @@ type Config struct {
 			BucketName      string `yaml:"bucket_name" env:"S3_BUCKET_NAME"`
 			Location        string `yaml:"location" env:"S3_LOCATION"`
 		} `yaml:"s3"`
+		MDNS struct {
+			Enabled bool `yaml:"enabled" env:"MDNS_ENABLED"`
+		}
 	} `yaml:"app_config"`
 
 	Storage struct {
