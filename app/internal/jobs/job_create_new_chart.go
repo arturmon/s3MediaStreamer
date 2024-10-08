@@ -116,10 +116,10 @@ func saveConsulState(_ context.Context, logger *logs.Logger, key string, value u
 
 	// If the key exists, return the existing value and update it
 	if kv != nil && len(kv.Value) > 0 {
-		existingValue, err := uuid.Parse(string(kv.Value)) // Convert the stored value back to UUID
-		if err != nil {
-			logger.Error("Error parsing existing UUID from Consul:", err)
-			return uuid.Nil, err
+		existingValue, errParse := uuid.Parse(string(kv.Value)) // Convert the stored value back to UUID
+		if errParse != nil {
+			logger.Error("Error parsing existing UUID from Consul:", errParse)
+			return uuid.Nil, errParse
 		}
 
 		// Log the existing value
