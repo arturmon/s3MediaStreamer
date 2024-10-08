@@ -496,9 +496,9 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 
 	for rows.Next() {
 		var track model.Track
-		var readPlaylistID, position string // Переменная для хранения позиции
+		var readPlaylistID, position string // Variable for storing position
 
-		// Считывание данных в переменные
+		// Reading Data into Variables
 		if err = rows.Scan(
 			&track.ID, &track.CreatedAt, &track.UpdatedAt,
 			&track.Album, &track.AlbumArtist, &track.Composer,
@@ -507,13 +507,13 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 			&track.Disc, &track.DiscTotal, &track.Track,
 			&track.TrackTotal, &track.Duration, &track.SampleRate,
 			&track.Bitrate,
-			&readPlaylistID, // Здесь считываем позицию
-			&position,       // И здесь считываем PlaylistID
+			&readPlaylistID, // Here we read the readPlaylistID
+			&position,       // Here we read the position
 		); err != nil {
 			return nil, err
 		}
 
-		// Заполняем TrackRequest
+		// Fill out TrackRequest
 		trackRequest := model.TrackRequest{
 			Position:   position,
 			PlaylistID: readPlaylistID,
@@ -526,10 +526,6 @@ func (c *Client) GetPlaylistAllTracks(ctx context.Context, playlistID string) ([
 		return nil, err
 	}
 
-	// Вывод результата
-	for _, trackRequest := range trackRequests {
-		fmt.Printf("%+v\n", trackRequest)
-	}
 	tracks := trackRequests
 
 	return tracks, nil
