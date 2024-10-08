@@ -15,6 +15,9 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+// Define a custom type for the context key to avoid conflicts
+type contextKey string
+
 // global vars
 var version = "latest"
 var buildTime = "0000-00-00 UTC"
@@ -50,7 +53,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	ctx = context.WithValue(ctx, "appInfo", appInfo)
+	ctx = context.WithValue(ctx, contextKey("appInfo"), appInfo)
 
 	cfg := config.GetConfig()
 	logger := logs.GetLogger(
@@ -60,7 +63,7 @@ func main() {
 		cfg.AppConfig.LogGelfServerType,
 		appName,
 	)
-	appsInfo, _ := ctx.Value("appInfo").(*model.AppInfo)
+	appsInfo, _ := ctx.Value(contextKey("appInfo")).(*model.AppInfo)
 	logger.Infof("App Info: Name: %s, Version: %s, Build Time: %s", appsInfo.AppName, appsInfo.Version, appsInfo.BuildTime)
 	logger.Info("config initialize")
 	logger.Infof("Logger initialized with level: %s, type: %s", cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
