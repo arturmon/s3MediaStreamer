@@ -67,7 +67,7 @@ type Service struct {
 	Playlist        *playlist.Service
 	Session         *session.Service
 	OTP             *otp.Service
-	tree            *tree.TreeService
+	tree            *tree.Service
 }
 
 func InitServices(ctx context.Context, appName, version string, cfg *model.Config, logger *logs.Logger) (*Service, error) {
