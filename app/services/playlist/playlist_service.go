@@ -219,7 +219,7 @@ func (s Service) GetTracksInPlaylist(ctx context.Context, userRole, userID, play
 
 	playlistContents, err := s.GetPlaylistAllTracks(ctx, playlistID)
 	if err != nil {
-		return nil, &model.RestError{Code: http.StatusNotFound, Err: fmt.Sprintf("Error GetTracksInPlaylist")}
+		return nil, &model.RestError{Code: http.StatusNotFound, Err: fmt.Sprintf("Error: %s", err)}
 	}
 
 	return playlistContents, nil
