@@ -9,12 +9,53 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
+
+// Helper function to parse the path and return the components
+func parsePath(pathStr string) (string, string, string, string, uuid.UUID, error) {
+	components := strings.Split(pathStr, ".")
+	if len(components) != 4 {
+		return "", "", "", "", uuid.Nil, fmt.Errorf("invalid path format: %s", pathStr)
+	}
+
+	playlistID := components[0]
+	trackType := components[1]
+	trackID := components[2]
+
+	playlistIDUUID, parseErr := uuid.Parse(playlistID)
+	if parseErr != nil {
+		return "", "", "", "", uuid.Nil, fmt.Errorf("invalid UUID format for playlistID: %s", playlistID)
+	}
+
+	return playlistID, trackType, trackID, pathStr, playlistIDUUID, nil
+}
+
+// Helper function to execute SQL update query
+func executeUpdateQuery(ctx context.Context, tx pgx.Tx, playlistIDUUID uuid.UUID, oldPath, newPath string) error {
+	updateQuery := squirrel.Update("playlist_tracks").
+		Set("path", newPath).
+		Where(squirrel.Eq{
+			"playlist_id": playlistIDUUID,
+			"path":        oldPath,
+		}).
+		PlaceholderFormat(squirrel.Dollar)
+
+	query, args, err := updateQuery.ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to generate update SQL: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute update query: %w", err)
+	}
+
+	return nil
+}
 
 // UpdatePositionsInDB updates the path with the new position in the database after rebalancing
 func (c *Client) UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) error {
-
-	// Start a transaction
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
@@ -29,84 +70,41 @@ func (c *Client) UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) err
 		return fmt.Errorf("tree is empty, nothing to update")
 	}
 
-	// Iterate over the tree and update each node's path in the database
 	tree.Each(func(key interface{}, value interface{}) {
 		node, ok := value.(*model.Node)
 		if !ok {
-			err = fmt.Errorf("unexpected value type: %s", value)
+			err = fmt.Errorf("unexpected value type: %T", value)
 			return
 		}
 
-		// Convert the key (path) to string and split it into components
 		pathStr, ok := key.(string)
 		if !ok {
 			err = fmt.Errorf("unexpected key type: %T", key)
 			return
 		}
-		components := strings.Split(pathStr, ".")
 
-		// We expect the format <playlistID>.<trackType>.<trackID>.<position>
-		if len(components) != 4 {
-			err = fmt.Errorf("invalid path format: %s", pathStr)
-			if err != nil {
-				return
-			}
-
+		playlistID, trackType, trackID, oldPath, playlistIDUUID, parseErr := parsePath(pathStr)
+		if parseErr != nil {
+			err = parseErr
+			return
 		}
 
-		playlistID := components[0] // Playlist ID
-		trackType := components[1]  // 'track' or 'playlist'
-		trackID := components[2]    // Track or Playlist ID
-
-		// Generate new path with the updated position
 		newPath := fmt.Sprintf("%s.%s.%s.%d", playlistID, trackType, trackID, node.Position)
 
-		playlistIDUUID, parseErr := uuid.Parse(components[0]) // Assuming components[0] is the playlistID
-		if parseErr != nil {
-			err = fmt.Errorf("invalid UUID format for playlistID: %s", components[0])
+		if execErr := executeUpdateQuery(ctx, tx, playlistIDUUID, oldPath, newPath); execErr != nil {
+			err = execErr
 			return
 		}
-
-		// Build the SQL query using squirrel to update the path
-		updateQuery := squirrel.Update("playlist_tracks").
-			Set("path", newPath). // Update the full path
-			Where(squirrel.Eq{
-				"playlist_id": playlistIDUUID,
-				"path":        pathStr,
-			}).
-			PlaceholderFormat(squirrel.Dollar)
-		// Universal update
-		/*
-			upsertQuery := squirrel.Insert("playlist_tracks").
-				Columns("playlist_id", "path", "position").
-				Values(playlistIDUUID, newPath, node.Position).
-				Suffix("ON CONFLICT (playlist_id, path) DO UPDATE SET position = EXCLUDED.position").
-				PlaceholderFormat(squirrel.Dollar)
-		*/
-
-		// Generate the SQL query and arguments
-		query, args, errGenerate := updateQuery.ToSql()
-		if errGenerate != nil {
-			return
-		}
-
-		// Execute the update query
-		_, err = tx.Exec(ctx, query, args...)
-		if err != nil {
-			return
-		}
-
 	})
 
-	// Commit the transaction
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
 }
 
+// InsertPositionInDB inserts a new position in the database
 func (c *Client) InsertPositionInDB(ctx context.Context, tree *treemap.Map) error {
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
@@ -134,24 +132,14 @@ func (c *Client) InsertPositionInDB(ctx context.Context, tree *treemap.Map) erro
 			err = fmt.Errorf("unexpected key type: %T", key)
 			return
 		}
-		components := strings.Split(pathStr, ".")
 
-		if len(components) != 4 {
-			err = fmt.Errorf("invalid path format: %s", pathStr)
+		playlistID, trackType, trackID, _, playlistIDUUID, parseErr := parsePath(pathStr)
+		if parseErr != nil {
+			err = parseErr
 			return
 		}
-
-		playlistID := components[0]
-		trackType := components[1]
-		trackID := components[2]
 
 		newPath := fmt.Sprintf("%s.%s.%s.%d", playlistID, trackType, trackID, node.Position)
-
-		playlistIDUUID, parseErr := uuid.Parse(playlistID)
-		if parseErr != nil {
-			err = fmt.Errorf("invalid UUID format for playlistID: %s", playlistID)
-			return
-		}
 
 		insertQuery := squirrel.Insert("playlist_tracks").
 			Columns("playlist_id", "path").
@@ -168,12 +156,10 @@ func (c *Client) InsertPositionInDB(ctx context.Context, tree *treemap.Map) erro
 		if err != nil {
 			return
 		}
-
 	})
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return err
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
