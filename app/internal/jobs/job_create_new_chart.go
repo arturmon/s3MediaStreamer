@@ -70,8 +70,7 @@ func (j *CreateNewMusicChartJob) Run() {
 		return
 	}
 
-	var request model.SetPlaylistTrackOrderRequest
-	request = convertTracksToSetPlaylistTrackOrderRequest(tracks)
+	request := convertTracksToSetPlaylistTrackOrderRequest(tracks)
 	if errRest := j.app.Service.Playlist.AddTracksToPlaylist(
 		ctx,
 		"admin",
