@@ -18,13 +18,10 @@ import (
 // Define a custom type for the context key to avoid conflicts
 type contextKey string
 
-// global vars
-//
-//lint:ignore gochecknoglobals Global variables are necessary for CI/CD
 var (
-	version   = "latest"               // Default value for version
-	buildTime = "0000-00-00T00:00:00Z" // Default value for buildTime
-	appName   = "s3MediaStreamer"      // Default value for appName
+	version   = "latest"               //nolint: gochecknoglobals
+	buildTime = "0000-00-00T00:00:00Z" //nolint: gochecknoglobals
+	appName   = "s3MediaStreamer"      //nolint: gochecknoglobals
 )
 
 // @title			               S3 Media Streamer Application API
