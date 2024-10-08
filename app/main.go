@@ -19,9 +19,11 @@ import (
 type contextKey string
 
 // global vars
-var version = "latest"
-var buildTime = "0000-00-00 UTC"
-var appName = "s3MediaStreamer"
+var (
+	version   = "latest"               // Default value for version
+	buildTime = "0000-00-00T00:00:00Z" // Default value for buildTime
+	appName   = "s3MediaStreamer"      // Default value for appName
+)
 
 // @title			               S3 Media Streamer Application API
 // @version		                   0.0.1
