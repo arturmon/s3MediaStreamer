@@ -17,7 +17,7 @@ func (s *Service) validateUserForPlaylist(ctx context.Context, userRole, userID,
 		return restErr
 	}
 
-	_, restErr = s.ensurePlaylistExists(ctx, playlistID)
+	restErr = s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}

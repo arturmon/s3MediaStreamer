@@ -135,7 +135,7 @@ func (s *Service) CreateNewPlaylist(c *gin.Context) (*model.PLayList, *model.Res
 
 func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
 	// Check if the playlist exists in the repository
-	_, restErr := s.ensurePlaylistExists(ctx, playlistID)
+	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -161,7 +161,7 @@ func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, p
 
 func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, playlistID, referenceID, parentID string) *model.RestError {
 	// Check if the playlist exists
-	_, restErr := s.ensurePlaylistExists(ctx, playlistID)
+	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -257,7 +257,7 @@ func (s Service) GetUserPlaylists(ctx context.Context, userRole, userID string) 
 
 func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
 	// Check if the playlist exists
-	_, restErr := s.ensurePlaylistExists(ctx, playlistID)
+	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -284,7 +284,7 @@ func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID,
 
 func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
 	// Check if the playlist exists
-	_, restErr := s.ensurePlaylistExists(ctx, playlistID)
+	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
 		return restErr
 	}
