@@ -9,12 +9,32 @@ consul:
   wait_time: 5
 
 app_config:
-  log_level: "debug" # otel, debug, info, warn, error, fatal, panic
-  log_type: "text" # text, json, gelf
-  log_gelf_server: "localhost:12201"
-  log_gelf_server_type: "udp" # tcp, udp
+  logs:
+    level: "info" # debug, info, warn, error
+    type: "json" # graylog, kafka, telegram, console, json
+    graylog:
+      server: "localhost:12201"
+      compression_type: "none" # node, gzip, zlib
+    kafka:
+      brokers: "localhost:9092"
+      type_connection: "udp"
+      topic: "music-events"
+      num_partitions: 1
+      replication_factor: 1
+      async: false
+      max_attempts: 10
+    telegram:
+      token: "YOUR_TELEGRAM_BOT_TOKEN"
+      chat_username: "YOUR_TELEGRAM_CHAT_ID"
   web:
     mode: "release" # debug, test, release
+    debug:
+      with_span_id: false
+      with_trace_id: false
+      with_request_body: false
+      with_response_body: false
+      with_request_header: false
+      with_response_header: false
     corsAllowOrigins: "*" # example: http://localhost:10000 or *
   jobs:
     interval_rescan_consul: 60 #second
