@@ -20,13 +20,39 @@ type Config struct {
 	} `yaml:"consul"`
 
 	AppConfig struct {
-		LogLevel          string `yaml:"log_level" env:"LOG_LEVEL"`
-		LogType           string `yaml:"log_type" env:"LOG_TYPE"`
-		LogGelfServer     string `yaml:"log_gelf_server" env:"LOG_GELF_SERVER_URL"`
+		Logs struct {
+			Level   string `yaml:"level" env:"LOG_LEVEL"`
+			Type    string `yaml:"type" env:"LOG_TYPE"`
+			Graylog struct {
+				ServerAddr      string `yaml:"server" env:"GRAYLOG_SERVER_ADDR"`
+				CompressionType string `yaml:"compression_type" env:"GRAYLOG_SERVER_COMPRESSION_TYPE"`
+			} `yaml:"graylog"`
+			Kafka struct {
+				Broker            string `yaml:"brokers" env:"KAFKA_BROKER"`
+				TypeConnection    string `yaml:"type_connection" env:"KAFKA_TYPE_CONNECTION"`
+				Topic             string `yaml:"topic" env:"KAFKA_TOPIC"`
+				NumPartitions     int    `yaml:"num_partitions" env:"KAFKA_NUM_PARTITIONS"`
+				ReplicationFactor int    `yaml:"replication_factor" env:"KAFKA_REPLICATION_FACTOR"`
+				Asynchronous      bool   `yaml:"async" env:"KAFKA_ASYNCHRONOUS"`
+				MaxAttempts       int    `yaml:"max_attempts" env:"KAFKA_MAX_ATTEMPTS"`
+			} `yaml:"kafka"`
+			Telegram struct {
+				Token    string `yaml:"token" env:"TELEGRAM_TOKEN"`
+				ChatUser string `yaml:"chat_user" env:"TELEGRAM_CHAT_USER"`
+			}
+		} `yaml:"logs"`
 		LogGelfServerType string `yaml:"log_gelf_server_type" env:"LOG_GELF_SERVER_TYPE"`
 		Web               struct {
 			Mode             string `yaml:"mode" env:"WEB_MODE"`
 			CorsAllowOrigins string `yaml:"corsAllowOrigins" env:"CORS_ALLOW_ORIGINS"`
+			Debug            struct {
+				WithSpanID         bool `yaml:"with_span_id" env:"DEBUG_WITH_SPAN_ID"`
+				WithTraceID        bool `yaml:"with_trace_id" env:"DEBUG_WITH_TRACE_ID"`
+				WithRequestBody    bool `yaml:"with_request_body" env:"DEBUG_WITH_REQUEST_BODY"`
+				WithResponseBody   bool `yaml:"with_response_body" env:"DEBUG_WITH_RESPONSE_BODY"`
+				WithRequestHeader  bool `yaml:"with_request_header" env:"DEBUG_WITH_REQUEST_HEADER"`
+				WithResponseHeader bool `yaml:"with_response_header" env:"DEBUG_WITH_RESPONSE_HEADER"`
+			} `yaml:"debug"`
 		} `yaml:"web"`
 
 		Jobs struct {
