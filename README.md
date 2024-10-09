@@ -31,9 +31,10 @@ use Rancher desktop and devspave usage
 ## Run Devspace
 
 ```shell
+export DEVSPACE_CONFIG=/home/amudrykh/GolandProjects/s3MediaStreamer/devspace.yaml
 kubectl port-forward service/redis-master 6379:6379 -n database > /dev/null 2>&1 & \
 kubectl port-forward service/postgresql 5432:5432 -n database > /dev/null 2>&1 & \
-devspace dev --namespace media --config /home/amudrykh/GolandProjects/s3MediaStreamer/devspace.yaml
+devspace use namespace media & devspace dev
 ```
 
 ```
