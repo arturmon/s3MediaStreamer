@@ -32,7 +32,7 @@ func NewConsulKVService(cfg *model.Config, logger *logs.Logger, client Service) 
 func (k *KVService) GetFromConsul(key string) ([]byte, error) {
 	kv, _, err := k.ConsulClient.KV().Get(key, nil)
 	if err != nil {
-		k.logger.Error("Error fetching key from Consul:", err)
+		k.logger.Errorf("Error fetching key from Consul: %s", err)
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (k *KVService) PutToConsul(key string, value string) error {
 	}
 	_, err := k.ConsulClient.KV().Put(kvPair, nil)
 	if err != nil {
-		k.logger.Error("Error setting key in Consul:", err)
+		k.logger.Errorf("Error setting key in Consul: %s", err)
 		return err
 	}
 	return nil

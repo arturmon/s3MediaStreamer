@@ -41,19 +41,19 @@ func (j *CreateNewMusicChartJob) Run() {
 	playlistID := uuid.New()
 	consulSaveKey := fmt.Sprintf("service/%s/state/jobs/CreateNewMusicChartJob/playlistID", j.app.AppName)
 
-	j.app.Logger.Infof("Save playlistID consul:%s\n", playlistID.String())
+	j.app.Logger.Infof("Save playlistID consul:%s", playlistID.String())
 	playlistIDold, err := saveConsulState(ctx, j.app.Logger, consulSaveKey, playlistID, j.app.Service.ConsulService.ConsulClient)
 	if err != nil {
 		j.app.Logger.Errorf("Error save or load consul: %s", err)
 	}
 
-	j.app.Logger.Infof("Delete old Playlist: %s\n", playlistIDold.String())
+	j.app.Logger.Infof("Delete old Playlist: %s", playlistIDold.String())
 	err = j.app.Service.Playlist.DeletePlaylist(ctx, playlistIDold.String())
 	if err != nil {
 		j.app.Logger.Errorf("Error delete old Playlist: %s", err)
 		return
 	}
-	j.app.Logger.Infof("Generate new Playlist: %s\n", playlistID.String())
+	j.app.Logger.Infof("Generate new Playlist: %s", playlistID.String())
 	// Create new Playlist
 	// Generate a unique ID for the new playlist_handler (you can use your own method)
 	newPlaylist := model.PLayList{
@@ -109,7 +109,7 @@ func saveConsulState(_ context.Context, logger *logs.Logger, key string, value u
 	// Try to get the existing value for the key from Consul
 	kv, _, err := client.KV().Get(key, nil)
 	if err != nil {
-		logger.Error("Error fetching key from Consul:", err)
+		logger.Errorf("Error fetching key from Consul: %s", err)
 		return uuid.Nil, err
 	}
 
@@ -117,12 +117,12 @@ func saveConsulState(_ context.Context, logger *logs.Logger, key string, value u
 	if kv != nil && len(kv.Value) > 0 {
 		existingValue, errParse := uuid.Parse(string(kv.Value)) // Convert the stored value back to UUID
 		if errParse != nil {
-			logger.Error("Error parsing existing UUID from Consul:", errParse)
+			logger.Errorf("Error parsing existing UUID from Consul: %s", errParse)
 			return uuid.Nil, errParse
 		}
 
 		// Log the existing value
-		logger.Infof("Key exists in Consul with value: %s, updating to new value: %s.\n", existingValue, valueStr)
+		logger.Infof("Key exists in Consul with value: %s, updating to new value: %s.", existingValue, valueStr)
 
 		// Update the value in Consul
 		kvPair := &api.KVPair{
@@ -140,14 +140,14 @@ func saveConsulState(_ context.Context, logger *logs.Logger, key string, value u
 	}
 
 	// If the key does not exist, create it
-	logger.Infof("Key %s does not exist in Consul, creating new key.\n", key)
+	logger.Infof("Key %s does not exist in Consul, creating new key.", key)
 	kvPair := &api.KVPair{
 		Key:   key,
 		Value: []byte(valueStr),
 	}
 	_, err = client.KV().Put(kvPair, nil)
 	if err != nil {
-		logger.Error("Error creating key in Consul:", err)
+		logger.Errorf("Error creating key in Consul: %s", err)
 		return uuid.Nil, err
 	}
 

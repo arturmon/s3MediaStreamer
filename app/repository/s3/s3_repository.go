@@ -129,7 +129,7 @@ func (h *Repository) DownloadFilesS3Stream(ctx context.Context, name string, cal
 	defer func(object *minio.Object) {
 		err = object.Close()
 		if err != nil {
-
+			return
 		}
 	}(object)
 

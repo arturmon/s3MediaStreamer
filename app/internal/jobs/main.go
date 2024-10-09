@@ -32,7 +32,7 @@ func InitJob(app *app.App) error {
 
 	// Fetch initial schedules from Consul
 	if err := jobScheduler.scheduleJobsFromConsul(app); err != nil {
-		app.Logger.Error("Failed to schedule jobs from Consul:", err)
+		app.Logger.Errorf("Failed to schedule jobs from Consul: %s", err)
 		return err
 	}
 
@@ -50,7 +50,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 		key := js.keyPrefix + jobConfig.Name
 		interval, err := app.Service.ConsulKV.FetchConsulConfig(key, jobConfig.StartJob)
 		if err != nil {
-			app.Logger.Error("Failed to fetch Consul config for job:", jobConfig.Name, err)
+			app.Logger.Errorf("Failed to fetch Consul config for job: %s err: %s", jobConfig.Name, err)
 			return err
 		}
 
@@ -92,7 +92,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 		}
 
 		if err != nil {
-			app.Logger.Error("Failed to schedule job:", jobConfig.Name, err)
+			app.Logger.Errorf("Failed to schedule job: %s err: %s", jobConfig.Name, err)
 			return err
 		}
 
@@ -109,7 +109,7 @@ func (js *JobScheduler) watchConsulForChanges(app *app.App) {
 	for {
 		// Re-schedule jobs if configuration in Consul changes
 		if err := js.scheduleJobsFromConsul(app); err != nil {
-			app.Logger.Error("Failed to reschedule jobs from Consul:", err)
+			app.Logger.Errorf("Failed to reschedule jobs from Consul: %s", err)
 		}
 
 		// Poll interval before checking Consul again
