@@ -58,20 +58,20 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 		lastConfig, configExists := js.jobConfigMap[jobConfig.Name]
 		if !configExists || lastConfig != interval {
 			// Log the configuration change
-			app.Logger.Info("Job configuration changed:", jobConfig.Name, " from:", lastConfig, " to:", interval)
+			app.Logger.Infof("Job configuration changed: %s from: %s to: %s", jobConfig.Name, lastConfig, interval)
 
 			// Update the stored configuration
 			js.jobConfigMap[jobConfig.Name] = interval
 		} else {
 			// Skip scheduling if the configuration hasn't changed
-			app.Logger.Debug("No change in job configuration for:", jobConfig.Name)
+			app.Logger.Debugf("No change in job configuration for: %s", jobConfig.Name)
 			continue
 		}
 
 		// Stop existing job if it exists
 		if entryID, entryExists := js.jobEntryMap[jobConfig.Name]; entryExists {
 			jobrunner.Remove(entryID)
-			app.Logger.Info("Removed existing job:", jobConfig.Name)
+			app.Logger.Infof("Removed existing job: %s", jobConfig.Name)
 		}
 
 		// Schedule the job based on the function name specified in the configuration

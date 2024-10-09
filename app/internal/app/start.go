@@ -28,10 +28,10 @@ func StartPprofServer(logger *logs.Logger) {
 	}
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Fatal(err)
+		logger.Fatal(err.Error())
 	}
 
-	logger.Println("Use endpoint ppof http://localhost:6060/debug/pprof/")
+	logger.Info("Use endpoint ppof http://localhost:6060/debug/pprof/")
 }
 
 func (a *App) Run(ctx context.Context) {

@@ -29,7 +29,7 @@ func NewTrackHandler(
 // Wrapper with user role and ID check, including logging
 func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userContext *model.UserContext)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		h.logger.Println("Checking user role and ID in session data")
+		h.logger.Info("Checking user role and ID in session data")
 
 		// Perform user role and user ID check
 		userRole, userID, err := h.ReadUserIDAndRole(c)
@@ -46,7 +46,7 @@ func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userCont
 		}
 
 		// Log the successfully extracted user role and ID
-		h.logger.Printf("User role: %s, User ID: %s - Success extracted in session data", userRole, userID)
+		h.logger.Infof("User role: %s, User ID: %s - Success extracted in session data", userRole, userID)
 
 		// Call the original handler with userContext
 		handler(c, userContext)

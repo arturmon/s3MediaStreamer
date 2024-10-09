@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginPrometheus "github.com/penglongli/gin-metrics/ginmetrics"
+	sloggin "github.com/samber/slog-gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
@@ -36,7 +37,17 @@ func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *g
 	router.Use(gin.Recovery())
 
 	router.Use(otelgin.Middleware("s3MediaStreamer"))
-	router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
+	//router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
+	config := sloggin.Config{
+		WithSpanID:         cfg.AppConfig.Web.Debug.WithSpanID,
+		WithTraceID:        cfg.AppConfig.Web.Debug.WithTraceID,
+		WithRequestBody:    cfg.AppConfig.Web.Debug.WithRequestBody,
+		WithResponseBody:   cfg.AppConfig.Web.Debug.WithResponseBody,
+		WithRequestHeader:  cfg.AppConfig.Web.Debug.WithRequestHeader,
+		WithResponseHeader: cfg.AppConfig.Web.Debug.WithResponseHeader,
+	}
+	router.Use(sloggin.New(logger.WithGroup("http")))
+	router.Use(sloggin.NewWithConfig(logger.Slog(), config))
 
 	logger.Info("prometheus initializing")
 
@@ -81,7 +92,7 @@ func (a *App) startServer() *http.Server {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			a.Logger.Fatal("HTTP server error:", err)
+			a.Logger.Fatalf("HTTP server error: %s", err)
 		}
 	}()
 
@@ -93,10 +104,6 @@ func (a *App) shutdownServer(server *http.Server) {
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		a.Logger.Fatal("HTTP server shutdown error:", err)
+		a.Logger.Fatalf("HTTP server shutdown error: %s", err)
 	}
-}
-
-func LogWithLogrusf(logger *logs.Logger, format string, args ...interface{}) {
-	logger.Debugf(format, args...)
 }

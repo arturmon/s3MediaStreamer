@@ -11,13 +11,13 @@ import (
 func (s *Service) HandleMessage(ctx context.Context, messageBody map[string]interface{}) {
 	s3event, errExtract := s.extractRecordsEvent(messageBody)
 	if errExtract != nil {
-		s.logger.Printf("Error extract message: %v", errExtract)
+		s.logger.Infof("Error extract message: %v", errExtract)
 		return
 	}
 
 	action, ok := messageBody["EventName"].(string)
 	if !ok {
-		s.logger.Println("Invalid action field")
+		s.logger.Error("Invalid action field")
 		return
 	}
 
@@ -25,13 +25,13 @@ func (s *Service) HandleMessage(ctx context.Context, messageBody map[string]inte
 	case "s3:ObjectRemoved:Delete":
 		err := s.deleteEvent(ctx, s3event)
 		if err != nil {
-			s.logger.Printf("Error handling deleteEvent: %v", err)
+			s.logger.Errorf("Error handling deleteEvent: %v", err)
 			return
 		}
 	case "s3:ObjectCreated:Put":
 		err := s.putEvent(ctx, s3event)
 		if err != nil {
-			s.logger.Printf("Error handling putEvent: %v", err)
+			s.logger.Errorf("Error handling putEvent: %v", err)
 			return
 		}
 	default:
@@ -46,7 +46,7 @@ func (s *Service) deleteEvent(ctx context.Context, s3event *model.MessageBody) e
 	}
 	err = s.track.CleanTracks(ctx)
 	if err != nil {
-		s.logger.Printf("Error deleting filename: %v\n", err)
+		s.logger.Errorf("Error deleting filename: %v\n", err)
 		return err
 	}
 	return nil
@@ -85,7 +85,7 @@ func (s *Service) checkObjectS3(ctx context.Context, object *model.MessageBody, 
 	// Download file data from S3
 	fileName, err := s.s3.DownloadFilesS3(ctx, object.Key)
 	if err != nil {
-		c.logger.Printf("Error downloading file %s from S3: %v\n", object.Key, err)
+		c.logger.Errorf("Error downloading file %s from S3: %v\n", object.Key, err)
 		return err
 	}
 
@@ -96,12 +96,12 @@ func (s *Service) checkObjectS3(ctx context.Context, object *model.MessageBody, 
 		return err
 	}
 	if errReadTags != nil {
-		c.logger.Printf("Error processing file: %s Error: %v\n", object.Records[0].S3.Object.Key, errReadTags)
+		c.logger.Errorf("Error processing file: %s Error: %v\n", object.Records[0].S3.Object.Key, errReadTags)
 		return err
 	}
 	err = s.checkIfTrackExists(ctx, objectTags, object.Records[0].S3.Object.VersionID, c)
 	if err != nil {
-		c.logger.Printf("%v\n", err)
+		c.logger.Errorf("%v\n", err)
 	}
 	return nil
 }
@@ -118,7 +118,7 @@ func (s *Service) checkIfTrackExists(ctx context.Context, track *model.Track, s3
 }
 
 func (s *Service) handleNonexistentTrack(ctx context.Context, track *model.Track, s3id string, c *Service) error {
-	c.logger.Printf("Track Artist: %s not found in the database.\n", track.Title)
+	c.logger.Infof("Track Artist: %s not found in the database.\n", track.Title)
 
 	existingTracksSlice := []model.Track{*track}
 	if len(existingTracksSlice) == 1 {
@@ -126,14 +126,14 @@ func (s *Service) handleNonexistentTrack(ctx context.Context, track *model.Track
 			return fmt.Errorf("error creating track_handler: %w", err)
 		}
 	} else {
-		c.logger.Printf("Track with Artist %s already exists\n", track.Artist)
+		c.logger.Errorf("Track with Artist %s already exists\n", track.Artist)
 	}
 
 	err := s.s3.AddS3Version(ctx, existingTracksSlice[0].ID.String(), s3id)
 	if err != nil {
 		return fmt.Errorf("error add s3 track_handler: %w", err)
 	}
-	c.logger.Printf("Track Artist: %s save to database.\n", track.Artist)
+	c.logger.Infof("Track Artist: %s save to database.\n", track.Artist)
 	return nil
 }
 

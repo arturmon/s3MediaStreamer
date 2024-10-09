@@ -57,18 +57,15 @@ func main() {
 	ctx = context.WithValue(ctx, contextKey("appInfo"), appInfo)
 
 	cfg := config.GetConfig()
-	logger := logs.GetLogger(
-		cfg.AppConfig.LogLevel,
-		cfg.AppConfig.LogType,
-		cfg.AppConfig.LogGelfServer,
-		cfg.AppConfig.LogGelfServerType,
-		appName,
-	)
+
+	initConfLogger := logs.InitConfLogger(cfg)
+	logger := logs.GetLogger(ctx, initConfLogger, appInfo)
+
 	appsInfo, _ := ctx.Value(contextKey("appInfo")).(*model.AppInfo)
 	logger.Infof("App Info: Name: %s, Version: %s, Build Time: %s", appsInfo.AppName, appsInfo.Version, appsInfo.BuildTime)
 	logger.Info("config initialize")
-	logger.Infof("Logger initialized with level: %s, type: %s", cfg.AppConfig.LogLevel, cfg.AppConfig.LogType)
-	if cfg.AppConfig.LogLevel == "debug" {
+	logger.Infof("Logger initialized with level: %s, type: %s", cfg.AppConfig.Logs.Level, cfg.AppConfig.Logs.Type)
+	if cfg.AppConfig.Logs.Level == "debug" {
 		config.PrintAllDefaultEnvs(logger)
 		go app.StartPprofServer(logger)
 	}

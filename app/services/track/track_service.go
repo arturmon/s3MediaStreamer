@@ -144,7 +144,7 @@ func (s *Service) GetTracksService(c *gin.Context, page, pageSize, filter string
 	// Retrieve paginated tracks from the storage
 	tracks, countTotal, err := s.GetTracks(c.Request.Context(), offset, pageSizeInt, sortBy, sortOrder, filter, "", "")
 	if err != nil {
-		s.logger.Error(err)
+		s.logger.Error(err.Error())
 
 		return nil, 0, 0, 0, &model.RestError{Code: http.StatusInternalServerError, Err: "Internal Server Error"}
 	}
@@ -163,7 +163,7 @@ func (s *Service) GetTrackByID(c *gin.Context, id string) (*model.Track, *model.
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, &model.RestError{Code: http.StatusNotFound, Err: "track_handler not found"}
 		}
-		s.logger.Error(err)
+		s.logger.Error(err.Error())
 		return nil, &model.RestError{Code: http.StatusInternalServerError, Err: "Internal Server Error"}
 	}
 

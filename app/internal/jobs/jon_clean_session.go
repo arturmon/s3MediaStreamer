@@ -11,11 +11,11 @@ import (
 
 func (j *CleanOldSessionJob) Run() {
 	if !j.app.Service.ConsulElection.IsLeader() {
-		j.app.Logger.Println("I'm not the leader.")
+		j.app.Logger.Info("I'm not the leader.")
 		return
 	}
 
-	j.app.Logger.Println("Start Clean old session storage...")
+	j.app.Logger.Info("Start Clean old session storage...")
 
 	var dbPool *pgxpool.Pool
 
@@ -41,9 +41,9 @@ func (j *CleanOldSessionJob) Run() {
 
 	err := CleanSessions(dbPool)
 	if err != nil {
-		j.app.Logger.Fatal(err)
+		j.app.Logger.Fatal(err.Error())
 	}
-	j.app.Logger.Printf("complete Clean old session storage.")
+	j.app.Logger.Info("complete Clean old session storage.")
 }
 
 func CleanSessions(pool *pgxpool.Pool) error {

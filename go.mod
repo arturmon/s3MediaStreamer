@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.21.6
 
 require (
+	github.com/Graylog2/go-gelf v0.0.0-20170811154226-7ebf4f536d8f
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/arturmon/consul-leader-election v1.2.6
 	github.com/bamzi/jobrunner v1.0.0
@@ -35,6 +36,11 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.20.4
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/slog-gin v1.13.5
+	github.com/samber/slog-graylog/v2 v2.7.0
+	github.com/samber/slog-kafka/v2 v2.6.0
+	github.com/samber/slog-telegram/v2 v2.4.0
+	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.9.0
@@ -84,6 +90,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -125,6 +132,7 @@ require (
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
+	github.com/pierrec/lz4/v4 v4.1.16 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
@@ -132,6 +140,8 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/rs/xid v1.6.0 // indirect
+	github.com/samber/lo v1.44.0 // indirect
+	github.com/samber/slog-common v0.17.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect

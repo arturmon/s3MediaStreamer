@@ -150,7 +150,7 @@ func ReadSessionInfoOnKey(logger *logs.Logger, consulClient *api.Client) error {
 		return err
 	}
 	for _, session := range listSession {
-		logger.Printf("Session ID: %s Node: %s Name: %s CreateIndex: %d", session.ID, session.Node, session.Name, session.CreateIndex)
+		logger.Infof("Session ID: %s Node: %s Name: %s CreateIndex: %d", session.ID, session.Node, session.Name, session.CreateIndex)
 		// Print more session information if needed
 	}
 	return nil

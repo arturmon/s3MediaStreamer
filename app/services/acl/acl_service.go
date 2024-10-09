@@ -82,7 +82,7 @@ func (s *Service) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.
 				return
 			}
 			// Handle other errors
-			logger.Println("JWT Cookie Error:", err)
+			logger.Errorf("JWT Cookie Error: %s", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
@@ -97,7 +97,7 @@ func (s *Service) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.
 		})
 		if err != nil || !token.Valid {
 			// Handle invalid or expired token
-			logger.Println("JWT Parse Error:", err)
+			logger.Errorf("JWT Parse Error: %s", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
@@ -105,7 +105,7 @@ func (s *Service) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			// Handle invalid claims format
-			logger.Println("JWT Claims Error:", err)
+			logger.Errorf("JWT Claims Error: %s", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, model_all.ErrorResponse{Message: "unauthenticated"})
 			return
 		}
@@ -142,7 +142,7 @@ func (s *Service) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *log
 		logger.Debugf("Role: %s, Path: %s, Method: %s, Allowed: %t\n", role, path, method, allowed)
 		if err != nil {
 			// Handle error
-			logger.Println("Authorization Error:", err)
+			logger.Errorf("Authorization Error: %s", err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, model_all.ErrorResponse{Message: "internal server error"})
 			return
 		}

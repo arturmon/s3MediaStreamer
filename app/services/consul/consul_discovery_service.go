@@ -40,7 +40,7 @@ func NewService(appName string, cfg *model.Config, logger *logs.Logger) *Service
 	consulConfig.WaitTime = time.Duration(cfg.Consul.WaitTime) * time.Second
 	client, err := api.NewClient(consulConfig)
 	if err != nil {
-		logger.Fatal("Failed to create Consul client:", err)
+		logger.Fatalf("Failed to create Consul client: %s", err)
 	}
 
 	for {
@@ -74,7 +74,7 @@ func (s *Service) UpdateHealthCheck() {
 	for {
 		err := s.ConsulClient.Agent().UpdateTTL(check, "online", api.HealthPassing)
 		if err != nil {
-			s.logger.Fatal(err)
+			s.logger.Fatal(err.Error())
 		}
 		<-ticker.C
 	}
@@ -83,7 +83,7 @@ func (s *Service) UpdateHealthCheck() {
 func (s *Service) RegisterService() {
 	port, err := strconv.Atoi(s.cfg.Listen.Port)
 	if err != nil {
-		s.logger.Fatal("Failed to register Consul services:", err) // handle error appropriately
+		s.logger.Fatalf("Failed to register Consul services: %s", err) // handle error appropriately
 	}
 	ip := s.GetLocalIP()
 
@@ -128,7 +128,7 @@ func (s *Service) RegisterService() {
 
 	err = s.ConsulClient.Agent().ServiceRegister(register)
 	if err != nil {
-		s.logger.Fatal(err)
+		s.logger.Fatal(err.Error())
 	}
 }
 
@@ -141,13 +141,13 @@ func (s *Service) SetupConsulWatch() {
 
 	plan, err := watch.Parse(query)
 	if err != nil {
-		s.logger.Fatal(err)
+		s.logger.Fatal(err.Error())
 	}
 
 	plan.HybridHandler = func(_ watch.BlockingParamVal, result interface{}) {
 		if msg, ok := result.([]*api.ServiceEntry); ok {
 			for _, entry := range msg {
-				s.logger.Debugln("new member joined", entry.Service)
+				s.logger.Debug("new member joined", entry.Service)
 			}
 		}
 	}

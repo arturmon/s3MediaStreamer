@@ -203,7 +203,7 @@ func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	// Delegate the task of adding the track or playlist to the repository layer
 	err := s.trackRepository.AddTrackToPlaylist(ctx, playlistID, referenceType, referenceID, parentPath) // Pass parentPath to the repository
 	if err != nil {
-		s.logger.Error(err)
+		s.logger.Error(err.Error())
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to add reference to playlist"}
 	}
 
@@ -332,7 +332,7 @@ func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, pla
 	// Step 2: Generate paths and validate tracks or playlists
 	stringPlaylistID, err := uuid.Parse(playlistID)
 	if err != nil {
-		s.logger.Printf("Invalid PlaylistID %s: %v\n", playlistID, err)
+		s.logger.Errorf("Invalid PlaylistID %s: %v\n", playlistID, err)
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Invalid parse PlaylistID string to UUID"}
 	}
 

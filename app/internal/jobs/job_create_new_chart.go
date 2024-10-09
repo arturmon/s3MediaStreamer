@@ -16,11 +16,11 @@ const timeFormat = "2006-01-02 15:04:05"
 func (j *CreateNewMusicChartJob) Run() {
 	ctx := context.Background()
 	if !j.app.Service.ConsulElection.IsLeader() {
-		j.app.Logger.Println("I'm not the leader.")
+		j.app.Logger.Info("I'm not the leader.")
 		return
 	}
 
-	j.app.Logger.Println("Start Job Create New Music chart...")
+	j.app.Logger.Info("Start Job Create New Music chart...")
 
 	page, pageSize := 0, 100
 	sortBy, sortOrder := "updated_at", "DESC"
@@ -31,11 +31,11 @@ func (j *CreateNewMusicChartJob) Run() {
 	tracks, _, err := j.app.Service.Track.GetTracks(ctx, page, pageSize, sortBy, sortOrder, "", startTime, endTime)
 
 	if err != nil {
-		j.app.Logger.Println("Error fetching tracks:", err)
+		j.app.Logger.Errorf("Error fetching tracks: %s", err)
 		return
 	}
 	if tracks == nil {
-		j.app.Logger.Println("No new products appeared")
+		j.app.Logger.Info("No new products appeared")
 		return
 	}
 	playlistID := uuid.New()
@@ -44,13 +44,13 @@ func (j *CreateNewMusicChartJob) Run() {
 	j.app.Logger.Infof("Save playlistID consul:%s\n", playlistID.String())
 	playlistIDold, err := saveConsulState(ctx, j.app.Logger, consulSaveKey, playlistID, j.app.Service.ConsulService.ConsulClient)
 	if err != nil {
-		j.app.Logger.Println("Error save or load consul:", err)
+		j.app.Logger.Errorf("Error save or load consul: %s", err)
 	}
 
 	j.app.Logger.Infof("Delete old Playlist: %s\n", playlistIDold.String())
 	err = j.app.Service.Playlist.DeletePlaylist(ctx, playlistIDold.String())
 	if err != nil {
-		j.app.Logger.Println("Error delete old Playlist:", err)
+		j.app.Logger.Errorf("Error delete old Playlist: %s", err)
 		return
 	}
 	j.app.Logger.Infof("Generate new Playlist: %s\n", playlistID.String())
@@ -66,7 +66,7 @@ func (j *CreateNewMusicChartJob) Run() {
 
 	err = j.app.Service.Playlist.CreatePlayListName(ctx, newPlaylist)
 	if err != nil {
-		j.app.Logger.Println("Error create new Playlist:", err)
+		j.app.Logger.Errorf("Error create new Playlist: %s", err)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (j *CreateNewMusicChartJob) Run() {
 		&request,
 		false,
 	); errRest != nil {
-		j.app.Logger.Println("Error add tracks to new Playlist:")
+		j.app.Logger.Errorf("Error add tracks to new Playlist: %s", err)
 		return
 	}
 

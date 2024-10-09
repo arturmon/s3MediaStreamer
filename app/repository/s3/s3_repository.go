@@ -46,10 +46,10 @@ func (h *Repository) UploadFilesS3(ctx context.Context, upload *model.UploadS3) 
 		upload.FilePath,
 		minio.PutObjectOptions{ContentType: upload.ContentType})
 	if err != nil {
-		h.logger.Fatalln(err)
+		h.logger.Fatal(err.Error())
 	}
 
-	h.logger.Printf("Successfully uploaded %s of size %d\n", upload.ObjectName, info.Size)
+	h.logger.Infof("Successfully uploaded %s of size %d\n", upload.ObjectName, info.Size)
 	return nil
 }
 
@@ -57,7 +57,7 @@ func (h *Repository) DownloadFilesS3(ctx context.Context, name string) (string, 
 	// Extract the object name after the last "/"
 	objectName := filepath.Base(name)
 	tempDir := os.TempDir()
-	h.logger.Debugln("Temporary directory:", tempDir)
+	h.logger.Debug("Temporary directory: ", tempDir)
 	fullFilePath := tempDir + "/" + objectName
 
 	err := h.s3Client.FGetObject(ctx, h.cfg.AppConfig.S3.BucketName, objectName, fullFilePath, minio.GetObjectOptions{})

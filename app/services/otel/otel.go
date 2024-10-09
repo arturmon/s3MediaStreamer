@@ -57,7 +57,7 @@ func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error)
 
 	tp, tpErr := jaegerTraceProvider(ctx, config)
 	if tpErr != nil {
-		config.Logger.Fatal(tpErr)
+		config.Logger.Fatal(tpErr.Error())
 		return nil, tpErr
 	}
 	otel.SetTracerProvider(tp)

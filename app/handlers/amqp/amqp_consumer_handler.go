@@ -63,7 +63,7 @@ func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logg
 
 			notificationChannel, err := messageClient.Consume(ctx)
 			if err != nil {
-				logger.Printf("Error getting objectInfo: %v\n", err)
+				logger.Errorf("Error getting objectInfo: %v\n", err)
 				time.Sleep(reconnectSleepSeconds * time.Second)
 				continue
 			}

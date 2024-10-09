@@ -42,7 +42,7 @@ func (c *Handler) StartAMQPConsumers(ctx context.Context, logger *logs.Logger, m
 	go func() {
 		if err := c.ConsumeMessagesWithPool(ctx, logger, messageClient, numWorkers, workerDone); err != nil {
 			// Handle error
-			logger.Fatal(err)
+			logger.Fatal(err.Error())
 		}
 	}()
 }

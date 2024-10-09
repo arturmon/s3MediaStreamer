@@ -10,15 +10,15 @@ import (
 func (j *CleanS3Job) Run() {
 	ctx := context.Background()
 	if !j.app.Service.ConsulElection.IsLeader() {
-		j.app.Logger.Println("I'm not the leader.")
+		j.app.Logger.Info("I'm not the leader.")
 		return
 	}
 
-	j.app.Logger.Println("Start Job Clean empty tags s3 files...")
+	j.app.Logger.Info("Start Job Clean empty tags s3 files...")
 
 	listObject, err := j.app.Service.S3Storage.ListObjectS3(ctx)
 	if err != nil {
-		j.app.Logger.Printf("Error listing objects in S3: %v\n", err)
+		j.app.Logger.Errorf("Error listing objects in S3: %v\n", err)
 		return
 	}
 
@@ -28,7 +28,7 @@ func (j *CleanS3Job) Run() {
 
 	j.processS3Objects(ctx, listObject)
 
-	j.app.Logger.Println("complete Job Clean empty tags s3 files")
+	j.app.Logger.Info("complete Job Clean empty tags s3 files")
 }
 
 func (j *CleanS3Job) processS3Objects(ctx context.Context, listObject []minio.ObjectInfo) {
@@ -65,7 +65,7 @@ func (j *CleanS3Job) processS3Object(ctx context.Context, wg *sync.WaitGroup, ob
 func (j *CleanS3Job) processS3ObjectContent(ctx context.Context, obj minio.ObjectInfo) {
 	fileName, errDownS3 := j.app.Service.S3Storage.DownloadFilesS3(ctx, obj.Key)
 	if errDownS3 != nil {
-		j.app.Logger.Printf("Error downloading file %s from S3: %v\n", obj.Key, errDownS3)
+		j.app.Logger.Errorf("Error downloading file %s from S3: %v\n", obj.Key, errDownS3)
 		return
 	}
 
@@ -74,10 +74,10 @@ func (j *CleanS3Job) processS3ObjectContent(ctx context.Context, obj minio.Objec
 	// Create a Track from the file data
 	_, errReadTags := j.app.Service.Tags.ReadTags(fileName)
 	if errReadTags != nil {
-		j.app.Logger.Printf("Find empty tags in file: %s\n", obj.Key)
+		j.app.Logger.Errorf("Find empty tags in file: %s\n", obj.Key)
 		err := j.app.Service.S3Storage.DeleteObjectS3(ctx, &obj)
 		if err != nil {
-			j.app.Logger.Printf("Error delete file %s from S3: %v\n", obj.Key, err)
+			j.app.Logger.Errorf("Error delete file %s from S3: %v\n", obj.Key, err)
 		}
 	}
 
