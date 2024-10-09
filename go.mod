@@ -23,7 +23,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/consul/api v1.29.2
+	github.com/hashicorp/consul/api v1.29.4
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/mdns v1.0.4
 	github.com/ilyakaznacheev/cleanenv v1.5.0
