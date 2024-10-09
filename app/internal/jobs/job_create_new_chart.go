@@ -131,7 +131,7 @@ func saveConsulState(_ context.Context, logger *logs.Logger, key string, value u
 		}
 		_, err = client.KV().Put(kvPair, nil)
 		if err != nil {
-			logger.Error("Error updating key in Consul:", err)
+			logger.Errorf("Error updating key in Consul: %s", err)
 			return uuid.Nil, err
 		}
 
