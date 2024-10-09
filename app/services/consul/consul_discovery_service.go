@@ -147,7 +147,7 @@ func (s *Service) SetupConsulWatch() {
 	plan.HybridHandler = func(_ watch.BlockingParamVal, result interface{}) {
 		if msg, ok := result.([]*api.ServiceEntry); ok {
 			for _, entry := range msg {
-				s.logger.Debug("new member joined", entry.Service)
+				s.logger.With("new member joined", entry.Service)
 			}
 		}
 	}

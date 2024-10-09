@@ -87,7 +87,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 			job := NewCreateNewMusicChartJob(app)
 			err = jobrunner.Schedule(interval, job)
 		default:
-			app.Logger.Warn("Unknown job function:", jobConfig.Name)
+			app.Logger.Warnf("Unknown job function: %s", jobConfig.Name)
 			continue
 		}
 
@@ -98,7 +98,7 @@ func (js *JobScheduler) scheduleJobsFromConsul(app *app.App) error {
 
 		// Store the new EntryID in the map
 		js.jobEntryMap[jobConfig.Name] = entryID
-		app.Logger.Info("Successfully scheduled job:", jobConfig.Name, "with interval:", interval)
+		app.Logger.Infof("Successfully scheduled job: %s with interval: %s", jobConfig.Name, interval)
 	}
 
 	return nil

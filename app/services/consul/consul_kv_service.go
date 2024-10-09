@@ -38,7 +38,7 @@ func (k *KVService) GetFromConsul(key string) ([]byte, error) {
 
 	// Handle the case where the key is not found (kv is nil).
 	if kv == nil {
-		k.logger.Warn("Key not found in Consul:", key)
+		k.logger.Warnf("Key not found in Consul: %s", key)
 		return nil, nil // Return nil, indicating the key does not exist.
 	}
 
@@ -67,7 +67,7 @@ func (k *KVService) FetchConsulConfig(key string, defaultValue string) (string, 
 	}
 
 	if value == nil {
-		k.logger.Warn("Key not found in Consul, creating with default value:", key)
+		k.logger.Warnf("Key not found in Consul, creating with default value: %s", key)
 		err = k.PutToConsul(key, defaultValue)
 		if err != nil {
 			return "", err
