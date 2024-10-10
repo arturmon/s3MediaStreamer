@@ -22,9 +22,18 @@ func RunMigrations(_ context.Context, connectionString string) error {
 	// Apply pending migrations
 	migrateErr := m.Up()
 	if migrateErr != nil {
-		if !errors.Is(migrateErr, migrate.ErrNoChange) {
-			return fmt.Errorf("failed to apply migrations: %w", migrateErr)
+		if errors.Is(migrateErr, migrate.ErrNoChange) {
+			return nil // No migrations to apply, so we return without error.
 		}
+
+		// Attempt to rollback in case of failure
+		rollbackErr := m.Down()
+		if rollbackErr != nil {
+			return fmt.Errorf("failed to apply migrations and failed to rollback: %w", rollbackErr)
+		}
+
+		return fmt.Errorf("failed to apply migrations, rolled back successfully: %w", migrateErr)
 	}
+
 	return nil
 }
