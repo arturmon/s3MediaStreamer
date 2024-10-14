@@ -29,7 +29,7 @@ func NewHandlers(ctx context.Context, app *app.App) *Handlers {
 	healthHandler := healthhandler.NewMonitoringHandler(*app.Service.Health)
 	jobHandler := jobshandler.NewJobHandler()
 	trackHandler := trackhandler.NewTrackHandler(*app.Service.Track)
-	userHandler := userhandler.NewUserHandler(*app.Service.ACL, *app.Service.User, *app.Service.AccessControl)
+	userHandler := userhandler.NewUserHandler(*app.Service.ACL, *app.Service.User, *app.Service.AccessControl, app.Service.MetricsMonitor)
 	playlistHandler := playlisthandler.NewPlaylistHandler(*app.Service.Playlist, *userHandler)
 	otpHandler := otphandler.NewOtpHandler(*app.Service.OTP)
 	messageRepo, err := amqp2.NewRabbitMQHandlerWrapper(ctx, app.Cfg, app.Logger, app.Service.InitRepo.InitConnect.RabbitCon, *app.Service.Message)
