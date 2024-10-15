@@ -32,3 +32,4 @@ chart/Chart.lock
 # Ignore DevSpace cache and log folder
 .devspace/
 
+http-client.private.env.json
