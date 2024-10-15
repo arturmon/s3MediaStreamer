@@ -37,4 +37,10 @@ kubectl port-forward service/postgresql 5432:5432 -n database > /dev/null 2>&1 &
 devspace use namespace media & devspace dev
 ```
 
-```
+### Devspace container command
+
+- Run DLV `app_debug`
+- Run `app_run`
+- Run build `app_build`
+- Synchronize `app_sync`
+- View all aliases use: `alias`
