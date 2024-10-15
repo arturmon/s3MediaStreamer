@@ -116,14 +116,16 @@ stream audio
 
 ## API PLayList
 
-| url                                  | code             | method | function           |
-|--------------------------------------|------------------|--------|--------------------|
-| /:playlist_id/add/track/:track_id    | 201/400/404/500  | POST   | AddToPlaylist      |
-| /:playlist_id/remove/track/:track_id | 200/400/404/500  | DELETE | RemoveFromPlaylist |
-| /:playlist_id/clear                  | 200/400/404/500  | DELETE | ClearPlaylist      |
-| /create                              | 201/400/404/500  | POST   | CreatePlaylist     |
-| /delete/:id                          | 204/400/404/500  | DELETE | DeletePlaylist     |
-| /:playlist_id/set                    | 200/400/404/500  | POST   | SetFromPlaylist    |
+| url                     | code            | method | function               |
+|-------------------------|-----------------|--------|------------------------|
+| /:playlist_id/:track_id | 201/400/404/500 | POST   | AddToPlaylist          |
+| /:playlist_id/:track_id | 200/400/404/500 | DELETE | RemoveFromPlaylist     |
+| /:playlist_id/clear     | 200/400/404/500 | DELETE | ClearPlaylist          |
+| /create                 | 201/400/404/500 | POST   | CreatePlaylist         |
+| /:playlist_id           | 204/400/404/500 | DELETE | DeletePlaylist         |
+| /:playlist_id           | 200/400/401/500 | GET    | ListTracksFromPlaylist |
+| /get                    | 200/404/500     | GET    | ListPlaylists          |
+| /:playlist_id/tracks    | 200/400/401/500 | POST   | AddTracksToPlaylist    |
 
 /playlist/79bb1214-ac3a-4233-9925-a9ed232dd320/add/track/679fcd2d-3eee-4f94-8989-06765b3b5426
 ```json
