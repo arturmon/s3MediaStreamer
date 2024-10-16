@@ -9,11 +9,11 @@ import (
 
 func NewMonitoringService(postgresMetrics *connect.DBMetrics) *CombinedMetrics {
 	registry := prometheus.NewRegistry()
-	UserMetrics := NewMetrics(registry)
+	userMetrics := NewMetrics(registry)
 
 	return &CombinedMetrics{
 		PostgresMetrics: postgresMetrics,
-		UserMetrics:     UserMetrics,
+		UserMetrics:     userMetrics,
 	}
 }
 
