@@ -23,8 +23,6 @@ import (
 	"s3MediaStreamer/app/services/track"
 	"s3MediaStreamer/app/services/tree"
 	"s3MediaStreamer/app/services/user"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 func initServices(ctx context.Context,
@@ -47,9 +45,7 @@ func initServices(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	registry := prometheus.NewRegistry()
-	metrics := monitoring.NewMetrics(registry)
-	// metricsMonitorService := monitoring.NewMonitoringService()
+	metricsMonitorService := monitoring.NewMonitoringService(repo.InitConnect.metrics)
 
 	accessControlService := auth.NewAuthService(repo.PgRepo)
 	treeService := tree.NewTreeService()
@@ -86,7 +82,7 @@ func initServices(ctx context.Context,
 		AuthCache:       cashingService,
 		S3Storage:       s3Service,
 		TracingProvider: tracingService,
-		MetricsMonitor:  metrics,
+		MetricsMonitor:  metricsMonitorService,
 		AccessControl:   accessControlService,
 		Audio:           audioService,
 		Track:           trackService,

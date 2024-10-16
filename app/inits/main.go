@@ -2,6 +2,7 @@ package inits
 
 import (
 	"context"
+	"s3MediaStreamer/app/connect"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
 	repoDB "s3MediaStreamer/app/repository/postgres"
@@ -38,6 +39,7 @@ type initConnect struct {
 	s3Client     *minio.Client
 	pgClient     *repoDB.Client
 	SessionStore sessions.Store
+	metrics      *connect.DBMetrics
 }
 
 type initRepo struct {
@@ -55,7 +57,7 @@ type Service struct {
 	AuthCache       *cashing.CachingService
 	S3Storage       *s3.Service
 	TracingProvider *otel.Provider
-	MetricsMonitor  *monitoring.Metrics
+	MetricsMonitor  *monitoring.CombinedMetrics
 	AccessControl   *auth.Service
 	Audio           *audio.Service
 	Track           *track.Service

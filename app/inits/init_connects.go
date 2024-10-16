@@ -21,7 +21,7 @@ func initConnects(ctx context.Context, cfg *model.Config, logger *logs.Logger) (
 	if err != nil {
 		return nil, err
 	}
-	pgclient, err := connect.NewDBConfig(ctx, cfg, logger)
+	pgclient, metrics, err := connect.NewDBConfig(ctx, cfg, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -36,5 +36,6 @@ func initConnects(ctx context.Context, cfg *model.Config, logger *logs.Logger) (
 		s3Client:     s3client,
 		pgClient:     pgclient,
 		SessionStore: sessionclient,
+		metrics:      metrics,
 	}, nil
 }

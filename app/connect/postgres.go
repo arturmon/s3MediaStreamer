@@ -33,33 +33,34 @@ type StorageConfig struct {
 	pool     *pgxpool.Pool
 }
 
-func NewDBConfig(ctx context.Context, cfg *model.Config, logger *logs.Logger) (*postgres.Client, error) {
-	logger.Info("Starting Postgres connection initialization...")
-	pool, err := NewClient(ctx, MaxAttempts, MaxDelay, &StorageConfig{
+func NewDBConfig(ctx context.Context, cfg *model.Config, logger *logs.Logger) (*postgres.Client, *DBMetrics, error) {
+	logger.Info("Starting Postgres Connection...")
+	storageConfig := &StorageConfig{
 		Host:     cfg.Storage.Host,
 		Port:     cfg.Storage.Port,
 		Username: cfg.Storage.Username,
 		Password: cfg.Storage.Password,
 		Database: cfg.Storage.Database,
-	}, logger)
+	}
+	metrics, err := storageConfig.Connect(ctx, logger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to Postgres: %w", err)
+		return nil, nil, err
 	}
 	return &postgres.Client{
-		Pool: pool,
-	}, nil
+		Pool: storageConfig.pool,
+	}, metrics, nil
 }
 
-func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) error {
+func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) (*DBMetrics, error) {
 	startTime := time.Now()
-	metrics := NewDBPrometheusMetrics()
+	metrics := NewDBMetrics()
 	metrics.DatabaseConnectionAttemptCounter.Inc()
 
 	logger.Info("Attempting to connect to Postgres...")
 	pool, err := NewClient(ctx, MaxAttempts, MaxDelay, s, logger)
 	if err != nil {
 		metrics.DatabaseConnectionFailureCounter.Inc()
-		return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
+		return nil, fmt.Errorf("failed to connect to PostgreSQL: %w", err)
 	}
 	// Save the pool in the s structure for future use.
 	s.pool = pool
@@ -68,7 +69,7 @@ func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) error 
 	metrics.ResponseTimeDBConnect.Observe(duration.Seconds())
 	metrics.DatabaseConnectionSuccessCounter.Inc()
 	logger.Info("Successfully connected to Postgres")
-	return nil
+	return metrics, nil
 }
 
 func NewClient(ctx context.Context, maxAttempts int,
@@ -137,15 +138,15 @@ func DoWithAttempts(fn func() error, maxAttempts int, delay time.Duration) error
 	return err
 }
 
-type DBPrometheusMetrics struct {
+type DBMetrics struct {
 	DatabaseConnectionAttemptCounter prometheus.Counter
 	DatabaseConnectionSuccessCounter prometheus.Counter
 	DatabaseConnectionFailureCounter prometheus.Counter
 	ResponseTimeDBConnect            prometheus.Histogram
 }
 
-func NewDBPrometheusMetrics() *DBPrometheusMetrics {
-	return &DBPrometheusMetrics{
+func NewDBMetrics() *DBMetrics {
+	return &DBMetrics{
 		DatabaseConnectionAttemptCounter: promauto.NewCounter(prometheus.CounterOpts{
 			Name: "database_connection_attempt_total",
 			Help: "Total number of database connection attempts",

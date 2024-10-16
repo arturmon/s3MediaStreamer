@@ -1,15 +1,25 @@
 package monitoring
 
 import (
+	"s3MediaStreamer/app/connect"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-type Service struct {
+func NewMonitoringService(postgresMetrics *connect.DBMetrics) *CombinedMetrics {
+	registry := prometheus.NewRegistry()
+	UserMetrics := NewMetrics(registry)
+
+	return &CombinedMetrics{
+		PostgresMetrics: postgresMetrics,
+		UserMetrics:     UserMetrics,
+	}
 }
 
-func NewMonitoringService() *Service {
-	return &Service{}
+type CombinedMetrics struct {
+	PostgresMetrics *connect.DBMetrics // Postgres
+	UserMetrics     *Metrics           // User service metrics
 }
 
 type Metrics struct {

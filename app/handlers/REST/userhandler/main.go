@@ -20,10 +20,10 @@ type Handler struct {
 	acl         acl.Service
 	userService user.Service
 	authService auth.Service
-	metrics     *monitoring.Metrics
+	metrics     *monitoring.CombinedMetrics
 }
 
-func NewUserHandler(acl acl.Service, userService user.Service, authService auth.Service, metrics *monitoring.Metrics) *Handler {
+func NewUserHandler(acl acl.Service, userService user.Service, authService auth.Service, metrics *monitoring.CombinedMetrics) *Handler {
 	return &Handler{acl, userService, authService, metrics}
 }
 
@@ -44,7 +44,7 @@ func (h *Handler) Register(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Register")
 	defer span.End()
 
-	h.metrics.RegisterAttemptCounter.Inc()
+	h.metrics.UserMetrics.RegisterAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
@@ -54,12 +54,12 @@ func (h *Handler) Register(c *gin.Context) {
 
 	register, err := h.userService.Register(c.Request.Context(), data)
 	if err != nil {
-		h.metrics.RegisterErrorCounter.Inc()
+		h.metrics.UserMetrics.RegisterErrorCounter.Inc()
 		c.JSON(err.Code, err.Err)
 		return
 	}
 
-	h.metrics.RegisterSuccessCounter.Inc()
+	h.metrics.UserMetrics.RegisterSuccessCounter.Inc()
 
 	c.JSON(http.StatusCreated, register)
 }
@@ -80,11 +80,11 @@ func (h *Handler) Login(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Login")
 	defer span.End()
 
-	h.metrics.LoginAttemptCounter.Inc()
+	h.metrics.UserMetrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
-		h.metrics.LoginErrorCounter.Inc()
+		h.metrics.UserMetrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
@@ -92,15 +92,15 @@ func (h *Handler) Login(c *gin.Context) {
 	login, err := h.userService.Login(c, data)
 	if err != nil {
 		if err.Code == http.StatusUnauthorized {
-			h.metrics.ErrPasswordCounter.Inc() // Increment the incorrect password counter
+			h.metrics.UserMetrics.ErrPasswordCounter.Inc() // Increment the incorrect password counter
 		} else {
-			h.metrics.LoginErrorCounter.Inc() // Increment the login error counter
+			h.metrics.UserMetrics.LoginErrorCounter.Inc() // Increment the login error counter
 		}
 		c.JSON(err.Code, err.Err)
 		return
 	}
 
-	h.metrics.LoginSuccessCounter.Inc()
+	h.metrics.UserMetrics.LoginSuccessCounter.Inc()
 
 	c.JSON(http.StatusOK, login)
 }
@@ -120,7 +120,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "DeleteUser")
 	defer span.End()
 
-	h.metrics.DeleteUserAttemptCounter.Inc()
+	h.metrics.UserMetrics.DeleteUserAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
@@ -135,11 +135,11 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 
 	err := h.userService.DeleteUser(c.Request.Context(), email)
 	if err != nil {
-		h.metrics.DeleteUserErrorCounter.Inc()
+		h.metrics.UserMetrics.DeleteUserErrorCounter.Inc()
 		c.JSON(err.Code, err.Err)
 	}
 
-	h.metrics.DeleteUserSuccessCounter.Inc()
+	h.metrics.UserMetrics.DeleteUserSuccessCounter.Inc()
 
 	c.JSON(http.StatusOK, model.OkResponse{Message: "user deleted"})
 }
@@ -159,14 +159,14 @@ func (h *Handler) Logout(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Logout")
 	defer span.End()
 
-	h.metrics.LogoutAttemptCounter.Inc()
+	h.metrics.UserMetrics.LogoutAttemptCounter.Inc()
 
 	err := h.userService.Logout(c)
 	if err != nil {
 		c.JSON(err.Code, err.Err)
 		return
 	}
-	h.metrics.LogoutSuccessCounter.Inc()
+	h.metrics.UserMetrics.LogoutSuccessCounter.Inc()
 
 	c.JSON(http.StatusOK, model.OkResponse{Message: "success"})
 }
