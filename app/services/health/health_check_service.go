@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/streadway/amqp"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 const (
@@ -24,13 +24,13 @@ type Repository interface {
 type Service struct {
 	HealthMetrics *Metric
 	DBRepository  db.Repository
-	rabbitmq      *amqp.Connection
+	rabbitmq      *amqp091.Connection
 	s3Repository  s3.Repository
 	logger        *logs.Logger
 }
 
 // NewHealthCheckWrapper создает новую обертку для проверки здоровья.
-func NewHealthCheckWrapper(metrics *Metric, dbOps db.Repository, amqpClient *amqp.Connection, s3Handler s3.Repository, logger *logs.Logger) *Service {
+func NewHealthCheckWrapper(metrics *Metric, dbOps db.Repository, amqpClient *amqp091.Connection, s3Handler s3.Repository, logger *logs.Logger) *Service {
 	return &Service{
 		HealthMetrics: metrics,
 		DBRepository:  dbOps,
