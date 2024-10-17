@@ -30,12 +30,12 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/go-redis/redis/v8"
 	"github.com/minio/minio-go/v7"
-	"github.com/streadway/amqp"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type initConnect struct {
 	cashingDB    *redis.Client
-	RabbitCon    *amqp.Connection
+	RabbitCon    *amqp091.Connection
 	s3Client     *minio.Client
 	pgClient     *repoDB.Client
 	SessionStore sessions.Store

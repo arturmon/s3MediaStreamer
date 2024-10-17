@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/streadway/amqp"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 	reconnectSleepSeconds = 5
 )
 
-func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp.Delivery) {
+func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp091.Delivery) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,7 +76,7 @@ func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logg
 			select {
 			case <-ctx.Done():
 				return
-			case <-messageClient.Conn.NotifyClose(make(chan *amqp.Error)):
+			case <-messageClient.Conn.NotifyClose(make(chan *amqp091.Error)):
 				logger.Warn("RabbitMQ connection closed, attempting to reconnect...")
 				time.Sleep(reconnectSleepSeconds * time.Second)
 			}
@@ -90,7 +90,7 @@ func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logg
 }
 
 // Consume starts consuming messages from the queue.
-func (c *Handler) Consume(ctx context.Context) (<-chan amqp.Delivery, error) {
+func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) {
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
 		"",                // consumer

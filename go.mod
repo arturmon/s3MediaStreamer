@@ -34,6 +34,7 @@ require (
 	github.com/penglongli/gin-metrics v0.1.10
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.20.5
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/slog-gin v1.13.5
 	github.com/samber/slog-graylog/v2 v2.7.0

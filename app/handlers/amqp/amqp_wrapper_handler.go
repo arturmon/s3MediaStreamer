@@ -6,7 +6,7 @@ import (
 	"s3MediaStreamer/app/model"
 	"s3MediaStreamer/app/services/rabbitmq"
 
-	"github.com/streadway/amqp"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 	QueueNoWait     = false
 )
 
-func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *logs.Logger, conn *amqp.Connection, amqpService rabbitmq.Service) (*Handler, error) {
+func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *logs.Logger, conn *amqp091.Connection, amqpService rabbitmq.Service) (*Handler, error) {
 	logger.Info("Starting rabbitmq handler...")
 	rabbitChannel, err := newRabbitMQChanel(conn)
 	if err != nil {
@@ -33,7 +33,7 @@ func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *l
 	return repo, nil
 }
 
-func newRabbitMQChanel(conn *amqp.Connection) (*amqp.Channel, error) {
+func newRabbitMQChanel(conn *amqp091.Connection) (*amqp091.Channel, error) {
 	channel, err := conn.Channel()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func newRabbitMQChanel(conn *amqp.Connection) (*amqp.Channel, error) {
 	return channel, nil
 }
 
-func newRabbitMQQueue(queueName string, conn *amqp.Connection) (*amqp.Queue, error) {
+func newRabbitMQQueue(queueName string, conn *amqp091.Connection) (*amqp091.Queue, error) {
 	channel, err := conn.Channel()
 	if err != nil {
 		return nil, err

@@ -5,24 +5,24 @@ import (
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/services/rabbitmq"
 
-	"github.com/streadway/amqp"
+	"github.com/rabbitmq/amqp091-go"
 )
 
-// AmqpServiceInterface определяет методы для работы с RabbitMQ.
+// AmqpServiceInterface defines methods for working with RabbitMQ.
 type Interface interface {
 	HandleMessage(ctx context.Context, messageBody map[string]interface{})
 }
 
-// AmqpHandler представляет репозиторий для работы с RabbitMQ.
+// AmqpHandler represents a repository for working with RabbitMQ.
 type Handler struct {
 	amqpService rabbitmq.Service
-	Conn        *amqp.Connection
-	channel     *amqp.Channel
-	queue       *amqp.Queue
+	Conn        *amqp091.Connection
+	channel     *amqp091.Channel
+	queue       *amqp091.Queue
 }
 
-// NewAmqpHandler создает новый экземпляр RabbitMQRepository.
-func NewAMQPHandler(amqpService rabbitmq.Service, conn *amqp.Connection, channel *amqp.Channel, queue *amqp.Queue) *Handler {
+// NewAmqpHandler creates a new RabbitMQRepository instance.
+func NewAMQPHandler(amqpService rabbitmq.Service, conn *amqp091.Connection, channel *amqp091.Channel, queue *amqp091.Queue) *Handler {
 	return &Handler{
 		amqpService: amqpService,
 		Conn:        conn,
