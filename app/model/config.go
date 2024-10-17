@@ -103,6 +103,7 @@ type Config struct {
 		Broker             string `yaml:"broker" env:"MQ_BROKER"`
 		BrokerPort         int    `yaml:"broker_port" env:"MQ_BROKER_PORT"`
 		RetryingConnection int    `yaml:"retrying_connection" env:"MQ_BROKER_RETRYING_CONNECTION"`
+		SubscribeAutoAck   bool   `yaml:"subscribe_auto_ack" env:"MQ_SUBSCRIBE_AUTO_ACK"`
 	} `yaml:"message_queue"`
 
 	Session struct {

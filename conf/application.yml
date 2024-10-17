@@ -78,6 +78,7 @@ message_queue:
   broker: "localhost"
   broker_port: 5672
   retrying_connection: 5 # second
+  subscribe_auto_ack: true
 
 session:
   session_storage_type: "postgres" # cookie, memory, memcached, mongo, postgres

@@ -28,8 +28,8 @@ func NewRabbitMQHandlerWrapper(ctx context.Context, cfg *model.Config, logger *l
 	if err != nil {
 		return nil, err
 	}
-	repo := NewAMQPHandler(amqpService, conn, rabbitChannel, rabbitQueue)
-	repo.StartAMQPConsumers(ctx, logger, repo)
+	repo := NewAMQPHandler(amqpService, conn, rabbitChannel, rabbitQueue, cfg, logger)
+	repo.StartAMQPConsumers(ctx)
 	return repo, nil
 }
 

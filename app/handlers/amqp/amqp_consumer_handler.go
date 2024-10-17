@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	SubscribeAutoAck      = true
 	SubscribeExlusive     = false
 	SubscribeNoLocal      = false
 	SubscribeNoWait       = false
@@ -24,21 +23,38 @@ func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp091.D
 		case <-ctx.Done():
 			// If the context is canceled, return and stop processing messages.
 			return
-
 		case message, ok := <-messages:
 			// Check if the channel is closed (no more messages).
 			if !ok {
 				return
 			}
 
-			// Handle the message based on its action
+			// Process the message depending on the action
 			var messageBody map[string]interface{}
 			err := json.Unmarshal(message.Body, &messageBody)
 			if err != nil {
-				// error unmarshal
+				c.logger.Errorf("Error unmarshalling message: %v", err)
+				if !c.autoAck {
+					// Reject message without resending if autoAck = false
+					err = message.Reject(false)
+					if err != nil {
+						return
+					}
+				}
 				continue
 			}
-			go c.HandleMessage(ctx, messageBody)
+
+			// Process the message
+			go func(msg amqp091.Delivery) {
+				c.HandleMessage(ctx, messageBody)
+				// If autoAck = false, process the confirmation manually
+				if !c.autoAck {
+					err = msg.Ack(false)
+					if err != nil {
+						c.logger.Errorf("Error acknowledging message: %v", err)
+					}
+				}
+			}(message)
 		}
 	}
 }
@@ -94,7 +110,7 @@ func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) 
 	messages, err := c.channel.Consume(
 		c.queue.Name,      // queue
 		"",                // consumer
-		SubscribeAutoAck,  // auto-ack
+		c.autoAck,         // auto-ack
 		SubscribeExlusive, // exclusive
 		SubscribeNoLocal,  // no-local
 		SubscribeNoWait,   // no-wait
