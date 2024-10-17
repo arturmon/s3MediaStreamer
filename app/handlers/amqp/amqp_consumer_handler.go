@@ -24,37 +24,47 @@ func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp091.D
 			// If the context is canceled, return and stop processing messages.
 			return
 		case message, ok := <-messages:
-			// Check if the channel is closed (no more messages).
 			if !ok {
 				return
 			}
 
-			// Process the message depending on the action
-			var messageBody map[string]interface{}
-			err := json.Unmarshal(message.Body, &messageBody)
-			if err != nil {
-				c.logger.Errorf("Error unmarshalling message: %v", err)
-				if !c.autoAck {
-					// Reject message without resending if autoAck = false
-					err = message.Reject(false)
-					if err != nil {
-						return
-					}
-				}
-				continue
-			}
+			// Process each message
+			c.processMessage(ctx, message)
+		}
+	}
+}
 
-			// Process the message
-			go func(msg amqp091.Delivery) {
-				c.HandleMessage(ctx, messageBody)
-				// If autoAck = false, process the confirmation manually
-				if !c.autoAck {
-					err = msg.Ack(false)
-					if err != nil {
-						c.logger.Errorf("Error acknowledging message: %v", err)
-					}
-				}
-			}(message)
+// processMessage - Processes one message from the queue
+func (c *Handler) processMessage(ctx context.Context, message amqp091.Delivery) {
+	var messageBody map[string]interface{}
+	err := json.Unmarshal(message.Body, &messageBody)
+	if err != nil {
+		c.logger.Errorf("Error unmarshalling message: %v", err)
+		c.rejectMessageIfNeeded(message)
+		return
+	}
+
+	go c.handleAndAcknowledge(ctx, message, messageBody)
+}
+
+// handleAndAcknowledge - Processes the message and acknowledges it
+func (c *Handler) handleAndAcknowledge(ctx context.Context, message amqp091.Delivery, messageBody map[string]interface{}) {
+	// Обработка сообщения
+	c.HandleMessage(ctx, messageBody)
+
+	// Если autoAck = false, подтверждаем сообщение вручную
+	if !c.autoAck {
+		if err := message.Ack(false); err != nil {
+			c.logger.Errorf("Error acknowledging message: %v", err)
+		}
+	}
+}
+
+// rejectMessageIfNeeded - Rejects the message if autoAck = false
+func (c *Handler) rejectMessageIfNeeded(message amqp091.Delivery) {
+	if !c.autoAck {
+		if err := message.Reject(false); err != nil {
+			c.logger.Errorf("Error rejecting message: %v", err)
 		}
 	}
 }
