@@ -17,18 +17,17 @@ func NewRabbitMQConnection(_ context.Context, cfg *model.Config, logger *logs.Lo
 	} else {
 		amqpURL = cfg.MessageQueue.Broker
 	}
-
-	// amqpURLpriv := fmt.Sprintf("rabbitmq://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
-	amqpURLpriv := fmt.Sprintf("amqp://%s:%s@%s", cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
+	protocol := "amqp" //amqp, rabbitmq
+	amqpURLpriv := fmt.Sprintf("%s://%s:%s@%s", protocol, cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 	logger.Debugf("AMQP URL: %s", amqpURLpriv)
 	conn, err := amqp091.Dial(amqpURLpriv)
 	if err != nil {
-		logger.Errorf("(AMQP) Failed to connect rabbitmq at amqp://%s:***@%s, errors: %v", cfg.MessageQueue.User, amqpURL, err)
+		logger.Errorf("(AMQP) Failed to connect rabbitmq at %s://%s:***@%s, errors: %v", protocol, cfg.MessageQueue.User, amqpURL, err)
 
 		return nil, err
 	}
 
-	logger.Infof("(AMQP) Successfully connected to AMQP Client: amqp://%s:***@%s", cfg.MessageQueue.User, amqpURL)
+	logger.Infof("(AMQP) Successfully connected to AMQP Client: %s://%s:***@%s", protocol, cfg.MessageQueue.User, amqpURL)
 
 	return conn, nil
 }
