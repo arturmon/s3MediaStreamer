@@ -129,8 +129,20 @@ func (s *Service) getMp3Info(f io.Reader) (uint32, time.Duration, uint32, error)
 			return 0, 0, 0, err
 		}
 		duration += frame.Duration()
-		sampleRate = uint32(frame.Header().SampleRate())
-		bitrate = uint32(frame.Header().BitRate() / millisecondsPerSecond)
+
+		// Get the sample rate and check for potential overflow
+		sr := frame.Header().SampleRate()
+		if sr < 0 {
+			return 0, 0, 0, fmt.Errorf("invalid sample rate: %d", sr)
+		}
+		sampleRate = uint32(sr)
+
+		// Get the bitrate and check for potential overflow
+		br := frame.Header().BitRate() / millisecondsPerSecond
+		if br < 0 || br > int(^uint32(0)) {
+			return 0, 0, 0, fmt.Errorf("invalid bitrate: %d", br)
+		}
+		bitrate = uint32(br)
 	}
 	return sampleRate, duration, bitrate, nil
 }
