@@ -52,7 +52,7 @@ app_config:
   s3:
     endpoint: "localhost:9000"
     access_key_id: "app"
-    secret_access_key: ""
+    secret_access_key: "E7ct9Zr1rOu0ZJZLxTqv"
     use_ssl: false
     bucket_name: "music-bucket"
     location: "us-east-1"
