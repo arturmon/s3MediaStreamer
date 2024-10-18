@@ -116,9 +116,11 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 }
 
 // GetTracks retrieves a list of tracks with pagination and filtering.
-func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, 
-						sortOrder, filter, startTime, endTime string) 
-						([]model.Track, int, error) {
+func (c *Client) GetTracks(
+	ctx context.Context,
+	offset, limit int,
+	sortBy, sortOrder, filter, startTime, endTime string,
+) ([]model.Track, int, error) {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "GetTracks")
 	defer span.End()
