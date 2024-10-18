@@ -2,10 +2,10 @@ package session
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
 )
 
@@ -39,7 +39,7 @@ func (h *Service) SetSessionData(c *gin.Context, data map[string]interface{}) er
 	// Save the session
 	if err := session.Save(); err != nil {
 		// Handle the error here, e.g., log it
-		logrus.Errorf("Error saving session: %v", err)
+		err = fmt.Errorf("error saving session: %v", err)
 		return err
 	}
 	return nil
@@ -65,7 +65,7 @@ func (h *Service) LogoutSession(c *gin.Context) error {
 	// Save the session
 	if err := session.Save(); err != nil {
 		// Handle the error here, e.g., log it
-		logrus.Errorf("Error saving session: %v", err)
+		err = fmt.Errorf("error saving session: %v", err)
 		return err
 	}
 	return nil

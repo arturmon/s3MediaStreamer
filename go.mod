@@ -41,7 +41,6 @@ require (
 	github.com/samber/slog-kafka/v2 v2.6.0
 	github.com/samber/slog-telegram/v2 v2.4.0
 	github.com/segmentio/kafka-go v0.4.47
-	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
