@@ -125,59 +125,19 @@ func (c *Client) GetTracks(
 	_, span := tracer.Start(ctx, "GetTracks")
 	defer span.End()
 
-	// Create a new instance of squirrel.SelectBuilder
 	queryBuilder := squirrel.Select("*").From("tracks")
 
-	// Build the WHERE clause for filtering if filter is provided
-	if filter != "" {
-		filterColumns := []string{"album_artist", "composer", "artist"}
+	// Apply filtering
+	queryBuilder, filter = buildFilterClause(queryBuilder, filter)
 
-		// Create a slice to hold the individual filter conditions
-		var filterExprs []string
-		for _, col := range filterColumns {
-			// Check if exact matching is required based on the filter
-			if strings.HasPrefix(filter, "=") {
-				// Use "=" for exact matching
-				filterExpr := fmt.Sprintf("%s = $%d", col, 1)
-				filterExprs = append(filterExprs, filterExpr)
-			} else {
-				// Use ILIKE for pattern matching
-				filterExpr := fmt.Sprintf("%s ILIKE $%d", col, 1)
-				filterExprs = append(filterExprs, filterExpr)
-			}
-		}
-		if !strings.HasPrefix(filter, "=") {
-			filter = "%" + filter + "%"
-		}
+	// Apply time-based filtering
+	queryBuilder = applyTimeFilters(queryBuilder, startT, endT)
 
-		// Remove the "=" from the filter value
-		filter = strings.TrimPrefix(filter, "=")
-		// Combine the individual filter conditions using OR
-		orCondition := strings.Join(filterExprs, " OR ")
+	// Apply sorting
+	queryBuilder = buildSortClause(queryBuilder, sortBy, sortOrder)
 
-		// Then add orCondition to WHERE clause
-		queryBuilder = queryBuilder.Where(orCondition, filter)
-	}
-
-	// Add the time filter if startTime or endTime are provided
-	if startT != "" {
-		queryBuilder = queryBuilder.Where("updated_at >= $1", startT)
-	}
-	if endT != "" {
-		queryBuilder = queryBuilder.Where("updated_at <= $2", endT)
-	}
-
-	// Build the ORDER BY clause if sortBy and sortOrder are provided
-	if sortBy != "" && sortOrder != "" {
-		queryBuilder = queryBuilder.OrderBy(sortBy + " " + sortOrder)
-	}
-
-	// Add LIMIT and OFFSET to the query
-	if limit < 0 || offset < 0 {
-		limit = 0
-		offset = 0
-	}
-	queryBuilder = queryBuilder.Limit(uint64(limit)).Offset(uint64(offset))
+	// Apply pagination
+	queryBuilder = applyPagination(queryBuilder, offset, limit)
 
 	queryBuilder = queryBuilder.PlaceholderFormat(squirrel.Dollar)
 
@@ -187,14 +147,13 @@ func (c *Client) GetTracks(
 		return nil, 0, err
 	}
 
-	// Execute the query and retrieve the results
+	// Execute the query
 	rows, err := c.Pool.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, 0, err
 	}
 	defer rows.Close()
 
-	// Process the results
 	var tracks []model.Track
 	for rows.Next() {
 		var track model.Track
@@ -213,7 +172,7 @@ func (c *Client) GetTracks(
 		tracks = append(tracks, track)
 	}
 
-	// Get the total count of records (excluding pagination)
+	// Get total count
 	totalRows, countErr := c.GetTotalTrackCount(queryBuilder)
 	if countErr != nil {
 		return nil, 0, countErr
@@ -544,4 +503,61 @@ func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string)
 	}
 
 	return playlistTracks, nil
+}
+
+// Helper function to build the filter clause
+func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) (squirrel.SelectBuilder, string) {
+	if filter == "" {
+		return queryBuilder, ""
+	}
+
+	filterColumns := []string{"album_artist", "composer", "artist"}
+	var filterExprs []string
+
+	if strings.HasPrefix(filter, "=") {
+		filter = strings.TrimPrefix(filter, "=")
+		for _, col := range filterColumns {
+			filterExpr := fmt.Sprintf("%s = $%d", col, 1)
+			filterExprs = append(filterExprs, filterExpr)
+		}
+	} else {
+		filter = "%" + filter + "%"
+		for _, col := range filterColumns {
+			filterExpr := fmt.Sprintf("%s ILIKE $%d", col, 1)
+			filterExprs = append(filterExprs, filterExpr)
+		}
+	}
+
+	orCondition := strings.Join(filterExprs, " OR ")
+	queryBuilder = queryBuilder.Where(orCondition, filter)
+	return queryBuilder, filter
+}
+
+// Helper function to apply time filters
+func applyTimeFilters(queryBuilder squirrel.SelectBuilder, startT, endT string) squirrel.SelectBuilder {
+	if startT != "" {
+		queryBuilder = queryBuilder.Where("updated_at >= $1", startT)
+	}
+	if endT != "" {
+		queryBuilder = queryBuilder.Where("updated_at <= $2", endT)
+	}
+	return queryBuilder
+}
+
+// Helper function to apply sorting
+func buildSortClause(queryBuilder squirrel.SelectBuilder, sortBy, sortOrder string) squirrel.SelectBuilder {
+	if sortBy != "" && sortOrder != "" {
+		queryBuilder = queryBuilder.OrderBy(sortBy + " " + sortOrder)
+	}
+	return queryBuilder
+}
+
+// Helper function to apply pagination
+func applyPagination(queryBuilder squirrel.SelectBuilder, offset, limit int) squirrel.SelectBuilder {
+	if limit < 0 || offset < 0 {
+		limit = 0
+		offset = 0
+	}
+	queryBuilder = queryBuilder.Limit(uint64(limit)).Offset(uint64(offset))
+	return queryBuilder
 }
