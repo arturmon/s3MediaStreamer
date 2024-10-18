@@ -15,7 +15,7 @@ const ChunkSize = 1000
 
 type TracksRepositoryInterface interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
-	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error)
+	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startT, endT string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
 	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
@@ -119,7 +119,7 @@ func (c *Client) CreateTracks(ctx context.Context, list []model.Track) error {
 func (c *Client) GetTracks(
 	ctx context.Context,
 	offset, limit int,
-	sortBy, sortOrder, filter, startTime, endTime string,
+	sortBy, sortOrder, filter, startT, endT string,
 ) ([]model.Track, int, error) {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "GetTracks")
@@ -160,11 +160,11 @@ func (c *Client) GetTracks(
 	}
 
 	// Add the time filter if startTime or endTime are provided
-	if startTime != "" {
-		queryBuilder = queryBuilder.Where("updated_at >= $1", startTime)
+	if startT != "" {
+		queryBuilder = queryBuilder.Where("updated_at >= $1", startT)
 	}
-	if endTime != "" {
-		queryBuilder = queryBuilder.Where("updated_at <= $2", endTime)
+	if endT != "" {
+		queryBuilder = queryBuilder.Where("updated_at <= $2", endT)
 	}
 
 	// Build the ORDER BY clause if sortBy and sortOrder are provided

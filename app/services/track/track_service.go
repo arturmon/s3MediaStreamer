@@ -18,7 +18,7 @@ import (
 
 type Repository interface {
 	CreateTracks(ctx context.Context, list []model.Track) error
-	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error)
+	GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startT, endT string) ([]model.Track, int, error)
 	GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error)
 	CleanTracks(ctx context.Context) error
 	DeleteTracksAll(ctx context.Context) error
@@ -47,7 +47,7 @@ func (s *Service) CreateTracks(ctx context.Context, list []model.Track) error {
 	return s.trackRepository.CreateTracks(ctx, list)
 }
 
-func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startTime, endTime string) ([]model.Track, int, error) {
+func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startT, endT string) ([]model.Track, int, error) {
 	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filter, startTime, endTime)
 }
 
