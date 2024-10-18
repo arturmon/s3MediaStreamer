@@ -48,7 +48,7 @@ func (s *Service) CreateTracks(ctx context.Context, list []model.Track) error {
 }
 
 func (s *Service) GetTracks(ctx context.Context, offset, limit int, sortBy, sortOrder, filter, startT, endT string) ([]model.Track, int, error) {
-	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filter, startTime, endTime)
+	return s.trackRepository.GetTracks(ctx, offset, limit, sortBy, sortOrder, filter, startT, endT)
 }
 
 func (s *Service) GetTracksByColumns(ctx context.Context, code, columns string) (*model.Track, error) {
