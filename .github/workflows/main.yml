@@ -1,16 +1,21 @@
 name: CI/CD master
 
+#on:
+#  push:
+#    branches:
+#      - main
+#    paths-ignore:
+#      - '**.md'
+#  pull_request:
+#    branches:
+#      - main
+#    paths-ignore:
+#      - '**.md'
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
+  workflow_run:
+    workflows: ["golangci-lint"]
+    types:
+      - completed
 
 jobs:
   initial:
