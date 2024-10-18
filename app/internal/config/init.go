@@ -1,13 +1,13 @@
 package config
 
 import (
+	"log"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
 	"sync"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	log "github.com/sirupsen/logrus"
 )
 
 // getConfigManager returns a singleton instance of the configuration manager.
@@ -26,7 +26,7 @@ func GetConfig() *model.Config {
 	cfgManager := getConfigManager()
 
 	cfgManager.once.Do(func() {
-		log.Info("gathering config")
+		log.Print("gathering config")
 
 		cfgManager.instance = &model.Config{}
 	})
@@ -34,14 +34,14 @@ func GetConfig() *model.Config {
 	if err := cleanenv.ReadConfig("conf/application.yml", cfgManager.instance); err != nil {
 		helpText := "Stream Player S3"
 		help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
-		log.Debug(help)
-		log.Errorf("Error reading environment variables: %v", err)
+		log.Printf(help)
+		log.Printf("Error reading environment variables: %v", err)
 	}
 	go func() {
 		time.Sleep(sleepDurationSeconds * time.Second) // sleep for 5 seconds
 		err := cleanenv.UpdateEnv(cfgManager.instance)
 		if err != nil {
-			log.Errorf("Error update environment variables: %v", err)
+			log.Printf("Error update environment variables: %v", err)
 		}
 	}()
 	return cfgManager.instance
