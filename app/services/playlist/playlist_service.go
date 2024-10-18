@@ -15,7 +15,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 )
 
 type Repository interface {
@@ -347,7 +346,7 @@ func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, pla
 
 		addPlaylistStructs = append(addPlaylistStructs, model.PlaylistStruct{
 			PlaylistID: stringPlaylistID,
-			Path:       pgtype.Ltree{String: fmt.Sprintf("%s.%s.%s.%s", playlistID, referenceType, referenceID, positionStr)},
+			Path:       fmt.Sprintf("%s.%s.%s.%s", playlistID, referenceType, referenceID, positionStr),
 		})
 	}
 

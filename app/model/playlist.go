@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgtype"
 )
 
 type PLayList struct {
@@ -32,8 +31,8 @@ type SetPlaylistTrackOrderRequest struct {
 }
 
 type PlaylistStruct struct {
-	PlaylistID uuid.UUID    `json:"playlist_id"` // UUID
-	Path       pgtype.Ltree `json:"path"`        // type LTREE
+	PlaylistID uuid.UUID `json:"playlist_id"` // UUID
+	Path       string    `json:"path"`        // type LTREE
 }
 
 // NestedPlaylist represents the structure of a nested playlist with its own tracks and further nested playlists.

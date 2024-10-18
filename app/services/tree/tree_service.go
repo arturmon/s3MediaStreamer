@@ -102,7 +102,7 @@ func (s *Service) RebalanceTreePositions(tree *treemap.Map) error {
 func (s *Service) FillTree(tree *treemap.Map, items []model.PlaylistStruct) error {
 	for _, item := range items {
 		// Convert Ltree to string and split into components by dot (.)
-		pathStr := item.Path.String
+		pathStr := item.Path
 		components := strings.Split(pathStr, ".")
 
 		// We expect the format <trackType>.<parentID>.<trackID>.<position>
@@ -178,7 +178,7 @@ func (s *Service) AddToTree(tree *treemap.Map, items []model.PlaylistStruct, reb
 //   - error: Returns an error if the path format is invalid or if any issue occurs during
 //     insertion into the tree.
 func (s *Service) addItemToTree(tree *treemap.Map, item model.PlaylistStruct) error {
-	pathStr := item.Path.String
+	pathStr := item.Path
 	components := strings.Split(pathStr, ".")
 
 	if len(components) != expectedPathComponents {
