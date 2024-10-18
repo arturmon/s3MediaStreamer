@@ -139,7 +139,7 @@ func (s *Service) getMp3Info(f io.Reader) (uint32, time.Duration, uint32, error)
 
 		// Get the bitrate and check for potential overflow
 		br := frame.Header().BitRate() / millisecondsPerSecond
-		if br < 0 || br > int(^uint32(0)) {
+		if br < 0 || uint32(br) > ^uint32(0) { // Convert br to uint32 for comparison
 			return 0, 0, 0, fmt.Errorf("invalid bitrate: %d", br)
 		}
 		bitrate = uint32(br)
