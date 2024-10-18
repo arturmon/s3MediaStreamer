@@ -74,7 +74,7 @@ func (s *Service) extractRecordsEvent(data map[string]interface{}) (*model.Messa
 	}
 
 	// Check if Records array is not empty
-	if messageBody.Records == nil || len(messageBody.Records) == 0 {
+	if len(messageBody.Records) == 0 {
 		return &model.MessageBody{}, err
 	}
 
