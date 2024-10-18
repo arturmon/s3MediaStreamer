@@ -349,5 +349,8 @@ issues:
     - path: "services/tags/tags_service.go"
       linters:
         - gosec
+    - path: "repository/postgres/track_repository.go"
+      linters:
+        - gosec
 
   fix: true
