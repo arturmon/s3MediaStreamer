@@ -156,3 +156,22 @@ func (s *Service) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *log
 		}
 	}
 }
+
+func (s *Service) GetAllPolicies(ctx context.Context, logger *logs.Logger) {
+	_, span := otel.Tracer("").Start(ctx, "GetAllPolicies")
+	defer span.End()
+
+	// Get all the policies from the Casbin enforcer
+	policies, err := s.AccessControl.GetPolicy()
+	if err != nil {
+		logger.Errorf("Failed to get all policies: %s", err)
+		return
+	}
+
+	// Log the retrieved policies
+	for _, policy := range policies {
+		logger.Debugf("Policy: %v", policy)
+	}
+
+	return
+}

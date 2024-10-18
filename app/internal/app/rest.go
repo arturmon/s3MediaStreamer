@@ -62,12 +62,8 @@ func (a *App) startHTTP(ctx context.Context) {
 	a.Logger.Info("start HTTP")
 
 	a.Logger.Debug("view Casbin Policies:")
-	// policies := a.Service.AccessControl.GetPolicy()
-	var logMessage string
-	// for _, p := range policies {
-	//	logMessage += fmt.Sprintf("Policy: %v\n", p)
-	//}
-	a.Logger.Debugf(logMessage)
+	a.Service.ACL.GetAllPolicies(ctx, a.Logger)
+
 	a.Logger.Info("application completely initialized, ...started")
 	a.Logger.Infof("The services is ready to listen and serve on %s:%s.", a.Cfg.Listen.BindIP, a.Cfg.Listen.Port)
 	// Start server
