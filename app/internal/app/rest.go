@@ -37,7 +37,7 @@ func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *g
 	router.Use(gin.Recovery())
 
 	router.Use(otelgin.Middleware("s3MediaStreamer"))
-	//router.Use(LoggingMiddleware(LoggingMiddlewareAdapter(logger)))
+
 	config := sloggin.Config{
 		WithSpanID:         cfg.AppConfig.Web.Debug.WithSpanID,
 		WithTraceID:        cfg.AppConfig.Web.Debug.WithTraceID,
@@ -46,8 +46,11 @@ func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *g
 		WithRequestHeader:  cfg.AppConfig.Web.Debug.WithRequestHeader,
 		WithResponseHeader: cfg.AppConfig.Web.Debug.WithResponseHeader,
 	}
-	router.Use(sloggin.New(logger.WithGroup("http")))
-	router.Use(sloggin.NewWithConfig(logger.Slog(), config))
+
+	if config.WithSpanID || config.WithTraceID || config.WithRequestBody || config.WithResponseBody || config.WithRequestHeader || config.WithResponseHeader {
+		router.Use(sloggin.New(logger.WithGroup("http")))
+		router.Use(sloggin.NewWithConfig(logger.Slog(), config))
+	}
 
 	logger.Info("prometheus initializing")
 
