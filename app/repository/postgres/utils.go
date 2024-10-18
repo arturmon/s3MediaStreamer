@@ -178,10 +178,10 @@ func (c *Client) QueryInTransaction(ctx context.Context, sql string, args []inte
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	// Commit the transaction
 	if err = tx.Commit(ctx); err != nil {
-		rows.Close()
 		return nil, err
 	}
 
