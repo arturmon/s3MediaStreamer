@@ -169,6 +169,10 @@ func (c *Client) GetTracks(ctx context.Context, offset, limit int, sortBy, sortO
 	}
 
 	// Add LIMIT and OFFSET to the query
+	if limit < 0 || offset < 0 {
+		limit = 0
+		offset = 0
+	}
 	queryBuilder = queryBuilder.Limit(uint64(limit)).Offset(uint64(offset))
 
 	queryBuilder = queryBuilder.PlaceholderFormat(squirrel.Dollar)
