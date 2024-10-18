@@ -1,26 +1,18 @@
 name: CI/CD master
 
-#on:
-#  push:
-#    branches:
-#      - main
-#    paths-ignore:
-#      - '**.md'
-#  pull_request:
-#    branches:
-#      - main
-#    paths-ignore:
-#      - '**.md'
 on:
   workflow_run:
-    workflows: ["golangci-lint"]
+    workflows:
+      - golangci-lint
     types:
       - completed
+
 
 jobs:
   initial:
     name: Initializing
     runs-on: ${{ matrix.platform }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       matrix:
         go-version: ['1.21.x', '1.22.x', '1.23.x']
