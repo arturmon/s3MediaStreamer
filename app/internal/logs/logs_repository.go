@@ -3,7 +3,6 @@ package logs
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"os"
 	"runtime"
 	"s3MediaStreamer/app/model"
@@ -14,6 +13,7 @@ import (
 	"github.com/Graylog2/go-gelf/gelf"
 	sloggraylog "github.com/samber/slog-graylog/v2"
 	slogkafka "github.com/samber/slog-kafka/v2"
+	slogmulti "github.com/samber/slog-multi"
 	slogtelegram "github.com/samber/slog-telegram/v2"
 	"github.com/segmentio/kafka-go"
 )
@@ -61,6 +61,7 @@ func InitConfLogger(cfg *model.Config) *model.LoggerSetup {
 
 func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppInfo) *Logger {
 	var logger *slog.Logger
+	var loggers []slog.Handler
 
 	// Set up the log level
 	var logLevel slog.Level
@@ -89,10 +90,11 @@ func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppI
 
 		gelfWriter.CompressionType = mapCompressionType(conf.CompressionType)
 
-		logger = slog.New(sloggraylog.Option{
+		graylogHandler := sloggraylog.Option{
 			Level:  logLevel,
 			Writer: gelfWriter,
-		}.NewGraylogHandler())
+		}.NewGraylogHandler()
+		loggers = append(loggers, graylogHandler)
 
 	case "kafka":
 		// Kafka initialization
@@ -131,10 +133,12 @@ func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppI
 			}),
 		})
 
-		logger = slog.New(slogkafka.Option{
+		kafkaHandler := slogkafka.Option{
 			Level:       logLevel,
 			KafkaWriter: writer,
-		}.NewKafkaHandler())
+		}.NewKafkaHandler()
+
+		loggers = append(loggers, kafkaHandler)
 
 		defer func(writer *kafka.Writer) {
 			err = writer.Close()
@@ -154,11 +158,13 @@ func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppI
 		token := conf.TelegramToken
 		username := conf.TelegramUsername
 
-		logger = slog.New(slogtelegram.Option{
+		telegramHandler := slogtelegram.Option{
 			Level:    logLevel,
 			Token:    token,
 			Username: username,
-		}.NewTelegramHandler())
+		}.NewTelegramHandler()
+
+		loggers = append(loggers, telegramHandler)
 
 	case "json":
 		// JSON logger initialization
@@ -178,6 +184,15 @@ func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppI
 			Level: logLevel,
 		}))
 	}
+
+	consoleHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: logLevel,
+	})
+	loggers = append(loggers, consoleHandler)
+
+	logger = slog.New(
+		slogmulti.Fanout(loggers...),
+	)
 
 	// Add common fields to logger
 	logger = logger.With(
@@ -205,9 +220,4 @@ func mapCompressionType(compressionType string) gelf.CompressType {
 	default:
 		return gelf.CompressNone
 	}
-}
-
-func IsUrl(str string) bool {
-	u, err := url.Parse(str)
-	return err == nil && u.Scheme != "" && u.Host != ""
 }

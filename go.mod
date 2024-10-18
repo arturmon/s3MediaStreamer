@@ -39,6 +39,7 @@ require (
 	github.com/samber/slog-gin v1.13.5
 	github.com/samber/slog-graylog/v2 v2.7.0
 	github.com/samber/slog-kafka/v2 v2.6.0
+	github.com/samber/slog-multi v1.2.3
 	github.com/samber/slog-telegram/v2 v2.4.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.9.0
@@ -137,7 +138,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/rs/xid v1.6.0 // indirect
-	github.com/samber/lo v1.44.0 // indirect
+	github.com/samber/lo v1.47.0 // indirect
 	github.com/samber/slog-common v0.17.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
