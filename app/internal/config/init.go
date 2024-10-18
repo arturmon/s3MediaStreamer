@@ -34,7 +34,7 @@ func GetConfig() *model.Config {
 	if err := cleanenv.ReadConfig("conf/application.yml", cfgManager.instance); err != nil {
 		helpText := "Stream Player S3"
 		help, _ := cleanenv.GetDescription(cfgManager.instance, &helpText)
-		log.Printf(help)
+		log.Print(help)
 		log.Printf("Error reading environment variables: %v", err)
 	}
 	go func() {
