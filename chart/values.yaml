@@ -76,7 +76,7 @@ env:
   # Use localhost only set helm values consulSidecar.enabled: true
   CONSUL_URL: localhost:8500
   LOG_TYPE: gelf
-  LOG_GELF_SERVER_URL: graylog.logs.svc.cluster.local:12201
+  GRAYLOG_SERVER_ADDR: graylog.logs.svc.cluster.local:12201
   OPEN_TELEMETRY_JAEGER_ENDPOINT: http://jaeger-collector.monitoring.svc.cluster.local:4318
   CACHING_ENABLED: true
   CACHING_ADDRESS: redis-headless.database.svc.cluster.local:6379
