@@ -172,6 +172,4 @@ func (s *Service) GetAllPolicies(ctx context.Context, logger *logs.Logger) {
 	for _, policy := range policies {
 		logger.Debugf("Policy: %v", policy)
 	}
-
-	return
 }
