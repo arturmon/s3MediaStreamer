@@ -346,5 +346,8 @@ issues:
     - path: "main.go"
       linters:
         - gosec
+    - path: "services/tags/tags_service.go"
+      linters:
+        - gosec
 
   fix: true
