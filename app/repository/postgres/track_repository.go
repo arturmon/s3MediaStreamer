@@ -128,7 +128,7 @@ func (c *Client) GetTracks(
 	queryBuilder := squirrel.Select("*").From("tracks")
 
 	// Apply filtering
-	queryBuilder, filter = buildFilterClause(queryBuilder, filter)
+	queryBuilder = buildFilterClause(queryBuilder, filter)
 
 	// Apply time-based filtering
 	queryBuilder = applyTimeFilters(queryBuilder, startT, endT)
@@ -506,9 +506,9 @@ func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string)
 }
 
 // Helper function to build the filter clause
-func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) (squirrel.SelectBuilder, string) {
+func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) squirrel.SelectBuilder {
 	if filter == "" {
-		return queryBuilder, ""
+		return queryBuilder
 	}
 
 	filterColumns := []string{"album_artist", "composer", "artist"}
@@ -530,7 +530,7 @@ func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) (squi
 
 	orCondition := strings.Join(filterExprs, " OR ")
 	queryBuilder = queryBuilder.Where(orCondition, filter)
-	return queryBuilder, filter
+	return queryBuilder
 }
 
 // Helper function to apply time filters
