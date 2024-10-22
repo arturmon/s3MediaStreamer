@@ -36,7 +36,7 @@ func initializeGin(_ context.Context, cfg *model.Config, logger *logs.Logger) *g
 	router.Use(cors.New(ConfigCORS()))
 	router.Use(gin.Recovery())
 
-	router.Use(otelgin.Middleware("s3MediaStreamer"))
+	router.Use(otelgin.Middleware("s3MediaStreamer", otelgin.WithGinFilter(excludePathsFromTracing(excludedPaths))))
 
 	config := sloggin.Config{
 		WithSpanID:         cfg.AppConfig.Web.Debug.WithSpanID,
