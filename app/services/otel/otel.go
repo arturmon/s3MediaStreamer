@@ -2,6 +2,7 @@ package otel
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
@@ -31,6 +32,7 @@ type ProviderConfig struct {
 }
 type Provider struct {
 	provider trace.TracerProvider
+	logger   *logs.Logger
 }
 
 func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logger, appName, version string) (*Provider, error) {
@@ -52,7 +54,7 @@ func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logge
 
 func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error) {
 	if config.Disabled {
-		return &Provider{provider: trace.NewNoopTracerProvider()}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
+		return &Provider{provider: trace.NewNoopTracerProvider(), logger: config.Logger}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
 	}
 
 	tp, tpErr := jaegerTraceProvider(ctx, config)
@@ -65,7 +67,7 @@ func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error)
 		propagation.TraceContext{},
 		propagation.Baggage{}))
 
-	return &Provider{provider: tp}, nil
+	return &Provider{provider: tp, logger: config.Logger}, nil
 }
 
 func jaegerTraceProvider(ctx context.Context, config ProviderConfig) (*sdktrace.TracerProvider, error) {
@@ -97,6 +99,15 @@ func (p Provider) Close(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// LogWithTrace logs messages with TraceID and SpanID from the context.
+func (p *Provider) LogWithTrace(ctx context.Context, msg string) {
+	span := trace.SpanFromContext(ctx)
+	traceID := span.SpanContext().TraceID().String()
+	spanID := span.SpanContext().SpanID().String()
+
+	p.logger.Info(msg, slog.String("trace_id", traceID), slog.String("span_id", spanID))
 }
 
 func GetHostname() string {
