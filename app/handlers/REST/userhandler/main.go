@@ -1,6 +1,7 @@
 package userhandler
 
 import (
+	"context"
 	"net/http"
 	"s3MediaStreamer/app/model"
 	"s3MediaStreamer/app/services/acl"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type UserServiceInterface interface {
@@ -19,7 +21,7 @@ type UserServiceInterface interface {
 }
 
 type Handler struct {
-	Debug           bool
+	Trace           bool
 	acl             acl.Service
 	userService     user.Service
 	authService     auth.Service
@@ -52,20 +54,23 @@ func (h *Handler) Register(c *gin.Context) {
 	defer span.End()
 
 	h.metrics.UserMetrics.RegisterAttemptCounter.Inc()
+	h.logTrace(c.Request.Context(), span, "Starting user registration")
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
+		h.logTrace(c.Request.Context(), span, "Invalid request payload for registration", attribute.String("error", "invalid request payload"))
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
 	register, err := h.userService.Register(c.Request.Context(), data)
 	if err != nil {
+		h.logTrace(c.Request.Context(), span, "Error during user registration", attribute.String("error", err.Err))
 		h.metrics.UserMetrics.RegisterErrorCounter.Inc()
 		c.JSON(err.Code, err.Err)
 		return
 	}
-
+	h.logTrace(c.Request.Context(), span, "User registered successfully")
 	h.metrics.UserMetrics.RegisterSuccessCounter.Inc()
 
 	c.JSON(http.StatusCreated, register)
@@ -87,16 +92,12 @@ func (h *Handler) Login(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Login")
 	defer span.End()
 
-	// Log the request received
-	if h.Debug {
-		h.tracingProvider.LogWithTrace(c.Request.Context(), "Starting login")
-	}
 	// monitoring counter login
 	h.metrics.UserMetrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
-		if h.Debug {
+		if h.Trace {
 			span.SetAttributes(attribute.String("error", "invalid payload"))
 		}
 		h.metrics.UserMetrics.LoginErrorCounter.Inc()
@@ -108,23 +109,18 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		if err.Code == http.StatusUnauthorized {
 			h.metrics.UserMetrics.ErrPasswordCounter.Inc() // Increment the incorrect password counter
-			if h.Debug {
-				span.SetAttributes(attribute.String("error", "unauthorized"))
-			}
+			// Log the request received
+			h.logTrace(c.Request.Context(), span, "invalid payload", attribute.String("error", "invalid payload"))
 		} else {
 			h.metrics.UserMetrics.LoginErrorCounter.Inc() // Increment the login error counter
-			if h.Debug {
-				span.SetAttributes(attribute.String("error", err.Err))
-			}
+			h.logTrace(c.Request.Context(), span, "unauthorized login", attribute.String("error", "unauthorized"))
 		}
 		c.JSON(err.Code, err.Err)
 		return
 	}
 
 	h.metrics.UserMetrics.LoginSuccessCounter.Inc()
-	if h.Debug {
-		span.SetAttributes(attribute.String("result", "success"))
-	}
+	h.logTrace(c.Request.Context(), span, "success login", attribute.String("result", "success"))
 	c.JSON(http.StatusOK, login)
 }
 
@@ -147,11 +143,13 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
+		h.logTrace(c.Request.Context(), span, "Invalid request payload", attribute.String("error", "invalid request payload"))
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 	email, ok := data["email"]
 	if !ok {
+		h.logTrace(c.Request.Context(), span, "Email not provided", attribute.String("error", "email not provided"))
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "email not provided"})
 		return
 	}
@@ -162,6 +160,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		c.JSON(err.Code, err.Err)
 	}
 
+	h.logTrace(c.Request.Context(), span, "User deleted", attribute.String("result", "success"))
 	h.metrics.UserMetrics.DeleteUserSuccessCounter.Inc()
 
 	c.JSON(http.StatusOK, model.OkResponse{Message: "user deleted"})
@@ -182,15 +181,17 @@ func (h *Handler) Logout(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Logout")
 	defer span.End()
 
+	h.logTrace(c.Request.Context(), span, "User logout attempt")
 	h.metrics.UserMetrics.LogoutAttemptCounter.Inc()
 
 	err := h.userService.Logout(c)
 	if err != nil {
+		h.logTrace(c.Request.Context(), span, "Error during logout", attribute.String("error", "during logout"))
 		c.JSON(err.Code, err.Err)
 		return
 	}
 	h.metrics.UserMetrics.LogoutSuccessCounter.Inc()
-
+	h.logTrace(c.Request.Context(), span, "User logged out successfully", attribute.String("result", "success"))
 	c.JSON(http.StatusOK, model.OkResponse{Message: "success"})
 }
 
@@ -250,12 +251,14 @@ func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 
 	// Parse the JSON request body into the data map
 	if err := c.BindJSON(&data); err != nil {
+		h.logTrace(c.Request.Context(), span, "Invalid request payload", attribute.String("error", "invalid request payload"))
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
 	}
 
 	refreshToken, exists := data["refresh_token"]
 	if !exists {
+		h.logTrace(c.Request.Context(), span, "Invalid refresh token", attribute.String("error", "invalid refresh token"))
 		c.JSON(http.StatusUnauthorized, model.ErrorResponse{Message: "invalid refresh token"})
 		return
 	}
@@ -265,6 +268,13 @@ func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 		c.JSON(err.Code, err.Err)
 		return
 	}
-
+	h.logTrace(c.Request.Context(), span, "Success refreshing", attribute.String("info", "success refreshing"))
 	c.JSON(http.StatusOK, responce)
+}
+
+func (h *Handler) logTrace(ctx context.Context, span trace.Span, message string, attributes ...attribute.KeyValue) {
+	if h.Trace {
+		h.tracingProvider.LogWithTrace(ctx, message)
+		span.SetAttributes(attributes...)
+	}
 }
