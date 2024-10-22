@@ -6,10 +6,12 @@ import (
 	"s3MediaStreamer/app/services/acl"
 	"s3MediaStreamer/app/services/auth"
 	"s3MediaStreamer/app/services/monitoring"
+	tracing "s3MediaStreamer/app/services/otel"
 	"s3MediaStreamer/app/services/user"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 type UserServiceInterface interface {
@@ -17,14 +19,19 @@ type UserServiceInterface interface {
 }
 
 type Handler struct {
-	acl         acl.Service
-	userService user.Service
-	authService auth.Service
-	metrics     *monitoring.CombinedMetrics
+	Debug           bool
+	acl             acl.Service
+	userService     user.Service
+	authService     auth.Service
+	metrics         *monitoring.CombinedMetrics
+	tracingProvider *tracing.Provider
 }
 
-func NewUserHandler(acl acl.Service, userService user.Service, authService auth.Service, metrics *monitoring.CombinedMetrics) *Handler {
-	return &Handler{acl, userService, authService, metrics}
+func NewUserHandler(debug bool, acl acl.Service, userService user.Service,
+	authService auth.Service, metrics *monitoring.CombinedMetrics,
+	tracingProvider *tracing.Provider) *Handler {
+	return &Handler{debug, acl, userService,
+		authService, metrics, tracingProvider}
 }
 
 // Register godoc
@@ -80,10 +87,18 @@ func (h *Handler) Login(c *gin.Context) {
 	_, span := otel.Tracer("").Start(c.Request.Context(), "Login")
 	defer span.End()
 
+	// Log the request received
+	if h.Debug {
+		h.tracingProvider.LogWithTrace(c.Request.Context(), "Starting login")
+	}
+	// monitoring counter login
 	h.metrics.UserMetrics.LoginAttemptCounter.Inc()
 
 	var data map[string]string
 	if err := c.BindJSON(&data); err != nil {
+		if h.Debug {
+			span.SetAttributes(attribute.String("error", "invalid payload"))
+		}
 		h.metrics.UserMetrics.LoginErrorCounter.Inc()
 		c.JSON(http.StatusBadRequest, model.ErrorResponse{Message: "invalid request payload"})
 		return
@@ -93,15 +108,23 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		if err.Code == http.StatusUnauthorized {
 			h.metrics.UserMetrics.ErrPasswordCounter.Inc() // Increment the incorrect password counter
+			if h.Debug {
+				span.SetAttributes(attribute.String("error", "unauthorized"))
+			}
 		} else {
 			h.metrics.UserMetrics.LoginErrorCounter.Inc() // Increment the login error counter
+			if h.Debug {
+				span.SetAttributes(attribute.String("error", err.Err))
+			}
 		}
 		c.JSON(err.Code, err.Err)
 		return
 	}
 
 	h.metrics.UserMetrics.LoginSuccessCounter.Inc()
-
+	if h.Debug {
+		span.SetAttributes(attribute.String("result", "success"))
+	}
 	c.JSON(http.StatusOK, login)
 }
 
