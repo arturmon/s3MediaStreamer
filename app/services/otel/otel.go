@@ -41,7 +41,7 @@ func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logge
 		Environment:    cfg.AppConfig.OpenTelemetry.Environment,
 		Cfg:            cfg,
 		Logger:         logger,
-		Disabled:       cfg.AppConfig.OpenTelemetry.TracingEnabled,
+		Disabled:       !cfg.AppConfig.OpenTelemetry.TracingEnabled,
 	}
 	tracer, err := initProvider(ctx, config)
 	if err != nil {
