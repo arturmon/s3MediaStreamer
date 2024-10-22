@@ -1,7 +1,6 @@
 package acl
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -156,9 +155,7 @@ func (s *Service) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *log
 	}
 }
 
-func (s *Service) GetAllPolicies(ctx context.Context, logger *logs.Logger) {
-	_, span := otel.Tracer("").Start(ctx, "GetAllPolicies")
-	defer span.End()
+func (s *Service) GetAllPolicies(logger *logs.Logger) {
 
 	// Get all the policies from the Casbin enforcer
 	policies, err := s.AccessControl.GetPolicy()

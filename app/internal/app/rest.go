@@ -65,7 +65,7 @@ func (a *App) startHTTP(ctx context.Context) {
 	a.Logger.Info("start HTTP")
 
 	a.Logger.Debug("view Casbin Policies:")
-	a.Service.ACL.GetAllPolicies(ctx, a.Logger)
+	a.Service.ACL.GetAllPolicies(a.Logger)
 
 	a.Logger.Info("application completely initialized, ...started")
 	a.Logger.Infof("The services is ready to listen and serve on %s:%s.", a.Cfg.Listen.BindIP, a.Cfg.Listen.Port)
