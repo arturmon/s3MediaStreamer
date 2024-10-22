@@ -69,10 +69,9 @@ func (s *Service) CheckAuthorization(c *gin.Context) (string, error) {
 	return claims["sub"].(string), nil
 }
 
-func (s *Service) ExtractUserRole(ctx context.Context, logger *logs.Logger) gin.HandlerFunc {
+func (s *Service) ExtractUserRole(logger *logs.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, span := otel.Tracer("").Start(ctx, "ExtractUserRole")
-		defer span.End()
+
 		jwtToken, err := c.Cookie("jwt") // Extract the JWT token from the cookie
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) { // Use errors.Is to check for a specific error
