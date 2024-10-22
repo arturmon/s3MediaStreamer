@@ -75,7 +75,7 @@ env:
   #CONSUL_URL: consul-consul-server.observability.svc.cluster.local:8500
   # Use localhost only set helm values consulSidecar.enabled: true
   CONSUL_URL: localhost:8500
-  LOG_TYPE: gelf
+  LOG_TYPE: graylog
   GRAYLOG_SERVER_ADDR: graylog.logs.svc.cluster.local:12201
   OPEN_TELEMETRY_JAEGER_ENDPOINT: http://jaeger-collector.monitoring.svc.cluster.local:4318
   CACHING_ENABLED: true
