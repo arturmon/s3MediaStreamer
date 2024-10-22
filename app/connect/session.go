@@ -32,6 +32,7 @@ const (
 func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (sessions.Store, error) {
 	gob.Register(uuid.UUID{})
 	var store sessions.Store
+	var err error
 
 	logger.Info("Initializing session store...")
 	var logFields []model.LogField
@@ -61,19 +62,20 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 		mongoURL := "mongodb://" + cfg.Session.Mongodb.MongoUser + ":" + cfg.Session.Mongodb.MongoPass +
 			"@" + cfg.Session.Mongodb.MongoHost + ":" + cfg.Session.Mongodb.MongoPort
 		mongoOptions := options.Client().ApplyURI(mongoURL)
-		client, err := mongo.Connect(ctx, mongoOptions) // Use Connect instead of NewClient
-		if err != nil {
-			logger.Errorf("Failed to create Mongo client: %v", err)
+		client, mongoErr := mongo.Connect(ctx, mongoOptions) // Use Connect instead of NewClient
+		logFields = []model.LogField{
+			{Key: "TypeConnect", Value: "Mongo Session", Mask: ""},
+			{Key: "MongoDB", Value: cfg.Session.Mongodb.MongoDatabase, Mask: ""},
+			{Key: "Host", Value: cfg.Session.Mongodb.MongoHost, Mask: ""},
+			{Key: "User", Value: cfg.Session.Mongodb.MongoUser, Mask: ""},
+			{Key: "Port", Value: cfg.Session.Mongodb.MongoPort, Mask: ""},
+		}
+		if mongoErr != nil {
+			logger.Errorf("Failed to create Mongo client: %v", mongoErr)
+			err = mongoErr
 		} else {
 			c := client.Database(cfg.Session.Mongodb.MongoDatabase).Collection("sessions")
 			store = mongodriver.NewStore(c, mongodriverMaxIdle, true, []byte(cfg.Session.Cookies.SessionSecretKey))
-			logFields = []model.LogField{
-				{Key: "TypeConnect", Value: "Mongo Session", Mask: ""},
-				{Key: "MongoDB", Value: cfg.Session.Mongodb.MongoDatabase, Mask: ""},
-				{Key: "Host", Value: cfg.Session.Mongodb.MongoHost, Mask: ""},
-				{Key: "User", Value: cfg.Session.Mongodb.MongoUser, Mask: ""},
-				{Key: "Port", Value: cfg.Session.Mongodb.MongoPort, Mask: ""},
-			}
 		}
 	case "postgres":
 		sslMode := "sslmode=disable"
@@ -92,17 +94,17 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 			{Key: "User", Value: cfg.Session.Postgresql.PostgresqlUser, Mask: ""},
 			{Key: "Password", Value: cfg.Session.Postgresql.PostgresqlPass, Mask: "password"},
 		}
-		db, err := sql.Open("postgres", dsn.String())
-		if err != nil {
-			logger.Errorf("Failed to create Postgres database connection: %v", err)
-			return nil, err
+		db, postgresErr := sql.Open("postgres", dsn.String())
+		if postgresErr != nil {
+			logger.Errorf("Failed to create Postgres database connection: %v", postgresErr)
+			err = postgresErr
 		}
 		db.SetMaxOpenConns(SetMaxOpenConns)
 		db.SetMaxIdleConns(SetMaxIdleConns)
-		store, err = postgres.NewStore(db, []byte(cfg.Session.Cookies.SessionSecretKey))
-		if err != nil {
-			logger.Errorf("Failed to create Postgres store: %v", err)
-			return nil, err
+		store, postgresErr = postgres.NewStore(db, []byte(cfg.Session.Cookies.SessionSecretKey))
+		if postgresErr != nil {
+			logger.Errorf("Failed to create Postgres store: %v", postgresErr)
+			err = postgresErr
 		}
 
 	default:
@@ -118,8 +120,12 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})
+	if err != nil {
+		logger.Slog().Error("(Session) Failed to connect", "connection", loggerMsg.MaskFields())
+		return store, err
+	}
 
 	//logger.Info("Session store initialized successfully")
-	logger.Slog().Error("(Session) Successfully to connect", "connection", loggerMsg.MaskFields())
+	logger.Slog().Info("(Session) Successfully to connect", "connection", loggerMsg.MaskFields())
 	return store, nil
 }
