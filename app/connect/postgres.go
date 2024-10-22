@@ -2,7 +2,6 @@ package connect
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/url"
 	"s3MediaStreamer/app/internal/logs"
@@ -55,12 +54,22 @@ func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) (*DBMe
 	startTime := time.Now()
 	metrics := NewDBMetrics()
 	metrics.DatabaseConnectionAttemptCounter.Inc()
+	// Create logs.LoggerMessageConnect
+	logFields := []model.LogField{
+		{Key: "TypeConnect", Value: "Postgres Data", Mask: ""},
+		{Key: "DB", Value: s.Database, Mask: ""},
+		{Key: "Addr", Value: s.Host, Mask: ""},
+		{Key: "User", Value: s.Username, Mask: ""},
+		{Key: "Password", Value: s.Password, Mask: "password"},
+	}
+	loggerMsg := logs.NewLoggerMessageConnect(logFields)
 
 	logger.Info("Attempting to connect to Postgres...")
 	pool, err := NewClient(ctx, MaxAttempts, MaxDelay, s, logger)
 	if err != nil {
 		metrics.DatabaseConnectionFailureCounter.Inc()
-		return nil, fmt.Errorf("failed to connect to PostgreSQL: %w", err)
+		logger.Slog().Error("(POSTGRES) Failed to connect", "connection", loggerMsg.MaskFields())
+		return nil, err
 	}
 	// Save the pool in the s structure for future use.
 	s.pool = pool
@@ -68,7 +77,7 @@ func (s *StorageConfig) Connect(ctx context.Context, logger *logs.Logger) (*DBMe
 	duration := time.Since(startTime)
 	metrics.ResponseTimeDBConnect.Observe(duration.Seconds())
 	metrics.DatabaseConnectionSuccessCounter.Inc()
-	logger.Info("Successfully connected to Postgres")
+	logger.Slog().Info("(POSTGRES) Success to connect", "connection", loggerMsg.MaskFields())
 	return metrics, nil
 }
 
