@@ -5,12 +5,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
-var excludedPaths = map[string]bool{
-	"/health/liveness":  true,
-	"/health/readiness": true,
-	"/metrics":          true,
-}
-
 func excludePathsFromTracing(excluded map[string]bool) otelgin.GinFilter {
 	return func(c *gin.Context) bool {
 		// Skip tracing for this endpoint

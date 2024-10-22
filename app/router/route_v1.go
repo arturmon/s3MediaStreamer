@@ -22,7 +22,7 @@ import (
 
 func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handlers) {
 	setupStaticFiles(app)
-	setupSystemRoutes(ctx, app, allHandlers)
+	setupSystemRoutes(app, allHandlers)
 
 	// Initialize Redis cache store
 	cacheURL, ttl := initCache(ctx, app)
@@ -113,7 +113,7 @@ func setupStaticFiles(app *app.App) {
 	app.REST.StaticFile("/favicon.ico", "./favicon.ico")
 }
 
-func setupSystemRoutes(ctx context.Context, app *app.App, allHandlers *handlers.Handlers) {
+func setupSystemRoutes(app *app.App, allHandlers *handlers.Handlers) {
 	sessionName := app.Cfg.Session.SessionName
 	app.REST.Use(sessions.Sessions(sessionName, app.Service.InitRepo.InitConnect.SessionStore))
 
