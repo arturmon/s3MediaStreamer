@@ -8,6 +8,9 @@ import (
 	"s3MediaStreamer/app/model"
 	"time"
 
+	"github.com/ggwhite/go-masker/v2"
+	slogformatter "github.com/samber/slog-formatter"
+
 	"log/slog"
 
 	"github.com/Graylog2/go-gelf/gelf"
@@ -20,6 +23,10 @@ import (
 
 type Logger struct {
 	*slog.Logger
+}
+
+type LoggerMessageConnect struct {
+	Fields []model.LogField
 }
 
 // Slog adapter method to get *slog.Logger from *Logger
@@ -167,40 +174,52 @@ func GetLogger(ctx context.Context, conf *model.LoggerSetup, appInfo *model.AppI
 		loggers = append(loggers, telegramHandler)
 
 	case "json":
-		// JSON logger initialization
-		logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		consoleHandler := slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 			Level: logLevel,
-		}))
+		})
+		loggers = append(loggers, consoleHandler)
 
 	case "text":
-		// Console (stdout) logger initialization
-		logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		consoleHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 			Level: logLevel,
-		}))
+		})
+		loggers = append(loggers, consoleHandler)
 
 	default:
 		// Default to console logging if no valid type is provided
-		logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		consoleHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 			Level: logLevel,
-		}))
+		})
+		loggers = append(loggers, consoleHandler)
 	}
 
-	consoleHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: logLevel,
+	formatter := slogformatter.FormatByType(func(u *LoggerMessageConnect) slog.Value {
+		// Determine the password value based on its length
+		maskedFields := u.MaskFields()
+		var fieldValues []slog.Attr
+		for k, v := range maskedFields {
+			fieldValues = append(fieldValues, slog.Any(k, v))
+		}
+
+		return slog.GroupValue(fieldValues...)
+
 	})
-	loggers = append(loggers, consoleHandler)
+
+	formattingMiddleware := slogformatter.NewFormatterHandler(formatter)
 
 	logger = slog.New(
-		slogmulti.Fanout(loggers...),
+		formattingMiddleware(
+			slogmulti.Fanout(loggers...),
+		),
 	)
 
 	// Add common fields to logger
 	logger = logger.With(
-		"app", appInfo.AppName,
-		"environment", "dev",
-		"release", appInfo.Version,
-		"build_time", appInfo.BuildTime,
-		"go_version", runtime.Version(),
+		slog.Group("system",
+			"release", appInfo.Version,
+			"build_time", appInfo.BuildTime,
+			"go_version", runtime.Version(),
+		),
 	)
 
 	// Set logger as the default logger for the application
@@ -220,4 +239,32 @@ func mapCompressionType(compressionType string) gelf.CompressType {
 	default:
 		return gelf.CompressNone
 	}
+}
+
+func NewLoggerMessageConnect(fields []model.LogField) *LoggerMessageConnect {
+	return &LoggerMessageConnect{
+		Fields: fields,
+	}
+}
+
+func (u *LoggerMessageConnect) MaskFields() map[string]interface{} {
+	maskedFields := make(map[string]interface{})
+	m := masker.NewMaskerMarshaler()
+	for _, field := range u.Fields {
+		switch field.Mask {
+		case "password":
+			maskValue, err := m.Marshal(masker.MaskerTypeName, field.Value.(string))
+			if err != nil {
+				maskedFields[field.Key] = "Masked Password"
+			} else {
+				maskedFields[field.Key] = maskValue
+			}
+			maskedFields[field.Key] = maskValue
+		default:
+			// No mask, just pass the value as is
+			maskedFields[field.Key] = field.Value
+		}
+	}
+
+	return maskedFields
 }

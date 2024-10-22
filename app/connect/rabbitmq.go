@@ -11,23 +11,32 @@ import (
 
 func NewRabbitMQConnection(_ context.Context, cfg *model.Config, logger *logs.Logger) (*amqp091.Connection, error) {
 	var amqpURL string
-	logger.Info("Starting AMQP Connection...")
+	protocol := "amqp" //amqp, rabbitmq
 	if cfg.MessageQueue.BrokerPort != 0 {
 		amqpURL = fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
 	} else {
 		amqpURL = cfg.MessageQueue.Broker
 	}
-	protocol := "amqp" //amqp, rabbitmq
+
+	logFields := []model.LogField{
+		{Key: "TypeConnect", Value: "Rabbitmq", Mask: ""},
+		{Key: "User", Value: cfg.MessageQueue.User, Mask: ""},
+		{Key: "Protocol", Value: protocol, Mask: ""},
+		{Key: "Addr", Value: amqpURL, Mask: ""},
+		{Key: "Password", Value: cfg.MessageQueue.Pass, Mask: "password"},
+	}
+	loggerMsg := logs.NewLoggerMessageConnect(logFields)
+
+	logger.Info("Starting AMQP Connection...")
+
 	amqpURLpriv := fmt.Sprintf("%s://%s:%s@%s", protocol, cfg.MessageQueue.User, cfg.MessageQueue.Pass, amqpURL)
 	logger.Debugf("AMQP URL: %s", amqpURLpriv)
 	conn, err := amqp091.Dial(amqpURLpriv)
 	if err != nil {
-		logger.Errorf("(AMQP) Failed to connect rabbitmq at %s://%s:***@%s, errors: %v", protocol, cfg.MessageQueue.User, amqpURL, err)
-
+		logger.Slog().Error("(AMQP) Failed to connect", "connection", loggerMsg.MaskFields())
 		return nil, err
 	}
 
-	logger.Infof("(AMQP) Successfully connected to AMQP Client: %s://%s:***@%s", protocol, cfg.MessageQueue.User, amqpURL)
-
+	logger.Slog().Error("(AMQP) Successfully to connect", "connection", loggerMsg.MaskFields())
 	return conn, nil
 }

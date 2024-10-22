@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"s3MediaStreamer/app/handlers"
 	"s3MediaStreamer/app/internal/app"
+	"s3MediaStreamer/app/internal/logs"
+	"s3MediaStreamer/app/model"
+	"strconv"
 	"time"
 
 	cache "github.com/chenyahui/gin-cache"
@@ -126,7 +129,7 @@ func setupSystemRoutes(ctx context.Context, app *app.App, allHandlers *handlers.
 
 	app.REST.Use(cors.New(handlers.ConfigCORS(app.Cfg.AppConfig.Web.CorsAllowOrigins)))
 
-	app.REST.Use(app.Service.ACL.ExtractUserRole(ctx, app.Logger))
+	app.REST.Use(app.Service.ACL.ExtractUserRole(app.Logger))
 	app.REST.Use(app.Service.ACL.NewAuthorizerWithRoleExtractor(app.Service.ACL.AccessControl, app.Logger, func(c *gin.Context) string {
 		if role, ok := c.Get("userRole"); ok {
 			return role.(string)
@@ -148,15 +151,22 @@ func InitCacheURL(ctx context.Context, app *app.App) (*persist.RedisStore, error
 		Password: app.Cfg.Storage.Caching.Password,
 		DB:       setDB,
 	})
+	// Create logs.LoggerMessageConnect
+	logFields := []model.LogField{
+		{Key: "TypeConnect", Value: "Redis", Mask: ""},
+		{Key: "DB", Value: strconv.Itoa(setDB), Mask: ""},
+		{Key: "Addr", Value: app.Cfg.Storage.Caching.Address, Mask: ""},
+		{Key: "Password", Value: app.Cfg.Storage.Caching.Password, Mask: "password"},
+	}
+	loggerMsg := logs.NewLoggerMessageConnect(logFields)
 
 	// Ping Redis to ensure the connection is working
 	if err := redisClient.Ping(ctx).Err(); err != nil {
-		app.Logger.Errorf("(Redis: caching URL) Failed to connect redis at %s, errors: %v", app.Cfg.Storage.Caching.Address, err)
+		app.Logger.Slog().Error("(Redis: Auth User) Failed to connect", "connection", loggerMsg.MaskFields())
 		return nil, err
 	}
 	// Log successful connection
-	app.Logger.Infof("(Redis: caching URL) Successfully connected to Redis at %s using DB index %d", app.Cfg.Storage.Caching.Address, setDB)
-
+	app.Logger.Slog().Info("(Redis: Auth User) Successfully to connect", "connection", loggerMsg.MaskFields())
 	redisStore := persist.NewRedisStore(redisClient)
 	return redisStore, nil
 }

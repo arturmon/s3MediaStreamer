@@ -15,6 +15,7 @@ require (
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/emirpasic/gods v1.18.1
 	github.com/exaring/otelpgx v0.6.2
+	github.com/ggwhite/go-masker/v2 v2.1.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
@@ -36,6 +37,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/slog-formatter v1.1.0
 	github.com/samber/slog-gin v1.13.5
 	github.com/samber/slog-graylog/v2 v2.7.0
 	github.com/samber/slog-kafka/v2 v2.6.0

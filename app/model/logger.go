@@ -15,3 +15,9 @@ type LoggerSetup struct {
 	KafkaASync             bool
 	KafkaMaxAttempts       int
 }
+
+type LogField struct {
+	Key   string
+	Value interface{}
+	Mask  string // Specifies the mask type (e.g., "mobile", "password", etc.)
+}

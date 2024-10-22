@@ -152,6 +152,8 @@ github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWo
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/gabriel-vasile/mimetype v1.4.5 h1:J7wGKdGu33ocBOhGy0z653k/lFKLFDPJMG8Gql0kxn4=
 github.com/gabriel-vasile/mimetype v1.4.5/go.mod h1:ibHel+/kbxn9x2407k1izTA1S81ku1z/DlgOW2QE0M4=
+github.com/ggwhite/go-masker/v2 v2.1.0 h1:tmpVa2dWjgzdmlLDFBBWlJ/KkzdT3snd2QmFcR9qk+c=
+github.com/ggwhite/go-masker/v2 v2.1.0/go.mod h1:Xky8hDSkBwV7pwCJvFsJaiFVwU9GCt0yIAx6yuAc6xY=
 github.com/gin-contrib/cors v1.7.2 h1:oLDHxdg8W/XDoN/8zamqk/Drgt4oVZDvaV0YmvVICQw=
 github.com/gin-contrib/cors v1.7.2/go.mod h1:SUJVARKgQ40dmrzgXEVxj2m7Ig1v1qIboQkPDTQ9t2E=
 github.com/gin-contrib/gzip v0.0.6 h1:NjcunTcGAj5CO1gn4N8jHOSIeRFHIbn51z6K+xaN4d4=
@@ -546,6 +548,8 @@ github.com/samber/lo v1.47.0 h1:z7RynLwP5nbyRscyvcD043DWYoOcYRv3mV8lBeqOCLc=
 github.com/samber/lo v1.47.0/go.mod h1:RmDH9Ct32Qy3gduHQuKJ3gW1fMHAnE/fAzQuf6He5cU=
 github.com/samber/slog-common v0.17.0 h1:HdRnk7QQTa9ByHlLPK3llCBo8ZSX3F/ZyeqVI5dfMtI=
 github.com/samber/slog-common v0.17.0/go.mod h1:mZSJhinB4aqHziR0SKPqpVZjJ0JO35JfH+dDIWqaCBk=
+github.com/samber/slog-formatter v1.1.0 h1:9waVLjNnUWUac6OVv1cj9Y1RQAwo/LhAD3jMzXuaVzY=
+github.com/samber/slog-formatter v1.1.0/go.mod h1:CEPmgdYDd+4lK0hbsxCkOVsLAJ4WXMhdUPypdwyNpLk=
 github.com/samber/slog-gin v1.13.5 h1:M2ELRUdgRVgP8SVUe1l5fmkdbocwR3YqdTRnqnN+ZYc=
 github.com/samber/slog-gin v1.13.5/go.mod h1:vqUCcni2o7z/miSF3uj904ZL8+hVBiwnPKP8Id0RNe8=
 github.com/samber/slog-graylog/v2 v2.7.0 h1:28jMsQ+wt/m4ybPWZRjVUIHN/j9PLbJK67Nez+OrUkQ=
