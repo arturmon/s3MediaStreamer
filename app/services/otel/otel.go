@@ -2,12 +2,14 @@ package otel
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -33,6 +35,7 @@ type ProviderConfig struct {
 type Provider struct {
 	provider trace.TracerProvider
 	logger   *logs.Logger
+	Disabled bool
 }
 
 func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logger, appName, version string) (*Provider, error) {
@@ -54,20 +57,25 @@ func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logge
 
 func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error) {
 	if config.Disabled {
-		return &Provider{provider: trace.NewNoopTracerProvider(), logger: config.Logger}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
+		return &Provider{provider: trace.NewNoopTracerProvider(), logger: config.Logger, Disabled: true}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
 	}
+	/*
+		if config.Disabled {
+			return &Provider{provider: sdktrace.NewTracerProvider(), logger: config.Logger, disabled: true}, nil
+		}
 
+	*/
 	tp, tpErr := jaegerTraceProvider(ctx, config)
 	if tpErr != nil {
 		config.Logger.Fatal(tpErr.Error())
-		return nil, tpErr
+		return nil, fmt.Errorf("failed to create jaeger trace provider: %w", tpErr)
 	}
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{}))
 
-	return &Provider{provider: tp, logger: config.Logger}, nil
+	return &Provider{provider: tp, logger: config.Logger, Disabled: false}, nil
 }
 
 func jaegerTraceProvider(ctx context.Context, config ProviderConfig) (*sdktrace.TracerProvider, error) {
@@ -116,4 +124,11 @@ func GetHostname() string {
 		return ""
 	}
 	return hostname
+}
+
+func (p *Provider) TraceAndLog(ctx context.Context, span trace.Span, message string, attributes ...attribute.KeyValue) {
+	if !p.Disabled {
+		p.LogWithTrace(ctx, message)
+		span.SetAttributes(attributes...)
+	}
 }
