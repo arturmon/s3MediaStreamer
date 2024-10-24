@@ -57,14 +57,9 @@ func InitializeTracer(ctx context.Context, cfg *model.Config, logger *logs.Logge
 
 func initProvider(ctx context.Context, config ProviderConfig) (*Provider, error) {
 	if config.Disabled {
-		return &Provider{provider: trace.NewNoopTracerProvider(), logger: config.Logger, Disabled: true}, nil //nolint:staticcheck // SA1019 NewNoopTracerProvider() is deprecated
+		return &Provider{provider: sdktrace.NewTracerProvider(), logger: config.Logger, Disabled: true}, nil
 	}
-	/*
-		if config.Disabled {
-			return &Provider{provider: sdktrace.NewTracerProvider(), logger: config.Logger, disabled: true}, nil
-		}
 
-	*/
 	tp, tpErr := jaegerTraceProvider(ctx, config)
 	if tpErr != nil {
 		config.Logger.Fatal(tpErr.Error())
