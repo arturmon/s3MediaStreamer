@@ -41,7 +41,7 @@ require (
 	github.com/samber/slog-gin v1.13.5
 	github.com/samber/slog-graylog/v2 v2.7.0
 	github.com/samber/slog-kafka/v2 v2.6.0
-	github.com/samber/slog-multi v1.2.3
+	github.com/samber/slog-multi v1.2.4
 	github.com/samber/slog-telegram/v2 v2.4.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.9.0

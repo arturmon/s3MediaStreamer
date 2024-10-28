@@ -556,8 +556,8 @@ github.com/samber/slog-graylog/v2 v2.7.0 h1:28jMsQ+wt/m4ybPWZRjVUIHN/j9PLbJK67Ne
 github.com/samber/slog-graylog/v2 v2.7.0/go.mod h1:HP/O4JXPM0+Es8HIfLYVn44nR93G0UgJ4apkSgXEpic=
 github.com/samber/slog-kafka/v2 v2.6.0 h1:zHtyT1nHiXvNOCJHi0gFufqrsdrO8nTLe3cs1r9ILF8=
 github.com/samber/slog-kafka/v2 v2.6.0/go.mod h1:Mo9rWatDkkJqeyjhbhdhe7vigJ+/b40BlNHUx0NqwvU=
-github.com/samber/slog-multi v1.2.3 h1:np8YoAZbGP699xA92SYZxs7zzKpL1/yBYk6q8/caXpc=
-github.com/samber/slog-multi v1.2.3/go.mod h1:ACuZ5B6heK57TfMVkVknN2UZHoFfjCwRxR0Q2OXKHlo=
+github.com/samber/slog-multi v1.2.4 h1:k9x3JAWKJFPKffx+oXZ8TasaNuorIW4tG+TXxkt6Ry4=
+github.com/samber/slog-multi v1.2.4/go.mod h1:ACuZ5B6heK57TfMVkVknN2UZHoFfjCwRxR0Q2OXKHlo=
 github.com/samber/slog-telegram/v2 v2.4.0 h1:vfyneXoi05b/eEirP/fyb4sIBe/23YYVB7rWoL4iP58=
 github.com/samber/slog-telegram/v2 v2.4.0/go.mod h1:Ken2XS8DJPqq10kE/UEI5NpZ6nb8aFNPJP9Nv9Y19F4=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 h1:nn5Wsu0esKSJiIVhscUtVbo7ada43DJhG55ua/hjS5I=
