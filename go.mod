@@ -31,7 +31,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mewkiz/flac v1.0.12
-	github.com/minio/minio-go/v7 v7.0.79
+	github.com/minio/minio-go/v7 v7.0.80
 	github.com/penglongli/gin-metrics v0.1.10
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.20.5
