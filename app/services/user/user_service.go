@@ -149,6 +149,8 @@ func (s *Service) Login(c *gin.Context, data map[string]string) (*model.OkLoginR
 		RefreshToken: refreshToken,
 		OtpEnabled:   user.OtpEnabled,
 	}
+
+	s.logger.Slog().Info("user Data login", "userData", s.logger.ToLogFields(loginResponse).MaskFields())
 	return &loginResponse, nil
 }
 

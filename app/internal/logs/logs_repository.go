@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 	"s3MediaStreamer/app/model"
+	"strings"
 	"time"
 
 	"github.com/ggwhite/go-masker/v2"
@@ -260,6 +261,24 @@ func (u *LoggerMessageConnect) MaskFields() map[string]interface{} {
 				maskedFields[field.Key] = maskValue
 			}
 			maskedFields[field.Key] = maskValue
+		case "email":
+			emailValue := field.Value.(string)
+			// Basic email masking by replacing the domain and part of the username
+			if atIndex := strings.Index(emailValue, "@"); atIndex != -1 {
+				maskedEmail := emailValue[:1] + "***" + emailValue[atIndex:]
+				maskedFields[field.Key] = maskedEmail
+			} else {
+				maskedFields[field.Key] = "Invalid Email Format"
+			}
+		case "jwt", "token":
+			// Mask tokens by retaining the first and last 4 characters, masking the middle
+			tokenValue := field.Value.(string)
+			if len(tokenValue) > 8 {
+				maskedToken := tokenValue[:4] + strings.Repeat("*", len(tokenValue)-8) + tokenValue[len(tokenValue)-4:]
+				maskedFields[field.Key] = maskedToken
+			} else {
+				maskedFields[field.Key] = "Invalid Token Format"
+			}
 		default:
 			// No mask, just pass the value as is
 			maskedFields[field.Key] = field.Value

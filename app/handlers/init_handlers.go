@@ -35,7 +35,7 @@ func NewHandlers(ctx context.Context, app *app.App) *Handlers {
 	otpHandler := otphandler.NewOtpHandler(*app.Service.OTP)
 	messageRepo, err := amqp2.NewRabbitMQHandlerWrapper(ctx, app.Cfg, app.Logger, app.Service.InitRepo.InitConnect.RabbitCon, *app.Service.Message)
 	audioHandler := audiohandler.NewAudioHandler(app.Service.Audio, app.Logger)
-	wrapper := NewTrackHandler(*app.Service.User, app.Logger)
+	wrapper := NewTrackHandler(*app.Service.User, app.Service.Session, app.Logger)
 	if err != nil {
 		return nil
 	}

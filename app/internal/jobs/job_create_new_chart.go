@@ -71,10 +71,16 @@ func (j *CreateNewMusicChartJob) Run() {
 	}
 
 	request := convertTracksToSetPlaylistTrackOrderRequest(tracks)
+
+	userContext := &model.UserContext{
+		UserID:    "cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+		UserRole:  "admin",
+		UserEmail: "admin@admin.com",
+	}
+
 	if errRest := j.app.Service.Playlist.AddTracksToPlaylist(
 		ctx,
-		"admin",
-		"cac22f72-1fa2-4a81-876d-39fcf1cc9159",
+		userContext,
 		playlistID.String(),
 		&request,
 		false,

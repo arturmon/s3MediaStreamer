@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"s3MediaStreamer/app/internal/logs"
 	"s3MediaStreamer/app/model"
+	"s3MediaStreamer/app/services/session"
 	"s3MediaStreamer/app/services/user"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +14,23 @@ type WrapperServiceInterface interface{}
 
 type WrapperHandler struct {
 	userService user.Service
+	session     *session.Service
 	logger      *logs.Logger
 }
 
 func NewTrackHandler(
 	userService user.Service,
+	session *session.Service,
 	logger *logs.Logger,
 ) *WrapperHandler {
 	return &WrapperHandler{
 		userService,
+		session,
 		logger,
 	}
 }
 
-// Wrapper with user role and ID check, including logging
+// WrapWithUserCheck with user role and ID check, including logging
 func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userContext *model.UserContext)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h.logger.Info("Checking user role and ID in session data")
@@ -38,15 +42,17 @@ func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userCont
 			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user id and role"})
 			return
 		}
-
+		// read user email in session
+		userEmail, err := h.session.GetSessionKey(c, "user_email")
 		// Create an instance of UserContext
 		userContext := &model.UserContext{
-			UserRole: userRole,
-			UserID:   userID,
+			UserRole:  userRole,
+			UserEmail: userEmail.(string),
+			UserID:    userID,
 		}
 
 		// Log the successfully extracted user role and ID
-		h.logger.Infof("User role: %s, User ID: %s - Success extracted in session data", userRole, userID)
+		h.logger.Slog().Info("Success extracted in session data", "sessionData", h.logger.ToLogFields(userContext).MaskFields())
 
 		// Call the original handler with userContext
 		handler(c, userContext)

@@ -4,7 +4,41 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"reflect"
+	"s3MediaStreamer/app/model"
 )
+
+// ToLogFields converts any texture into a LogField array taking into account masking.
+// ToLogFields converts any struct into a LogField array, considering masking.
+func (l *Logger) ToLogFields(v interface{}) *LoggerMessageConnect {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Struct {
+		return nil // Return nil if v is not a structure
+	}
+
+	fields := make([]model.LogField, 0)
+
+	// Iterate through all fields of the structure
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		fieldValue := val.Field(i)
+
+		// Retrieve the mask tag
+		mask := field.Tag.Get("mask")
+
+		// Add a field to the LogField array
+		fields = append(fields, model.LogField{
+			Key:   field.Name,
+			Value: fieldValue.Interface(),
+			Mask:  mask,
+		})
+	}
+
+	// Pass fields to NewLoggerMessageConnect
+	loggerMsg := NewLoggerMessageConnect(fields)
+
+	return loggerMsg
+}
 
 // Grouped logging helper that adds a group with a name and logs the message.
 

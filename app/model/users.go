@@ -20,6 +20,7 @@ type User struct {
 }
 
 type UserContext struct {
-	UserRole string
-	UserID   string
+	UserID    string `mask:""`
+	UserEmail string `mask:"email"`
+	UserRole  string `mask:""`
 }
