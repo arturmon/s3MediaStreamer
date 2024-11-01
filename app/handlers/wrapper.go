@@ -44,6 +44,11 @@ func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userCont
 		}
 		// read user email in session
 		userEmail, err := h.session.GetSessionKey(c, "user_email")
+		if err != nil {
+			h.logger.Warnf("Error reading user email: %v", err)
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Failed to read user email"})
+			return
+		}
 		// Create an instance of UserContext
 		userContext := &model.UserContext{
 			UserRole:  userRole,
