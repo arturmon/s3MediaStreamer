@@ -546,8 +546,22 @@ func applyTimeFilters(queryBuilder squirrel.SelectBuilder, startT, endT string) 
 
 // Helper function to apply sorting
 func buildSortClause(queryBuilder squirrel.SelectBuilder, sortBy, sortOrder string) squirrel.SelectBuilder {
-	if sortBy != "" && sortOrder != "" {
-		queryBuilder = queryBuilder.OrderBy(sortBy + " " + sortOrder)
+	// Define allowed sort columns and order directions
+	allowedSortColumns := map[string]bool{
+		"created_at":   true,
+		"updated_at":   true,
+		"album":        true,
+		"album_artist": true,
+		"title":        true,
+	}
+	allowedSortOrders := map[string]bool{
+		"ASC":  true,
+		"DESC": true,
+	}
+
+	// Validate sortBy and sortOrder against allowed values
+	if allowedSortColumns[sortBy] && allowedSortOrders[sortOrder] {
+		queryBuilder = queryBuilder.OrderBy(fmt.Sprintf("%s %s", sortBy, sortOrder))
 	}
 	return queryBuilder
 }
