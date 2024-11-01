@@ -72,7 +72,7 @@ func (h *Handler) DeletePlaylist(c *gin.Context, userContext *model.UserContext)
 	defer span.End()
 	// Get the playlist ID from the URL path
 	playlistID := c.Param("playlist_id")
-	errDeletePlaylist := h.playlistService.DeletePlaylistForUser(c, userContext.UserRole, userContext.UserID, playlistID)
+	errDeletePlaylist := h.playlistService.DeletePlaylistForUser(c, userContext, playlistID)
 	if errDeletePlaylist != nil {
 		c.JSON(errDeletePlaylist.Code, errDeletePlaylist.Err)
 		return
@@ -105,8 +105,7 @@ func (h *Handler) AddToPlaylist(c *gin.Context, userContext *model.UserContext) 
 
 	errAddToPlaylist := h.playlistService.AddTrackToPlaylist(
 		c,
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 		playlistID,
 		trackID,
 		parentID,
@@ -142,8 +141,7 @@ func (h *Handler) ListTracksFromPlaylist(c *gin.Context, userContext *model.User
 
 	response, errListTracksFromPlaylist := h.playlistService.GetTracksInPlaylist(
 		c,
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 		playlistID,
 	)
 	if errListTracksFromPlaylist != nil {
@@ -172,8 +170,7 @@ func (h *Handler) ListPlaylists(c *gin.Context, userContext *model.UserContext) 
 
 	response, errListTracksFromPlaylist := h.playlistService.GetUserPlaylists(
 		c,
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 	)
 	if errListTracksFromPlaylist != nil {
 		c.JSON(errListTracksFromPlaylist.Code, errListTracksFromPlaylist.Err)
@@ -207,8 +204,7 @@ func (h *Handler) RemoveFromPlaylist(c *gin.Context, userContext *model.UserCont
 
 	errRemoveFromPlaylist := h.playlistService.RemoveTrackFromPlaylist(
 		c,
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 		playlistID,
 		trackID,
 	)
@@ -241,8 +237,7 @@ func (h *Handler) ClearPlaylist(c *gin.Context, userContext *model.UserContext) 
 
 	errRemoveFromPlaylist := h.playlistService.ClearAllTracksInPlaylist(
 		c,
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 		playlistID,
 	)
 	if errRemoveFromPlaylist != nil {
@@ -285,8 +280,7 @@ func (h *Handler) AddTracksToPlaylist(c *gin.Context, userContext *model.UserCon
 	// Call the service function
 	if err := h.playlistService.AddTracksToPlaylist(
 		c.Request.Context(),
-		userContext.UserRole,
-		userContext.UserID,
+		userContext,
 		playlistID,
 		&request,
 		true,

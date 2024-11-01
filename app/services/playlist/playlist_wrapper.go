@@ -8,7 +8,7 @@ import (
 
 const adminPolicy = "admin"
 
-func (s *Service) isAuthorizedForPlaylist(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
+func (s *Service) isAuthorizedForPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string) *model.RestError {
 	// Get the owner ID of the playlist from the repository
 	ownerUUID, err := s.playlistRepository.GetPlaylistOwner(ctx, playlistID)
 	if err != nil {
@@ -22,14 +22,14 @@ func (s *Service) isAuthorizedForPlaylist(ctx context.Context, userRole, userID,
 		s.logger.Errorf("Failed to find user with ownerUUID %s: %v", ownerUUID.String(), err)
 		return &model.RestError{Code: http.StatusInternalServerError, Err: "Failed to find user"}
 	}
-	if userRole != user.Role {
-		s.logger.Warnf("Unauthorized access: user role mismatch for userID %s, expected role %s, but got %s", userID, user.Role, userRole)
+	if userContext.UserRole != user.Role {
+		s.logger.Warnf("Unauthorized access: user role mismatch for userID %s, expected role %s, but got %s", userContext.UserID, user.Role, userContext.UserRole)
 		return &model.RestError{Code: http.StatusForbidden, Err: "Unauthorized access"}
 	}
 
 	// Check if the user is authorized to access or modify the playlist
-	if user.Role != adminPolicy && user.ID.String() != userID {
-		s.logger.Warnf("Unauthorized access: userID %s is not the owner of playlistID %s", userID, playlistID)
+	if user.Role != adminPolicy && user.ID.String() != userContext.UserID {
+		s.logger.Warnf("Unauthorized access: userID %s is not the owner of playlistID %s", userContext.UserID, playlistID)
 		return &model.RestError{Code: http.StatusForbidden, Err: "Unauthorized access"}
 	}
 

@@ -132,7 +132,7 @@ func (s *Service) CreateNewPlaylist(c *gin.Context) (*model.PLayList, *model.Res
 	return &newPlaylist, nil
 }
 
-func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
+func (s *Service) DeletePlaylistForUser(ctx context.Context, userContext *model.UserContext, playlistID string) *model.RestError {
 	// Check if the playlist exists in the repository
 	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
@@ -140,7 +140,7 @@ func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, p
 	}
 
 	// Validate user authorization
-	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -158,7 +158,7 @@ func (s *Service) DeletePlaylistForUser(ctx context.Context, userRole, userID, p
 	return nil
 }
 
-func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, playlistID, referenceID, parentID string) *model.RestError {
+func (s *Service) AddTrackToPlaylist(ctx context.Context, userContext *model.UserContext, playlistID, referenceID, parentID string) *model.RestError {
 	// Check if the playlist exists
 	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
@@ -166,7 +166,7 @@ func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	}
 
 	// Validate user authorization
-	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -209,9 +209,9 @@ func (s *Service) AddTrackToPlaylist(ctx context.Context, userRole, userID, play
 	return nil
 }
 
-func (s Service) GetTracksInPlaylist(ctx context.Context, userRole, userID, playlistID string) ([]model.TrackRequest, *model.RestError) {
+func (s Service) GetTracksInPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string) ([]model.TrackRequest, *model.RestError) {
 	// Validate user authorization
-	restErr := s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr := s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return nil, restErr
 	}
@@ -224,14 +224,14 @@ func (s Service) GetTracksInPlaylist(ctx context.Context, userRole, userID, play
 	return playlistContents, nil
 }
 
-func (s Service) GetUserPlaylists(ctx context.Context, userRole, userID string) (*model.PlaylistsResponse, *model.RestError) {
+func (s Service) GetUserPlaylists(ctx context.Context, userContext *model.UserContext) (*model.PlaylistsResponse, *model.RestError) {
 	var playlists []model.PLayList
 	var err error
 
-	if userRole == adminPolicy {
+	if userContext.UserRole == adminPolicy {
 		playlists, err = s.GetPlaylists(ctx, "")
 	} else {
-		playlists, err = s.GetPlaylists(ctx, userID)
+		playlists, err = s.GetPlaylists(ctx, userContext.UserID)
 	}
 	if err != nil {
 		return nil, &model.RestError{Code: http.StatusNotFound, Err: "Playlists not found"}
@@ -254,7 +254,7 @@ func (s Service) GetUserPlaylists(ctx context.Context, userRole, userID string) 
 	return response, nil
 }
 
-func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID, playlistID, trackID string) *model.RestError {
+func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userContext *model.UserContext, playlistID, trackID string) *model.RestError {
 	// Check if the playlist exists
 	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
@@ -262,7 +262,7 @@ func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID,
 	}
 
 	// Validate user authorization
-	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -281,7 +281,7 @@ func (s *Service) RemoveTrackFromPlaylist(ctx context.Context, userRole, userID,
 	return nil
 }
 
-func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
+func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string) *model.RestError {
 	// Check if the playlist exists
 	restErr := s.ensurePlaylistExists(ctx, playlistID)
 	if restErr != nil {
@@ -289,7 +289,7 @@ func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID,
 	}
 
 	// Validate user authorization
-	restErr = s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr = s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return restErr
 	}
@@ -322,9 +322,9 @@ func (s Service) ClearAllTracksInPlaylist(ctx context.Context, userRole, userID,
 // Return Values:
 //   - *model.RestError: An error response if something goes wrong.
 //     Returns nil if successful.
-func (s *Service) AddTracksToPlaylist(ctx context.Context, userRole, userID, playlistID string, request *model.SetPlaylistTrackOrderRequest, rebalance bool) *model.RestError {
+func (s *Service) AddTracksToPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string, request *model.SetPlaylistTrackOrderRequest, rebalance bool) *model.RestError {
 	// Step 1: Validate the user and playlist existence
-	if restErr := s.validateUserForPlaylist(ctx, userRole, userID, playlistID); restErr != nil {
+	if restErr := s.validateUserForPlaylist(ctx, userContext, playlistID); restErr != nil {
 		return restErr
 	}
 

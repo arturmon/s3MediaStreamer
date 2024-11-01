@@ -10,9 +10,9 @@ import (
 )
 
 // Helper: Validates user authorization for a playlist
-func (s *Service) validateUserForPlaylist(ctx context.Context, userRole, userID, playlistID string) *model.RestError {
+func (s *Service) validateUserForPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string) *model.RestError {
 	// Validate user authorization
-	restErr := s.isAuthorizedForPlaylist(ctx, userRole, userID, playlistID)
+	restErr := s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
 	if restErr != nil {
 		return restErr
 	}
