@@ -351,8 +351,5 @@ issues:
     - path: "repository/postgres/track_repository.go"
       linters:
         - gosec
-    - path: "app/docs"
-      linters:
-        - depguard
 
   fix: true

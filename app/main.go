@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	_ "net/http/pprof"
-	_ "s3MediaStreamer/app/docs"
 	"s3MediaStreamer/app/handlers"
 	"s3MediaStreamer/app/internal/app"
 	"s3MediaStreamer/app/internal/config"
