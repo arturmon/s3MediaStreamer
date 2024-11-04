@@ -7,7 +7,6 @@ on:
     types:
       - completed
 
-
 jobs:
   initial:
     name: Initializing
@@ -92,8 +91,8 @@ jobs:
         with:
           sarif_file: results.sarif
 
-  Docker-Hub:
-    if: ${{ github.event_name == 'push' }}
+    Docker-Hub:
+    if: ${{ github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     needs: docker-check-vulnerabilities
     steps:
@@ -134,7 +133,7 @@ jobs:
 
 
   Docker-GHCR:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     needs: docker-check-vulnerabilities
     steps:
