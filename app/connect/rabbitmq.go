@@ -11,7 +11,7 @@ import (
 
 func NewRabbitMQConnection(_ context.Context, cfg *model.Config, logger *logs.Logger) (*amqp091.Connection, error) {
 	var amqpURL string
-	protocol := "amqp" //amqp, rabbitmq
+	protocol := "amqp" // amqp, rabbitmq
 	if cfg.MessageQueue.BrokerPort != 0 {
 		amqpURL = fmt.Sprintf("%s:%d", cfg.MessageQueue.Broker, cfg.MessageQueue.BrokerPort)
 	} else {

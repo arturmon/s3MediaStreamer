@@ -16,7 +16,7 @@ const (
 	expectedPathComponents = 4 // Expected number of components in the playlist path
 )
 
-// Helper function to parse the path and return the components
+// Helper function to parse the path and return the components.
 func parsePath(pathStr string) (string, string, string, string, uuid.UUID, error) {
 	components := strings.Split(pathStr, ".")
 	if len(components) != expectedPathComponents {
@@ -35,7 +35,7 @@ func parsePath(pathStr string) (string, string, string, string, uuid.UUID, error
 	return playlistID, trackType, trackID, pathStr, playlistIDUUID, nil
 }
 
-// Helper function to execute SQL update query
+// Helper function to execute SQL update query.
 func executeUpdateQuery(ctx context.Context, tx pgx.Tx, playlistIDUUID uuid.UUID, oldPath, newPath string) error {
 	updateQuery := squirrel.Update("playlist_tracks").
 		Set("path", newPath).
@@ -58,7 +58,7 @@ func executeUpdateQuery(ctx context.Context, tx pgx.Tx, playlistIDUUID uuid.UUID
 	return nil
 }
 
-// UpdatePositionsInDB updates the path with the new position in the database after rebalancing
+// UpdatePositionsInDB updates the path with the new position in the database after rebalancing.
 func (c *Client) UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) error {
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *Client) UpdatePositionsInDB(ctx context.Context, tree *treemap.Map) err
 	return nil
 }
 
-// InsertPositionInDB inserts a new position in the database
+// InsertPositionInDB inserts a new position in the database.
 func (c *Client) InsertPositionInDB(ctx context.Context, tree *treemap.Map) error {
 	tx, err := c.Pool.Begin(ctx)
 	if err != nil {

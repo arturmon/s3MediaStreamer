@@ -30,7 +30,7 @@ func NewTrackHandler(
 	}
 }
 
-// WrapWithUserCheck with user role and ID check, including logging
+// WrapWithUserCheck with user role and ID check, including logging.
 func (h *WrapperHandler) WrapWithUserCheck(handler func(c *gin.Context, userContext *model.UserContext)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h.logger.Info("Checking user role and ID in session data")

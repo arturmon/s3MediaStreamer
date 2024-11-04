@@ -19,7 +19,7 @@ type Service struct {
 	stopCh      chan struct{}
 }
 
-// NewMDNSService creates a new mDNS service instance
+// NewMDNSService creates a new mDNS service instance.
 func NewMDNSService(serviceName, port string, logger *logs.Logger) *Service {
 	// Convert port from string to int
 	portInt, err := strconv.Atoi(port)
@@ -35,7 +35,7 @@ func NewMDNSService(serviceName, port string, logger *logs.Logger) *Service {
 	}
 }
 
-// Start begins the mDNS service in a separate goroutine
+// Start begins the mDNS service in a separate goroutine.
 func (s *Service) Start() {
 	go func() {
 		// Get the hostname and IP addresses of the current machine
@@ -69,7 +69,7 @@ func (s *Service) Start() {
 	}()
 }
 
-// Stop gracefully stops the mDNS service
+// Stop gracefully stops the mDNS service.
 func (s *Service) Stop() {
 	close(s.stopCh) // Signal to stop the mDNS server
 }

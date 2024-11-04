@@ -325,7 +325,7 @@ func (c *Client) GetAllTracks(ctx context.Context) ([]model.Track, error) {
 	return c.ExecuteSelectQuery(ctx, selectBuilder)
 }
 
-// AddTrackToPlaylist inserts a track or playlist into a playlist_tracks table supporting nested structures with LTREE
+// AddTrackToPlaylist inserts a track or playlist into a playlist_tracks table supporting nested structures with LTREE.
 func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceType, referenceID, parentPath string) error {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "AddTrackToPlaylist")
@@ -390,7 +390,7 @@ func (c *Client) AddTrackToPlaylist(ctx context.Context, playlistID, referenceTy
 	return nil
 }
 
-// RemoveTrackFromPlaylist removes a track from a playlist_tracks table, handling hierarchical relationships with LTREE
+// RemoveTrackFromPlaylist removes a track from a playlist_tracks table, handling hierarchical relationships with LTREE.
 func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackID string) error {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "RemoveTrackFromPlaylist")
@@ -439,7 +439,7 @@ func (c *Client) RemoveTrackFromPlaylist(ctx context.Context, playlistID, trackI
 	return nil
 }
 
-// GetAllTracksByPositions retrieves all tracks within a playlist, including nested ones, ordered by position using LTREE
+// GetAllTracksByPositions retrieves all tracks within a playlist, including nested ones, ordered by position using LTREE.
 func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string) ([]model.Track, error) {
 	tracer := GetTracer(ctx)
 	_, span := tracer.Start(ctx, "GetAllTracksByPositions")
@@ -505,7 +505,7 @@ func (c *Client) GetAllTracksByPositions(ctx context.Context, playlistID string)
 	return playlistTracks, nil
 }
 
-// Helper function to build the filter clause
+// Helper function to build the filter clause.
 func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) squirrel.SelectBuilder {
 	if filter == "" {
 		return queryBuilder
@@ -533,7 +533,7 @@ func buildFilterClause(queryBuilder squirrel.SelectBuilder, filter string) squir
 	return queryBuilder
 }
 
-// Helper function to apply time filters
+// Helper function to apply time filters.
 func applyTimeFilters(queryBuilder squirrel.SelectBuilder, startT, endT string) squirrel.SelectBuilder {
 	if startT != "" {
 		queryBuilder = queryBuilder.Where("updated_at >= $1", startT)
@@ -544,7 +544,7 @@ func applyTimeFilters(queryBuilder squirrel.SelectBuilder, startT, endT string) 
 	return queryBuilder
 }
 
-// Helper function to apply sorting
+// Helper function to apply sorting.
 func buildSortClause(queryBuilder squirrel.SelectBuilder, sortBy, sortOrder string) squirrel.SelectBuilder {
 	// Define allowed sort columns and order directions
 	allowedSortColumns := map[string]bool{
@@ -566,7 +566,7 @@ func buildSortClause(queryBuilder squirrel.SelectBuilder, sortBy, sortOrder stri
 	return queryBuilder
 }
 
-// Helper function to apply pagination
+// Helper function to apply pagination.
 func applyPagination(queryBuilder squirrel.SelectBuilder, offset, limit int) squirrel.SelectBuilder {
 	if limit < 0 || offset < 0 {
 		limit = 0

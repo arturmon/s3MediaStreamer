@@ -125,7 +125,7 @@ func InitSession(ctx context.Context, cfg *model.Config, logger *logs.Logger) (s
 		return store, err
 	}
 
-	//logger.Info("Session store initialized successfully")
+	// logger.Info("Session store initialized successfully")
 	logger.Slog().Info("(Session) Successfully to connect", "connection", loggerMsg.MaskFields())
 	return store, nil
 }

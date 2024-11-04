@@ -9,7 +9,7 @@ import (
 	"github.com/emirpasic/gods/maps/treemap"
 )
 
-// Helper: Validates user authorization for a playlist
+// Helper: Validates user authorization for a playlist.
 func (s *Service) validateUserForPlaylist(ctx context.Context, userContext *model.UserContext, playlistID string) *model.RestError {
 	// Validate user authorization
 	restErr := s.isAuthorizedForPlaylist(ctx, userContext, playlistID)
@@ -25,7 +25,7 @@ func (s *Service) validateUserForPlaylist(ctx context.Context, userContext *mode
 	return nil
 }
 
-// Helper: Validates the track or playlist and determines its type
+// Helper: Validates the track or playlist and determines its type.
 func (s *Service) validateTrackOrPlaylist(ctx context.Context, referenceID string) (string, *model.RestError) {
 	_, errTrack := s.trackRepository.GetTracksByColumns(ctx, referenceID, "_id")
 	isPlaylist, err := s.CheckPlaylistExists(ctx, referenceID)
@@ -47,7 +47,7 @@ func (s *Service) validateTrackOrPlaylist(ctx context.Context, referenceID strin
 	return "", &model.RestError{Code: http.StatusNotFound, Err: fmt.Sprintf("Reference (track or playlist) with ID %s not found", referenceID)}
 }
 
-// Helper: Generates the position string based on the request and index
+// Helper: Generates the position string based on the request and index.
 func generatePositionStr(request *model.SetPlaylistTrackOrderRequest, i int) string {
 	if len(request.ItemIDs) == 1 {
 		if request.Position != nil {
@@ -58,7 +58,7 @@ func generatePositionStr(request *model.SetPlaylistTrackOrderRequest, i int) str
 	return fmt.Sprintf("%d", i)
 }
 
-// Helper: Updates the playlist tree structure
+// Helper: Updates the playlist tree structure.
 func (s *Service) updatePlaylistTree(ctx context.Context, playlistID string, addPlaylistStructs []model.PlaylistStruct, rebalance bool) (*treemap.Map, *model.RestError) {
 	// Retrieve existing playlist items
 	structPlaylist, err := s.trackRepository.GetPlaylistItems(ctx, playlistID)
@@ -82,7 +82,7 @@ func (s *Service) updatePlaylistTree(ctx context.Context, playlistID string, add
 	return treeAddItems, nil
 }
 
-// Helper: Updates the database with the modified tree
+// Helper: Updates the database with the modified tree.
 func (s *Service) updateDatabaseWithTree(ctx context.Context, tree *treemap.Map) *model.RestError {
 	err := s.trackRepository.InsertPositionInDB(ctx, tree)
 	if err != nil {

@@ -45,7 +45,7 @@ func InitRouter(ctx context.Context, app *app.App, allHandlers *handlers.Handler
 	initPlaylistRoutes(v1.Group("/playlist"), allHandlers, cacheURL, ttl, app.Cfg.Storage.Caching.Enabled)
 }
 
-// User-related routes
+// User-related routes.
 func initUserRoutes(users *gin.RouterGroup, allHandlers *handlers.Handlers) {
 	users.POST("/register", allHandlers.User.Register)
 	users.OPTIONS("/login", HandleOptions)
@@ -64,7 +64,7 @@ func initUserRoutes(users *gin.RouterGroup, allHandlers *handlers.Handlers) {
 	}
 }
 
-// Track-related routes
+// Track-related routes.
 func initTrackRoutes(tracks *gin.RouterGroup, allHandlers *handlers.Handlers, cacheURL *persist.RedisStore, ttl time.Duration, cacheEnabled bool) {
 	if cacheEnabled {
 		tracks.GET("", cache.CacheByRequestURI(cacheURL, ttl), allHandlers.Track.GetAllTracks)
@@ -75,13 +75,13 @@ func initTrackRoutes(tracks *gin.RouterGroup, allHandlers *handlers.Handlers, ca
 	}
 }
 
-// Audio routes
+// Audio routes.
 func initAudioRoutes(audio *gin.RouterGroup, allHandlers *handlers.Handlers) {
 	audio.GET("/stream/:segment", allHandlers.Audio.StreamM3U)
 	audio.GET("/:playlist_id", allHandlers.Audio.Audio)
 }
 
-// Playlist-related routes
+// Playlist-related routes.
 func initPlaylistRoutes(playlist *gin.RouterGroup, allHandlers *handlers.Handlers, cacheURL *persist.RedisStore, ttl time.Duration, cacheEnabled bool) {
 	playlist.POST("/create", allHandlers.Playlist.CreatePlaylist)
 
@@ -101,7 +101,7 @@ func initPlaylistRoutes(playlist *gin.RouterGroup, allHandlers *handlers.Handler
 	playlist.DELETE("/:playlist_id/clear", allHandlers.Wrapper.WrapWithUserCheck(allHandlers.Playlist.ClearPlaylist))
 }
 
-// Swagger routes
+// Swagger routes.
 func initSwaggerRoutes(swagger *gin.RouterGroup) {
 	swagger.GET("", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
