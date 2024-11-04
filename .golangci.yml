@@ -305,6 +305,7 @@ issues:
   exclude-dirs:
     - app/internal/logs
     - postgresql_data
+    - app/docs
   exclude-files:
     - app/model/swagger.go
     - app/model/playlist.go
