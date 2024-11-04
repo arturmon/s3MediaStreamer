@@ -26,7 +26,6 @@ type Handlers struct {
 }
 
 func NewHandlers(ctx context.Context, app *app.App) *Handlers {
-
 	healthHandler := healthhandler.NewMonitoringHandler(*app.Service.Health)
 	jobHandler := jobshandler.NewJobHandler()
 	trackHandler := trackhandler.NewTrackHandler(*app.Service.Track)

@@ -88,7 +88,6 @@ func (j *CreateNewMusicChartJob) Run() {
 		j.app.Logger.Errorf("Error add tracks to new Playlist: %s", err)
 		return
 	}
-
 }
 
 func convertTracksToSetPlaylistTrackOrderRequest(tracks []model.Track) model.SetPlaylistTrackOrderRequest {

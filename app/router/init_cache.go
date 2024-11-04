@@ -8,7 +8,7 @@ import (
 	"github.com/chenyahui/gin-cache/persist"
 )
 
-// Initialize cache and return cache URL and TTL
+// Initialize cache and return cache URL and TTL.
 func initCache(ctx context.Context, app *app.App) (*persist.RedisStore, time.Duration) {
 	cacheURL, err := InitCacheURL(ctx, app)
 	if err != nil {
