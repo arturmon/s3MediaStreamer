@@ -447,8 +447,8 @@ github.com/samber/slog-common v0.17.0 h1:HdRnk7QQTa9ByHlLPK3llCBo8ZSX3F/ZyeqVI5d
 github.com/samber/slog-common v0.17.0/go.mod h1:mZSJhinB4aqHziR0SKPqpVZjJ0JO35JfH+dDIWqaCBk=
 github.com/samber/slog-formatter v1.1.0 h1:9waVLjNnUWUac6OVv1cj9Y1RQAwo/LhAD3jMzXuaVzY=
 github.com/samber/slog-formatter v1.1.0/go.mod h1:CEPmgdYDd+4lK0hbsxCkOVsLAJ4WXMhdUPypdwyNpLk=
-github.com/samber/slog-gin v1.13.5 h1:M2ELRUdgRVgP8SVUe1l5fmkdbocwR3YqdTRnqnN+ZYc=
-github.com/samber/slog-gin v1.13.5/go.mod h1:vqUCcni2o7z/miSF3uj904ZL8+hVBiwnPKP8Id0RNe8=
+github.com/samber/slog-gin v1.13.6 h1:clWpgtdL/3KM1eGkUMUHTLNM1fG4nA3bHC1Pt7v0z44=
+github.com/samber/slog-gin v1.13.6/go.mod h1:iicbXYT1DozbzsbLfpRdXkAal3zmzIjayQCV5YR+A6M=
 github.com/samber/slog-graylog/v2 v2.7.0 h1:28jMsQ+wt/m4ybPWZRjVUIHN/j9PLbJK67Nez+OrUkQ=
 github.com/samber/slog-graylog/v2 v2.7.0/go.mod h1:HP/O4JXPM0+Es8HIfLYVn44nR93G0UgJ4apkSgXEpic=
 github.com/samber/slog-kafka/v2 v2.6.0 h1:zHtyT1nHiXvNOCJHi0gFufqrsdrO8nTLe3cs1r9ILF8=
