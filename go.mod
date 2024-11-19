@@ -10,7 +10,7 @@ require (
 	github.com/arturmon/consul-leader-election v1.2.6
 	github.com/bamzi/jobrunner v1.0.0
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
-	github.com/casbin/casbin/v2 v2.100.0
+	github.com/casbin/casbin/v2 v2.101.0
 	github.com/chenyahui/gin-cache v1.9.0
 	github.com/dhowden/tag v0.0.0-20230630033851-978a0926ee25
 	github.com/emirpasic/gods v1.18.1
