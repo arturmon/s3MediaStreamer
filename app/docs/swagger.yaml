@@ -1,0 +1,1026 @@
+basePath: /v1
+definitions:
+  model.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  model.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  model.NestedPlaylist:
+    properties:
+      _creator_user:
+        type: string
+      _id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      sub_playlists:
+        description: Further nested playlists
+        items:
+          $ref: '#/definitions/model.NestedPlaylist'
+        type: array
+      title:
+        type: string
+      tracks:
+        description: Tracks directly under this playlist
+        items:
+          $ref: '#/definitions/model.Track'
+        type: array
+    type: object
+  model.OTPInput:
+    properties:
+      token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.OkGenerateOTP:
+    properties:
+      base32: {}
+      otp-auth_url: {}
+    type: object
+  model.OkLoginResponce:
+    properties:
+      email:
+        type: string
+      jwt_token:
+        type: string
+      otp_enabled:
+        type: boolean
+      refresh_token:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.OkResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  model.PLayList:
+    properties:
+      description:
+        example: A short description of the application
+        type: string
+      title:
+        example: Title name
+        type: string
+    type: object
+  model.ParamsRefreshTocken:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  model.PlaylistTracksResponse:
+    properties:
+      playlist:
+        $ref: '#/definitions/model.NestedPlaylist'
+      sub_playlists:
+        items:
+          $ref: '#/definitions/model.NestedPlaylist'
+        type: array
+      tracks:
+        items:
+          $ref: '#/definitions/model.Track'
+        type: array
+    type: object
+  model.PlaylistsResponse:
+    properties:
+      playlists:
+        items:
+          $ref: '#/definitions/model.PLayList'
+        type: array
+    type: object
+  model.ResponceRefreshTocken:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIU....FnjPC-zct_EDkIuUviRNI
+        type: string
+    type: object
+  model.Track:
+    properties:
+      album:
+        example: Album name
+        type: string
+      album_artist:
+        example: Album artist name
+        type: string
+      artist:
+        example: Artist name
+        type: string
+      bitrate:
+        example: 320
+        type: integer
+      comment:
+        example: Additional comments
+        type: string
+      composer:
+        example: Composer name
+        type: string
+      disc:
+        example: 1
+        type: integer
+      disc_total:
+        example: 2
+        type: integer
+      genre:
+        example: Genre name
+        type: string
+      lyrics:
+        example: Lyrics of the track
+        type: string
+      sample_rate:
+        example: 44100
+        type: integer
+      title:
+        example: Title name
+        type: string
+      track:
+        example: 3
+        type: integer
+      track_total:
+        example: 10
+        type: integer
+      year:
+        example: 2022
+        type: integer
+    type: object
+  model.User:
+    description: 'User account information with: user _id, name, email, password'
+    properties:
+      email:
+        example: aaaa@aaaa.com
+        type: string
+      otp_enabled:
+        type: boolean
+      otp_verified:
+        type: boolean
+      otpAuthURL:
+        type: string
+      otpSecret:
+        type: string
+      password:
+        example: "1111"
+        type: string
+    type: object
+  model.UserResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: s3streammedia.localhost
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a s3 media streamer server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: S3 Media Streamer Application API
+  version: 0.0.1
+paths:
+  /audio/{playlist_id}:
+    get:
+      consumes:
+      - '*/*'
+      description: Streams audio files in the specified directory as MP3 or FLAC.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        type: string
+      - description: Control operation playlist play
+        in: path
+        name: control
+        type: string
+      produces:
+      - application/x-mpegURL
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Stream audio files.
+      tags:
+      - audio-controller
+  /audio/stream/{segment}:
+    get:
+      consumes:
+      - '*/*'
+      description: Streams audio files in the specified directory as MP3 or FLAC.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        type: string
+      - description: Control operation playlist play
+        in: path
+        name: control
+        type: string
+      produces:
+      - audio/mpeg
+      - audio/flac
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "404":
+          description: Segment not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "406":
+          description: Segment not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Stream audio files.
+      tags:
+      - audio-controller
+  /job/status:
+    get:
+      consumes:
+      - application/json
+      description: Check if the application server is running jobs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: All Job status
+      tags:
+      - job-controller
+  /otp/disable:
+    post:
+      consumes:
+      - application/json
+      description: Disable OTP for a user_handler by setting 'otp_enabled' to 'false'
+        in the database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP disabled successfully
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP status
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Disable OTP for a user_handler.
+      tags:
+      - OTP
+  /otp/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate an OTP token for a user and store it in the database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP generated successfully
+          schema:
+            $ref: '#/definitions/model.OkGenerateOTP'
+        "400":
+          description: Invalid refresh payload
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Failed to find user_handler or invalid email/password
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP secret or URL
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Generate OTP for a user.
+      tags:
+      - OTP
+  /otp/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validates a One-Time Password (OTP) for a user.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: OTP Input
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP Valid
+          schema:
+            $ref: '#/definitions/model.OkResponse'
+        "400":
+          description: Bad Request - Invalid OTP
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found - User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Validates a One-Time Password (OTP).
+      tags:
+      - OTP
+  /otp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP token for a user_handler and update 'otp_enabled'
+        and 'otp_verified' fields in the database.
+      parameters:
+      - description: OTP input data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP verified successfully
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Failed to update OTP status
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Verify OTP for a user.
+      tags:
+      - OTP
+  /playlist/{playlist_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a playlist based on its unique ID.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a playlist by ID.
+      tags:
+      - playlist-controller
+    get:
+      consumes:
+      - application/json
+      description: Get tracks from a playlist by providing the playlist ID.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks retrieved successfully
+          schema:
+            $ref: '#/definitions/model.PlaylistTracksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tracks from a playlist.
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/{track_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a track from the specified playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: Track ID
+        in: path
+        name: track_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Track removed from playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist or track not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Remove a track from the playlist.
+      tags:
+      - playlist-controller
+    post:
+      consumes:
+      - application/json
+      description: Add a track to an existing playlist.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: Track ID
+        in: path
+        name: track_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Track added to the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist or track not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add a track to a playlist
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/clear:
+    delete:
+      consumes:
+      - application/json
+      description: Removes all tracks from a playlist, effectively clearing it.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Playlist cleared successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Playlist not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Clear a playlist by removing all tracks from it.
+      tags:
+      - playlist-controller
+  /playlist/{playlist_id}/tracks:
+    post:
+      consumes:
+      - application/json
+      description: Set tracks in a playlist by providing a list of track IDs.
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: playlist_id
+        required: true
+        type: string
+      - description: List of track IDs to set in the playlist
+        in: body
+        name: track_ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tracks set in the playlist successfully
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Set tracks in a playlist.
+      tags:
+      - playlist-controller
+  /playlist/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new playlist with the provided information.
+      parameters:
+      - description: PLayList details
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/model.PLayList'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Playlist created successfully
+          schema:
+            items:
+              $ref: '#/definitions/model.PLayList'
+            type: array
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new playlist.
+      tags:
+      - playlist-controller
+  /playlist/get:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all playlists available in the storage.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Playlists retrieved successfully
+          schema:
+            $ref: '#/definitions/model.PlaylistsResponse'
+        "404":
+          description: Playlists not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all playlists
+      tags:
+      - playlist-controller
+  /tracks:
+    get:
+      consumes:
+      - '*/*'
+      description: responds with the list of all tracks as JSON.
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        name: page_size
+        type: integer
+      - description: Field to sort by (e.g., 'created_at')
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order ('asc' or 'desc')
+        in: query
+        name: sort_order
+        type: string
+      - description: Filter criteria ('I0001' or '=I0001')
+        in: query
+        name: filter
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Track'
+            type: array
+        "400":
+          description: Invalid page or page_size parameters
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Show the list of all tracks.
+      tags:
+      - track-controller
+  /tracks/{code}:
+    get:
+      consumes:
+      - '*/*'
+      description: |-
+        locates the track whose ID value matches the id parameter sent by the client,
+        then returns that track as a response.
+      parameters:
+      - description: Code track
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Track'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Track whose ID value matches the id.
+      tags:
+      - track-controller
+  /users/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success - User deleted
+          schema:
+            type: string
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found - User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes a user.
+      tags:
+      - user-controller
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with provided email and password.
+      parameters:
+      - description: Login User
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "400":
+          description: Bad Request - Incorrect Password
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found - User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Authenticates a user.
+      tags:
+      - user-controller
+  /users/logout:
+    post:
+      consumes:
+      - application/json
+      description: Clears the authentication cookie, logging out the user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.OkResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Logs out a user.
+      tags:
+      - user-controller
+  /users/me:
+    get:
+      consumes:
+      - '*/*'
+      description: Retrieves user_handler information based on JWT in the request's
+        cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.OkLoginResponce'
+        "401":
+          description: Unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user information
+      tags:
+      - user-controller
+  /users/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Validates the provided refresh token, generates a new access token,
+        and returns it.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/model.ParamsRefreshTocken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully refreshed access token
+          schema:
+            $ref: '#/definitions/model.ResponceRefreshTocken'
+        "400":
+          description: Bad Request - invalid refresh token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid refresh token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: failed to generate tokens and cookies
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Refreshes the access token using a valid refresh token.
+      tags:
+      - user-controller
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with provided name, email, and password.
+      parameters:
+      - description: Register User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.UserResponse'
+        "400":
+          description: Bad Request - User with this email exists
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized - User unauthenticated
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Registers a new user.
+      tags:
+      - user-controller
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Enter the JWT token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
