@@ -11,6 +11,8 @@ import (
 	"s3MediaStreamer/app/model"
 	"s3MediaStreamer/app/router"
 
+	_ "s3MediaStreamer/app/docs"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
