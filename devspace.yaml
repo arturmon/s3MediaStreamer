@@ -26,9 +26,14 @@ pipelines:
 # We recommend to skip image building during development (devspace dev) as much as possible
 images:
   app:
-    image: ghcr.io/arturmon/s3stream:latest
+    image: ghcr.io/arturmon/s3stream
     dockerfile: ./Dockerfile.dev
-    #kaniko: {}
+    tags:
+      - latest
+    #image: ghcr.io/arturmon/s3stream
+    #dockerfile: ./Dockerfile.dev
+    #tags:
+    #  - ${GIT_TAG_OR_HASH}
 
 # This is a list of `deployments` that DevSpace can create for this project
 deployments:
@@ -45,12 +50,14 @@ deployments:
       # You may also use `valuesFiles` to load values from files, e.g. valuesFiles: ["values.yaml"]
       values:
         ingress:
-          host: s3streammedia.localhost
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: s3streammedia.lab.me
+          host: s3streammedia.lab.me
           className: nginx
           useTls: false
         image:
           registry: ghcr.io/arturmon/s3stream
-          tag: "latest"
+          tag: latest
           pullPolicy: Always
         resources:
           requests:
@@ -64,15 +71,15 @@ deployments:
 dev:
   app:
     # Search for the container that runs this image
-    imageSelector: ghcr.io/arturmon/s3stream:latest
+    #imageSelector: ghcr.io/arturmon/s3stream:latest
     #imageSelector: localhost:32017/s3stream:${GIT_TAG_OR_HASH}
-    #labelSelector:
-    #  app.kubernetes.io/name: media
-    #  app.kubernetes.io/service: backend
-    # app.kubernetes.io/instance: app
+    labelSelector:
+      app.kubernetes.io/name: s3media
+      app.kubernetes.io/service: backend
+      app.kubernetes.io/instance: app
 
     containers:
-      media:
+      s3media:
         devImage: ghcr.io/loft-sh/devspace-containers/go:1.22-alpine
         resources:
           requests:
@@ -87,17 +94,18 @@ dev:
     #devImage: ghcr.io/loft-sh/devspace-containers/go:1.21-alpine
     # Sync files between the local filesystem and the development container
         sync:
-          - path: ./
+          - path: ./:/app
             excludeFile: .gitignore
-            downloadExcludePaths:
-              - app/
-              - acl/
-              - conf/
-              - docs/
-              - migration/
-              - utils/
+            #downloadExcludePaths:
+            #  - app/
+            #  - acl/
+            #  - conf/
+            #  - docs/
+            #  - migration/
+            #  - utils/
     # Open a terminal and use the following command to start it
         terminal:
+          enabled: true
           command: ./devspace_start.sh
     # Inject a lightweight SSH server into the container (so your IDE can connect to the remote dev env)
         ssh:
@@ -112,10 +120,6 @@ dev:
     ports:
       - port: "2345"
       - port: "10000"
-    # Open the following URLs once they return an HTTP status code other than 502 or 503
-    open:
-      - url: http://s3streammedia.localhost/v1/swagger/index.html#/
-
 
 # Use the `commands` section to define repeatable dev workflows for this project
 commands:
