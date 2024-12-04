@@ -11,7 +11,6 @@ import (
 	"s3MediaStreamer/app/services/consul"
 	"s3MediaStreamer/app/services/db"
 	"s3MediaStreamer/app/services/health"
-	"s3MediaStreamer/app/services/mdns"
 	"s3MediaStreamer/app/services/monitoring"
 	"s3MediaStreamer/app/services/otel"
 	"s3MediaStreamer/app/services/otp"
