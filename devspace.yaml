@@ -96,13 +96,8 @@ dev:
         sync:
           - path: ./:/app
             excludeFile: .gitignore
-            #downloadExcludePaths:
-            #  - app/
-            #  - acl/
-            #  - conf/
-            #  - docs/
-            #  - migration/
-            #  - utils/
+            downloadExcludePaths:
+              - "*"
     # Open a terminal and use the following command to start it
         terminal:
           enabled: true
