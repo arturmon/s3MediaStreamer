@@ -67,12 +67,7 @@ func initServices(ctx context.Context,
 	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, *userService, logger, treeService)
 	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistService, logger)
 	otpService := otp.NewOTPService(*userService, cfg)
-	// Initialize mDNS service if enabled
-	var mDNSService *mdns.Service
-	if cfg.AppConfig.MDNS.Enabled {
-		mDNSService = mdns.NewMDNSService(appName, cfg.Listen.Port, logger)
-		mDNSService.Start()
-	}
+
 	logger.Info("Complete service initialize.")
 	return &Service{
 		InitRepo:        repo,
@@ -96,6 +91,5 @@ func initServices(ctx context.Context,
 		Session:         sessionService,
 		OTP:             otpService,
 		Tree:            treeService,
-		mDNS:            mDNSService,
 	}, nil
 }

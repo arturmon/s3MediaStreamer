@@ -56,8 +56,6 @@ app_config:
     use_ssl: false
     bucket_name: "music-bucket"
     location: "us-east-1"
-  mdns:
-    enabled: true
 
 storage:
   caching:
