@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine
+FROM golang:1.24-alpine
 
 RUN adduser -D -g '' appuser
 RUN mkdir -p /app
