@@ -16,7 +16,7 @@ RUN go mod download
 RUN go build -C ./app -v -o /app/s3stream
 
 # Stage 2: Final stage
-FROM alpine:3.20.3
+FROM alpine:3.21.3
 
 LABEL author="Artur Mudrykh"
 
