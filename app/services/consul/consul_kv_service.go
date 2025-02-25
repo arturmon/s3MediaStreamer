@@ -20,7 +20,6 @@ type KVService struct {
 }
 
 func NewConsulKVService(cfg *model.Config, logger *logs.Logger, client Service) *KVService {
-
 	return &KVService{
 		ConsulClient: client.GetConsulClient(),
 		logger:       logger,

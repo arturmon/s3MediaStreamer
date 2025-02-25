@@ -41,7 +41,7 @@ func (s *Service) S3BucketActionEventQueue(ctx context.Context, messageBody map[
 	}
 }
 
-// extractRecordsEvent extracts event data from the message
+// extractRecordsEvent extracts event data from the message.
 func (s *Service) extractRecordsEvent(data map[string]interface{}) (*model.MessageBody, error) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *Service) extractRecordsEvent(data map[string]interface{}) (*model.Messa
 	return &messageBody, nil
 }
 
-// deleteEvent handles the event where an object is removed from S3
+// deleteEvent handles the event where an object is removed from S3.
 func (s *Service) deleteEvent(ctx context.Context, s3event *model.MessageBody) error {
 	err := s.s3.DeleteS3Version(ctx, s3event.Records[0].S3.Object.VersionID)
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *Service) deleteEvent(ctx context.Context, s3event *model.MessageBody) e
 	return nil
 }
 
-// putEvent handles the event where an object is created or updated in S3
+// putEvent handles the event where an object is created or updated in S3.
 func (s *Service) putEvent(ctx context.Context, s3event *model.MessageBody) error {
 	err := s.checkObjectS3(ctx, s3event)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *Service) putEvent(ctx context.Context, s3event *model.MessageBody) erro
 	return nil
 }
 
-// checkObjectS3 checks the object in S3 and processes it
+// checkObjectS3 checks the object in S3 and processes it.
 func (s *Service) checkObjectS3(ctx context.Context, object *model.MessageBody) error {
 	// Download file data from S3
 	fileName, err := s.s3.DownloadFilesS3(ctx, object.Key)
@@ -112,7 +112,7 @@ func (s *Service) checkObjectS3(ctx context.Context, object *model.MessageBody) 
 	return nil
 }
 
-// checkIfTrackExists checks if the track already exists in the database
+// checkIfTrackExists checks if the track already exists in the database.
 func (s *Service) checkIfTrackExists(ctx context.Context, track *model.Track, s3id string) error {
 	_, err := s.track.GetTracksByColumns(ctx, track.Title, "title")
 	if err != nil {
@@ -124,7 +124,7 @@ func (s *Service) checkIfTrackExists(ctx context.Context, track *model.Track, s3
 	return nil
 }
 
-// handleNonexistentTrack handles the case where a track is not found in the database
+// handleNonexistentTrack handles the case where a track is not found in the database.
 func (s *Service) handleNonexistentTrack(ctx context.Context, track *model.Track, s3id string) error {
 	s.logger.Infof("Track '%s' not found in the database.\n", track.Title)
 
@@ -145,7 +145,7 @@ func (s *Service) handleNonexistentTrack(ctx context.Context, track *model.Track
 	return nil
 }
 
-// isNoRecordsFound checks if the error message indicates no records were found
+// isNoRecordsFound checks if the error message indicates no records were found.
 func (s *Service) isNoRecordsFound(errMsg string) bool {
 	// Use a regex pattern to check for the "no records found" message
 	pattern := `no records found (.+)`

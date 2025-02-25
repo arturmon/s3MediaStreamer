@@ -11,27 +11,28 @@ type Publisher interface {
 	Publish(ctx context.Context, topic string, message []byte) error
 }
 
-type RabbitMQPublisher struct {
+// PublisherImpl represents a RabbitMQ message publisher.
+type PublisherImpl struct {
 	conn    *amqp091.Connection
 	channel *amqp091.Channel
 }
 
-// NewRabbitMQPublisher initializes a new RabbitMQPublisher.
-func NewRabbitMQPublisher(conn *amqp091.Connection) (*RabbitMQPublisher, error) {
+// NewPublisher initializes a new RabbitMQ publisher.
+func NewPublisher(conn *amqp091.Connection) (*PublisherImpl, error) {
 	channel, err := conn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create RabbitMQ channel: %w", err)
 	}
 
-	return &RabbitMQPublisher{
+	return &PublisherImpl{
 		conn:    conn,
 		channel: channel,
 	}, nil
 }
 
 // Publish sends a message to the specified topic (queue).
-func (r *RabbitMQPublisher) Publish(ctx context.Context, topic string, message []byte) error {
-	err := r.channel.PublishWithContext(
+func (p *PublisherImpl) Publish(ctx context.Context, topic string, message []byte) error {
+	err := p.channel.PublishWithContext(
 		ctx,
 		"",    // exchange
 		topic, // routing key (queue name)
@@ -49,11 +50,11 @@ func (r *RabbitMQPublisher) Publish(ctx context.Context, topic string, message [
 }
 
 // Close gracefully closes the channel and connection.
-func (r *RabbitMQPublisher) Close() error {
-	if err := r.channel.Close(); err != nil {
+func (p *PublisherImpl) Close() error {
+	if err := p.channel.Close(); err != nil {
 		return fmt.Errorf("failed to close RabbitMQ channel: %w", err)
 	}
-	if err := r.conn.Close(); err != nil {
+	if err := p.conn.Close(); err != nil {
 		return fmt.Errorf("failed to close RabbitMQ connection: %w", err)
 	}
 	return nil

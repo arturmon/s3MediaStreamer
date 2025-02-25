@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"s3MediaStreamer/app/internal/logs"
 	"sync"
-	"time"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -35,7 +33,7 @@ func (c *Handler) ConsumeMessages(ctx context.Context, queueName string, message
 	}
 }
 
-// processMessage handles processing for a single message
+// processMessage handles processing for a single message.
 func (c *Handler) processMessage(ctx context.Context, queueName string, message amqp091.Delivery) {
 	var messageBody map[string]interface{}
 	err := json.Unmarshal(message.Body, &messageBody)
@@ -49,7 +47,7 @@ func (c *Handler) processMessage(ctx context.Context, queueName string, message 
 	go c.handleAndAcknowledge(ctx, queueName, message, messageBody)
 }
 
-// handleAndAcknowledge processes the message and acknowledges it
+// handleAndAcknowledge processes the message and acknowledges it.
 func (c *Handler) handleAndAcknowledge(ctx context.Context, queueName string, message amqp091.Delivery, messageBody map[string]interface{}) {
 	// Handle the message
 	c.HandleMessage(ctx, queueName, messageBody)
@@ -62,7 +60,7 @@ func (c *Handler) handleAndAcknowledge(ctx context.Context, queueName string, me
 	}
 }
 
-// rejectMessageIfNeeded rejects the message if autoAck is false
+// rejectMessageIfNeeded rejects the message if autoAck is false.
 func (c *Handler) rejectMessageIfNeeded(message amqp091.Delivery) {
 	if !c.autoAck {
 		if err := message.Reject(false); err != nil {
@@ -71,6 +69,7 @@ func (c *Handler) rejectMessageIfNeeded(message amqp091.Delivery) {
 	}
 }
 
+/*
 // consumeMessagesWithPool starts consuming messages using a worker pool.
 func (c *Handler) consumeMessagesWithPool(ctx context.Context, queueName string, logger *logs.Logger, messageClient *Handler, numWorkers int, workerDone chan struct{}) error {
 	ctx, cancel := context.WithCancel(ctx)
@@ -117,7 +116,9 @@ func (c *Handler) consumeMessagesWithPool(ctx context.Context, queueName string,
 	return nil
 }
 
-// consumeMessagesFromQueue consumes messages from a specific queue
+*/
+
+// consumeMessagesFromQueue consumes messages from a specific queue.
 func (c *Handler) consumeMessagesFromQueue(
 	ctx context.Context,
 	queueName string,
@@ -166,10 +167,10 @@ func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) 
 			nil,               // args
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error consuming messages from queue %s: %v", queueName, err)
+			return nil, fmt.Errorf("error consuming messages from queue %s: %w", queueName, err)
 		}
 		go c.ConsumeMessages(ctx, queueName, messages)
-		//return messages, nil
+		// return messages, nil
 	}
 
 	// In case no channels are found

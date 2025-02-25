@@ -62,7 +62,7 @@ func NewAMQPHandler(amqpService rabbitmq.Service, conn *amqp091.Connection, queu
 				// Queue exists with different parameters, log the information and skip queue creation
 				logger.Infof("Queue '%s' exists with different parameters: %v", queueConfig.Name, errCheckQueue)
 				// Skip creating the queue since it exists with different parameters
-				return nil, fmt.Errorf("queue '%s' already exists with different parameters: %v", queueConfig.Name, errCheckQueue)
+				return nil, fmt.Errorf("queue '%s' already exists with different parameters: %w", queueConfig.Name, errCheckQueue)
 			default:
 				// For other AMQP errors, log the error and return it
 				return nil, fmt.Errorf("failed to check queue '%s': %w", queueConfig.Name, errCheckQueue)
@@ -75,11 +75,12 @@ func NewAMQPHandler(amqpService rabbitmq.Service, conn *amqp091.Connection, queu
 		// Declare or create the queue
 		rabbitQueue, errQueue := newRabbitMQQueue(&queueConfig, rabbitChannel)
 		if errQueue != nil {
-			if errQueue.Code == amqp091.PreconditionFailed {
-				logger.Fatalf("the queue '%s' already exists, but with different parameters : %v", queueConfig.Name, errQueue)
-			} else if errQueue.Code == amqp091.ResourceLocked {
-				logger.Fatalf("the queue '%s' is blocked : %v", queueConfig.Name, errQueue)
-			} else {
+			switch errQueue.Code {
+			case amqp091.PreconditionFailed:
+				logger.Fatalf("The queue '%s' already exists but with different parameters: %v", queueConfig.Name, errQueue)
+			case amqp091.ResourceLocked:
+				logger.Fatalf("The queue '%s' is blocked: %v", queueConfig.Name, errQueue)
+			default:
 				logger.Errorf("Error declaring or creating queue '%s': %v", queueConfig.Name, errQueue)
 				return nil, errQueue
 			}
@@ -104,7 +105,7 @@ func (c *Handler) Ping(_ context.Context) bool {
 	return !c.Conn.IsClosed()
 }
 
-// StartAMQPConsumers starts consumers for all configured queues
+// StartAMQPConsumers starts consumers for all configured queues.
 func (c *Handler) StartAMQPConsumers(ctx context.Context) {
 	numWorkers := 5
 	var wg sync.WaitGroup

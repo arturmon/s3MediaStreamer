@@ -70,7 +70,6 @@ func (s *Service) CheckAuthorization(c *gin.Context) (string, error) {
 
 func (s *Service) ExtractUserRole(logger *logs.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		jwtToken, err := c.Cookie("jwt") // Extract the JWT token from the cookie
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) { // Use errors.Is to check for a specific error
@@ -156,7 +155,6 @@ func (s *Service) NewAuthorizerWithRoleExtractor(e *casbin.Enforcer, logger *log
 }
 
 func (s *Service) GetAllPolicies(logger *logs.Logger) {
-
 	// Get all the policies from the Casbin enforcer
 	policies, err := s.AccessControl.GetPolicy()
 	if err != nil {
