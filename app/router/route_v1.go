@@ -5,9 +5,6 @@ import (
 	"net/http"
 	"s3MediaStreamer/app/handlers"
 	"s3MediaStreamer/app/internal/app"
-	"s3MediaStreamer/app/internal/logs"
-	"s3MediaStreamer/app/model"
-	"strconv"
 	"time"
 
 	cache "github.com/chenyahui/gin-cache"
@@ -15,7 +12,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -140,33 +136,4 @@ func setupSystemRoutes(app *app.App, allHandlers *handlers.Handlers) {
 
 func HandleOptions(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNoContent)
-}
-
-// InitCacheURL initializes the Redis cache store and returns a persist.RedisStore instance.
-func InitCacheURL(ctx context.Context, app *app.App) (*persist.RedisStore, error) {
-	setDB := 1
-	redisClient := redis.NewClient(&redis.Options{
-		Network:  "tcp",
-		Addr:     app.Cfg.Storage.Caching.Address,
-		Password: app.Cfg.Storage.Caching.Password,
-		DB:       setDB,
-	})
-	// Create logs.LoggerMessageConnect
-	logFields := []model.LogField{
-		{Key: "TypeConnect", Value: "Redis", Mask: ""},
-		{Key: "DB", Value: strconv.Itoa(setDB), Mask: ""},
-		{Key: "Addr", Value: app.Cfg.Storage.Caching.Address, Mask: ""},
-		{Key: "Password", Value: app.Cfg.Storage.Caching.Password, Mask: "password"},
-	}
-	loggerMsg := logs.NewLoggerMessageConnect(logFields)
-
-	// Ping Redis to ensure the connection is working
-	if err := redisClient.Ping(ctx).Err(); err != nil {
-		app.Logger.Slog().Error("(Redis: Auth User) Failed to connect", "connection", loggerMsg.MaskFields())
-		return nil, err
-	}
-	// Log successful connection
-	app.Logger.Slog().Info("(Redis: Auth User) Successfully to connect", "connection", loggerMsg.MaskFields())
-	redisStore := persist.NewRedisStore(redisClient)
-	return redisStore, nil
 }
