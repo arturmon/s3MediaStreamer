@@ -117,7 +117,8 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	h.metrics.UserMetrics.LoginSuccessCounter.Inc()
-	h.tracingProvider.TraceAndLog(c.Request.Context(), span, "success login", attribute.String("result", "success"))
+	message := "success login user: '" + login.Email + "', roles: '" + login.Role + "'"
+	h.tracingProvider.TraceAndLog(c.Request.Context(), span, message, attribute.String("result", "success"))
 	c.JSON(http.StatusOK, login)
 }
 
