@@ -23,22 +23,16 @@ func NewWorker(messageClient *Handler, workerDone chan struct{}) *Worker {
 }
 
 // StartProcessing starts processing messages using a worker pool.
-func (w *Worker) StartProcessing(ctx context.Context, messages <-chan amqp091.Delivery, wg *sync.WaitGroup, numWorkers int, workerDone chan struct{}) {
+func (w *Worker) StartProcessing(ctx context.Context, queueName string, messages <-chan amqp091.Delivery, wg *sync.WaitGroup, numWorkers int) {
 	// Start worker pool
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go w.worker(ctx, messages, wg)
+		go w.worker(ctx, queueName, messages, wg)
 	}
-
-	// Defer wg.Done() after starting all workers
-	defer func() {
-		wg.Wait()
-		close(workerDone)
-	}()
 }
 
 // worker is the function that each worker executes.
-func (w *Worker) worker(ctx context.Context, messages <-chan amqp091.Delivery, wg *sync.WaitGroup) {
+func (w *Worker) worker(ctx context.Context, queueName string, messages <-chan amqp091.Delivery, wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 	}()
@@ -59,7 +53,7 @@ func (w *Worker) worker(ctx context.Context, messages <-chan amqp091.Delivery, w
 				continue
 			}
 
-			w.MessageClient.HandleMessage(ctx, messageBody)
+			w.MessageClient.HandleMessage(ctx, queueName, messageBody)
 		}
 	}
 }

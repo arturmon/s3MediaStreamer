@@ -20,7 +20,8 @@ type Config struct {
 	} `yaml:"consul"`
 
 	AppConfig struct {
-		Logs struct {
+		Location string `yaml:"location" env:"LOCATION"`
+		Logs     struct {
 			Level   string `yaml:"level" env:"LOG_LEVEL"`
 			Type    string `yaml:"type" env:"LOG_TYPE"`
 			Graylog struct {
@@ -93,15 +94,15 @@ type Config struct {
 		} `yaml:"caching"`
 	} `yaml:"storage"`
 
-	MessageQueue struct {
-		SubQueueName       string `yaml:"sub_queue_name" env:"MQ_QUEUE_NAME"`
-		User               string `yaml:"user" env:"MQ_USER"`
-		Pass               string `yaml:"pass" env:"MQ_PASS"`
-		Broker             string `yaml:"broker" env:"MQ_BROKER"`
-		BrokerPort         int    `yaml:"broker_port" env:"MQ_BROKER_PORT"`
-		RetryingConnection int    `yaml:"retrying_connection" env:"MQ_BROKER_RETRYING_CONNECTION"`
-		SubscribeAutoAck   bool   `yaml:"subscribe_auto_ack" env:"MQ_SUBSCRIBE_AUTO_ACK"`
-	} `yaml:"message_queue"`
+	Bus struct {
+		User               string        `yaml:"user" env:"MQ_USER"`
+		Pass               string        `yaml:"pass" env:"MQ_PASS"`
+		Broker             string        `yaml:"broker" env:"MQ_BROKER"`
+		BrokerPort         int           `yaml:"broker_port" env:"MQ_BROKER_PORT"`
+		RetryingConnection int           `yaml:"retrying_connection" env:"MQ_BROKER_RETRYING_CONNECTION"`
+		SubscribeAutoAck   bool          `yaml:"subscribe_auto_ack" env:"MQ_SUBSCRIBE_AUTO_ACK"`
+		QueueConfig        []QueueConfig `yaml:"queues"`
+	} `yaml:"bus"`
 
 	Session struct {
 		SessionStorageType string `yaml:"session_storage_type" env:"SESSION_STORAGE_TYPE"`

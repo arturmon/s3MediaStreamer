@@ -9,6 +9,7 @@ consul:
   wait_time: 5
 
 app_config:
+  location: "Asia/Nicosia"
   logs:
     level: "info" # debug, info, warn, error
     type: "json" # graylog, kafka, telegram, console, json
@@ -69,14 +70,21 @@ storage:
   port: "5432"
   database: "db_issue_album"
 
-message_queue:
-  sub_queue_name: "s3_queue"
+bus:
   user: "guest"
   pass: "guest"
   broker: "localhost"
   broker_port: 5672
   retrying_connection: 5 # second
   subscribe_auto_ack: true
+  queues:
+    - name: "s3BucketActionEventQueue" # app/services/rabbitmq/rabbitmq_s3.go
+      durable: true
+      auto_delete: false
+      exclusive: false
+      no_wait: false
+      arguments:
+        x-queue-type: quorum
 
 session:
   session_storage_type: "postgres" # cookie, memory, memcached, mongo, postgres

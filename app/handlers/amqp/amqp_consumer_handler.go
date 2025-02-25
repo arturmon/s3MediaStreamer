@@ -3,6 +3,7 @@ package amqp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"s3MediaStreamer/app/internal/logs"
 	"sync"
 	"time"
@@ -17,7 +18,7 @@ const (
 	reconnectSleepSeconds = 5
 )
 
-func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp091.Delivery) {
+func (c *Handler) ConsumeMessages(ctx context.Context, queueName string, messages <-chan amqp091.Delivery) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -29,13 +30,13 @@ func (c *Handler) ConsumeMessages(ctx context.Context, messages <-chan amqp091.D
 			}
 
 			// Process each message
-			c.processMessage(ctx, message)
+			c.processMessage(ctx, queueName, message)
 		}
 	}
 }
 
-// processMessage - Processes one message from the queue
-func (c *Handler) processMessage(ctx context.Context, message amqp091.Delivery) {
+// processMessage handles processing for a single message
+func (c *Handler) processMessage(ctx context.Context, queueName string, message amqp091.Delivery) {
 	var messageBody map[string]interface{}
 	err := json.Unmarshal(message.Body, &messageBody)
 	if err != nil {
@@ -44,15 +45,16 @@ func (c *Handler) processMessage(ctx context.Context, message amqp091.Delivery) 
 		return
 	}
 
-	go c.handleAndAcknowledge(ctx, message, messageBody)
+	// Process and acknowledge the message
+	go c.handleAndAcknowledge(ctx, queueName, message, messageBody)
 }
 
-// handleAndAcknowledge - Processes the message and acknowledges it
-func (c *Handler) handleAndAcknowledge(ctx context.Context, message amqp091.Delivery, messageBody map[string]interface{}) {
-	// Обработка сообщения
-	c.HandleMessage(ctx, messageBody)
+// handleAndAcknowledge processes the message and acknowledges it
+func (c *Handler) handleAndAcknowledge(ctx context.Context, queueName string, message amqp091.Delivery, messageBody map[string]interface{}) {
+	// Handle the message
+	c.HandleMessage(ctx, queueName, messageBody)
 
-	// Если autoAck = false, подтверждаем сообщение вручную
+	// Acknowledge the message if autoAck is false
 	if !c.autoAck {
 		if err := message.Ack(false); err != nil {
 			c.logger.Errorf("Error acknowledging message: %v", err)
@@ -60,7 +62,7 @@ func (c *Handler) handleAndAcknowledge(ctx context.Context, message amqp091.Deli
 	}
 }
 
-// rejectMessageIfNeeded - Rejects the message if autoAck = false
+// rejectMessageIfNeeded rejects the message if autoAck is false
 func (c *Handler) rejectMessageIfNeeded(message amqp091.Delivery) {
 	if !c.autoAck {
 		if err := message.Reject(false); err != nil {
@@ -69,8 +71,8 @@ func (c *Handler) rejectMessageIfNeeded(message amqp091.Delivery) {
 	}
 }
 
-// ConsumeMessagesWithPool starts consuming messages using a worker pool.
-func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logger, messageClient *Handler, numWorkers int, workerDone chan struct{}) error {
+// consumeMessagesWithPool starts consuming messages using a worker pool.
+func (c *Handler) consumeMessagesWithPool(ctx context.Context, queueName string, logger *logs.Logger, messageClient *Handler, numWorkers int, workerDone chan struct{}) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -96,7 +98,7 @@ func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logg
 
 			// Start processing messages using a worker pool
 			worker := NewWorker(messageClient, workerDone)
-			worker.StartProcessing(ctx, notificationChannel, &wg, numWorkers, workerDone)
+			worker.StartProcessing(ctx, queueName, notificationChannel, &wg, numWorkers)
 
 			// Block here until the connection is closed, then attempt to reconnect
 			select {
@@ -115,10 +117,16 @@ func (c *Handler) ConsumeMessagesWithPool(ctx context.Context, logger *logs.Logg
 	return nil
 }
 
-// Consume starts consuming messages from the queue.
-func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) {
-	messages, err := c.channel.Consume(
-		c.queue.Name,      // queue
+// consumeMessagesFromQueue consumes messages from a specific queue
+func (c *Handler) consumeMessagesFromQueue(
+	ctx context.Context,
+	queueName string,
+	queue *amqp091.Queue,
+	numWorkers int,
+	workerDone chan struct{},
+) error {
+	messages, err := c.channels[queueName].Consume(
+		queue.Name,        // queue
 		"",                // consumer
 		c.autoAck,         // auto-ack
 		SubscribeExlusive, // exclusive
@@ -127,11 +135,43 @@ func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) 
 		nil,               // args
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Start processing the messages in a separate goroutine
-	go c.ConsumeMessages(ctx, messages)
+	worker := NewWorker(c, workerDone)
+	var wg sync.WaitGroup
+	worker.StartProcessing(ctx, queueName, messages, &wg, numWorkers)
+	wg.Wait()
+	return nil
+}
 
-	return messages, nil
+// Consume sets up the consumer for a given queue.
+func (c *Handler) Consume(ctx context.Context) (<-chan amqp091.Delivery, error) {
+	// Ensure the channel exists
+	if c.channels == nil {
+		return nil, fmt.Errorf("no channels available")
+	}
+
+	// Assume we're consuming from a queue (for simplicity, use the first queue here).
+	// Adjust as needed to select a specific queue from the channels map.
+	for queueName, channel := range c.channels {
+		// Consume messages from the queue
+		messages, err := channel.Consume(
+			queueName,         // queue
+			"",                // consumer
+			c.autoAck,         // auto-ack
+			SubscribeExlusive, // exclusive
+			SubscribeNoLocal,  // no-local
+			SubscribeNoWait,   // no-wait
+			nil,               // args
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error consuming messages from queue %s: %v", queueName, err)
+		}
+		go c.ConsumeMessages(ctx, queueName, messages)
+		//return messages, nil
+	}
+
+	// In case no channels are found
+	return nil, fmt.Errorf("no valid channels available")
 }

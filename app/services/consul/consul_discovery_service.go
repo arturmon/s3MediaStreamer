@@ -47,8 +47,8 @@ func NewService(appName string, cfg *model.Config, logger *logs.Logger) *Service
 		_, err = client.Agent().Services()
 		if err != nil {
 			logger.Errorf("Failed to fetch Consul services: %s", err)
-			logger.Infof("Retrying connection to Consul in %d seconds...", cfg.MessageQueue.RetryingConnection)
-			time.Sleep(time.Duration(cfg.MessageQueue.RetryingConnection) * time.Second)
+			logger.Infof("Retrying connection to Consul in %d seconds...", cfg.Bus.RetryingConnection)
+			time.Sleep(time.Duration(cfg.Bus.RetryingConnection) * time.Second)
 			continue
 		}
 		break

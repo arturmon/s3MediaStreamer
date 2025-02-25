@@ -60,12 +60,13 @@ func initServices(ctx context.Context,
 	healthService.StartHealthChecks()
 
 	sessionService := session.NewSessionHandler()
-	messageService := rabbitmq.NewMessageService(logger, repo.PgRepo, *s3Service, *trackService, *tagsService)
 
 	userService := user.NewUserService(repo.PgRepo, *sessionService, *cashingService, logger, *accessControlService, cfg)
 	playlistService := playlist.NewPlaylistService(repo.PgRepo, repo.PgRepo, *sessionService, *accessControlService, *userService, logger, treeService)
 	audioService := audio.NewAudioService(*trackService, *s3Service, *playlistService, logger)
 	otpService := otp.NewOTPService(*userService, cfg)
+
+	messageService := rabbitmq.NewMessageService(cfg, logger, repo.PgRepo, *s3Service, *trackService, *tagsService)
 
 	logger.Info("Complete service initialize.")
 	return &Service{
