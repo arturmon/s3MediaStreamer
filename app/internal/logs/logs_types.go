@@ -79,6 +79,7 @@ func (l *Logger) Fatal(msg string, attrs ...slog.Attr) {
 	}
 
 	l.Error(msg, args...)
+	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
 }
 
@@ -87,5 +88,6 @@ func (l *Logger) Fatalf(format string, args ...any) {
 	msg := fmt.Sprintf(format, args...)
 
 	l.Error(msg)
+	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
 }
