@@ -80,7 +80,7 @@ dev:
 
     containers:
       s3media:
-        devImage: ghcr.io/loft-sh/devspace-containers/go:1.22-alpine
+        devImage: ghcr.io/loft-sh/devspace-containers/go:1.23-alpine
         resources:
           requests:
             cpu: 0.4
