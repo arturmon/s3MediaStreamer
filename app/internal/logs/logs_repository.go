@@ -279,6 +279,33 @@ func (u *LoggerMessageConnect) MaskFields() map[string]interface{} {
 			} else {
 				maskedFields[field.Key] = "Invalid Token Format"
 			}
+		case "postgresDSN":
+			// Mask PostgreSQL DSN by hiding username and password
+			dsnValue := field.Value.(string)
+			if strings.HasPrefix(dsnValue, "postgres://") {
+				parts := strings.SplitN(strings.TrimPrefix(dsnValue, "postgres://"), "@", 2)
+				if len(parts) == 2 {
+					userPass := strings.SplitN(parts[0], ":", 2)
+					if len(userPass) == 2 {
+						maskedUser := userPass[0][:1] + "***"
+						maskValue, err := m.Marshal(masker.MaskerTypeName, userPass[1])
+						if err != nil {
+							maskedPass := "******"
+							maskedDSN := "postgres://" + maskedUser + ":" + maskedPass + "@" + parts[1]
+							maskedFields[field.Key] = maskedDSN
+						} else {
+							maskedDSN := "postgres://" + maskedUser + ":" + maskValue + "@" + parts[1]
+							maskedFields[field.Key] = maskedDSN
+						}
+					} else {
+						maskedFields[field.Key] = "Invalid DSN Format"
+					}
+				} else {
+					maskedFields[field.Key] = "Invalid DSN Format"
+				}
+			} else {
+				maskedFields[field.Key] = "Invalid DSN Format"
+			}
 		default:
 			// No mask, just pass the value as is
 			maskedFields[field.Key] = field.Value
