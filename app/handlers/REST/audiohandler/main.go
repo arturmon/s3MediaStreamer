@@ -88,7 +88,19 @@ func (h *Handler) StreamM3U(c *gin.Context) {
 		c.JSON(errValidateOTP.Code, errValidateOTP.Err)
 		return
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			h.logger.Errorf("Error closing file: %v", err)
+			c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "Error closing file"})
+		}
+	}(f)
+	// Check that findObject is not nil before setting headers
+	if findObject == nil {
+		h.logger.Errorf("S3 object metadata is missing, cannot set headers")
+		c.JSON(http.StatusInternalServerError, model.ErrorResponse{Message: "S3 object metadata is missing"})
+		return
+	}
 
 	c.Header("Content-Type", findObject.Metadata.Get("Content-Type"))
 	c.Header("Content-Disposition", "inline; filename="+findObject.Key)
@@ -100,5 +112,20 @@ func (h *Handler) StreamM3U(c *gin.Context) {
 	// Wait for client disconnect notification
 	<-c.Writer.CloseNotify()
 	// Client disconnected, clean up and return
-	h.logger.Info("Client disconnected, stopping streaming.")
+	clientIP := c.Request.Header.Get("X-Real-IP")
+	if clientIP == "" {
+		clientIP = c.Request.Header.Get("X-Forwarded-For")
+	}
+	if clientIP == "" {
+		clientIP = c.ClientIP()
+	}
+	h.logger.Infof(
+		"Client disconnected: IP=%s, User-Agent=%s, Segment=%s, Track Duration=%ds, File Size=%d bytes",
+		clientIP,
+		c.Request.UserAgent(),
+		segmentPath,
+		track.Duration,
+		findObject.Size,
+	)
+
 }
